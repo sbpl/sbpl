@@ -1,0 +1,15 @@
+<package>
+  <description brief="Search-based Planning Library (SBPL)">
+    A library of search-based planning algorithms
+
+  </description>
+  <author>Maxim Likhachev/maximl@seas.upenn.edu</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url></url>
+
+  <export>
+    <cpp cflags="-I${prefix}/src -O3" lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -lsbpl"/>
+  </export>
+  
+</package>
