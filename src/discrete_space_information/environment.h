@@ -29,34 +29,58 @@
 #ifndef __ENVIRONMENT_H_
 #define __ENVIRONMENT_H_
 
-
+//base class for environments defining planning graphs
+//It is independent of the graph search used
+//The main means of communication between environment and graph search is through stateID. 
+//Each state is uniquely defined by stateID and graph search is ONLY aware of stateIDs. It doesn't know anything about the actual state variables.
+//Environment, on the other hand, maintains a mapping from stateID to actual state variables (coordinates) using StateID2IndexMapping array
 class DiscreteSpaceInformation
 {
 
 public:
 
-  //data
-  std::vector<int*> StateID2IndexMapping;
+	//mapping from hashentry stateID (used in environment to contain the coordinates of a state, say x,y or x,y,theta) 
+	//to an array of state indices used in searches. If a single search is done, then it is a single entry. 
+	//So StateID2IndexMapping[100][0] = 5 means that hashentry with stateID 100 is mapped onto search index = 5 in search 0
+	//The value of -1 means that no search state has been created yet for this hashentry
+	std::vector<int*> StateID2IndexMapping;
 	
-
+	//debugging file
 	FILE* fDeb;
 
+	//initialization environment from file (see .cfg files for examples)
 	virtual bool InitializeEnv(const char* sEnvFile) = 0;
 
-
+	//initialization of MDP data structure
 	virtual bool InitializeMDPCfg(MDPConfig *MDPCfg) = 0;
-	virtual int  GetFromToHeuristic(int FromStateID, int ToStateID) = 0;
-	virtual int  GetGoalHeuristic(int stateID) = 0;
-	virtual int  GetStartHeuristic(int stateID) = 0;
-	virtual void SetAllActionsandAllOutcomes(CMDPSTATE* state) = 0;
-	virtual void SetAllPreds(CMDPSTATE* state) = 0;
-	virtual void GetSuccs(int SourceStateID, std::vector<int>* SuccIDV, std::vector<int>* CostV) = 0;
-	virtual void GetPreds(int TargetStateID, std::vector<int>* PredIDV, std::vector<int>* CostV) = 0;
 
+	//heuristic estimate from state FromStateID to state ToStateID
+	virtual int  GetFromToHeuristic(int FromStateID, int ToStateID) = 0;
+	//heuristic estimate from state with stateID to goal state
+	virtual int  GetGoalHeuristic(int stateID) = 0;
+	//heuristic estimate from start state to state with stateID
+	virtual int  GetStartHeuristic(int stateID) = 0;
+
+	//depending on the search used, it may call GetSuccs function (for forward search) or GetPreds function (for backward search)
+	//or both (for incremental search). At least one of this functions should be implemented (otherwise, there will be no search to run)
+	//Some searches may also use SetAllActionsandAllOutcomes or SetAllPreds functions if they keep the pointers to successors (predecessors) but
+	//most searches do not require this, so it is not necessary to support this
+	virtual void GetSuccs(int SourceStateID, std::vector<int>* SuccIDV, std::vector<int>* CostV) = 0;
+	//see comments for GetSuccs functon
+	virtual void GetPreds(int TargetStateID, std::vector<int>* PredIDV, std::vector<int>* CostV) = 0;
+	//see comments for GetSuccs functon
+	virtual void SetAllActionsandAllOutcomes(CMDPSTATE* state) = 0;
+	//see comments for GetSuccs functon
+	virtual void SetAllPreds(CMDPSTATE* state) = 0;
+
+	//returns the number of states (hashentries) created 
 	virtual int	 SizeofCreatedEnv() = 0;
+	//prints the state variables for a state with stateID
 	virtual void PrintState(int stateID, bool bVerbose, FILE* fOut=NULL) = 0;
+	//prints environment config file 
 	virtual void PrintEnv_Config(FILE* fOut) = 0;
 
+	//sets a parameter to a value. The set of supported parameters depends on the particular environment
 	virtual bool SetEnvParameter(const char* parameter, int value)
 	{
 		printf("ERROR: Environment has no parameters that can be set via SetEnvParameter function\n");
@@ -89,6 +113,7 @@ public:
 		printf("ERROR: environment does not support calls to GetRandomSuccsatDistance function\n");
 		exit(1);
 	}
+	//see comments for GetRandomSuccsatDistance
 	virtual void GetRandomPredsatDistance(int TargetStateID, std::vector<int>* PredIDV, std::vector<int>* CLowV)
 	{
 		printf("ERROR: environment does not support calls to GetRandomPredsatDistance function\n");
@@ -96,6 +121,7 @@ public:
 	};
 
     
+	//checks the heuristics for consistency (some environments do not support this debugging call)
 	virtual void EnsureHeuristicsUpdated(bool bGoalHeuristics)
 	{
 		//by default the heuristics are up-to-date, but in some cases, the heuristics are computed only when really needed. For example,

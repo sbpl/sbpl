@@ -33,8 +33,11 @@
 //---configuration----
 
 //control of EPS
+//initial suboptimality bound (cost solution <= cost(eps*cost optimal solution)
 #define ARA_DEFAULT_INITIAL_EPS	    5.0
+//as planning time exist, ARA* decreases epsilon bound
 #define ARA_DECREASE_EPS    0.2
+//final epsilon bound
 #define ARA_FINAL_EPS	    1.0
 
 
@@ -52,7 +55,7 @@ class CList;
 //-------------------------------------------------------------
 
 
-//state structure
+//state structure used in ARA* search tree
 typedef class ARASEARCHSTATEDATA : public AbstractSearchState
 {
 public:
@@ -78,7 +81,7 @@ public:
 
 
 
-//statespace
+//the statespace of ARA*
 typedef struct ARASEARCHSTATESPACE
 {
 	double eps;
@@ -105,22 +108,41 @@ class ARAPlanner : public SBPLPlanner
 {
 
 public:
+
+	//replan a path within the allocated time, return the solution in the vector
 	int replan(double allocated_time_secs, vector<int>* solution_stateIDs_V);
+	//replan a path within the allocated time, return the solution in the vector, also returns solution cost
 	int replan(double allocated_time_sec, vector<int>* solution_stateIDs_V, int* solcost);
 
+	//set the goal state
     int set_goal(int goal_stateID);
+	//set the start state
     int set_start(int start_stateID);
-    void costs_changed(StateChangeQuery const & stateChange);
-    void costs_changed();
-    int force_planning_from_scratch(); 
 
+	//inform the search about the new edge costs
+    void costs_changed(StateChangeQuery const & stateChange);
+
+	//inform the search about the new edge costs - 
+	//since ARA* is non-incremental, it is sufficient (and more efficient) to just inform ARA* of the fact that some costs changed
+    void costs_changed();
+
+
+   	//set a flag to get rid of the previous search efforts, release the memory and re-initialize the search, when the next replan is called
+	 int force_planning_from_scratch(); 
+
+	//you can either search forwards or backwards
 	int set_search_mode(bool bSearchUntilFirstSolution);
 
-
+	//returns the suboptimality bound on the currently found solution
 	virtual double get_solution_eps() const {return pSearchStateSpace_->eps_satisfied;};
+
+	//returns the number of states expanded so far
     virtual int get_n_expands() const { return searchexpands; }
+
+	//returns the value of the initial epsilon (suboptimality bound) used
 	virtual void set_initialsolution_eps(double initialsolution_eps) {finitial_eps = initialsolution_eps;};
 
+	//prints out the search path into a file
 	void print_searchpath(FILE* fOut);
 
 
