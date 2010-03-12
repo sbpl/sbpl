@@ -100,81 +100,125 @@ typedef struct
 }EnvironmentNAV2D_t;
 
 
-
+//2D (x,y) grid planning problem. For general structure see comments on parent class DiscreteSpaceInformation
 class EnvironmentNAV2D : public DiscreteSpaceInformation
 {
 
 public:
 
+	//see comments on the same function in the parent class
 	bool InitializeEnv(const char* sEnvFile);
-
-
+	//see comments on the same function in the parent class
 	bool InitializeMDPCfg(MDPConfig *MDPCfg);
+	//see comments on the same function in the parent class
 	int  GetFromToHeuristic(int FromStateID, int ToStateID);
+	//see comments on the same function in the parent class
 	int  GetGoalHeuristic(int stateID);
+	//see comments on the same function in the parent class
 	int  GetStartHeuristic(int stateID);
+	//see comments on the same function in the parent class
 	void SetAllActionsandAllOutcomes(CMDPSTATE* state);
+	//see comments on the same function in the parent class
 	void SetAllPreds(CMDPSTATE* state);
+	//see comments on the same function in the parent class
 	void GetSuccs(int SourceStateID, vector<int>* SuccIDV, vector<int>* CostV);
+	//see comments on the same function in the parent class
 	void GetPreds(int TargetStateID, vector<int>* PredIDV, vector<int>* CostV);
 
+	//see comments on the same function in the parent class
 	int	 SizeofCreatedEnv();
+	//see comments on the same function in the parent class
 	void PrintState(int stateID, bool bVerbose, FILE* fOut=NULL);
+	//see comments on the same function in the parent class
 	void PrintEnv_Config(FILE* fOut);
     
+	//initialize environment. Gridworld is defined as matrix A of size width by height. 
+	//So, internally, it is accessed as A[x][y] with x ranging from 0 to width-1 and and y from 0 to height-1
+	//Each element in A[x][y] is unsigned char. A[x][y] = 0 corresponds to fully traversable and cost is just Euclidean distance
+	//The cost of transition between two neighboring cells is EuclideanDistance*(max(A[sourcex][sourcey],A[targetx][targety])+1)
+	//If A[x][y] >= obsthresh, then in the above equation it is assumed to be infinite.
+	//mapdata is a pointer to the values of A. If it is null, then A is initialized to all zeros. Mapping is: A[x][y] = mapdata[x+y*width]
+	//start/goal are given by startx, starty, goalx,goaly. If they are not known yet, just set them to 0. Later setgoal/setstart can be executed
+	//finally obsthresh defined obstacle threshold, as mentioned above
     bool InitializeEnv(int width, int height,
 		       /** if mapdata is NULL the grid is initialized to all freespace */
                        const unsigned char* mapdata,
                        int startx, int starty,
                        int goalx, int goaly, unsigned char obsthresh);
+	//a short version of environment initialization. Here start and goal coordinates will be set to 0s
     bool InitializeEnv(int width, int height,
 		       /** if mapdata is NULL the grid is initialized to all freespace */
                        const unsigned char* mapdata, unsigned char obsthresh);
-
+	//set start location
     int SetStart(int x, int y);
+	//set goal location
     int SetGoal(int x, int y);
+	//currently, this is not used
     void SetGoalTolerance(double tol_x, double tol_y, double tol_theta); /**< not used yet */
+	//update the traversability of a cell<x,y>
     bool UpdateCost(int x, int y, unsigned char newcost);
+
+	//this function fill in Predecessor/Successor states of edges whose costs changed
+	//It takes in an array of cells whose traversability changed, and returns (in vector preds_of_changededgesIDV) 
+	//the IDs of all states that have outgoing edges that go through the changed cells
 	void GetPredsofChangedEdges(vector<nav2dcell_t> const * changedcellsV, vector<int> *preds_of_changededgesIDV);
+	//same as GetPredsofChangedEdges, but returns successor states. Both functions need to be present for incremental search
 	void GetSuccsofChangedEdges(vector<nav2dcell_t> const * changedcellsV, vector<int> *succs_of_changededgesIDV);
 
 	//returns true if two states meet the same condition - see environment.h for more info
 	virtual bool AreEquivalent(int StateID1, int StateID2);
 
-	//the following two functions generate succs/preds at some domain-dependent distance - see environment.h for more info
+	//generates succs at some domain-dependent distance - see environment.h for more info
+	//used by certain searches such as R*
 	virtual void GetRandomSuccsatDistance(int SourceStateID, std::vector<int>* SuccIDV, std::vector<int>* CLowV);
+	//generates preds at some domain-dependent distance - see environment.h for more info
+	//used by certain searches such as R*
 	virtual void GetRandomPredsatDistance(int TargetStateID, std::vector<int>* PredIDV, std::vector<int>* CLowV);
 
 	//generates nNumofNeighs random neighbors of cell <X,Y> at distance nDist_c (measured in cells)
 	//it will also generate goal if within this distance as an additional neighbor
 	virtual void GetRandomNeighs(int stateID, std::vector<int>* NeighIDV, std::vector<int>* CLowV, int nNumofNeighs, int nDist_c, bool bSuccs);
 
-
+	//a direct way to set the configuration of environment - see InitializeEnv function for details about the parameters
+	//it is not a full way to initialize environment. To fully initialize, one needs to executed InitGeneral in addition.
 	void SetConfiguration(int width, int height,
 			      /** if mapdata is NULL the grid is initialized to all freespace */
 			      const unsigned char* mapdata,
 			      int startx, int starty,
 			      int goalx, int goaly);
 	
+	//performs initialization of environments. It is usually called in from InitializeEnv. 
+	//But if SetConfiguration is used, then one should call InitGeneral by himself
 	bool InitGeneral();
 
+	//returns the actual <x,y> associated with state of stateID 
 	void GetCoordFromState(int stateID, int& x, int& y) const;
 
+	//returns a stateID associated with coordinates <x,y>
 	int GetStateFromCoord(int x, int y);
 
+	//returns true if <x,y> is obstacle (used by the value of this cell and obsthresh)
 	bool IsObstacle(int x, int y);
+
+	//returns the cost associated with <x,y> cell, i.e., A[x][y]
 	unsigned char GetMapCost(int x, int y);
+
+	//returns the parameters associated with the current environment. This is useful for setting up a copy of an environment (i.e., second planning problem)
 	void GetEnvParms(int *size_x, int *size_y, int* startx, int* starty, int* goalx, int* goaly, unsigned char* obsthresh);
 
+	//way to set up various parameters. For a list of parameters, see the body of the function - it is pretty straightforward
 	bool SetEnvParameter(const char* parameter, int value);
 
+	//access to internal configuration data structure
 	const EnvNAV2DConfig_t* GetEnvNavConfig();
 
 	EnvironmentNAV2D();
     ~EnvironmentNAV2D();
 
+	//print some time statistics
     void PrintTimeStat(FILE* fOut);
 	 
+	//checks X,Y against map boundaries
 	bool IsWithinMapCell(int X, int Y);
 
 
