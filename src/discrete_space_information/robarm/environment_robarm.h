@@ -117,31 +117,43 @@ typedef struct
 
 }EnvironmentROBARM_t;
 
-
+//planar kinematic robot arm of variable number of degrees of freedom
 class EnvironmentROBARM : public DiscreteSpaceInformation
 {
 
 public:
 
+	//initialize environment from a file (see .cfg files in robotarm directory for example)
 	bool InitializeEnv(const char* sEnvFile);
 
-
+	//initialize MDP config with IDs of start/goal
 	bool InitializeMDPCfg(MDPConfig *MDPCfg);
+
+	//see comments on the same function in the parent class
 	int  GetFromToHeuristic(int FromStateID, int ToStateID);
+	//see comments on the same function in the parent class
 	int  GetGoalHeuristic(int stateID);
+	//see comments on the same function in the parent class
 	int  GetStartHeuristic(int stateID);
+	//see comments on the same function in the parent class
 	void SetAllActionsandAllOutcomes(CMDPSTATE* state);
+	//see comments on the same function in the parent class
 	void SetAllPreds(CMDPSTATE* state);
+	//see comments on the same function in the parent class
 	void GetSuccs(int SourceStateID, vector<int>* SuccIDV, vector<int>* CostV);
+	//see comments on the same function in the parent class
 	void GetPreds(int TargetStateID, vector<int>* PredIDV, vector<int>* CostV);
 
+	//see comments on the same function in the parent class
 	int	 SizeofCreatedEnv();
+	//see comments on the same function in the parent class
 	void PrintState(int stateID, bool bVerbose, FILE* fOut=NULL);
+	//see comments on the same function in the parent class
 	void PrintEnv_Config(FILE* fOut);
 
 
     ~EnvironmentROBARM(){};
-
+	//prints out some runtime statistics
     void PrintTimeStat(FILE* fOut);
 	
  private:
