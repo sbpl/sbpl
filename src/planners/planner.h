@@ -58,13 +58,17 @@ typedef enum
 		ABSTRACT_GENERALSTATE
 } AbstractSearchStateType_t; 
 
+//base class for a search state
 class AbstractSearchState
 {
 
 public:
+	//each state can be a member of at most two lists
+	//indices of lists are given in planner.h (e.g., STATEID2IND_SLOT0)
 	struct listelement* listelem[2];
-	//index of the state in the heap
+	//index of the state in the heap, typically used for membership in OPEN
 	int heapindex;
+	//type of state. usually it will be general state
 	AbstractSearchStateType_t StateType; 
 
 public:
@@ -88,14 +92,17 @@ class DiscreteSpaceInformation;
 */
 class StateChangeQuery;
 
+//pure virtual base class for a generic planner
 class SBPLPlanner
 {
 
 public:
 
 	//returns 1 if solution is found, 0 otherwise
-    //will replan incrementally if possible (e.g., supported by the planner and not forced to replan from scratch)
+    //will replan incrementally if possible (e.g., as supported by the planner and not forced to replan from scratch)
+	//takes in the time available for planner and returns a sequence of stateIDs that corresponds to the solution
   virtual int replan(double allocated_time_sec, std::vector<int>* solution_stateIDs_V) = 0;
+  //works same as replan function with two parameters, but also returns the cost of the solution
   virtual int replan(double allocated_time_sec, std::vector<int>* solution_stateIDs_V, int* solcost) = 0;
 
     //sets the goal of search (planner will automatically decide whether it needs to replan from scratch)
