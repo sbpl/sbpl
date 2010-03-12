@@ -54,15 +54,18 @@ class CList;
 
 //-------------------------------------------------------------
 
-
-//state structure for high level states in Gamma graph
+//high level states in R* search
+//in other words, state structure for high level states in Gamma graph
 typedef class RSTARSEARCHSTATEDATA : public AbstractSearchState
 {
 public:
-	CMDPSTATE* MDPstate; //the MDP state itself
+	//the MDP state itself
+	CMDPSTATE* MDPstate; 
 	//RSTAR* relevant data
 	unsigned int g;
+	//RSTAR* relevant data
 	short unsigned int iterationclosed;
+	//RSTAR* relevant data
 	short unsigned int callnumberaccessed;
 
 	//best predecessor and the action from it 
@@ -75,6 +78,7 @@ public:
     //set of predecessor actions together with some info
     vector<CMDPACTION*> predactionV;
 
+	//RSTAR* relevant data - heuristics
 	int h;
 
 	
@@ -83,29 +87,37 @@ public:
 	~RSTARSEARCHSTATEDATA() {};
 } RSTARState;
 
-
+//action in Gamma graph. Each action in Gamma graph corresponds to a path
 typedef struct RSTARACTIONDATA_T
 {
+	//lower bound on the cost of the path
     int clow;
+	//number of expansions done so far to compute the path that represents this action
     int exp;
+	//path that the action represetns
 	//the path is always stored as a valid path w.r.t. the original graph (not search tree) 
 	//so if the search is forward, then the path is from source to target and otherwise, the path is from target toward source
     vector<int> pathIDs; 
 }RSTARACTIONDATA;
 
 
+//low-level (local) search state in R*
 typedef class RSTARLSEARCHSTATEDATA : public AbstractSearchState
 {
 public:
-	CMDPSTATE* MDPstate; //the MDP state itself
-	//planner relevant data
+	//the MDP state itself
+	CMDPSTATE* MDPstate; 
+	//planner relevant data - g-value
 	int g;
 
+	//planner relevant data
 	unsigned int iteration;
+	//planner relevant data
     unsigned int iterationclosed;
 
 	//best predecessors according to the search tree (so, in backward search these are actual successors)
 	CMDPSTATE* bestpredstate; 
+	//the cost of the best action from the best preds to this state
     int bestpredstateactioncost;
 
 	
@@ -114,16 +126,23 @@ public:
 	~RSTARLSEARCHSTATEDATA() {};
 } RSTARLSearchState;
 
-//local search statespace
+
+//local search statespace in R*
 class RSTARLSEARCHSTATESPACE
 {
 public:
+	//graph constructed by local search
 	CMDP MDP;
+	//start state
 	CMDPSTATE* StartState;
+	//goal state
 	CMDPSTATE* GoalState;
+	//search-related var
 	int iteration;
 
+	//open list
     CHeap* OPEN;
+	//incons list - used for suboptimal search
     CList* INCONS;
 
 public:
@@ -144,21 +163,30 @@ typedef class RSTARLSEARCHSTATESPACE RSTARLSearchStateSpace_t;
 //statespace
 typedef struct RSTARSEARCHSTATESPACE
 {
+	//required epsilon
 	double eps;
+	//epsilon that is satisfied
     double eps_satisfied;
+	//open list
 	CHeap* OPEN;
 
 	//searchiteration gets incremented with every R* search (and reset upon every increment of callnumber)
 	short unsigned int searchiteration; 
 	//callnumber gets incremented with every call to R* (so, it can be multiple number of times within planning times since R* is executed multiple times)
 	short unsigned int callnumber; 
+	//search goal state (not necessarily the actual start state, it depends on search direction)
 	CMDPSTATE* searchgoalstate;
+	//search start state
 	CMDPSTATE* searchstartstate;
 	
+	//graph constructed by high-level search
 	CMDP searchMDP;
 
+	//need to reevaluate fvals
 	bool bReevaluatefvals;
+	//need to reinitialize search space
     bool bReinitializeSearchStateSpace;
+	//set when it is a new search iteration
 	bool bNewSearchIteration;
 
 } RSTARSearchStateSpace_t;
@@ -170,23 +198,37 @@ class RSTARPlanner : public SBPLPlanner
 {
 
 public:
+	//replan a path within the allocated time, return the solution in the vector
 	int replan(double allocated_time_secs, vector<int>* solution_stateIDs_V);
+	//replan a path within the allocated time, return the solution in the vector, also returns solution cost
 	int replan(double allocated_time_sec, vector<int>* solution_stateIDs_V, int* solcost);
 
+	//set the goal state
     int set_goal(int goal_stateID);
+	//set the start state
     int set_start(int start_stateID);
+	//inform the search about the new edge costs
     void costs_changed(StateChangeQuery const & stateChange);
+	//inform the search about the new edge costs - 
+	//since R* is non-incremental, it is sufficient (and more efficient) to just inform ARA* of the fact that some costs changed
     void costs_changed();
+   	//set a flag to get rid of the previous search efforts, release the memory and re-initialize the search, when the next replan is called
     int force_planning_from_scratch();
 
+	//you can either search forwards or backwards
 	int set_search_mode(bool bSearchUntilFirstSolution);
 
 
+	//obtain probabilistic eps suboptimality bound
 	virtual double get_solution_probabilisticeps() const {return pSearchStateSpace->eps_satisfied;};
+	//get number of high level expands
     virtual int get_highlevel_expands() const { return highlevel_searchexpands; }
+	//get number of low level expands
     virtual int get_lowlevel_expands() const { return lowlevel_searchexpands; }
+	//set initial solution epsilon that R* will try to satisfy (probabilistically)
 	virtual void set_initialsolution_eps(double initialsolution_eps) {finitial_eps = initialsolution_eps;};
 
+	//print out search path 
 	void print_searchpath(FILE* fOut);
 
 
