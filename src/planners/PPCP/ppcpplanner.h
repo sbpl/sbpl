@@ -31,21 +31,24 @@
 
 
 
-
+//a state for PPCP
 typedef class PPCPPLANNERSTATEDATA : public AbstractSearchState
 {
 public:
 
-	CMDPSTATE* MDPstate; //the MDP state itself
+	//the MDP state itself
+	CMDPSTATE* MDPstate; 
 	//planner relevant data
 	int v;
+	//planner relevant data
 	unsigned int iteration;
 
 	//best action
 	CMDPACTION *bestnextaction; 
 
 private:
-	float Pc; //probability of reaching this state (intermediate variable used by the algorithm)
+	//probability of reaching this state (intermediate variable used by the algorithm)
+	float Pc; 
 
 	
 public:
@@ -59,11 +62,14 @@ public:
 
 
 
-//statespace
+//PPCP statespace
 typedef struct PPCPSTATESPACE
 {
+	//MDP
 	CMDP MDP;
+	//pointer to start state
 	CMDPSTATE* StartState;
+	//pointer to goal state
 	CMDPSTATE* GoalState;
 
 	int iteration;
@@ -85,14 +91,17 @@ typedef struct PPCPSTATESPACE
 
 
 
-
-//below, S signifies a fully observable part of the state space
+//PPCP planner
+//in explanations, S signifies a fully observable part of the state space
 //H signifies hidden variables
 class PPCPPlanner : public SBPLPlanner
 {
 
 public:
 
+	//planning (replanning) function. Takes in time available for planning
+	// returns policy, expected cost of the solution policy, and probability of successfully reaching the goal (it is < 1, whenever 
+	//PPCP ran out of time before full convergence
 	int replan(double allocated_time_secs, vector<sbpl_PolicyStatewithBinaryh_t>* SolutionPolicy, float* ExpectedCost, float* ProbofReachGoal);
 
 	//constructors
@@ -100,15 +109,18 @@ public:
     //destructor
     ~PPCPPlanner();
 
-	//setting start state in S, setting goal state in S
+	//setting goal state in S
     int set_goal(int goal_stateID);
+	//setting start state in S
     int set_start(int start_stateID);
 
+	//not supported version of replan
 	int replan(double allocated_time_sec, vector<int>* solution_stateIDs_V){
 		printf("ERROR: this version of replan not supported in PPCP planner\n");
 		exit(1);
 	};
 
+	//not supported version of replan
 	int replan(double allocated_time_sec, vector<int>* solution_stateIDs_V, int* solcost){
 		printf("ERROR: this version of replan not supported in PPCP planner\n");
 		exit(1);
@@ -118,6 +130,7 @@ public:
     int force_planning_from_scratch(); 
 
 	
+	//sets how to search - not supported in PPCP
 	int set_search_mode(bool bSearchUntilFirstSolution){
 		printf("ERROR: set_search_mode not supported in PPCP planner\n");
 		exit(1);
@@ -127,6 +140,7 @@ public:
     // Notifies the planner that costs have changed. May need to be specialized for different subclasses in terms of what to
     // do here
 	void costs_changed(StateChangeQuery const & stateChange);
+	//notifies the planner that costs have changed
     void costs_changed();
 
 
