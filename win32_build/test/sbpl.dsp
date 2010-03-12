@@ -105,10 +105,6 @@ SOURCE=..\..\src\discrete_space_information\nav2d_uu\environment_nav2duu.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\src\discrete_space_information\nav3dkin\environment_nav3Dkin.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\src\discrete_space_information\navxythetalat\environment_navxythetalat.cpp
 # End Source File
 # Begin Source File
@@ -180,10 +176,6 @@ SOURCE=..\..\src\discrete_space_information\nav2d\environment_nav2D.h
 # Begin Source File
 
 SOURCE=..\..\src\discrete_space_information\nav2d_uu\environment_nav2duu.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\src\discrete_space_information\nav3dkin\environment_nav3Dkin.h
 # End Source File
 # Begin Source File
 
