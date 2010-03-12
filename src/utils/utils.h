@@ -109,8 +109,14 @@ void EvaluatePolicy(CMDP* PolicyMDP, int StartStateID, int GoalStateID,
 					int* nMerges, bool *bCycles);
 int ComputeNumofStochasticActions(CMDP* pMDP);
 
+//one of the three functions that correspond to bresenham algorithm of path following
+//this function computes bresenham parameters given the start and end points on the line segment
 void get_bresenham_parameters(int p1x, int p1y, int p2x, int p2y, bresenham_param_t *params);
+//one of the three functions that correspond to bresenham algorithm of path following
+//returns current cell on the line segment
 void get_current_point(bresenham_param_t *params, int *x, int *y);
+//one of the three functions that correspond to bresenham algorithm of path following
+//moves to the next point
 int get_next_point(bresenham_param_t *params);
 
 //converts discretized version of angle into continuous (radians)
@@ -125,12 +131,13 @@ int ContTheta2Disc(double fTheta, int NUMOFANGLEVALS);
 //output is an angle in the range of from 0 to 2*PI
 double normalizeAngle(double angle);
 
+//computes minimum unsigned difference between two angles in radians
 double computeMinUnsignedAngleDiff(double angle1, double angle2);
 
 //returns true if 2D point is within the specified polygon given by ordered sequence of 2D points (last point is automatically connected to the first)
 bool IsInsideFootprint(sbpl_2Dpt_t pt, vector<sbpl_2Dpt_t>* bounding_polygon);
 
-//computes 8-connected distances
+//computes 8-connected distances - performs distance transform in two linear passes
 void computeDistancestoNonfreeAreas(unsigned char** Grid2D, int width_x, int height_y, unsigned char obsthresh, float** disttoObs_incells, 
 									float** disttoNonfree_incells);
 
