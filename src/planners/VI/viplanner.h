@@ -39,11 +39,12 @@ struct VIPLANNER_T
 	int iteration;
 };
 
-
+//Value Iteration state
 typedef class VIPLANNERSTATEDATA : public AbstractSearchState
 {
 public:
-	CMDPSTATE* MDPstate; //the MDP state itself
+	//the MDP state itself
+	CMDPSTATE* MDPstate; 
 	//planner relevant data
 	float v;
 	float Pc;
@@ -59,11 +60,12 @@ public:
 } VIState;
 
 
-
+//value iteration planner
 class VIPlanner : public SBPLPlanner
 {
 
 public:
+	//replan a path within the allocated time, return the policy in the solution vector
 	int replan(double allocated_time_secs, vector<int>* solution_stateIDs_V);
 
 	//constructors
