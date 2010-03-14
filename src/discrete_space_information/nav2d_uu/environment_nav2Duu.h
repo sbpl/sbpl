@@ -91,82 +91,101 @@ typedef struct
 }EnvironmentNAV2DUU_t;
 
 
-//this class is NOT fully yet implemented, please do not use it!
+/** \brief this class is NOT fully yet implemented, please do not use it!
+  */
 class EnvironmentNAV2DUU : public DiscreteSpaceInformation
 {
 
 public:
 
-	//see comments on the same function in the parent class
+	/** \brief see comments on the same function in the parent class
+    */
 	bool InitializeEnv(const char* sEnvFile);
 
-	//initialize environment. Gridworld is defined as matrix A of size width by height. 
-	//So, internally, it is accessed as A[x][y] with x ranging from 0 to width-1 and and y from 0 to height-1
-	//Each element in A[x][y] is unsigned char. A[x][y] = 0 corresponds to fully traversable and cost is just Euclidean distance
-	//The cost of transition between two neighboring cells is EuclideanDistance*(max(A[sourcex][sourcey],A[targetx][targety])+1)
-	//If A[x][y] >= obsthresh, then in the above equation it is assumed to be infinite.
-	//mapdata is a pointer to the values of A. If it is null, then A is initialized to all zeros. Mapping is: A[x][y] = mapdata[x+y*width]
-	//start/goal are given by startx, starty, goalx,goaly. If they are not known yet, just set them to 0. Later setgoal/setstart can be executed
-	//finally obsthresh defined obstacle threshold, as mentioned above
-	//uncertaintymapdata is set up in the same way as mapdata in terms of the order
-	//in terms of the values, uncertaintymapdata specifies probabilities of being obstructed
+	/** \brief initialize environment. Gridworld is defined as matrix A of size width by height. 
+	So, internally, it is accessed as A[x][y] with x ranging from 0 to width-1 and and y from 0 to height-1
+	Each element in A[x][y] is unsigned char. A[x][y] = 0 corresponds to fully traversable and cost is just Euclidean distance
+	The cost of transition between two neighboring cells is EuclideanDistance*(max(A[sourcex][sourcey],A[targetx][targety])+1)
+	If A[x][y] >= obsthresh, then in the above equation it is assumed to be infinite.
+	mapdata is a pointer to the values of A. If it is null, then A is initialized to all zeros. Mapping is: A[x][y] = mapdata[x+y*width]
+	start/goal are given by startx, starty, goalx,goaly. If they are not known yet, just set them to 0. Later setgoal/setstart can be executed
+	finally obsthresh defined obstacle threshold, as mentioned above
+	uncertaintymapdata is set up in the same way as mapdata in terms of the order
+	in terms of the values, uncertaintymapdata specifies probabilities of being obstructed
+  */
 	bool InitializeEnv(int width, int height,
 					const unsigned char* mapdata, const float* uncertaintymapdata, unsigned char obsthresh);
-	//set start location
+	/** \brief set start location
+    */
     int SetStart(int x, int y);
-    //set goal location
+    /** \brief set goal location
+      */
 	int SetGoal(int x, int y);
-	//update the traversability of a cell<x,y>
+	/** \brief update the traversability of a cell<x,y>
+    */
 	bool UpdateCost(int x, int y, unsigned char newcost);
 	
 
-	//see comments on the same function in the parent class
+	/** \brief see comments on the same function in the parent class
+    */
 	bool InitializeMDPCfg(MDPConfig *MDPCfg);
-	//see comments on the same function in the parent class
+	/** \brief see comments on the same function in the parent class
+    */
 	int  GetFromToHeuristic(int FromStateID, int ToStateID);
-	//see comments on the same function in the parent class
+	/** \brief see comments on the same function in the parent class
+    */
 	int  GetGoalHeuristic(int stateID);
-	//see comments on the same function in the parent class
+	/** \brief see comments on the same function in the parent class
+    */
 	int  GetStartHeuristic(int stateID);
 
-	//see comments on the same function in the parent class
+	/** \brief see comments on the same function in the parent class
+    */
 	void PrintState(int stateID, bool bVerbose, FILE* fOut=NULL);
-	//see comments on the same function in the parent class
+	/** \brief see comments on the same function in the parent class
+  */
 	void PrintEnv_Config(FILE* fOut);
 
 
 	EnvironmentNAV2DUU();
     ~EnvironmentNAV2DUU(){};
 
-	//not fully implemented yet
+	/** \brief not fully implemented yet
+    */
 	void GetPreds(int stateID, const vector<sbpl_BinaryHiddenVar_t>* updatedhvaluesV, vector<CMDPACTION>* IncomingDetActionV,
 								  vector<CMDPACTION>* IncomingStochActionV, vector<sbpl_BinaryHiddenVar_t>* StochActionNonpreferredOutcomeV);
 
 
-	//not fully implemented yet
+	/** \brief not fully implemented yet
+    */
 	void SetAllActionsandAllOutcomes(CMDPSTATE* state){
 		printf("ERROR: SetAllActionsandAllOutcomes not supported in NAV2D UNDER UNCERTAINTY\n");
 		exit(1);
 	};
-	//not fully implemented yet
+	/** \brief not fully implemented yet
+    */
 	void SetAllPreds(CMDPSTATE* state){
 		printf("ERROR: SetAllPreds not supported in NAV2D UNDER UNCERTAINTY\n");
 		exit(1);
 	};
-	//not fully implemented yet
+	/** \brief not fully implemented yet
+  */
 	void GetSuccs(int SourceStateID, vector<int>* SuccIDV, vector<int>* CostV){
 		printf("ERROR: GetSuccs not supported in NAV2D UNDER UNCERTAINTY\n");
 		exit(1);
 	};
-	//not fully implemented yet
+	/** \brief not fully implemented yet
+    */
 	void GetPreds(int TargetStateID, vector<int>* PredIDV, vector<int>* CostV){
 		printf("ERROR: GetPreds not supported in NAV2D UNDER UNCERTAINTY\n");
 		exit(1);
 	};
 	
-	//not fully implemented yet
+	/** \brief not fully implemented yet
+    */
 	int	 SizeofCreatedEnv();
-	//not fully implemented yet
+	/** \brief not fully implemented yet
+    */
 	int  SizeofH();
 
 

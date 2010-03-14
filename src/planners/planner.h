@@ -58,17 +58,21 @@ typedef enum
 		ABSTRACT_GENERALSTATE
 } AbstractSearchStateType_t; 
 
-//base class for a search state
+/** \brief base class for a search state
+  */
 class AbstractSearchState
 {
 
 public:
-	//each state can be a member of at most two lists
-	//indices of lists are given in planner.h (e.g., STATEID2IND_SLOT0)
+	/** \brief each state can be a member of at most two lists
+	indices of lists are given in planner.h (e.g., STATEID2IND_SLOT0)
+  */
 	struct listelement* listelem[2];
-	//index of the state in the heap, typically used for membership in OPEN
+	/** \brief index of the state in the heap, typically used for membership in OPEN
+    */
 	int heapindex;
-	//type of state. usually it will be general state
+	/** \brief type of state. usually it will be general state
+    */
 	AbstractSearchStateType_t StateType; 
 
 public:
@@ -92,37 +96,46 @@ class DiscreteSpaceInformation;
 */
 class StateChangeQuery;
 
-//pure virtual base class for a generic planner
+/** \brief pure virtual base class for a generic planner
+  */
 class SBPLPlanner
 {
 
 public:
 
-	//returns 1 if solution is found, 0 otherwise
-    //will replan incrementally if possible (e.g., as supported by the planner and not forced to replan from scratch)
-	//takes in the time available for planner and returns a sequence of stateIDs that corresponds to the solution
+	/** \brief returns 1 if solution is found, 0 otherwise
+    will replan incrementally if possible (e.g., as supported by the planner and not forced to replan from scratch)
+	takes in the time available for planner and returns a sequence of stateIDs that corresponds to the solution
+  */
   virtual int replan(double allocated_time_sec, std::vector<int>* solution_stateIDs_V) = 0;
-  //works same as replan function with two parameters, but also returns the cost of the solution
+  /** \brief works same as replan function with two parameters, but also returns the cost of the solution
+    */
   virtual int replan(double allocated_time_sec, std::vector<int>* solution_stateIDs_V, int* solcost) = 0;
 
-    //sets the goal of search (planner will automatically decide whether it needs to replan from scratch)
+    /** \brief sets the goal of search (planner will automatically decide whether it needs to replan from scratch)
+      */
     virtual int set_goal(int goal_stateID) = 0;
 
-    //sets the start of search (planner will automatically decide whether it needs to replan from scratch)
+    /** \brief sets the start of search (planner will automatically decide whether it needs to replan from scratch)
+      */
     virtual int set_start(int start_stateID) = 0;
 
-    //forgets previous planning efforts and starts planning from scratch next time replan is called
+    /** \brief forgets previous planning efforts and starts planning from scratch next time replan is called
+      */
     virtual int force_planning_from_scratch() = 0; 
 
-	//sets the mode for searching
-	//if bSearchUntilFirstSolution is false, then planner searches for at most allocatime_time_sec, independently of whether it finds a solution or not (default mode)
-	//if bSearchUntilFirstSolution is true, then planner searches until it finds the first solution. It may be faster than allocated_time or it may be longer
-	//In other words, in the latter case, the planner does not spend time on improving the solution even if time permits, but may also take longer than allocated_time before returning
-	//So, normally bSearchUntilFirstSolution should be set to false.
+	/** \brief sets the mode for searching
+
+      if bSearchUntilFirstSolution is false, then planner searches for at most allocatime_time_sec, independently of whether it finds a solution or not (default mode)
+      if bSearchUntilFirstSolution is true, then planner searches until it finds the first solution. It may be faster than allocated_time or it may be longer
+      In other words, in the latter case, the planner does not spend time on improving the solution even if time permits, but may also take longer than allocated_time before returning
+      So, normally bSearchUntilFirstSolution should be set to false.
+  */
 	virtual int set_search_mode(bool bSearchUntilFirstSolution) = 0;
 
-    // Notifies the planner that costs have changed. May need to be specialized for different subclasses in terms of what to
-    // do here
+    /** \brief  Notifies the planner that costs have changed. May need to be specialized for different subclasses in terms of what to
+     do here
+     */
 	virtual void costs_changed(StateChangeQuery const & stateChange) = 0;
   
   /** \return The "epsilon" value of the solution last computed by
@@ -135,9 +148,10 @@ public:
       operation, or -1 if this information is not available. */
   virtual int get_n_expands() const { return -1; }
 
-	//setting initial solution eps 
-   //This parameter is ignored in planners that don't have a notion of eps
-   //In ARA*/AD*: (cost(initialsolution) <= eps*cost(optimalsolution))
+	/** \brief setting initial solution eps 
+       This parameter is ignored in planners that don't have a notion of eps
+       In ARA* / AD*: (cost(initialsolution) <= eps*cost(optimalsolution))
+  */
    virtual void set_initialsolution_eps(double initialsolution_eps) {};
 
 

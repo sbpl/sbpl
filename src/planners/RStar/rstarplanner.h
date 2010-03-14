@@ -54,31 +54,39 @@ class CList;
 
 //-------------------------------------------------------------
 
-//high level states in R* search
-//in other words, state structure for high level states in Gamma graph
+/** \brief high level states in R* search
+  \note in other words, state structure for high level states in Gamma graph
+  */
 typedef class RSTARSEARCHSTATEDATA : public AbstractSearchState
 {
 public:
-	//the MDP state itself
+	/** \brief the MDP state itself
+    */
 	CMDPSTATE* MDPstate; 
-	//RSTAR* relevant data
+	/** \brief RSTAR* relevant data
+    */
 	unsigned int g;
-	//RSTAR* relevant data
+	/** \brief RSTAR* relevant data
+    */
 	short unsigned int iterationclosed;
-	//RSTAR* relevant data
+	/** \brief RSTAR* relevant data
+    */
 	short unsigned int callnumberaccessed;
 
-	//best predecessor and the action from it 
-	//- note that in R* bestpredaction refers to best predecessor in the high-level graph constructed by R*
-	//this graph is ALWAYS rooted at searchstart and directed towards searchgoal independently of the actual direction of search 
-	//(from start to goal or from goal to start)
-	//thus sourcestate for the action is always at the state closer to the start of the search tree
+	/** \brief best predecessor and the action from it 
+      \note note that in R* bestpredaction refers to best predecessor in the high-level graph constructed by R*
+      this graph is ALWAYS rooted at searchstart and directed towards searchgoal independently of the actual direction of search 
+      (from start to goal or from goal to start)
+      thus sourcestate for the action is always at the state closer to the start of the search tree
+  */
 	CMDPACTION *bestpredaction; 
 
-    //set of predecessor actions together with some info
+    /** \brief set of predecessor actions together with some info
+      */
     vector<CMDPACTION*> predactionV;
 
-	//RSTAR* relevant data - heuristics
+	/** \brief RSTAR* relevant data - heuristics
+    */
 	int h;
 
 	
@@ -87,37 +95,48 @@ public:
 	~RSTARSEARCHSTATEDATA() {};
 } RSTARState;
 
-//action in Gamma graph. Each action in Gamma graph corresponds to a path
+/** \brief action in Gamma graph. Each action in Gamma graph corresponds to a path
+  */
 typedef struct RSTARACTIONDATA_T
 {
-	//lower bound on the cost of the path
+	/** \brief lower bound on the cost of the path
+    */
     int clow;
-	//number of expansions done so far to compute the path that represents this action
+	/** \brief number of expansions done so far to compute the path that represents this action
+    */
     int exp;
-	//path that the action represetns
-	//the path is always stored as a valid path w.r.t. the original graph (not search tree) 
-	//so if the search is forward, then the path is from source to target and otherwise, the path is from target toward source
+	/** \brief path that the action represents
+      \note the path is always stored as a valid path w.r.t. the original graph (not search tree) 
+      so if the search is forward, then the path is from source to target and otherwise, the path is from target toward source
+  */
     vector<int> pathIDs; 
 }RSTARACTIONDATA;
 
 
-//low-level (local) search state in R*
+/** \brief low-level (local) search state in R*
+  */
 typedef class RSTARLSEARCHSTATEDATA : public AbstractSearchState
 {
 public:
-	//the MDP state itself
+	/** \brief the MDP state itself
+    */
 	CMDPSTATE* MDPstate; 
-	//planner relevant data - g-value
+	/** \brief planner relevant data - g-value
+    */
 	int g;
 
-	//planner relevant data
+	/** \brief planner relevant data
+    */
 	unsigned int iteration;
-	//planner relevant data
+	/** \brief planner relevant data
+    */
     unsigned int iterationclosed;
 
-	//best predecessors according to the search tree (so, in backward search these are actual successors)
+	/** \brief best predecessors according to the search tree (so, in backward search these are actual successors)
+    */
 	CMDPSTATE* bestpredstate; 
-	//the cost of the best action from the best preds to this state
+	/** \brief the cost of the best action from the best preds to this state
+    */
     int bestpredstateactioncost;
 
 	
@@ -127,22 +146,29 @@ public:
 } RSTARLSearchState;
 
 
-//local search statespace in R*
+/** \brief local search statespace in R*
+  */
 class RSTARLSEARCHSTATESPACE
 {
 public:
-	//graph constructed by local search
+	/** \brief graph constructed by local search
+    */
 	CMDP MDP;
-	//start state
+	/** \brief start state
+    */
 	CMDPSTATE* StartState;
-	//goal state
+	/** \brief goal state
+    */
 	CMDPSTATE* GoalState;
-	//search-related var
+	/** \brief search-related variable
+    */
 	int iteration;
 
-	//open list
+	/** \brief open list
+    */
     CHeap* OPEN;
-	//incons list - used for suboptimal search
+	/** \brief incons list - used for suboptimal search
+    */
     CList* INCONS;
 
 public:
@@ -160,80 +186,109 @@ public:
 typedef class RSTARLSEARCHSTATESPACE RSTARLSearchStateSpace_t;
 
 
-//statespace
+/** \brief statespace
+  */
 typedef struct RSTARSEARCHSTATESPACE
 {
-	//required epsilon
+	/** \brief required epsilon
+    */
 	double eps;
-	//epsilon that is satisfied
+	/** \brief epsilon that is satisfied
+    */
     double eps_satisfied;
-	//open list
+	/** \brief open list
+    */
 	CHeap* OPEN;
 
-	//searchiteration gets incremented with every R* search (and reset upon every increment of callnumber)
+	/** \brief searchiteration gets incremented with every R* search (and reset upon every increment of callnumber)
+    */
 	short unsigned int searchiteration; 
-	//callnumber gets incremented with every call to R* (so, it can be multiple number of times within planning times since R* is executed multiple times)
+	/** \brief callnumber gets incremented with every call to R* (so, it can be multiple number of times within planning times since R* is executed multiple times)
+    */
 	short unsigned int callnumber; 
-	//search goal state (not necessarily the actual start state, it depends on search direction)
+	/** \brief search goal state (not necessarily the actual start state, it depends on search direction)
+    */
 	CMDPSTATE* searchgoalstate;
-	//search start state
+	/** \brief search start state
+    */
 	CMDPSTATE* searchstartstate;
 	
-	//graph constructed by high-level search
+	/** \brief graph constructed by high-level search
+    */
 	CMDP searchMDP;
 
-	//need to reevaluate fvals
+	/** \brief need to reevaluate fvals
+    */
 	bool bReevaluatefvals;
-	//need to reinitialize search space
+	/** \brief need to reinitialize search space
+    */
     bool bReinitializeSearchStateSpace;
-	//set when it is a new search iteration
+	/** \brief set when it is a new search iteration
+    */
 	bool bNewSearchIteration;
 
 } RSTARSearchStateSpace_t;
 
 
 
-//RSTAR* planner
+/** \brief RSTAR* planner
+  */
 class RSTARPlanner : public SBPLPlanner
 {
 
 public:
-	//replan a path within the allocated time, return the solution in the vector
+	/** \brief replan a path within the allocated time, return the solution in the vector
+    */
 	int replan(double allocated_time_secs, vector<int>* solution_stateIDs_V);
-	//replan a path within the allocated time, return the solution in the vector, also returns solution cost
+	/** \brief replan a path within the allocated time, return the solution in the vector, also returns solution cost
+    */
 	int replan(double allocated_time_sec, vector<int>* solution_stateIDs_V, int* solcost);
 
-	//set the goal state
+	/** \brief set the goal state
+    */
     int set_goal(int goal_stateID);
-	//set the start state
+	/** \brief set the start state
+    */
     int set_start(int start_stateID);
-	//inform the search about the new edge costs
+	/** \brief inform the search about the new edge costs
+    */
     void costs_changed(StateChangeQuery const & stateChange);
-	//inform the search about the new edge costs - 
-	//since R* is non-incremental, it is sufficient (and more efficient) to just inform ARA* of the fact that some costs changed
+	/** \brief inform the search about the new edge costs - 
+	    \note since R* is non-incremental, it is sufficient (and more efficient) to just inform R* of the fact that some costs changed
+  */
     void costs_changed();
-   	//set a flag to get rid of the previous search efforts, release the memory and re-initialize the search, when the next replan is called
+   	/** \brief set a flag to get rid of the previous search efforts, release the memory and re-initialize the search, when the next replan is called
+      */
     int force_planning_from_scratch();
 
-	//you can either search forwards or backwards
+	/** \brief you can either search forwards or backwards
+    */
 	int set_search_mode(bool bSearchUntilFirstSolution);
 
 
-	//obtain probabilistic eps suboptimality bound
+	/** \brief obtain probabilistic eps suboptimality bound
+    */
 	virtual double get_solution_probabilisticeps() const {return pSearchStateSpace->eps_satisfied;};
-	//get number of high level expands
+	/** \brief get number of high level expands
+    */
     virtual int get_highlevel_expands() const { return highlevel_searchexpands; }
-	//get number of low level expands
+	/** \brief get number of low level expands
+    */
     virtual int get_lowlevel_expands() const { return lowlevel_searchexpands; }
-	//set initial solution epsilon that R* will try to satisfy (probabilistically)
+	/** \brief set initial solution epsilon that R* will try to satisfy (probabilistically)
+    */
 	virtual void set_initialsolution_eps(double initialsolution_eps) {finitial_eps = initialsolution_eps;};
 
-	//print out search path 
+	/** \brief print out search path 
+    */
 	void print_searchpath(FILE* fOut);
 
 
-	//constructors & destructors
+	/** \brief constructor 
+    */
     RSTARPlanner(DiscreteSpaceInformation* environment, bool bforwardsearch);
+	/** \brief destructor
+    */
     ~RSTARPlanner();
 
 

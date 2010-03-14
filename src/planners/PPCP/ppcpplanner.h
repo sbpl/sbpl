@@ -31,19 +31,24 @@
 
 
 
-//a state for PPCP
+/** \brief a state for PPCP
+  */
 typedef class PPCPPLANNERSTATEDATA : public AbstractSearchState
 {
 public:
 
-	//the MDP state itself
+	/** \brief the MDP state itself
+    */
 	CMDPSTATE* MDPstate; 
-	//planner relevant data
+	/** \brief planner relevant data
+    */
 	int v;
-	//planner relevant data
+	/** \brief planner relevant data
+    */
 	unsigned int iteration;
 
-	//best action
+	/** \brief best action
+    */
 	CMDPACTION *bestnextaction; 
 
 private:
@@ -62,14 +67,18 @@ public:
 
 
 
-//PPCP statespace
+/** \brief PPCP statespace
+  */
 typedef struct PPCPSTATESPACE
 {
-	//MDP
+	/** \brief MDP
+    */
 	CMDP MDP;
-	//pointer to start state
+	/** \brief pointer to start state
+  */
 	CMDPSTATE* StartState;
-	//pointer to goal state
+	/** \brief pointer to goal state
+  */
 	CMDPSTATE* GoalState;
 
 	int iteration;
@@ -78,7 +87,8 @@ typedef struct PPCPSTATESPACE
     //TODO - vector<PolicyFullState_t*> CurrentPolicy; //current policy
     double currentpolicyconfidence;
 
-	//set when it is necessary to reset the planner
+	/** \brief set when it is necessary to reset the planner
+  */
 	bool bReinitializeSearchStateSpace;
 
 }PPCPStateSpace_t;
@@ -91,56 +101,68 @@ typedef struct PPCPSTATESPACE
 
 
 
-//PPCP planner
-//in explanations, S signifies a fully observable part of the state space
-//H signifies hidden variables
+/** \brief PPCP planner
+in explanations, S signifies a fully observable part of the state space
+H signifies hidden variables
+*/
 class PPCPPlanner : public SBPLPlanner
 {
 
 public:
 
-	//planning (replanning) function. Takes in time available for planning
-	// returns policy, expected cost of the solution policy, and probability of successfully reaching the goal (it is < 1, whenever 
-	//PPCP ran out of time before full convergence
+	/** \brief planning (replanning) function. Takes in time available for planning
+	 returns policy, expected cost of the solution policy, and probability of successfully reaching the goal (it is < 1, whenever 
+	PPCP ran out of time before full convergence
+  */
 	int replan(double allocated_time_secs, vector<sbpl_PolicyStatewithBinaryh_t>* SolutionPolicy, float* ExpectedCost, float* ProbofReachGoal);
 
-	//constructors
+	/** \brief constructors
+    */
 	PPCPPlanner(DiscreteSpaceInformation* environment, int sizeofS, int sizeofH); 
-    //destructor
+    /** \brief destructor
+      */
     ~PPCPPlanner();
 
-	//setting goal state in S
+	/** \brief setting goal state in S
+    */
     int set_goal(int goal_stateID);
-	//setting start state in S
+	/** \brief setting start state in S
+    */
     int set_start(int start_stateID);
 
-	//not supported version of replan
+	/** \brief not supported version of replan
+    */
 	int replan(double allocated_time_sec, vector<int>* solution_stateIDs_V){
 		printf("ERROR: this version of replan not supported in PPCP planner\n");
 		exit(1);
 	};
 
-	//not supported version of replan
+	/** \brief not supported version of replan
+    */
 	int replan(double allocated_time_sec, vector<int>* solution_stateIDs_V, int* solcost){
 		printf("ERROR: this version of replan not supported in PPCP planner\n");
 		exit(1);
 	};
 
-    //forgets previous planning efforts and starts planning from scratch next time replan is called
+    /** \brief forgets previous planning efforts and starts planning from scratch next time replan is called
+      */
     int force_planning_from_scratch(); 
 
 	
-	//sets how to search - not supported in PPCP
+	/** \brief sets how to search - not supported in PPCP
+    */
 	int set_search_mode(bool bSearchUntilFirstSolution){
 		printf("ERROR: set_search_mode not supported in PPCP planner\n");
 		exit(1);
 	};
 
 
-    // Notifies the planner that costs have changed. May need to be specialized for different subclasses in terms of what to
-    // do here
+    /** \brief  Notifies the planner that costs have changed. May need to be specialized for different subclasses in terms of what to
+     do here
+    */
 	void costs_changed(StateChangeQuery const & stateChange);
-	//notifies the planner that costs have changed
+	/** \brief notifies the planner that costs have changed
+    */
     void costs_changed();
 
 

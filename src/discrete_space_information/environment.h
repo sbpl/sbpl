@@ -29,58 +29,74 @@
 #ifndef __ENVIRONMENT_H_
 #define __ENVIRONMENT_H_
 
-//base class for environments defining planning graphs
-//It is independent of the graph search used
-//The main means of communication between environment and graph search is through stateID. 
-//Each state is uniquely defined by stateID and graph search is ONLY aware of stateIDs. It doesn't know anything about the actual state variables.
-//Environment, on the other hand, maintains a mapping from stateID to actual state variables (coordinates) using StateID2IndexMapping array
+/** \brief base class for environments defining planning graphs
+It is independent of the graph search used
+The main means of communication between environment and graph search is through stateID. 
+Each state is uniquely defined by stateID and graph search is ONLY aware of stateIDs. It doesn't know anything about the actual state variables.
+Environment, on the other hand, maintains a mapping from stateID to actual state variables (coordinates) using StateID2IndexMapping array
+*/
 class DiscreteSpaceInformation
 {
 
 public:
 
-	//mapping from hashentry stateID (used in environment to contain the coordinates of a state, say x,y or x,y,theta) 
-	//to an array of state indices used in searches. If a single search is done, then it is a single entry. 
-	//So StateID2IndexMapping[100][0] = 5 means that hashentry with stateID 100 is mapped onto search index = 5 in search 0
-	//The value of -1 means that no search state has been created yet for this hashentry
+	/** \brief mapping from hashentry stateID (used in environment to contain the coordinates of a state, say x,y or x,y,theta) 
+	to an array of state indices used in searches. If a single search is done, then it is a single entry. 
+	So StateID2IndexMapping[100][0] = 5 means that hashentry with stateID 100 is mapped onto search index = 5 in search 0
+	The value of -1 means that no search state has been created yet for this hashentry
+  */
 	std::vector<int*> StateID2IndexMapping;
 	
-	//debugging file
+	/** \brief debugging file
+    */
 	FILE* fDeb;
 
-	//initialization environment from file (see .cfg files for examples)
+	/** \brief initialization environment from file (see .cfg files for examples)
+    */
 	virtual bool InitializeEnv(const char* sEnvFile) = 0;
 
-	//initialization of MDP data structure
+	/** \brief initialization of MDP data structure
+    */
 	virtual bool InitializeMDPCfg(MDPConfig *MDPCfg) = 0;
 
-	//heuristic estimate from state FromStateID to state ToStateID
+	/** \brief heuristic estimate from state FromStateID to state ToStateID
+    */
 	virtual int  GetFromToHeuristic(int FromStateID, int ToStateID) = 0;
-	//heuristic estimate from state with stateID to goal state
+	/** \brief heuristic estimate from state with stateID to goal state
+    */
 	virtual int  GetGoalHeuristic(int stateID) = 0;
-	//heuristic estimate from start state to state with stateID
+	/** \brief heuristic estimate from start state to state with stateID
+    */
 	virtual int  GetStartHeuristic(int stateID) = 0;
 
-	//depending on the search used, it may call GetSuccs function (for forward search) or GetPreds function (for backward search)
-	//or both (for incremental search). At least one of this functions should be implemented (otherwise, there will be no search to run)
-	//Some searches may also use SetAllActionsandAllOutcomes or SetAllPreds functions if they keep the pointers to successors (predecessors) but
-	//most searches do not require this, so it is not necessary to support this
+	/** \brief depending on the search used, it may call GetSuccs function (for forward search) or GetPreds function (for backward search)
+	or both (for incremental search). At least one of this functions should be implemented (otherwise, there will be no search to run)
+	Some searches may also use SetAllActionsandAllOutcomes or SetAllPreds functions if they keep the pointers to successors (predecessors) but
+	most searches do not require this, so it is not necessary to support this
+  */
 	virtual void GetSuccs(int SourceStateID, std::vector<int>* SuccIDV, std::vector<int>* CostV) = 0;
-	//see comments for GetSuccs functon
+	/** \brief see comments for GetSuccs functon
+    */
 	virtual void GetPreds(int TargetStateID, std::vector<int>* PredIDV, std::vector<int>* CostV) = 0;
-	//see comments for GetSuccs functon
+	/** \brief see comments for GetSuccs functon
+    */
 	virtual void SetAllActionsandAllOutcomes(CMDPSTATE* state) = 0;
-	//see comments for GetSuccs functon
+	/** \brief see comments for GetSuccs functon
+    */
 	virtual void SetAllPreds(CMDPSTATE* state) = 0;
 
-	//returns the number of states (hashentries) created 
+	/** \brief returns the number of states (hashentries) created 
+    */
 	virtual int	 SizeofCreatedEnv() = 0;
-	//prints the state variables for a state with stateID
+	/** \brief prints the state variables for a state with stateID
+    */
 	virtual void PrintState(int stateID, bool bVerbose, FILE* fOut=NULL) = 0;
-	//prints environment config file 
+	/** \brief prints environment config file 
+    */
 	virtual void PrintEnv_Config(FILE* fOut) = 0;
 
-	//sets a parameter to a value. The set of supported parameters depends on the particular environment
+	/** \brief sets a parameter to a value. The set of supported parameters depends on the particular environment
+    */
 	virtual bool SetEnvParameter(const char* parameter, int value)
 	{
 		printf("ERROR: Environment has no parameters that can be set via SetEnvParameter function\n");
@@ -95,25 +111,28 @@ public:
 		return list;
 	}
 
-	//returns true if two states meet the same condition,
-	//this is used in some planners to figure out if two states are the same in some lower-dimensional manifold
-	//for example, in robotarm planning, two states could be equivalent if their end effectors are at the same position
-	//unless overwritten in a child class, this function is not implemented
+	/** \brief returns true if two states meet the same condition,
+	brief this is used in some planners to figure out if two states are the same in some lower-dimensional manifold
+	for example, in robotarm planning, two states could be equivalent if their end effectors are at the same position
+	unless overwritten in a child class, this function is not implemented
+  */
 	virtual bool AreEquivalent(int StateID1, int StateID2){
 		printf("ERROR: environment does not support calls to AreEquivalent function\n");
 		exit(1);
 	}
 
-	//the following two functions generate succs/preds at some domain-dependent distance. The number of generated succs/preds is up
-	//to the environment. NOTE: they MUST generate goal state as a succ/pred if it is within the distance from the state
-	//CLowV is the corresponding vector of lower bounds on the costs from the state to the successor states (or vice versa for preds function)
-	//unless overwritten in a child class, this function is not implemented
+	/** \brief the following two functions generate succs/preds at some domain-dependent distance. The number of generated succs/preds is up
+	to the environment. NOTE: they MUST generate goal state as a succ/pred if it is within the distance from the state
+	CLowV is the corresponding vector of lower bounds on the costs from the state to the successor states (or vice versa for preds function)
+	unless overwritten in a child class, this function is not implemented
+  */
 	virtual void GetRandomSuccsatDistance(int SourceStateID, std::vector<int>* SuccIDV, std::vector<int>* CLowV)
 	{
 		printf("ERROR: environment does not support calls to GetRandomSuccsatDistance function\n");
 		exit(1);
 	}
-	//see comments for GetRandomSuccsatDistance
+	/** \brief see comments for GetRandomSuccsatDistance
+    */
 	virtual void GetRandomPredsatDistance(int TargetStateID, std::vector<int>* PredIDV, std::vector<int>* CLowV)
 	{
 		printf("ERROR: environment does not support calls to GetRandomPredsatDistance function\n");
@@ -121,7 +140,8 @@ public:
 	};
 
     
-	//checks the heuristics for consistency (some environments do not support this debugging call)
+	/** \brief checks the heuristics for consistency (some environments do not support this debugging call)
+    */
 	virtual void EnsureHeuristicsUpdated(bool bGoalHeuristics)
 	{
 		//by default the heuristics are up-to-date, but in some cases, the heuristics are computed only when really needed. For example,
@@ -131,7 +151,8 @@ public:
 
 	};
 
-	//destructor
+	/** \brief destructor
+    */
 	virtual ~DiscreteSpaceInformation(){
 	printf("destroying discretespaceinformation\n");
     for(unsigned int i = 0; i < StateID2IndexMapping.size(); ++i){
@@ -141,7 +162,8 @@ public:
   }
 
 
-	//constructor
+	/** \brief constructor
+    */
 	DiscreteSpaceInformation()
 	{
 

@@ -77,37 +77,50 @@ typedef struct
 }EnvironmentXXX_t;
 
 
-//this is just an example of environment and can be used (copy and paste) for creating a more complex environment
+/** \brief this is just an example of environment and can be used (copy and paste) for creating a more complex environment
+  */
 class EnvironmentXXX : public DiscreteSpaceInformation
 {
 
 public:
-	//see comments on the same function in the parent class
+	/** \brief see comments on the same function in the parent class
+    */
 	bool InitializeEnv(char* sEnvFile);
 
 
-	//see comments on the same function in the parent class
+	/** \brief see comments on the same function in the parent class
+    */
 	bool InitializeMDPCfg(MDPConfig *MDPCfg);
-	//see comments on the same function in the parent class
+	/** \brief see comments on the same function in the parent class
+    */
 	int  GetFromToHeuristic(int FromStateID, int ToStateID);
-	//see comments on the same function in the parent class
+	/** \brief see comments on the same function in the parent class
+    */
 	int  GetGoalHeuristic(int stateID);
-	//see comments on the same function in the parent class
+	/** \brief see comments on the same function in the parent class
+    */
 	int  GetStartHeuristic(int stateID);
-	//see comments on the same function in the parent class
+	/** \brief see comments on the same function in the parent class
+    */
 	void SetAllActionsandAllOutcomes(CMDPSTATE* state);
-	//see comments on the same function in the parent class
+	/** \brief see comments on the same function in the parent class
+    */
 	void SetAllPreds(CMDPSTATE* state);
-	//see comments on the same function in the parent class
+	/** \brief see comments on the same function in the parent class
+    */
 	void GetSuccs(int SourceStateID, vector<int>* SuccIDV, vector<int>* CostV);
-	//see comments on the same function in the parent class
+	/** \brief see comments on the same function in the parent class
+    */
 	void GetPreds(int TargetStateID, vector<int>* PredIDV, vector<int>* CostV);
 
-	//see comments on the same function in the parent class
+	/** \brief see comments on the same function in the parent class
+    */
 	int	 SizeofCreatedEnv();
-	//see comments on the same function in the parent class
+	/** \brief see comments on the same function in the parent class
+    */
 	void PrintState(int stateID, bool bVerbose, FILE* fOut=NULL);
-	//see comments on the same function in the parent class
+	/** \brief see comments on the same function in the parent class
+    */
 	void PrintEnv_Config(FILE* fOut);
 
 

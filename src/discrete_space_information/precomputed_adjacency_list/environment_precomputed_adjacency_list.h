@@ -38,27 +38,32 @@ public:
   AdjacencyListSBPLEnv ();
   void writeToStream (ostream& str = cout);
 
-  /// Add point to roadmap.  Does not check for duplicates.
+  /** \brief Add point to roadmap.  Does not check for duplicates.
+  */
   void addPoint (const Coords& c);
 
-  /// Does the roadmap contain this point?
+  /** \brief Does the roadmap contain this point?
+  */
   bool hasPoint (const Coords& c);
 
-  /// Remove the last N points added using addPoint (and all their incident edges) in O(N) time
+  /** \brief Remove the last N points added using addPoint (and all their incident edges) in O(N) time
+  */
   void removeLastPoints (unsigned int n=1);
 
-  /// \post An undirected edge exists between c1 and c2 with the given cost
-  /// cost, if not provided, defaults to the heuristic cost between c1 and c2
+  /**
+   \post An undirected edge exists between c1 and c2 with the given cost
+   cost, if not provided, defaults to the heuristic cost between c1 and c2
+  */
   void setCost (const Coords& c1, const Coords& c2, int cost);
   void setCost (const Coords& c1, const Coords& c2);
   
   void setStartState (const Coords& c);
   void setGoalState (const Coords& c);
 
-  /// Use ARA* to find an optimal path between the currently set start and goal states
-  /// \return Vector of states on the path
-  /// \post solution_cost will hold the cost of the returned solution
-
+  /** \brief Use ARA* to find an optimal path between the currently set start and goal states
+   \return Vector of states on the path
+   \post solution_cost will hold the cost of the returned solution
+   */
   vector<Coords> findOptimalPath (int* solution_cost);
 
   // Inherited DiscreteSpaceInformation ops

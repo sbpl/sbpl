@@ -39,18 +39,22 @@ struct VIPLANNER_T
 	int iteration;
 };
 
-//Value Iteration state
+/** \brief Value Iteration state
+  */
 typedef class VIPLANNERSTATEDATA : public AbstractSearchState
 {
 public:
-	//the MDP state itself
+	/** \brief the MDP state itself
+    */
 	CMDPSTATE* MDPstate; 
-	//planner relevant data
+	/** \brief planner relevant data
+    */
 	float v;
 	float Pc;
 	unsigned int iteration;
 
-	//best action
+	/** \brief best action
+    */
 	CMDPACTION *bestnextaction; 
 
 	
@@ -60,22 +64,26 @@ public:
 } VIState;
 
 
-//value iteration planner
+/** \brief value iteration planner
+  */
 class VIPlanner : public SBPLPlanner
 {
 
 public:
-	//replan a path within the allocated time, return the policy in the solution vector
+	/** \brief replan a path within the allocated time, return the policy in the solution vector
+    */
 	int replan(double allocated_time_secs, vector<int>* solution_stateIDs_V);
 
-	//constructors
+	/** \brief constructors
+    */
 	VIPlanner(DiscreteSpaceInformation* environment, MDPConfig* MDP_cfg)
 	{
 		environment_ = environment;
 		MDPCfg_ = MDP_cfg;
 	};
 
-    //destructor
+    /** \brief destructor
+      */
     ~VIPlanner();
 
 private:

@@ -30,19 +30,24 @@
 #define __CONFIG_H_
 
 
-//if set, then heuristic is used if available
+/** \brief if set, then heuristic is used if available
+  */
 #define USE_HEUR 1 
 
-//memory debugging
+/** \brief memory debugging
+  */
 #define MEM_CHECK 0
 
-//regular debugging
+/** \brief regular debugging
+  */
 #define DEBUG 0
 
-//timing debugging
+/** \brief timing debugging
+  */
 #define TIME_DEBUG 0
 
-//small epsilon for various floating error checking
+/** \brief small epsilon for various floating error checking
+  */
 #define ERR_EPS 0.0000001
 
 
