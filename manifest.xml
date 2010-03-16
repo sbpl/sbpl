@@ -6,7 +6,7 @@
   <author>Maxim Likhachev/maximl@seas.upenn.edu</author>
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
-  <url></url>
+  <url>http://ros.org/wiki/sbpl</url>
 
   <export>
     <cpp cflags="-I${prefix}/src -O3" lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -lsbpl"/>
