@@ -1043,10 +1043,10 @@ int main(int argc, char *argv[])
 
     //2D planning
     //plan2d(argc, argv);
-    planandnavigate2d(argc, argv);
+    //planandnavigate2d(argc, argv);
 
     //xytheta planning
-    //planxythetalat(argc, argv);
+    planxythetalat(argc, argv);
 
     //xytheta planning
     //planandnavigatexythetalat(argc, argv);

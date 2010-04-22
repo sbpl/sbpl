@@ -655,8 +655,9 @@ bool SBPL2DGridSearch::search_withslidingbuckets(unsigned char** Grid2D, unsigne
     SBPL_2DGridSearchState *searchPredState = NULL;
     int numofExpands = 0;
 
-    //get the current time
-	clock_t starttime = clock();
+#if DEBUG
+	FILE* f2Dsearch = fopen("2dgriddebug.txt", "w");
+#endif
 	
 	//closed = 0
 	iteration_++;
@@ -714,20 +715,28 @@ bool SBPL2DGridSearch::search_withslidingbuckets(unsigned char** Grid2D, unsigne
 		term_factor = 0.0;
 	};
 	
+    //get the current time
+	clock_t starttime = clock();
+
 
  	char *pbClosed = (char*)calloc(1, width_*height_);   
 
     //the main repetition of expansions
-	printf("2D search with sliding buckets\n");
+	printf("2D search with sliding buckets and term_factor=%.3f\n", term_factor);
 	int prevg = 0;
-    while(!OPEN2DBLIST_->empty() && search2DGoalState->g > term_factor*OPEN2DBLIST_->currentminpriority)
+    while(!OPEN2DBLIST_->empty() && search2DGoalState->g > term_factor*OPEN2DBLIST_->getminkey())
     {
+
+#if DEBUG
+		fprintf(f2Dsearch, "currentminelement_priority before pop=%d\n",  OPEN2DBLIST_->getminkey());
+#endif
+
         //get the next state for expansion
         searchExpState = (SBPL_2DGridSearchState*)OPEN2DBLIST_->popminelement();
 
-		if(searchExpState->g > OPEN2DBLIST_->currentminpriority){
+		if(searchExpState->g > OPEN2DBLIST_->getminkey()){
 			printf("ERROR: g=%d for state %d %d but minpriority=%d (prevg=%d)\n", searchExpState->g, 
-				searchExpState->x, searchExpState->y, OPEN2DBLIST_->currentminpriority, prevg);
+				searchExpState->x, searchExpState->y, OPEN2DBLIST_->getminkey(), prevg);
 		}
 		prevg = searchExpState->g;
 
@@ -738,6 +747,12 @@ bool SBPL2DGridSearch::search_withslidingbuckets(unsigned char** Grid2D, unsigne
 		if(pbClosed[exp_x + width_*exp_y] == 1)
 			continue;
 		pbClosed[exp_x + width_*exp_y] = 1;
+
+#if DEBUG
+		fprintf(f2Dsearch, "expanding state <%d %d> with g=%d (currentminelement_priority=%d, currentfirstbucket_bindex=%d, currentfirstbucket_priority=%d)\n", 
+			searchExpState->x, searchExpState->y, searchExpState->g, OPEN2DBLIST_->getminkey(), 
+			OPEN2DBLIST_->currentfirstbucket_bindex, OPEN2DBLIST_->currentfirstbucket_priority);
+#endif
 
 		//expand
         numofExpands++;
@@ -779,6 +794,10 @@ bool SBPL2DGridSearch::search_withslidingbuckets(unsigned char** Grid2D, unsigne
            {
 				searchPredState->iterationaccessed = iteration_;
 				searchPredState->g = __min(INFINITECOST, cost + searchExpState->g); 
+
+#if DEBUG
+				fprintf(f2Dsearch, "inserting state <%d %d> with g=%d\n", searchPredState->x, searchPredState->y, searchPredState->g);
+#endif
 
 				//put it into the list
 				OPEN2DBLIST_->insert(searchPredState, searchPredState->g);

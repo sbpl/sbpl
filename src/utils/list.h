@@ -478,11 +478,12 @@ public:
 	int* lastelementindexV; //index of the last element for each bucket
 	int numofbuckets;
 	int bucketsize;
-	int currentminbucket_index; //index of the current minbucket
+	int currentminelement_bindex; //index of the bucket of the current min element
 	int currentminelement_index; //index of the current minelement in the bucket
-	int currentmaxpriority; //the max priority in the list
-	int currentminpriority; //the priority of the currentminbucket
-
+	int currentmaxelement_priority; //the maxelement priority in the list
+	int currentminelement_priority; //the priority of the current minelement
+	int currentfirstbucket_bindex; //index of the bucket that corresponds to the first bucket in the list (lowest priority)
+	int currentfirstbucket_priority; //priority of the first bucket in the list
 
 //constructors
 public:
@@ -500,9 +501,9 @@ public:
 			bucketV[i] = NULL; 
 		}
 	
-		currentminbucket_index = 0;
+		currentminelement_bindex = currentfirstbucket_bindex = 0;
 		currentminelement_index = -1;
-		currentmaxpriority = currentminpriority = 0;
+		currentmaxelement_priority = currentminelement_priority = currentfirstbucket_priority = 0;
 	 };
 	~CSlidingBucket()
 	{
@@ -523,16 +524,16 @@ public:
 public:
 
   inline bool empty()
-    {return (currentminelement_index == -1 && currentmaxpriority == currentminpriority);};
+    {return (currentminelement_index == -1 && currentmaxelement_priority == currentminelement_priority);};
 
   inline int getminkey()
-  	{return currentminpriority;};
+  	{return currentminelement_priority;};
 
   void reset()
   {
-		currentminbucket_index = 0;
+		currentminelement_bindex = currentfirstbucket_bindex = 0;
 		currentminelement_index = -1;
-		currentmaxpriority = currentminpriority = 0;
+		currentmaxelement_priority = currentminelement_priority = currentfirstbucket_priority = 0;
 		for(int i = 0; i < numofbuckets; i++)
 		{
 			lastelementindexV[i] = -1;
@@ -546,18 +547,22 @@ public:
 
 	AbstractSearchState *popminelement()
 	{
-		if(currentminelement_index == -1 && currentmaxpriority == currentminpriority)
+		if(currentminelement_index == -1 && currentmaxelement_priority == currentminelement_priority)
 			return NULL;
 		else
 		{
 			AbstractSearchState* currentelement = NULL;
-			if(currentminelement_index == -1 || bucketV[currentminbucket_index] == NULL || bucketV[currentminbucket_index][currentminelement_index] == NULL)
+			if(currentminelement_index == -1 || bucketV[currentminelement_bindex] == NULL || bucketV[currentminelement_bindex][currentminelement_index] == NULL)
 				currentelement = recomputeandreturnmin();
 			else
-				currentelement = bucketV[currentminbucket_index][currentminelement_index];
+				currentelement = bucketV[currentminelement_bindex][currentminelement_index];
 
 			//delete the element
-			bucketV[currentminbucket_index][currentminelement_index] = NULL;
+			bucketV[currentminelement_bindex][currentminelement_index] = NULL;
+
+			//reset the first bucket to the element that was just delete
+			currentfirstbucket_bindex = currentminelement_bindex;
+			currentfirstbucket_priority = currentminelement_priority;
 
 			//recomputemin
 			recomputeandreturnmin();
@@ -568,15 +573,15 @@ public:
 
 	AbstractSearchState *getminelement()
 	{
-		if(currentminelement_index == -1 && currentmaxpriority == currentminpriority)
+		if(currentminelement_index == -1 && currentmaxelement_priority == currentminelement_priority)
 			return NULL;
 		else
 		{
 			AbstractSearchState* currentelement = NULL;
-			if(currentminelement_index == -1 || bucketV[currentminbucket_index] == NULL || bucketV[currentminbucket_index][currentminelement_index] == NULL)
+			if(currentminelement_index == -1 || bucketV[currentminelement_bindex] == NULL || bucketV[currentminelement_bindex][currentminelement_index] == NULL)
 				currentelement = recomputeandreturnmin();
 			else
-				currentelement = bucketV[currentminbucket_index][currentminelement_index];
+				currentelement = bucketV[currentminelement_bindex][currentminelement_index];
 
 			return currentelement;
 		}
@@ -585,12 +590,12 @@ public:
 	void insert(AbstractSearchState *AbstractSearchState1, int priority)
 	{
 		//compute the index of the bucket where to put it in
-		int bucket_increment = (priority - currentminpriority);
-		int bucket_index = (currentminbucket_index + bucket_increment)%numofbuckets;
+		int bucket_increment = (priority - currentfirstbucket_priority);
+		int bucket_index = (currentfirstbucket_bindex + bucket_increment)%numofbuckets;
 
 		if(bucket_increment >= numofbuckets || bucket_increment < 0)
 		{
-			printf("ERROR: invalid priority=%d (currentminpriority=%d) used with sliding buckets\n", priority, currentminpriority);
+			printf("ERROR: invalid priority=%d (currentfirstbucket_priority=%d) used with sliding buckets\n", priority, currentfirstbucket_priority);
 			exit(1);
 		}
 
@@ -608,12 +613,17 @@ public:
 
 		bucketV[bucket_index][lastelementindexV[bucket_index]] = AbstractSearchState1;
 
-		//make sure maximum is correct
-		if(priority > currentmaxpriority)
-			currentmaxpriority = priority;
+		//make sure maximum and minimum is correct
+		if(priority > currentmaxelement_priority)
+			currentmaxelement_priority = priority;
+		if(priority < currentminelement_priority)
+		{
+			currentminelement_priority = priority;
+			currentminelement_bindex = bucket_index; 
+		}
 
 		//special case for the only entry
-		if(currentminbucket_index == bucket_index && currentminelement_index == -1)
+		if(currentminelement_bindex == bucket_index && currentminelement_index == -1)
 		{
 			currentminelement_index = 0;
 		}
@@ -623,34 +633,33 @@ private:
 
 	AbstractSearchState *recomputeandreturnmin()
 	{
-		if(currentminelement_index == -1 && currentmaxpriority == currentminpriority)
+		if(currentminelement_index == -1 && currentmaxelement_priority == currentminelement_priority)
 			return NULL;
-		while(currentminelement_index == -1 || bucketV[currentminbucket_index] == NULL || bucketV[currentminbucket_index][currentminelement_index] == NULL)
+		while(currentminelement_index == -1 || bucketV[currentminelement_bindex] == NULL || bucketV[currentminelement_bindex][currentminelement_index] == NULL)
 		{
 			//try incrementing element index
-			if (currentminelement_index < lastelementindexV[currentminbucket_index])
+			if (currentminelement_index < lastelementindexV[currentminelement_bindex])
 				currentminelement_index++;
 			else
 			{
 				//there are no more elements left in this bucket
-				lastelementindexV[currentminbucket_index] = -1;
+				lastelementindexV[currentminelement_bindex] = -1;
 
 				//if it was the last bucket, then that is it
-				if(currentminpriority == currentmaxpriority)
+				if(currentminelement_priority == currentmaxelement_priority)
 				{
-					currentminbucket_index = 0;
 					currentminelement_index = -1;
-					currentmaxpriority = currentminpriority;
+					currentmaxelement_priority = currentminelement_priority;
 					return NULL;
 				}
 
 				//try incrementing bucket index
-				currentminbucket_index = (currentminbucket_index + 1)%numofbuckets;
+				currentminelement_bindex = (currentminelement_bindex + 1)%numofbuckets;
 				currentminelement_index = 0;
-				currentminpriority++;
+				currentminelement_priority++;
 			}
 		}
-		return bucketV[currentminbucket_index][currentminelement_index];
+		return bucketV[currentminelement_bindex][currentminelement_index];
 	};
 
 	void createbucket(int bucketindex)
