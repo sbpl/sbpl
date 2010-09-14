@@ -181,12 +181,22 @@ public:
     */
     ~ARAPlanner();
 
+  double get_initial_eps(){return finitial_eps;};
 
+  double get_initial_eps_planning_time(){return finitial_eps_planning_time;}
 
+  double get_final_eps_planning_time(){return final_eps_planning_time;};
+
+  int get_n_expands_init_solution(){return num_of_expands_initial_solution;};
+
+    double get_final_epsilon(){return final_eps;};
 private:
 
 	//member variables
-	double finitial_eps;
+  double finitial_eps, finitial_eps_planning_time, final_eps_planning_time, final_eps;
+
+  int num_of_expands_initial_solution;
+
 	MDPConfig* MDPCfg_;
 
 	bool bforwardsearch; //if true, then search proceeds forward, otherwise backward

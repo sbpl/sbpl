@@ -65,6 +65,10 @@ ARAPlanner::ARAPlanner(DiscreteSpaceInformation* environment, bool bSearchForwar
             printf("ERROR: failed to create statespace\n");
             return;
         }    
+    finitial_eps_planning_time = -1.0;
+    final_eps_planning_time = -1.0;
+    num_of_expands_initial_solution = 0;
+    final_eps = -1.0;
 }
 
 ARAPlanner::~ARAPlanner()
@@ -1044,6 +1048,12 @@ bool ARAPlanner::Search(ARASearchStateSpace_t* pSearchStateSpace, vector<int>& p
 		printf("eps=%f expands=%d g(searchgoal)=%d time=%.3f\n", pSearchStateSpace->eps_satisfied, searchexpands - prevexpands,
 							((ARAState*)pSearchStateSpace->searchgoalstate->PlannerSpecificData)->g,double(clock()-loop_time)/CLOCKS_PER_SEC);
 
+                if(pSearchStateSpace->eps_satisfied == finitial_eps && pSearchStateSpace->eps == finitial_eps)
+                {
+                  finitial_eps_planning_time = double(clock()-loop_time)/CLOCKS_PER_SEC;
+                  num_of_expands_initial_solution = searchexpands - prevexpands;
+                }
+
 #if DEBUG
         fprintf(fDeb, "eps=%f expands=%d g(searchgoal)=%d time=%.3f\n", pSearchStateSpace->eps_satisfied, searchexpands - prevexpands,
 							((ARAState*)pSearchStateSpace->searchgoalstate->PlannerSpecificData)->g,double(clock()-loop_time)/CLOCKS_PER_SEC);
@@ -1088,8 +1098,8 @@ bool ARAPlanner::Search(ARASearchStateSpace_t* pSearchStateSpace, vector<int>& p
 
 	printf("total expands this call = %d, planning time = %.3f secs, solution cost=%d\n", 
            searchexpands, (clock()-TimeStarted)/((double)CLOCKS_PER_SEC), solcost);
-    
-
+        final_eps_planning_time = (clock()-TimeStarted)/((double)CLOCKS_PER_SEC);
+        final_eps = pSearchStateSpace->eps_satisfied;
     //fprintf(fStat, "%d %d\n", searchexpands, solcost);
 
 	return ret;
