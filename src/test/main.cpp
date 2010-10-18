@@ -448,7 +448,7 @@ int planxythetamlevlat(int argc, char *argv[])
 
 
 	//initialize the second level
-	int numofaddlevels = 0;
+	int numofaddlevels = 1;
 	printf("Number of additional levels = %d\n", numofaddlevels);
 	if(!environment_navxythetalat.InitializeAdditionalLevels(numofaddlevels, perimeterptsVV))
 	{

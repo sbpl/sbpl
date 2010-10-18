@@ -4,7 +4,6 @@ include_directories(${PROJECT_SOURCE_DIR}/code)
 
 add_library(sbpl
   ../src/discrete_space_information/nav2d/environment_nav2D.cpp
-  ../src/discrete_space_information/nav3dkin/environment_nav3Dkin.cpp
   ../src/discrete_space_information/navxythetalat/environment_navxythetalat.cpp
   ../src/discrete_space_information/navxythetalat/environment_navxythetamlevlat.cpp
   ../src/discrete_space_information/nav2d_uu/environment_nav2Duu.cpp
