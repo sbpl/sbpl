@@ -34,7 +34,7 @@ using namespace std;
 
 void PrintUsage(char *argv[])
 {
-	printf("USAGE: %s <cfg file>\n", argv[0]);
+	printf("USAGE: %s <cfg file> [motionprimitivesfile.mprim for xythetalattice planning]\n", argv[0]);
 }
 
 
@@ -1197,22 +1197,33 @@ int main(int argc, char *argv[])
 	}
 
     //2D planning
+	//usage: exename 2Denvironmentfile.cfg
+	//2Denvironmentfile.cfg files can be found sbpl/env_examples/nav2d
     //plan2d(argc, argv);
     //planandnavigate2d(argc, argv);
 
     //xytheta planning
+	//usage: exename 3Denvironmentfile.cfg motionprimitivesfile.mprim 
+	//3Denvironmentfile.cfg files can be found sbpl/env_examples/nav3d
+	//the motionprimitives files can be found in matlab/mprim directory
+	//note: the resolution of the motion primitives files should match the resolution of the cfg files
     //planxythetalat(argc, argv);
 
     //xytheta planning
+	//usage: see the comments for planxythetalat() above
     //planandnavigatexythetalat(argc, argv);
 
 	//xytheta with multiple levels (i.e., base of the robot and upper body)
+	//usage: see the comments for planxythetalat() above
 	planxythetamlevlat(argc, argv);
 
     //robotarm planning
+	//usage: exename robarmenvironmentfile.cfg
+	//robarmenvironmentfile.cfg files can be found sbpl/env_examples/robarm
     //planrobarm(argc, argv);
 
 	//plan under uncertainty (with incomplete information to be exact)
+	//not functional yet
 	//plan2duu(argc, argv); //not fully implemented yet
 
 	return 0;
