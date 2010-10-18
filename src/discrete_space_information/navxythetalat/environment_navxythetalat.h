@@ -72,6 +72,7 @@ public:
 
 typedef struct
 {
+	unsigned char aind; //index of the action (unique for given starttheta)
 	char starttheta;
 	char dX;
 	char dY;
@@ -393,10 +394,12 @@ public:
 
 	void ComputeHeuristicValues();
 
-	bool IsValidCell(int X, int Y);
+	virtual bool IsValidCell(int X, int Y);
 
 	void CalculateFootprintForPose(EnvNAVXYTHETALAT3Dpt_t pose, vector<sbpl_2Dcell_t>* footprint);
+	void CalculateFootprintForPose(EnvNAVXYTHETALAT3Dpt_t pose, vector<sbpl_2Dcell_t>* footprint, const vector<sbpl_2Dpt_t>& FootprintPolygon);
 	void RemoveSourceFootprint(EnvNAVXYTHETALAT3Dpt_t sourcepose, vector<sbpl_2Dcell_t>* footprint);
+	void RemoveSourceFootprint(EnvNAVXYTHETALAT3Dpt_t sourcepose, vector<sbpl_2Dcell_t>* footprint, const vector<sbpl_2Dpt_t>& FootprintPolygon);
 
 	virtual void GetSuccs(int SourceStateID, vector<int>* SuccIDV, vector<int>* CostV, vector<EnvNAVXYTHETALATAction_t*>* actionindV=NULL) = 0;
 

@@ -215,15 +215,15 @@ int planxythetalat(int argc, char *argv[])
 {
 
 	int bRet = 0;
-	double allocated_time_secs = 3; //in seconds
+	double allocated_time_secs = 10; //in seconds
 	MDPConfig MDPCfg;
 	bool bsearchuntilfirstsolution = false;
 
 	//set the perimeter of the robot (it is given with 0,0,0 robot ref. point for which planning is done)
 	vector<sbpl_2Dpt_t> perimeterptsV;
 	sbpl_2Dpt_t pt_m;
-	double halfwidth = 0.3; //0.3;
-	double halflength = 0.45; //0.45;
+	double halfwidth = 0.1; //0.3;
+	double halflength = 0.1; //0.45;
 	pt_m.x = -halflength;
 	pt_m.y = -halfwidth;
 	perimeterptsV.push_back(pt_m);
@@ -368,6 +368,159 @@ int planxythetalat(int argc, char *argv[])
 
     return bRet;
 }
+
+//planning with multiple levels x,y,theta lattice (for example, base and upper body)
+//there are no additional degrees of freedom. 
+//It is just that each level may have a different footprint 
+//and should be checked against the cost map at corresponding height
+//It is useful for doing planning for navigation by a tall ground robot operating in a cluttered 3D map
+int planxythetamlevlat(int argc, char *argv[])
+{
+
+	int bRet = 0;
+	double allocated_time_secs = 10; //in seconds
+	MDPConfig MDPCfg;
+	bool bsearchuntilfirstsolution = false;
+
+	//set the perimeter of the robot (it is given with 0,0,0 robot ref. point for which planning is done)
+	//this is for the default level - base level
+	vector<sbpl_2Dpt_t> perimeterptsV;
+	sbpl_2Dpt_t pt_m;
+	double halfwidth = 0.05; //0.3;
+	double halflength = 0.05; //0.45;
+	pt_m.x = -halflength;
+	pt_m.y = -halfwidth;
+	perimeterptsV.push_back(pt_m);
+	pt_m.x = halflength;
+	pt_m.y = -halfwidth;
+	perimeterptsV.push_back(pt_m);
+	pt_m.x = halflength;
+	pt_m.y = halfwidth;
+	perimeterptsV.push_back(pt_m);
+	pt_m.x = -halflength;
+	pt_m.y = halfwidth;
+	perimeterptsV.push_back(pt_m);
+	
+	//clear perimeter
+	//perimeterptsV.clear();
+	//pt_m.x = 0.0;
+	//pt_m.y = 0.0;
+	//perimeterptsV.push_back(pt_m);
+
+	//Initialize Environment (should be called before initializing anything else)
+	EnvironmentNAVXYTHETAMLEVLAT environment_navxythetalat;
+
+	if(argc == 3)
+	{
+		if(!environment_navxythetalat.InitializeEnv(argv[1], perimeterptsV, argv[2]))
+		{
+			printf("ERROR: InitializeEnv failed\n");
+			exit(1);
+		}
+	}
+	else
+	{
+		if(!environment_navxythetalat.InitializeEnv(argv[1], perimeterptsV, NULL))
+		{
+			printf("ERROR: InitializeEnv failed\n");
+			exit(1);
+		}
+	}
+
+
+	//this is for the second level - upper body level
+	vector<sbpl_2Dpt_t> perimeterptsVV[2];
+	perimeterptsVV[0].clear();
+	halfwidth = 0.05; 
+	halflength = 0.05; 
+	pt_m.x = -halflength;
+	pt_m.y = -halfwidth;
+	perimeterptsVV[0].push_back(pt_m);
+	pt_m.x = halflength;
+	pt_m.y = -halfwidth;
+	perimeterptsVV[0].push_back(pt_m);
+	pt_m.x = halflength;
+	pt_m.y = halfwidth;
+	perimeterptsVV[0].push_back(pt_m);
+	pt_m.x = -halflength;
+	pt_m.y = halfwidth;
+	perimeterptsVV[0].push_back(pt_m);
+
+
+	//initialize the second level
+	int numofaddlevels = 0;
+	printf("Number of additional levels = %d\n", numofaddlevels);
+	if(!environment_navxythetalat.InitializeAdditionalLevels(numofaddlevels, perimeterptsVV))
+	{
+		printf("ERROR: InitializeAdditionalLevels failed with numofaddlevels=%d\n", numofaddlevels);
+		exit(1);
+
+	}
+
+	//TODO-initialize the other level map
+
+	//Initialize MDP Info
+	if(!environment_navxythetalat.InitializeMDPCfg(&MDPCfg))
+	{
+		printf("ERROR: InitializeMDPCfg failed\n");
+		exit(1);
+	}
+
+
+	//plan a path
+	vector<int> solution_stateIDs_V;
+	bool bforwardsearch = false;
+	ADPlanner planner(&environment_navxythetalat, bforwardsearch);
+
+    if(planner.set_start(MDPCfg.startstateid) == 0)
+        {
+            printf("ERROR: failed to set start state\n");
+            exit(1);
+        }
+
+    if(planner.set_goal(MDPCfg.goalstateid) == 0)
+        {
+            printf("ERROR: failed to set goal state\n");
+            exit(1);
+        }
+	planner.set_initialsolution_eps(3.0);
+
+	//set search mode
+	planner.set_search_mode(bsearchuntilfirstsolution);
+
+    printf("start planning...\n");
+	bRet = planner.replan(allocated_time_secs, &solution_stateIDs_V);
+    printf("done planning\n");
+	std::cout << "size of solution=" << solution_stateIDs_V.size() << std::endl;
+
+    environment_navxythetalat.PrintTimeStat(stdout);
+
+    FILE* fSol = fopen("sol.txt", "w");
+	vector<EnvNAVXYTHETALAT3Dpt_t> xythetaPath;
+	environment_navxythetalat.ConvertStateIDPathintoXYThetaPath(&solution_stateIDs_V, &xythetaPath);
+	printf("solution size=%d\n", xythetaPath.size());
+	for(unsigned int i = 0; i < xythetaPath.size(); i++) {
+		fprintf(fSol, "%.3f %.3f %.3f\n", xythetaPath.at(i).x, xythetaPath.at(i).y, xythetaPath.at(i).theta);
+	}
+    fclose(fSol);
+
+    environment_navxythetalat.PrintTimeStat(stdout);
+
+	//print a path
+	if(bRet)
+	{
+		//print the solution
+		printf("Solution is found\n");
+	}
+	else
+		printf("Solution does not exist\n");
+
+	fflush(NULL);
+
+
+    return bRet;
+}
+
 
 
 
@@ -982,11 +1135,13 @@ int planrobarm(int argc, char *argv[])
 		exit(1);
 	}
 
+	//srand(1); //TODO
 
 	//plan a path
 	vector<int> solution_stateIDs_V;
-	bool bforwardsearch = false;
-	ARAPlanner planner(&environment_robarm, bforwardsearch);
+	bool bforwardsearch = true;
+	//ARAPlanner planner(&environment_robarm, bforwardsearch);
+	RSTARPlanner planner(&environment_robarm, bforwardsearch);
 
     if(planner.set_start(MDPCfg.startstateid) == 0)
         {
@@ -1046,14 +1201,20 @@ int main(int argc, char *argv[])
     //planandnavigate2d(argc, argv);
 
     //xytheta planning
-    planxythetalat(argc, argv);
+    //planxythetalat(argc, argv);
 
     //xytheta planning
     //planandnavigatexythetalat(argc, argv);
 
+	//xytheta with multiple levels (i.e., base of the robot and upper body)
+	planxythetamlevlat(argc, argv);
+
     //robotarm planning
     //planrobarm(argc, argv);
-	
+
+	//plan under uncertainty (with incomplete information to be exact)
+	//plan2duu(argc, argv); //not fully implemented yet
+
 	return 0;
 }
 

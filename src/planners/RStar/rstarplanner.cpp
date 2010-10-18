@@ -234,13 +234,14 @@ CKey RSTARPlanner::LocalSearchComputeKey(RSTARLSearchState* rstarlsearchState)
 	else
 		h = environment_->GetFromToHeuristic(pLSearchStateSpace->GoalState->StateID, rstarlsearchState->MDPstate->StateID);
 
-    retkey.key[0] = rstarlsearchState->g + pSearchStateSpace->eps*h;
+    retkey.key[0] = rstarlsearchState->g + (int)(pSearchStateSpace->eps*h);
 
     return retkey;
 }
 
 
-bool RSTARPlanner::ComputeLocalPath(int StartStateID, int GoalStateID, int maxc, int maxe, int *pCost, int *pCostLow, int *pExp, vector<int>* pPathIDs, int* pNewGoalStateID)
+bool RSTARPlanner::ComputeLocalPath(int StartStateID, int GoalStateID, int maxc, int maxe, 
+									int *pCost, int *pCostLow, int *pExp, vector<int>* pPathIDs, int* pNewGoalStateID, double maxnumofsecs)
 {
     vector<int> SuccIDV;
     vector<int> CostV;              
@@ -329,6 +330,17 @@ bool RSTARPlanner::ComputeLocalPath(int StartStateID, int GoalStateID, int maxc,
                 }
             }
         }
+
+		if(local_expands%10000 == 0)
+		{
+			if((clock()-TimeStarted) >= maxnumofsecs*(double)CLOCKS_PER_SEC) 
+			{
+				printf("breaking local search because global planning time expires\n");
+				break;
+			}
+		}
+
+
     }//while
 
     lowlevel_searchexpands += local_expands;
@@ -571,7 +583,7 @@ CKey RSTARPlanner::ComputeKey(RSTARState* rstarState)
 	}
 
 	//compute 2nd element of the key
-    retkey.key[1] = rstarState->g + pSearchStateSpace->eps*h;
+    retkey.key[1] = rstarState->g + (int)(pSearchStateSpace->eps*h);
 
 	//compute the 1st element
     if(rstarState->g > pSearchStateSpace->eps*starttostateh || 
@@ -688,8 +700,8 @@ int RSTARPlanner::ImprovePath(double MaxNumofSecs)
 
             //re-compute the path
             int NewGoalStateID = rstarstate->MDPstate->StateID;
-            ComputeLocalPath(rstarpredstate->MDPstate->StateID, rstarstate->MDPstate->StateID, maxc, maxe, 
-                &computedaction->Costs[0], &computedactiondata->clow, &computedactiondata->exp, &computedactiondata->pathIDs, &NewGoalStateID);
+	       ComputeLocalPath(rstarpredstate->MDPstate->StateID, rstarstate->MDPstate->StateID, maxc, maxe, 
+                &computedaction->Costs[0], &computedactiondata->clow, &computedactiondata->exp, &computedactiondata->pathIDs, &NewGoalStateID, MaxNumofSecs);
 
             fprintf(fDeb, "return values: pathcost=%d clow=%d exp=%d\n", 
                 computedaction->Costs[0], computedactiondata->clow, computedactiondata->exp);
@@ -1347,6 +1359,9 @@ bool RSTARPlanner::Search(vector<int>& pathIds, int & PathCost, bool bFirstSolut
 #endif
 
 	PathCost = ((RSTARState*)pSearchStateSpace->searchgoalstate->PlannerSpecificData)->g;
+	if(((RSTARACTIONDATA*)((RSTARState*)pSearchStateSpace->searchgoalstate->PlannerSpecificData)->bestpredaction->PlannerSpecificData)->pathIDs.size() == 0)
+		PathCost = INFINITECOST; //the path to the goal is not found, it is just goal has been generated but the last edge to it wasn't computed yet
+
 	MaxMemoryCounter += (oldenvsize - environment_->StateID2IndexMapping.size()*sizeof(int));
 	
 	printf("MaxMemoryCounter = %d\n", MaxMemoryCounter);

@@ -280,7 +280,7 @@ void EnvironmentXXX::ComputeHeuristicValues()
 }
 
 //-----------interface with outside functions-----------------------------------
-bool EnvironmentXXX::InitializeEnv(char* sEnvFile)
+bool EnvironmentXXX::InitializeEnv(const char* sEnvFile)
 {
 
 	FILE* fCfg = fopen(sEnvFile, "r");

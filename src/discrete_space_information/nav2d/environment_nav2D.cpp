@@ -178,7 +178,7 @@ void EnvironmentNAV2D::ReadConfiguration(FILE* fCfg)
 		exit(1);
 	}
 	fscanf(fCfg, "%s", sTemp);
-	EnvNAV2DCfg.obsthresh = atof(sTemp);
+	EnvNAV2DCfg.obsthresh = (int)(atof(sTemp));
 	printf("obsthresh = %d\n", EnvNAV2DCfg.obsthresh);
 
 
@@ -493,25 +493,25 @@ void EnvironmentNAV2D::GetRandomNeighs(int stateID, std::vector<int>* NeighIDV, 
         int dY = 0;
 
         //pick a direction
-        float fDir = 2*PI_CONST*(((double)rand())/RAND_MAX);
+        float fDir = (float)(2*PI_CONST*(((double)rand())/RAND_MAX));
 
         //compute the successor that result from following this direction until one of the coordinates reaches the desired distance
         //decide whether |dX| = dist or |dY| = dist
         float fRadius = 0;
         if(fabs(cos(fDir)) > fabs(sin(fDir)))
         {
-            fRadius = (nDist_c+0.5)/fabs(cos(fDir));
+            fRadius = (float)((nDist_c+0.5)/fabs(cos(fDir)));
         }
         else
         {
-            fRadius = (nDist_c+0.5)/fabs(sin(fDir));
+            fRadius = (float)((nDist_c+0.5)/fabs(sin(fDir)));
         }
 
         dX = (int)(fRadius*cos(fDir));
         dY = (int)(fRadius*sin(fDir));
 
-        if((fabs(dX) < nDist_c && fabs(dY) < nDist_c) || fabs(dX) > nDist_c ||
-           fabs(dY) > nDist_c)
+        if((fabs((float)dX) < nDist_c && fabs((float)dY) < nDist_c) || fabs((float)dX) > nDist_c ||
+           fabs((float)dY) > nDist_c)
         {
             printf("ERROR in EnvNav2D genneighs function: dX=%d dY=%d\n", dX, dY);
             exit(1);

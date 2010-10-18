@@ -36,6 +36,7 @@
 #include <vector>
 #include <stdlib.h>
 
+
 #include "config.h"
 
 
@@ -59,6 +60,7 @@
 #include "../discrete_space_information/template/environment_XXX.h"
 #include "../discrete_space_information/nav2d/environment_nav2D.h"
 #include "../discrete_space_information/navxythetalat/environment_navxythetalat.h"
+#include "../discrete_space_information/navxythetalat/environment_navxythetamlevlat.h"
 #include "../discrete_space_information/robarm/environment_robarm.h"
 #include "../discrete_space_information/nav2d_uu/environment_nav2Duu.h"
 #include "../utils/list.h"

@@ -85,7 +85,7 @@ class EnvironmentXXX : public DiscreteSpaceInformation
 public:
 	/** \brief see comments on the same function in the parent class
     */
-	bool InitializeEnv(char* sEnvFile);
+	bool InitializeEnv(const char* sEnvFile);
 
 
 	/** \brief see comments on the same function in the parent class

@@ -31,14 +31,11 @@
 
 
 
-#define NUMOFLINKS 20
+#define NUMOFLINKS 6
 
 
-#define ROBARM_LONGACTIONDIST_CELLS 20   //for PES max. distance in coord to a sample point. It should be exactly so for one of the coordinates and this or smaller for the rest
-
-
-#define ROBARM_MAXNUMOFLONGACTIONSUCCS ((int)pow((double)2*ROBARM_LONGACTIONDIST_CELLS, NUMOFLINKS))
-
+#define ROBARM_LONGACTIONDIST_CELLS 30   //for R* max. distance in coord to a sample point. It should be exactly this, for one of the coordinates and this or smaller for the rest
+#define ROBARM_NUMOFRANDSUCCSATDIST 10		 //# of random successors at distance defined above, used by R* search
 
 //if cleared then the intersection of the whole arm against obstacles 
 //and bounds is checked
@@ -194,7 +191,7 @@ public:
 	void ContXY2Cell(double x, double y, short unsigned int* pX, short unsigned int *pY);
 	int IsValidLineSegment(double x0, double y0, double x1, double y1, char **Grid2D,
 					   		vector<CELLV>* pTestedCells);
-	void GetRandomSUCCS(CMDPSTATE* SourceState, vector<int>* SuccIDV, vector<int>* CLowV, int K);
+	void GetRandomSuccsatDistance(int SourceStateID, std::vector<int>* SuccIDV, std::vector<int>* CLowV);
 	unsigned int GetHeurBasedonCoord(short unsigned int coord[NUMOFLINKS]);
 	void PrintHeader(FILE* fOut);
 	int cost(short unsigned int state1coord[], short unsigned int state2coord[]);

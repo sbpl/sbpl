@@ -533,7 +533,7 @@ bool SBPL2DGridSearch::search_withbuckets(unsigned char** Grid2D, unsigned char 
 	clock_t starttime = clock();
 	
 	//int max_bucketed_priority = obsthresh*10*__max(this->width_, this->height_);
-	int max_bucketed_priority = 0.1*obsthresh*dxy_distance_mm_[0]*__max(this->width_, this->height_);
+	int max_bucketed_priority = (int)(0.1*obsthresh*dxy_distance_mm_[0]*__max(this->width_, this->height_));
 	printf("bucket-based OPEN2D has up to %d bucketed priorities, the rest will be unsorted\n", max_bucketed_priority);
 	CBucket OPEN2DBLIST(0, max_bucketed_priority); 
 

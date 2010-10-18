@@ -167,7 +167,11 @@ public:
 	DiscreteSpaceInformation()
 	{
 
+#ifndef WIN32
 	  if((fDeb = fopen("/tmp/envdebug.txt", "w")) == NULL)
+#else
+	  if((fDeb = fopen("envdebug.txt", "w")) == NULL)
+#endif
 	    {
 	      printf("ERROR: failed to open debug file for environment\n");
 	      exit(1);

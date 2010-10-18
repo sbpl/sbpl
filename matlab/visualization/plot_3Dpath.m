@@ -29,7 +29,8 @@
 function[] = plot_3Dpath(solfilename, mapfilename, resolution)
 
 %
-%generates motion primitives and saves them into file
+%Plots a 3D path overlaid on top of the map. 
+%Resolution should be in meters 
 %
 %written by Maxim Likhachev
 %---------------------------------------------------
@@ -37,40 +38,17 @@ function[] = plot_3Dpath(solfilename, mapfilename, resolution)
 
 %close all;
 
-LDOG = 0;
-
-
 obsthresh = 254;
 
-if LDOG
-    robot_width = 0.1;
-    robot_length = 0.2;    
-    %robot_width = 0.01;
-    %robot_length = 0.02;    
-else
-    %robot_width = 0.6;
-    %robot_length = 0.9;
-    robot_width = 0.16;
-    robot_length = 0.2;
-end;
+robot_width = 0.6;
+robot_length = 0.5;
+
 vehicle = [-robot_length/2.0 -robot_width/2.0
     robot_length/2.0 -robot_width/2.0
     robot_length/2.0  robot_width/2.0
     -robot_length/2.0 robot_width/2.0];
 
 
-% if LDOG
-%     cellsize = 0.01;
-%     map = load('env3_10mm.txt');
-%     %x = load('sol_ldog_10mm_env1_subopt_0p5sec.txt');
-%     x = load('sol.txt');
-% else %WG
-%     cellsize = 0.025;
-%     %map = load('costmap--soffice1-msfl-r100-i0-c135-I225-d750-H3000-env.txt');
-%    map = load('cubicle-25mm-inflated-env.txt');
-%     %map = load('willow-25mm-noninflated.txt');
-%     x = load('sol.txt');
-% end;
 cellsize = resolution;
 x = load(solfilename);
 

@@ -371,7 +371,8 @@ private:
 	//the actual search
 	bool Search(vector<int>& pathIds, int & PathCost, bool bFirstSolution, bool bOptimalSolution, double MaxNumofSecs);
 	//local search
-	bool ComputeLocalPath(int StartStateID, int GoalStateID, int maxc, int maxe, int *pCost, int *pCostLow, int *pExp, vector<int>* pPathIDs, int* pNewGoalStateID);
+	bool ComputeLocalPath(int StartStateID, int GoalStateID, int maxc, int maxe, 
+		int *pCost, int *pCostLow, int *pExp, vector<int>* pPathIDs, int* pNewGoalStateID, double maxnumofsecs);
 
 	//global search functions
 	void  SetBestPredecessor(RSTARState* rstarState, RSTARState* rstarPredState, CMDPACTION* action);

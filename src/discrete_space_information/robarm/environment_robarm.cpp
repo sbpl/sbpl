@@ -1171,11 +1171,8 @@ int EnvironmentROBARM::GetGoalHeuristic(int stateID)
 	}
 #endif
 
-
 	//define this function if it used in the planner (heuristic forward search would use it)
-
-	printf("ERROR in EnvROBARM..function: GetGoalHeuristic is undefined\n");
-	exit(1);
+	return GetFromToHeuristic(stateID, EnvROBARM.goalHashEntry->stateID);
 }
 
 int EnvironmentROBARM::GetStartHeuristic(int stateID)
@@ -1436,7 +1433,8 @@ void EnvironmentROBARM::GetPreds(int TargetStateID, vector<int>* PredIDV, vector
 }
 
 
-void EnvironmentROBARM::GetRandomSUCCS(CMDPSTATE* SourceState, vector<int>* SuccIDV, vector<int>* CLowV, int K)
+//generate succs at some domain-dependent distance - see environment.h for more info
+void EnvironmentROBARM::GetRandomSuccsatDistance(int SourceStateID, std::vector<int>* SuccIDV, std::vector<int>* CLowV)
 {
     short unsigned int coord[NUMOFLINKS];
     short unsigned int endeffx, endeffy;
@@ -1447,14 +1445,14 @@ void EnvironmentROBARM::GetRandomSUCCS(CMDPSTATE* SourceState, vector<int>* Succ
     CLowV->clear();
 
     //the number of successors
-    int numofsuccs = K;
+    int numofsuccs = ROBARM_NUMOFRANDSUCCSATDIST;
 
 	//goal state should be absorbing
-	if(SourceState->StateID == EnvROBARM.goalHashEntry->stateID)
+	if(SourceStateID == EnvROBARM.goalHashEntry->stateID)
 		return;
 
 	//get X, Y for the state
-	EnvROBARMHashEntry_t* HashEntry = EnvROBARM.StateID2CoordTable[SourceState->StateID];
+	EnvROBARMHashEntry_t* HashEntry = EnvROBARM.StateID2CoordTable[SourceStateID];
 	
 	//iterate through random actions
 	for (int succind = 0; succind < numofsuccs; succind++)

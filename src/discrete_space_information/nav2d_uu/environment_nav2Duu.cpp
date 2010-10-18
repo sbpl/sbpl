@@ -87,7 +87,7 @@ void EnvironmentNAV2DUU::ReadConfiguration(FILE* fCfg)
 		exit(1);
 	}
 	fscanf(fCfg, "%s", sTemp);
-	EnvNAV2DUUCfg.obsthresh = atof(sTemp);
+	EnvNAV2DUUCfg.obsthresh = (int)(atof(sTemp));
 	
 	//start(cells): 
 	fscanf(fCfg, "%s", sTemp);
@@ -674,7 +674,7 @@ void EnvironmentNAV2DUU::GetPreds(int stateID, const vector<sbpl_BinaryHiddenVar
 			//also insert the corresponding hidden variable value
 			sbpl_BinaryHiddenVar_t hval;
 			hval.h_ID = desth_ID;
-			hval.Prob = 1.0; //known to be an obstacle
+			hval.Prob = 1; //known to be an obstacle
 			StochActionNonpreferredOutcomeV->push_back(hval);
 		}
 	}

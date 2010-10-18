@@ -723,6 +723,7 @@ void EnvironmentNAVXYTHETALATTICE::PrecomputeActionswithBaseMotionPrimitive(vect
 		//iterate over motion primitives
 		for(size_t aind = 0; aind < motionprimitiveV->size(); aind++)
 		{
+			EnvNAVXYTHETALATCfg.ActionsV[tind][aind].aind = aind;
 			EnvNAVXYTHETALATCfg.ActionsV[tind][aind].starttheta = tind;
 			double mp_endx_m = motionprimitiveV->at(aind).intermptV[motionprimitiveV->at(aind).intermptV.size()-1].x;
 			double mp_endy_m = motionprimitiveV->at(aind).intermptV[motionprimitiveV->at(aind).intermptV.size()-1].y;
@@ -865,6 +866,9 @@ void EnvironmentNAVXYTHETALATTICE::PrecomputeActionswithCompleteMotionPrimitive(
 			
 			aind++;
 			numofactions++;
+			
+			//action index
+			EnvNAVXYTHETALATCfg.ActionsV[tind][aind].aind = aind;
 
 			//start angle
 			EnvNAVXYTHETALATCfg.ActionsV[tind][aind].starttheta = tind;
@@ -991,6 +995,7 @@ void EnvironmentNAVXYTHETALATTICE::PrecomputeActions()
 		int aind = 0;
 		for(; aind < 3; aind++)
 		{
+			EnvNAVXYTHETALATCfg.ActionsV[tind][aind].aind = aind;
 			EnvNAVXYTHETALATCfg.ActionsV[tind][aind].starttheta = tind;
 			EnvNAVXYTHETALATCfg.ActionsV[tind][aind].endtheta = (tind + aind - 1)%NAVXYTHETALAT_THETADIRS; //-1,0,1
 			double angle = DiscTheta2Cont(EnvNAVXYTHETALATCfg.ActionsV[tind][aind].endtheta, NAVXYTHETALAT_THETADIRS);
@@ -1026,6 +1031,7 @@ void EnvironmentNAVXYTHETALATTICE::PrecomputeActions()
 
 		//decrease and increase angle without movement
 		aind = 3;
+		EnvNAVXYTHETALATCfg.ActionsV[tind][aind].aind = aind;
 		EnvNAVXYTHETALATCfg.ActionsV[tind][aind].starttheta = tind;
 		EnvNAVXYTHETALATCfg.ActionsV[tind][aind].endtheta = tind-1;
 		if(EnvNAVXYTHETALATCfg.ActionsV[tind][aind].endtheta < 0) EnvNAVXYTHETALATCfg.ActionsV[tind][aind].endtheta += NAVXYTHETALAT_THETADIRS;
@@ -1058,6 +1064,7 @@ void EnvironmentNAVXYTHETALATTICE::PrecomputeActions()
 
 
 		aind = 4;
+		EnvNAVXYTHETALATCfg.ActionsV[tind][aind].aind = aind;
 		EnvNAVXYTHETALATCfg.ActionsV[tind][aind].starttheta = tind;
 		EnvNAVXYTHETALATCfg.ActionsV[tind][aind].endtheta = (tind + 1)%NAVXYTHETALAT_THETADIRS; 
 		EnvNAVXYTHETALATCfg.ActionsV[tind][aind].dX = 0;
@@ -1184,7 +1191,7 @@ bool EnvironmentNAVXYTHETALATTICE::IsValidConfiguration(int X, int Y, int Theta)
 		int y = footprint.at(find).y;
 
 		if (x < 0 || x >= EnvNAVXYTHETALATCfg.EnvWidth_c ||
-			y < 0 || Y >= EnvNAVXYTHETALATCfg.EnvHeight_c ||		
+			y < 0 || y >= EnvNAVXYTHETALATCfg.EnvHeight_c ||		
 			EnvNAVXYTHETALATCfg.Grid2D[x][y] >= EnvNAVXYTHETALATCfg.obsthresh)
 		{
 			return false;
@@ -1270,11 +1277,12 @@ double EnvironmentNAVXYTHETALATTICE::EuclideanDistance_m(int X1, int Y1, int X2,
 
 }
 
+//calculates a set of cells that correspond to the specified footprint
+//adds points to it (does not clear it beforehand) 
+void EnvironmentNAVXYTHETALATTICE::CalculateFootprintForPose(EnvNAVXYTHETALAT3Dpt_t pose, vector<sbpl_2Dcell_t>* footprint, const vector<sbpl_2Dpt_t>& FootprintPolygon)
+{
 
-//adds points to it (does not clear it beforehand)
-void EnvironmentNAVXYTHETALATTICE::CalculateFootprintForPose(EnvNAVXYTHETALAT3Dpt_t pose, vector<sbpl_2Dcell_t>* footprint)
-{  
-	int pind;
+int pind;
 
 #if DEBUG
 //  printf("---Calculating Footprint for Pose: %f %f %f---\n",
@@ -1282,7 +1290,7 @@ void EnvironmentNAVXYTHETALATTICE::CalculateFootprintForPose(EnvNAVXYTHETALAT3Dp
 #endif
 
   //handle special case where footprint is just a point
-  if(EnvNAVXYTHETALATCfg.FootprintPolygon.size() <= 1){
+  if(FootprintPolygon.size() <= 1){
     sbpl_2Dcell_t cell;
     cell.x = CONTXY2DISC(pose.x, EnvNAVXYTHETALATCfg.cellsize_m);
     cell.y = CONTXY2DISC(pose.y, EnvNAVXYTHETALATCfg.cellsize_m);
@@ -1300,10 +1308,10 @@ void EnvironmentNAVXYTHETALATTICE::CalculateFootprintForPose(EnvNAVXYTHETALAT3Dp
   unsigned int find;
   double max_x = -INFINITECOST, min_x = INFINITECOST, max_y = -INFINITECOST, min_y = INFINITECOST;
   sbpl_2Dpt_t pt = {0,0};
-  for(find = 0; find < EnvNAVXYTHETALATCfg.FootprintPolygon.size(); find++){
+  for(find = 0; find < FootprintPolygon.size(); find++){
     
     //rotate and translate the corner of the robot
-    pt = EnvNAVXYTHETALATCfg.FootprintPolygon[find];
+    pt = FootprintPolygon[find];
     
     //rotate and translate the point
     sbpl_2Dpt_t corner;
@@ -1352,7 +1360,7 @@ void EnvironmentNAVXYTHETALATTICE::CalculateFootprintForPose(EnvNAVXYTHETALAT3Dp
 //		printf("Testing point: %f %f Discrete: %d %d\n", pt.x, pt.y, discrete_x, discrete_y);
 #endif
 	
-		if(IsInsideFootprint(pt, &bounding_polygon)){
+		if(IsInsideFootprint(pt, &bounding_polygon)){ 
 		//convert to a grid point
 
 #if DEBUG
@@ -1395,15 +1403,26 @@ void EnvironmentNAVXYTHETALATTICE::CalculateFootprintForPose(EnvNAVXYTHETALAT3Dp
 
     }//over x_min...x_max
   }
+
+
+
 }
 
+//calculates a set of cells that correspond to the footprint of the base
+//adds points to it (does not clear it beforehand) 
+void EnvironmentNAVXYTHETALATTICE::CalculateFootprintForPose(EnvNAVXYTHETALAT3Dpt_t pose, vector<sbpl_2Dcell_t>* footprint)
+{  
+	CalculateFootprintForPose(pose, footprint, EnvNAVXYTHETALATCfg.FootprintPolygon);
+}
 
-void EnvironmentNAVXYTHETALATTICE::RemoveSourceFootprint(EnvNAVXYTHETALAT3Dpt_t sourcepose, vector<sbpl_2Dcell_t>* footprint)
+//removes a set of cells that correspond to the specified footprint at the sourcepose
+//adds points to it (does not clear it beforehand) 
+void EnvironmentNAVXYTHETALATTICE::RemoveSourceFootprint(EnvNAVXYTHETALAT3Dpt_t sourcepose, vector<sbpl_2Dcell_t>* footprint, const vector<sbpl_2Dpt_t>& FootprintPolygon)
 {  
 	vector<sbpl_2Dcell_t> sourcefootprint;
 
 	//compute source footprint
-	CalculateFootprintForPose(sourcepose, &sourcefootprint);
+	CalculateFootprintForPose(sourcepose, &sourcefootprint, FootprintPolygon);
 
 	//now remove the source cells from the footprint
 	for(int sind = 0; sind < (int)sourcefootprint.size(); sind++)
@@ -1420,6 +1439,13 @@ void EnvironmentNAVXYTHETALATTICE::RemoveSourceFootprint(EnvNAVXYTHETALAT3Dpt_t 
 
 
 
+}
+
+//removes a set of cells that correspond to the footprint of the base at the sourcepose
+//adds points to it (does not clear it beforehand) 
+void EnvironmentNAVXYTHETALATTICE::RemoveSourceFootprint(EnvNAVXYTHETALAT3Dpt_t sourcepose, vector<sbpl_2Dcell_t>* footprint)
+{  
+	RemoveSourceFootprint(sourcepose, footprint, EnvNAVXYTHETALATCfg.FootprintPolygon);
 }
 
 
