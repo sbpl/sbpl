@@ -1743,6 +1743,25 @@ bool EnvironmentNAVXYTHETALATTICE::UpdateCost(int x, int y, unsigned char newcos
 }
 
 
+bool EnvironmentNAVXYTHETALATTICE::SetMap(const unsigned char* mapdata)
+{
+	int xind=-1, yind=-1;
+
+	for (xind = 0; xind < EnvNAVXYTHETALATCfg.EnvWidth_c; xind++) {
+		for(yind = 0; yind < EnvNAVXYTHETALATCfg.EnvHeight_c; yind++) {
+			EnvNAVXYTHETALATCfg.Grid2D[xind][yind] = mapdata[xind+yind*EnvNAVXYTHETALATCfg.EnvWidth_c];
+		}
+	}
+
+	bNeedtoRecomputeStartHeuristics = true;
+	bNeedtoRecomputeGoalHeuristics = true;
+
+	return true;
+
+}
+
+
+
 void EnvironmentNAVXYTHETALATTICE::PrintEnv_Config(FILE* fOut)
 {
 

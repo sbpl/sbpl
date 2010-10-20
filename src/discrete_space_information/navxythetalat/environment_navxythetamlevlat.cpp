@@ -49,6 +49,8 @@ EnvironmentNAVXYTHETAMLEVLAT::EnvironmentNAVXYTHETAMLEVLAT()
 	AddLevelFootprintPolygonV = NULL;
 	AdditionalInfoinActionsV = NULL; 
 	AddLevelGrid2D = NULL;
+	AddLevel_cost_possibly_circumscribed_thresh = NULL;
+	AddLevel_cost_inscribed_thresh = NULL;
 }
 
 EnvironmentNAVXYTHETAMLEVLAT::~EnvironmentNAVXYTHETAMLEVLAT()
@@ -84,6 +86,18 @@ EnvironmentNAVXYTHETAMLEVLAT::~EnvironmentNAVXYTHETAMLEVLAT()
 		}
 		delete [] AddLevelGrid2D;
 		AddLevelGrid2D = NULL;
+	}
+
+	if(AddLevel_cost_possibly_circumscribed_thresh != NULL)
+	{
+		delete [] AddLevel_cost_possibly_circumscribed_thresh;
+		AddLevel_cost_possibly_circumscribed_thresh = NULL;
+	}
+
+	if(AddLevel_cost_inscribed_thresh != NULL)
+	{
+		delete [] AddLevel_cost_inscribed_thresh;
+		AddLevel_cost_inscribed_thresh = NULL;
 	}
 
 	//reset the number of additional levels
@@ -235,6 +249,9 @@ int EnvironmentNAVXYTHETAMLEVLAT::GetActionCost(int SourceX, int SourceY, int So
   {
 
 	int basecost = EnvironmentNAVXYTHETALAT::GetActionCost(SourceX, SourceY, SourceTheta, action);
+	
+	if(basecost >= INFINITECOST)
+		return INFINITECOST;
 
 	int addcost = GetActionCostacrossAddLevels(SourceX, SourceY, SourceTheta, action);
 	
@@ -261,7 +278,7 @@ int EnvironmentNAVXYTHETAMLEVLAT::GetActionCostacrossAddLevels(int SourceX, int 
 	//iterate through the additional levels
 	for (levelind=0; levelind < numofadditionalzlevs; levelind++)
 	{
-		if(AddLevelGrid2D[levelind][SourceX + action->dX][SourceY + action->dY] >= EnvNAVXYTHETALATCfg.cost_inscribed_thresh)
+		if(AddLevelGrid2D[levelind][SourceX + action->dX][SourceY + action->dY] >= AddLevel_cost_inscribed_thresh[levelind])
 			return INFINITECOST;
 	}
 
@@ -273,7 +290,8 @@ int EnvironmentNAVXYTHETAMLEVLAT::GetActionCostacrossAddLevels(int SourceX, int 
 		maxcellcostateachlevel[levelind] = 0;
 	}
 
-	for(i = 0; i < (int)action->interm3DcellsV.size(); i++)
+
+	for(i = 0; i < (int)action->interm3DcellsV.size() && maxcellcost < EnvNAVXYTHETALATCfg.obsthresh; i++)
 	{
 		interm3Dcell = action->interm3DcellsV.at(i);
 		interm3Dcell.x = interm3Dcell.x + SourceX;
@@ -283,6 +301,7 @@ int EnvironmentNAVXYTHETAMLEVLAT::GetActionCostacrossAddLevels(int SourceX, int 
 			interm3Dcell.y < 0 || interm3Dcell.y >= EnvNAVXYTHETALATCfg.EnvHeight_c)
 		{
 			maxcellcost = EnvNAVXYTHETALATCfg.obsthresh;
+			maxcellcostateachlevel[levelind] = EnvNAVXYTHETALATCfg.obsthresh;
 			break;
 		}
 
@@ -291,24 +310,25 @@ int EnvironmentNAVXYTHETAMLEVLAT::GetActionCostacrossAddLevels(int SourceX, int 
 		{
 			maxcellcost = __max(maxcellcost, AddLevelGrid2D[levelind][interm3Dcell.x][interm3Dcell.y]);
 			maxcellcostateachlevel[levelind] = __max(maxcellcostateachlevel[levelind], AddLevelGrid2D[levelind][interm3Dcell.x][interm3Dcell.y]);
-		}
-
-		//check that the robot is NOT in the cell at which there is no valid orientation
-		if(maxcellcost >= EnvNAVXYTHETALATCfg.cost_inscribed_thresh)
-		{
-			maxcellcost = EnvNAVXYTHETALATCfg.obsthresh;
-			break;
+			//check that the robot is NOT in the cell at which there is no valid orientation
+			if(maxcellcostateachlevel[levelind] >= AddLevel_cost_inscribed_thresh[levelind])
+			{
+				maxcellcost = EnvNAVXYTHETALATCfg.obsthresh;
+				maxcellcostateachlevel[levelind] = EnvNAVXYTHETALATCfg.obsthresh;
+				break;
+			}
 		}
 	}
 
 	//check collisions that for the particular footprint orientation along the action
-	for (levelind=0; levelind < numofadditionalzlevs && maxcellcost < EnvNAVXYTHETALATCfg.obsthresh; levelind++)
+	for (levelind=0; levelind < numofadditionalzlevs && 
+				(int) maxcellcost < EnvNAVXYTHETALATCfg.obsthresh; levelind++)
 	{
 		if(AddLevelFootprintPolygonV[levelind].size() > 1 && 
-			(int)maxcellcostateachlevel[levelind] >= EnvNAVXYTHETALATCfg.cost_possibly_circumscribed_thresh)
+			(int)maxcellcostateachlevel[levelind] >= AddLevel_cost_possibly_circumscribed_thresh[levelind])
 		{
 			checks++;
-			
+
 			//get intersecting cells for this level
 			vector<sbpl_2Dcell_t>* intersectingcellsV = &AdditionalInfoinActionsV[action->starttheta][action->aind].intersectingcellsV[levelind]; 
 			for(i = 0; i < (int)intersectingcellsV->size(); i++) 
@@ -356,7 +376,10 @@ int EnvironmentNAVXYTHETAMLEVLAT::GetActionCostacrossAddLevels(int SourceX, int 
  /*
  initialization of additional levels. 0 is the original one. All additional ones will start with index 1
  */
-bool EnvironmentNAVXYTHETAMLEVLAT::InitializeAdditionalLevels(int numofadditionalzlevs_in, const vector<sbpl_2Dpt_t>* perimeterptsV)
+bool EnvironmentNAVXYTHETAMLEVLAT::InitializeAdditionalLevels(int numofadditionalzlevs_in, 
+															  const vector<sbpl_2Dpt_t>* perimeterptsV,
+								unsigned char* cost_inscribed_thresh_in,
+								unsigned char* cost_possibly_circumscribed_thresh_in)
  {
 	int levelind = -1, xind=-1, yind=-1;
 	EnvNAVXYTHETALAT3Dpt_t temppose;
@@ -447,6 +470,14 @@ bool EnvironmentNAVXYTHETAMLEVLAT::InitializeAdditionalLevels(int numofadditiona
 		}
 	}
 
+	//create inscribed and circumscribed cost thresholds
+	AddLevel_cost_possibly_circumscribed_thresh = new unsigned char [numofadditionalzlevs];
+	AddLevel_cost_inscribed_thresh = new unsigned char [numofadditionalzlevs];
+	for(levelind = 0; levelind < numofadditionalzlevs; levelind++)
+	{
+		AddLevel_cost_possibly_circumscribed_thresh[levelind] = cost_possibly_circumscribed_thresh_in[levelind];
+		AddLevel_cost_inscribed_thresh[levelind] = cost_inscribed_thresh_in[levelind];
+	}
 
 	return true;
  }
@@ -470,6 +501,28 @@ bool EnvironmentNAVXYTHETAMLEVLAT::Set2DMapforAddLev(const unsigned char* mapdat
 	
 	return true;
 }
+
+//set 2D map for the additional level levind
+//the version of Set2DMapforAddLev that takes newmap as 2D array instead of one linear array
+bool EnvironmentNAVXYTHETAMLEVLAT::Set2DMapforAddLev(const unsigned char** NewGrid2D, int levind)
+{
+	int xind=-1, yind=-1;
+
+	if(AddLevelGrid2D == NULL)
+	{
+		printf("ERROR: failed to set2Dmap because the map was not allocated previously\n");
+		return false;
+	}
+
+	for (xind = 0; xind < EnvNAVXYTHETALATCfg.EnvWidth_c; xind++) {
+		for(yind = 0; yind < EnvNAVXYTHETALATCfg.EnvHeight_c; yind++) {
+			AddLevelGrid2D[levind][xind][yind] = NewGrid2D[xind][yind];
+		}
+	}
+	
+	return true;
+}
+
 
 
   /*

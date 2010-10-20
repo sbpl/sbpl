@@ -386,8 +386,8 @@ int planxythetamlevlat(int argc, char *argv[])
 	//this is for the default level - base level
 	vector<sbpl_2Dpt_t> perimeterptsV;
 	sbpl_2Dpt_t pt_m;
-	double halfwidth = 0.05; //0.3;
-	double halflength = 0.05; //0.45;
+	double halfwidth = 0.3; //0.3;
+	double halflength = 0.25; //0.45;
 	pt_m.x = -halflength;
 	pt_m.y = -halfwidth;
 	perimeterptsV.push_back(pt_m);
@@ -431,8 +431,8 @@ int planxythetamlevlat(int argc, char *argv[])
 	//this is for the second level - upper body level
 	vector<sbpl_2Dpt_t> perimeterptsVV[2];
 	perimeterptsVV[0].clear();
-	halfwidth = 0.05; 
-	halflength = 0.05; 
+	halfwidth = 0.3; 
+	halflength = 0.75; 
 	pt_m.x = -halflength;
 	pt_m.y = -halfwidth;
 	perimeterptsVV[0].push_back(pt_m);
@@ -447,17 +447,38 @@ int planxythetamlevlat(int argc, char *argv[])
 	perimeterptsVV[0].push_back(pt_m);
 
 
-	//initialize the second level
+	//enable the second level
 	int numofaddlevels = 1;
 	printf("Number of additional levels = %d\n", numofaddlevels);
-	if(!environment_navxythetalat.InitializeAdditionalLevels(numofaddlevels, perimeterptsVV))
+	unsigned char cost_inscribed_thresh_addlevels[2]; //size should be at least numofaddlevels
+	unsigned char cost_possibly_circumscribed_thresh_addlevels[2]; //size should be at least numofaddlevels
+	cost_inscribed_thresh_addlevels[0] = 255; //no costs are indicative of whether a cell is within inner circle
+	cost_possibly_circumscribed_thresh_addlevels[0] = 0; //no costs are indicative of whether a cell is within outer circle
+	cost_inscribed_thresh_addlevels[1] = 255; //no costs are indicative of whether a cell is within inner circle
+	cost_possibly_circumscribed_thresh_addlevels[1] = 0; //no costs are indicative of whether a cell is within outer circle
+	if(!environment_navxythetalat.InitializeAdditionalLevels(numofaddlevels, perimeterptsVV, 
+		cost_inscribed_thresh_addlevels, cost_possibly_circumscribed_thresh_addlevels))
 	{
 		printf("ERROR: InitializeAdditionalLevels failed with numofaddlevels=%d\n", numofaddlevels);
 		exit(1);
 
 	}
 
-	//TODO-initialize the other level map
+	//set the map for the second level (index parameter for the additional levels and is zero based)
+	//for this example, we pass in the same map as the map for the base. In general, it can be a totally different map
+	//as it corresponds to a different level
+	//NOTE: this map has to have costs set correctly with respect to inner and outer radii of the robot
+	//if the second level of the robot has these radii different than at the base level, then costs
+	//should reflect this 
+	//(see explanation for cost_possibly_circumscribed_thresh and cost_inscribed_thresh parameters in environment_navxythetalat.h file)
+	int addlevind = 0;
+	if(!environment_navxythetalat.Set2DMapforAddLev(
+		(const unsigned char**)(environment_navxythetalat.GetEnvNavConfig()->Grid2D),addlevind))
+	{
+		printf("ERROR: Setting Map for the Additional Level failed with level %d\n", addlevind);
+		exit(1);
+
+	}
 
 	//Initialize MDP Info
 	if(!environment_navxythetalat.InitializeMDPCfg(&MDPCfg))

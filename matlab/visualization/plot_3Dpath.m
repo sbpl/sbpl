@@ -41,7 +41,7 @@ function[] = plot_3Dpath(solfilename, mapfilename, resolution)
 obsthresh = 254;
 
 robot_width = 0.6;
-robot_length = 0.5;
+robot_length = 1.5;
 
 vehicle = [-robot_length/2.0 -robot_width/2.0
     robot_length/2.0 -robot_width/2.0

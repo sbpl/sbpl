@@ -147,7 +147,7 @@ typedef struct ENV_NAVXYTHETALAT_CONFIG
 	//the value at which and above which until cost_inscribed_thresh (not including it) cells 
 	//**may** have a nearest osbtacle within the distance that is in between the robot inner circle and the robot outer circle
 	//any cost below this value means that the robot will NOT collide with any obstacle, independently of its orientation
-	//if no such cost is known, then it should be set to 0 or -1 (then no cell cost will lower than it, and therefore the robot's footprint will always be checked)
+	//if no such cost is known, then it should be set to 0 or -1 (then no cell cost will be lower than it, and therefore the robot's footprint will always be checked)
 	int cost_possibly_circumscribed_thresh; //it has to be integer, because -1 means that it is not provided.
 
 	double nominalvel_mpersecs;
@@ -273,6 +273,14 @@ public:
 	 * \brief update the traversability of a cell<x,y>
   */
     bool UpdateCost(int x, int y, unsigned char newcost);
+
+  /**
+   * \brief re-setting the whole 2D map
+   * transform from linear array mapdata to the 2D matrix used internally: Grid2D[x][y] = mapdata[x+y*width]
+  */
+	bool SetMap(const unsigned char* mapdata);
+
+
   /**
    * \brief this function fill in Predecessor/Successor states of edges whose costs changed
    * It takes in an array of cells whose traversability changed, and returns (in vector preds_of_changededgesIDV) 
