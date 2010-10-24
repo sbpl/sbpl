@@ -64,8 +64,8 @@ CMDPSTATE* VIPlanner::CreateState(int stateID)
 #if DEBUG
 	if(environment_->StateID2IndexMapping[stateID][VIMDP_STATEID2IND] != -1)
 	{
-		printf("ERROR in CreateState: state already created\n");
-		exit(1);
+		SBPL_ERROR("ERROR in CreateState: state already created\n");
+		throw new SBPL_Exception();
 	}
 #endif
 
@@ -78,8 +78,8 @@ CMDPSTATE* VIPlanner::CreateState(int stateID)
 #if DEBUG
 	if(state != viPlanner.MDP.StateArray[environment_->StateID2IndexMapping[stateID][VIMDP_STATEID2IND]])
 	{
-		printf("ERROR in CreateState: invalid state index\n");
-		exit(1);
+		SBPL_ERROR("ERROR in CreateState: invalid state index\n");
+		throw new SBPL_Exception();
 	}
 #endif
 
@@ -96,8 +96,8 @@ CMDPSTATE* VIPlanner::GetState(int stateID)
 
 	if(stateID >= (int)environment_->StateID2IndexMapping.size())
 	{
-		printf("ERROR int GetState: stateID is invalid\n");
-		exit(1);
+		SBPL_ERROR("ERROR int GetState: stateID is invalid\n");
+		throw new SBPL_Exception();
 	}
 
 	if(environment_->StateID2IndexMapping[stateID][VIMDP_STATEID2IND] == -1)
@@ -111,14 +111,14 @@ CMDPSTATE* VIPlanner::GetState(int stateID)
 
 void VIPlanner::PrintVIData()
 {
-	printf("iteration %d: v(start) = %f\n", viPlanner.iteration, 
+	SBPL_PRINTF("iteration %d: v(start) = %f\n", viPlanner.iteration, 
 		((VIState*)(viPlanner.StartState->PlannerSpecificData))->v);
 
 }
 
 void VIPlanner::PrintStatHeader(FILE* fOut)
 {
-	fprintf(fOut, 
+	SBPL_FPRINTF(fOut, 
 		"iteration backups v(start)\n");
 }
 
@@ -126,10 +126,10 @@ void VIPlanner::PrintStatHeader(FILE* fOut)
 
 void VIPlanner::PrintStat(FILE* fOut, clock_t starttime)
 {
-	fprintf(fOut, "%d %d %f %f %d\n", 
+	SBPL_FPRINTF(fOut, "%d %d %f %f %d\n", 
 			viPlanner.iteration, g_backups, ((double)(clock()-starttime))/CLOCKS_PER_SEC, 
 			((VIState*)(viPlanner.StartState->PlannerSpecificData))->v,			
-			viPlanner.MDP.StateArray.size());
+			(unsigned int)viPlanner.MDP.StateArray.size());
 
 }
 
@@ -146,7 +146,7 @@ void VIPlanner::PrintPolicy(FILE* fPolicy)
 	double PolVal = 0.0;
 	double Conf = 0;
 	bool bCycles = false;
-	printf("Printing policy...\n");
+	SBPL_PRINTF("Printing policy...\n");
 	while((int)WorkList.size() > 0)
 	{
 		//pop the last state
@@ -159,14 +159,14 @@ void VIPlanner::PrintPolicy(FILE* fPolicy)
 		//print state ID
 		if(!bPrintStatOnly)
 		{
-			fprintf(fPolicy, "%d\n", state->StateID); 
+			SBPL_FPRINTF(fPolicy, "%d\n", state->StateID); 
 			environment_->PrintState(state->StateID, false, fPolicy);
 
 			int h = environment_->GetGoalHeuristic(state->StateID);
-			fprintf(fPolicy, "h=%d\n", h);
+			SBPL_FPRINTF(fPolicy, "h=%d\n", h);
 			if(h > statedata->v)
 			{
-				fprintf(fPolicy, "WARNING h overestimates exp.cost\n");
+				SBPL_FPRINTF(fPolicy, "WARNING h overestimates exp.cost\n");
 			}
 		}
 
@@ -174,7 +174,7 @@ void VIPlanner::PrintPolicy(FILE* fPolicy)
 		{
 			//goal state
 			if(!bPrintStatOnly)
-				fprintf(fPolicy, "0\n");
+				SBPL_FPRINTF(fPolicy, "0\n");
 			Conf += ((VIState*)state->PlannerSpecificData)->Pc;
 		}
 		else if(statedata->bestnextaction == NULL)
@@ -183,7 +183,7 @@ void VIPlanner::PrintPolicy(FILE* fPolicy)
 			if(!bPrintStatOnly)
 			{
 				//no outcome explored - stay in the same place
-				fprintf(fPolicy, "%d %d %d\n", 1, 0, state->StateID);
+				SBPL_FPRINTF(fPolicy, "%d %d %d\n", 1, 0, state->StateID);
 			}
 		}
 		else
@@ -196,13 +196,13 @@ void VIPlanner::PrintPolicy(FILE* fPolicy)
 			CMDPACTION* polaction = polstate->AddAction(action->ActionID);
 
 			if(!bPrintStatOnly)
-				fprintf(fPolicy, "%d ", action->SuccsID.size());
+				SBPL_FPRINTF(fPolicy, "%d ", (unsigned int)action->SuccsID.size());
 
 			//print successors and insert them into the list
 			for(int i = 0; i < (int)action->SuccsID.size(); i++)
 			{
 				if(!bPrintStatOnly)
-					fprintf(fPolicy, "%d %d ", action->Costs[i], action->SuccsID[i]);
+					SBPL_FPRINTF(fPolicy, "%d %d ", action->Costs[i], action->SuccsID[i]);
 				polaction->AddOutcome(action->SuccsID[i], action->Costs[i], action->SuccsProb[i]);
 
 				CMDPSTATE* succstate = GetState(action->SuccsID[i]);
@@ -217,10 +217,10 @@ void VIPlanner::PrintPolicy(FILE* fPolicy)
 				}
 			}
 			if(!bPrintStatOnly)
-				fprintf(fPolicy, "\n");
+				SBPL_FPRINTF(fPolicy, "\n");
 		}
 	}//while worklist not empty
-	printf("done\n");
+	SBPL_PRINTF("done\n");
 
 	//now evaluate the policy
 	double PolicyValue = -1;
@@ -231,22 +231,22 @@ void VIPlanner::PrintPolicy(FILE* fPolicy)
 		viPlanner.GoalState->StateID, &PolicyValue, &bFullPolicy, &Pcgoal, &nMerges,
 		&bCycles);
 
-	printf("Policy value = %f FullPolicy=%d Merges=%d Cycles=%d\n", 
+	SBPL_PRINTF("Policy value = %f FullPolicy=%d Merges=%d Cycles=%d\n", 
 		PolicyValue, bFullPolicy, nMerges, bCycles);
 	
 	if(!bFullPolicy)
-		printf("WARN: POLICY IS ONLY PARTIAL\n");
+		SBPL_PRINTF("WARN: POLICY IS ONLY PARTIAL\n");
 	if(fabs(PolicyValue-((VIState*)(viPlanner.StartState->PlannerSpecificData))->v) > MDP_ERRDELTA)
-		printf("WARN: POLICY VALUE IS NOT CORRECT\n");
+		SBPL_PRINTF("WARN: POLICY VALUE IS NOT CORRECT\n");
 
 
 	if(!bPrintStatOnly)
-		fprintf(fPolicy, "backups=%d runtime=%f vstart=%f policyvalue=%f fullpolicy=%d Pc(goal)=%f nMerges=%d bCyc=%d\n", 
+		SBPL_FPRINTF(fPolicy, "backups=%d runtime=%f vstart=%f policyvalue=%f fullpolicy=%d Pc(goal)=%f nMerges=%d bCyc=%d\n", 
 			g_backups, (double)g_runtime/CLOCKS_PER_SEC, 
 			((VIState*)(viPlanner.StartState->PlannerSpecificData))->v,		
 			PolicyValue, bFullPolicy, Pcgoal, nMerges, bCycles);
 	else
-		fprintf(fPolicy, "%d %f %f %f %d %f %d %d\n", 
+		SBPL_FPRINTF(fPolicy, "%d %f %f %f %d %f %d %d\n", 
 			g_backups, (double)g_runtime/CLOCKS_PER_SEC, 
 			((VIState*)(viPlanner.StartState->PlannerSpecificData))->v,		
 			PolicyValue, bFullPolicy, Pcgoal, nMerges, bCycles);
@@ -435,8 +435,12 @@ void VIPlanner::InitializePlanner()
 int VIPlanner::replan(double allocatedtime, vector<int>* solution_stateIDs_V)
 {
 
-	FILE* fPolicy = fopen("policy.txt","w");
-	FILE* fStat = fopen("stat.txt","w");
+#ifndef ROS
+  const char* policy = "policy.txt";
+  const char* stat = "stat.txt";
+#endif
+	FILE* fPolicy = SBPL_FOPEN(policy,"w");
+	FILE* fStat = SBPL_FOPEN(stat,"w");
 
 	//initialization
 	InitializePlanner();
@@ -465,9 +469,12 @@ int VIPlanner::replan(double allocatedtime, vector<int>* solution_stateIDs_V)
 
 	PrintStat(stdout, starttime);
 	PrintStat(fStat, starttime);
-	fflush(fStat);
+	SBPL_FFLUSH(fStat);
 
 	PrintPolicy(fPolicy);
+
+	SBPL_FCLOSE(fPolicy);
+	SBPL_FCLOSE(fStat);
 
 	return 1;
 

@@ -3,6 +3,10 @@ set(ROS_BUILD_TYPE Release)
 include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
 rosbuild_init()
 include_directories(${PROJECT_SOURCE_DIR}/code)
+
+# Add a ROS C++ macro to tell SBPL to use ROS print statements
+add_definitions(-DROS)
+
 rosbuild_add_library(sbpl 
                          src/discrete_space_information/nav2d/environment_nav2D.cpp
                          src/discrete_space_information/navxythetalat/environment_navxythetalat.cpp

@@ -34,7 +34,7 @@ using namespace std;
 
 void PrintUsage(char *argv[])
 {
-	printf("USAGE: %s <cfg file> [motionprimitivesfile.mprim for xythetalattice planning]\n", argv[0]);
+	SBPL_PRINTF("USAGE: %s <cfg file> [motionprimitivesfile.mprim for xythetalattice planning]\n", argv[0]);
 }
 
 
@@ -50,15 +50,15 @@ int plan2d(int argc, char *argv[])
 	EnvironmentNAV2D environment_nav2D;
 	if(!environment_nav2D.InitializeEnv(argv[1]))
 	{
-		printf("ERROR: InitializeEnv failed\n");
-		exit(1);
+		SBPL_ERROR("ERROR: InitializeEnv failed\n");
+		throw new SBPL_Exception();
 	}
 
 	//Initialize MDP Info
 	if(!environment_nav2D.InitializeMDPCfg(&MDPCfg))
 	{
-		printf("ERROR: InitializeMDPCfg failed\n");
-		exit(1);
+		SBPL_ERROR("ERROR: InitializeMDPCfg failed\n");
+		throw new SBPL_Exception();
 	}
 
 
@@ -73,65 +73,72 @@ int plan2d(int argc, char *argv[])
 
     if(planner.set_start(MDPCfg.startstateid) == 0)
         {
-            printf("ERROR: failed to set start state\n");
-            exit(1);
+            SBPL_ERROR("ERROR: failed to set start state\n");
+            throw new SBPL_Exception();
         }
 
     if(planner.set_goal(MDPCfg.goalstateid) == 0)
         {
-            printf("ERROR: failed to set goal state\n");
-            exit(1);
+            SBPL_ERROR("ERROR: failed to set goal state\n");
+            throw new SBPL_Exception();
         }
 
 	planner.set_initialsolution_eps(3.0);
 
-    printf("start planning...\n");
+    SBPL_PRINTF("start planning...\n");
 	bRet = planner.replan(allocated_time_secs, &solution_stateIDs_V);
-    printf("done planning\n");
+    SBPL_PRINTF("done planning\n");
 	std::cout << "size of solution=" << solution_stateIDs_V.size() << std::endl;
 
     environment_nav2D.PrintTimeStat(stdout);
 
 	/*
-    printf("start planning...\n");
+    SBPL_PRINTF("start planning...\n");
 	bRet = planner.replan(allocated_time_secs, &solution_stateIDs_V);
-    printf("done planning\n");
+    SBPL_PRINTF("done planning\n");
 	std::cout << "size of solution=" << solution_stateIDs_V.size() << std::endl;
 
     environment_nav2D.PrintTimeStat(stdout);
 
-    printf("start planning...\n");
+    SBPL_PRINTF("start planning...\n");
 	bRet = planner.replan(allocated_time_secs, &solution_stateIDs_V);
-    printf("done planning\n");
+    SBPL_PRINTF("done planning\n");
 	std::cout << "size of solution=" << solution_stateIDs_V.size() << std::endl;
 
     environment_nav2D.PrintTimeStat(stdout);
 
-    printf("start planning...\n");
+    SBPL_PRINTF("start planning...\n");
 	bRet = planner.replan(allocated_time_secs, &solution_stateIDs_V);
-    printf("done planning\n");
+    SBPL_PRINTF("done planning\n");
 	std::cout << "size of solution=" << solution_stateIDs_V.size() << std::endl;
 
     environment_nav2D.PrintTimeStat(stdout);
 
-    printf("start planning...\n");
+    SBPL_PRINTF("start planning...\n");
 	bRet = planner.replan(allocated_time_secs, &solution_stateIDs_V);
-    printf("done planning\n");
+    SBPL_PRINTF("done planning\n");
 	std::cout << "size of solution=" << solution_stateIDs_V.size() << std::endl;
 
     environment_nav2D.PrintTimeStat(stdout);
 
-    printf("start planning...\n");
+    SBPL_PRINTF("start planning...\n");
 	bRet = planner.replan(allocated_time_secs, &solution_stateIDs_V);
-    printf("done planning\n");
+    SBPL_PRINTF("done planning\n");
 	std::cout << "size of solution=" << solution_stateIDs_V.size() << std::endl;
 	*/
 
-    FILE* fSol = fopen("sol.txt", "w");
+#ifndef ROS
+  const char* sol = "sol.txt";
+#endif
+  FILE* fSol = SBPL_FOPEN(sol, "w");
+  if(fSol == NULL){
+    SBPL_ERROR("ERROR: could not open solution file\n");
+    throw new SBPL_Exception();
+  }
 	for(unsigned int i = 0; i < solution_stateIDs_V.size(); i++) {
 	  environment_nav2D.PrintState(solution_stateIDs_V[i], false, fSol);
 	}
-    fclose(fSol);
+    SBPL_FCLOSE(fSol);
 
     environment_nav2D.PrintTimeStat(stdout);
 
@@ -139,12 +146,12 @@ int plan2d(int argc, char *argv[])
 	if(bRet)
 	{
 		//print the solution
-		printf("Solution is found\n");
+		SBPL_PRINTF("Solution is found\n");
 	}
 	else
-		printf("Solution does not exist\n");
+		SBPL_PRINTF("Solution does not exist\n");
 
-	fflush(NULL);
+	SBPL_FFLUSH(NULL);
 
 
     return bRet;
@@ -161,15 +168,15 @@ int plan2duu(int argc, char *argv[])
 	EnvironmentNAV2DUU environment_nav2Duu;
 	if(!environment_nav2Duu.InitializeEnv(argv[1]))
 	{
-		printf("ERROR: InitializeEnv failed\n");
-		exit(1);
+		SBPL_ERROR("ERROR: InitializeEnv failed\n");
+		throw new SBPL_Exception();
 	}
 
 	//Initialize MDP Info
 	if(!environment_nav2Duu.InitializeMDPCfg(&MDPCfg))
 	{
-		printf("ERROR: InitializeMDPCfg failed\n");
-		exit(1);
+		SBPL_ERROR("ERROR: InitializeMDPCfg failed\n");
+		throw new SBPL_Exception();
 	}
 
 
@@ -179,32 +186,32 @@ int plan2duu(int argc, char *argv[])
 	//set start and goal
     if(planner.set_start(MDPCfg.startstateid) == 0)
         {
-            printf("ERROR: failed to set start state\n");
-            exit(1);
+            SBPL_ERROR("ERROR: failed to set start state\n");
+            throw new SBPL_Exception();
         }
     if(planner.set_goal(MDPCfg.goalstateid) == 0)
         {
-            printf("ERROR: failed to set goal state\n");
-            exit(1);
+            SBPL_ERROR("ERROR: failed to set goal state\n");
+            throw new SBPL_Exception();
         }
 
 
-    printf("start planning...\n");
+    SBPL_PRINTF("start planning...\n");
 	float ExpectedCost, ProbofReachGoal;
 	vector<sbpl_PolicyStatewithBinaryh_t> SolutionPolicy;
 	bRet = planner.replan(allocated_time_secs, &SolutionPolicy, &ExpectedCost, &ProbofReachGoal);
-    printf("done planning\n");
+    SBPL_PRINTF("done planning\n");
 
 
 	if(bRet)
 	{
 		//print the solution
-		printf("Solution is found: exp. cost=%f probofreachgoal=%f\n", ExpectedCost, ProbofReachGoal);
+		SBPL_PRINTF("Solution is found: exp. cost=%f probofreachgoal=%f\n", ExpectedCost, ProbofReachGoal);
 	}
 	else
-		printf("Solution does not exist\n");
+		SBPL_PRINTF("Solution does not exist\n");
 
-	fflush(NULL);
+	SBPL_FFLUSH(NULL);
 
 
     return bRet;
@@ -222,8 +229,8 @@ int planxythetalat(int argc, char *argv[])
 	//set the perimeter of the robot (it is given with 0,0,0 robot ref. point for which planning is done)
 	vector<sbpl_2Dpt_t> perimeterptsV;
 	sbpl_2Dpt_t pt_m;
-	double halfwidth = 0.1; //0.3;
-	double halflength = 0.1; //0.45;
+	double halfwidth = 0.01; //0.3;
+	double halflength = 0.01; //0.45;
 	pt_m.x = -halflength;
 	pt_m.y = -halfwidth;
 	perimeterptsV.push_back(pt_m);
@@ -251,24 +258,24 @@ int planxythetalat(int argc, char *argv[])
 	{
 		if(!environment_navxythetalat.InitializeEnv(argv[1], perimeterptsV, argv[2]))
 		{
-			printf("ERROR: InitializeEnv failed\n");
-			exit(1);
+			SBPL_ERROR("ERROR: InitializeEnv failed\n");
+			throw new SBPL_Exception();
 		}
 	}
 	else
 	{
 		if(!environment_navxythetalat.InitializeEnv(argv[1], perimeterptsV, NULL))
 		{
-			printf("ERROR: InitializeEnv failed\n");
-			exit(1);
+			SBPL_ERROR("ERROR: InitializeEnv failed\n");
+			throw new SBPL_Exception();
 		}
 	}
 
 	//Initialize MDP Info
 	if(!environment_navxythetalat.InitializeMDPCfg(&MDPCfg))
 	{
-		printf("ERROR: InitializeMDPCfg failed\n");
-		exit(1);
+		SBPL_ERROR("ERROR: InitializeMDPCfg failed\n");
+		throw new SBPL_Exception();
 	}
 
 
@@ -279,78 +286,85 @@ int planxythetalat(int argc, char *argv[])
 
     if(planner.set_start(MDPCfg.startstateid) == 0)
         {
-            printf("ERROR: failed to set start state\n");
-            exit(1);
+            SBPL_ERROR("ERROR: failed to set start state\n");
+            throw new SBPL_Exception();
         }
 
     if(planner.set_goal(MDPCfg.goalstateid) == 0)
         {
-            printf("ERROR: failed to set goal state\n");
-            exit(1);
+            SBPL_ERROR("ERROR: failed to set goal state\n");
+            throw new SBPL_Exception();
         }
 	planner.set_initialsolution_eps(3.0);
 
 	//set search mode
 	planner.set_search_mode(bsearchuntilfirstsolution);
 
-    printf("start planning...\n");
+    SBPL_PRINTF("start planning...\n");
 	bRet = planner.replan(allocated_time_secs, &solution_stateIDs_V);
-    printf("done planning\n");
-	std::cout << "size of solution=" << solution_stateIDs_V.size() << std::endl;
+    SBPL_PRINTF("done planning\n");
+	SBPL_PRINTF("size of solution=%d\n",(unsigned int)solution_stateIDs_V.size());
 
     environment_navxythetalat.PrintTimeStat(stdout);
 
 	/*
     if(planner.set_start(environment_navxythetalat.SetStart(1.6,0.5,0)) == 0)
         {
-            printf("ERROR: failed to set start state\n");
-            exit(1);
+            SBPL_ERROR("ERROR: failed to set start state\n");
+            throw new SBPL_Exception();
         }
 
 
-    printf("start planning...\n");
+    SBPL_PRINTF("start planning...\n");
 	bRet = planner.replan(allocated_time_secs, &solution_stateIDs_V);
-    printf("done planning\n");
+    SBPL_PRINTF("done planning\n");
 	std::cout << "size of solution=" << solution_stateIDs_V.size() << std::endl;
 
     environment_navxythetalat.PrintTimeStat(stdout);
 
 
-    printf("start planning...\n");
+    SBPL_PRINTF("start planning...\n");
 	bRet = planner.replan(allocated_time_secs, &solution_stateIDs_V);
-    printf("done planning\n");
+    SBPL_PRINTF("done planning\n");
 	std::cout << "size of solution=" << solution_stateIDs_V.size() << std::endl;
 
     environment_navxythetalat.PrintTimeStat(stdout);
 
-    printf("start planning...\n");
+    SBPL_PRINTF("start planning...\n");
 	bRet = planner.replan(allocated_time_secs, &solution_stateIDs_V);
-    printf("done planning\n");
+    SBPL_PRINTF("done planning\n");
 	std::cout << "size of solution=" << solution_stateIDs_V.size() << std::endl;
 
     environment_navxythetalat.PrintTimeStat(stdout);
 
-    printf("start planning...\n");
+    SBPL_PRINTF("start planning...\n");
 	bRet = planner.replan(allocated_time_secs, &solution_stateIDs_V);
-    printf("done planning\n");
+    SBPL_PRINTF("done planning\n");
 	std::cout << "size of solution=" << solution_stateIDs_V.size() << std::endl;
 
     environment_navxythetalat.PrintTimeStat(stdout);
 
-    printf("start planning...\n");
+    SBPL_PRINTF("start planning...\n");
 	bRet = planner.replan(allocated_time_secs, &solution_stateIDs_V);
-    printf("done planning\n");
+    SBPL_PRINTF("done planning\n");
 	std::cout << "size of solution=" << solution_stateIDs_V.size() << std::endl;
 	*/
 
-    FILE* fSol = fopen("sol.txt", "w");
+#ifndef ROS
+  const char* sol = "sol.txt";
+#endif
+  FILE* fSol = SBPL_FOPEN(sol, "w");
+  if(fSol == NULL){
+    SBPL_ERROR("ERROR: could not open solution file\n");
+    throw new SBPL_Exception();
+  }
 	vector<EnvNAVXYTHETALAT3Dpt_t> xythetaPath;
 	environment_navxythetalat.ConvertStateIDPathintoXYThetaPath(&solution_stateIDs_V, &xythetaPath);
-	printf("solution size=%d\n", xythetaPath.size());
+	SBPL_PRINTF("solution size=%d\n", (unsigned int)xythetaPath.size());
 	for(unsigned int i = 0; i < xythetaPath.size(); i++) {
-		fprintf(fSol, "%.3f %.3f %.3f\n", xythetaPath.at(i).x, xythetaPath.at(i).y, xythetaPath.at(i).theta);
+		SBPL_FPRINTF(fSol, "%.3f %.3f %.3f\n", xythetaPath.at(i).x, xythetaPath.at(i).y, xythetaPath.at(i).theta);
 	}
-    fclose(fSol);
+    SBPL_FCLOSE(fSol);
 
     environment_navxythetalat.PrintTimeStat(stdout);
 
@@ -358,12 +372,12 @@ int planxythetalat(int argc, char *argv[])
 	if(bRet)
 	{
 		//print the solution
-		printf("Solution is found\n");
+		SBPL_PRINTF("Solution is found\n");
 	}
 	else
-		printf("Solution does not exist\n");
+		SBPL_PRINTF("Solution does not exist\n");
 
-	fflush(NULL);
+	SBPL_FFLUSH(NULL);
 
 
     return bRet;
@@ -414,16 +428,16 @@ int planxythetamlevlat(int argc, char *argv[])
 	{
 		if(!environment_navxythetalat.InitializeEnv(argv[1], perimeterptsV, argv[2]))
 		{
-			printf("ERROR: InitializeEnv failed\n");
-			exit(1);
+			SBPL_ERROR("ERROR: InitializeEnv failed\n");
+			throw new SBPL_Exception();
 		}
 	}
 	else
 	{
 		if(!environment_navxythetalat.InitializeEnv(argv[1], perimeterptsV, NULL))
 		{
-			printf("ERROR: InitializeEnv failed\n");
-			exit(1);
+			SBPL_ERROR("ERROR: InitializeEnv failed\n");
+			throw new SBPL_Exception();
 		}
 	}
 
@@ -449,7 +463,7 @@ int planxythetamlevlat(int argc, char *argv[])
 
 	//enable the second level
 	int numofaddlevels = 1;
-	printf("Number of additional levels = %d\n", numofaddlevels);
+	SBPL_PRINTF("Number of additional levels = %d\n", numofaddlevels);
 	unsigned char cost_inscribed_thresh_addlevels[2]; //size should be at least numofaddlevels
 	unsigned char cost_possibly_circumscribed_thresh_addlevels[2]; //size should be at least numofaddlevels
 	cost_inscribed_thresh_addlevels[0] = 255; //no costs are indicative of whether a cell is within inner circle
@@ -459,8 +473,8 @@ int planxythetamlevlat(int argc, char *argv[])
 	if(!environment_navxythetalat.InitializeAdditionalLevels(numofaddlevels, perimeterptsVV, 
 		cost_inscribed_thresh_addlevels, cost_possibly_circumscribed_thresh_addlevels))
 	{
-		printf("ERROR: InitializeAdditionalLevels failed with numofaddlevels=%d\n", numofaddlevels);
-		exit(1);
+		SBPL_ERROR("ERROR: InitializeAdditionalLevels failed with numofaddlevels=%d\n", numofaddlevels);
+		throw new SBPL_Exception();
 
 	}
 
@@ -475,16 +489,16 @@ int planxythetamlevlat(int argc, char *argv[])
 	if(!environment_navxythetalat.Set2DMapforAddLev(
 		(const unsigned char**)(environment_navxythetalat.GetEnvNavConfig()->Grid2D),addlevind))
 	{
-		printf("ERROR: Setting Map for the Additional Level failed with level %d\n", addlevind);
-		exit(1);
+		SBPL_ERROR("ERROR: Setting Map for the Additional Level failed with level %d\n", addlevind);
+		throw new SBPL_Exception();
 
 	}
 
 	//Initialize MDP Info
 	if(!environment_navxythetalat.InitializeMDPCfg(&MDPCfg))
 	{
-		printf("ERROR: InitializeMDPCfg failed\n");
-		exit(1);
+		SBPL_ERROR("ERROR: InitializeMDPCfg failed\n");
+		throw new SBPL_Exception();
 	}
 
 
@@ -495,35 +509,42 @@ int planxythetamlevlat(int argc, char *argv[])
 
     if(planner.set_start(MDPCfg.startstateid) == 0)
         {
-            printf("ERROR: failed to set start state\n");
-            exit(1);
+            SBPL_ERROR("ERROR: failed to set start state\n");
+            throw new SBPL_Exception();
         }
 
     if(planner.set_goal(MDPCfg.goalstateid) == 0)
         {
-            printf("ERROR: failed to set goal state\n");
-            exit(1);
+            SBPL_ERROR("ERROR: failed to set goal state\n");
+            throw new SBPL_Exception();
         }
 	planner.set_initialsolution_eps(3.0);
 
 	//set search mode
 	planner.set_search_mode(bsearchuntilfirstsolution);
 
-    printf("start planning...\n");
+    SBPL_PRINTF("start planning...\n");
 	bRet = planner.replan(allocated_time_secs, &solution_stateIDs_V);
-    printf("done planning\n");
+    SBPL_PRINTF("done planning\n");
 	std::cout << "size of solution=" << solution_stateIDs_V.size() << std::endl;
 
     environment_navxythetalat.PrintTimeStat(stdout);
 
-    FILE* fSol = fopen("sol.txt", "w");
+#ifndef ROS
+  const char* sol = "sol.txt";
+#endif
+  FILE* fSol = SBPL_FOPEN(sol, "w");
+  if(fSol == NULL){
+    SBPL_ERROR("ERROR: could not open solution file\n");
+    throw new SBPL_Exception();
+  }
 	vector<EnvNAVXYTHETALAT3Dpt_t> xythetaPath;
 	environment_navxythetalat.ConvertStateIDPathintoXYThetaPath(&solution_stateIDs_V, &xythetaPath);
-	printf("solution size=%d\n", xythetaPath.size());
+	SBPL_PRINTF("solution size=%d\n", (unsigned int)xythetaPath.size());
 	for(unsigned int i = 0; i < xythetaPath.size(); i++) {
-		fprintf(fSol, "%.3f %.3f %.3f\n", xythetaPath.at(i).x, xythetaPath.at(i).y, xythetaPath.at(i).theta);
+		SBPL_FPRINTF(fSol, "%.3f %.3f %.3f\n", xythetaPath.at(i).x, xythetaPath.at(i).y, xythetaPath.at(i).theta);
 	}
-    fclose(fSol);
+    SBPL_FCLOSE(fSol);
 
     environment_navxythetalat.PrintTimeStat(stdout);
 
@@ -531,12 +552,12 @@ int planxythetamlevlat(int argc, char *argv[])
 	if(bRet)
 	{
 		//print the solution
-		printf("Solution is found\n");
+		SBPL_PRINTF("Solution is found\n");
 	}
 	else
-		printf("Solution does not exist\n");
+		SBPL_PRINTF("Solution does not exist\n");
 
-	fflush(NULL);
+	SBPL_FFLUSH(NULL);
 
 
     return bRet;
@@ -551,12 +572,19 @@ int planandnavigate2d(int argc, char *argv[])
 	MDPConfig MDPCfg;
 	EnvironmentNAV2D environment_nav2D;
 	EnvironmentNAV2D trueenvironment_nav2D;
-    int size_x=-1,size_y=-1;
-    int startx = 0, starty = 0;
-    int goalx=-1, goaly=-1;
-    FILE* fSol = fopen("sol.txt", "w");
-    int dx[8] = {-1, -1, -1,  0,  0,  1,  1,  1};
-    int dy[8] = {-1,  0,  1, -1,  1, -1,  0,  1};
+  int size_x=-1,size_y=-1;
+  int startx = 0, starty = 0;
+  int goalx=-1, goaly=-1;
+#ifndef ROS
+  const char* sol = "sol.txt";
+#endif
+  FILE* fSol = SBPL_FOPEN(sol, "w");
+  if(fSol == NULL){
+    SBPL_ERROR("ERROR: could not open solution file\n");
+    throw new SBPL_Exception();
+  }
+  int dx[8] = {-1, -1, -1,  0,  0,  1,  1,  1};
+  int dy[8] = {-1,  0,  1, -1,  1, -1,  0,  1};
 	bool bPrint = true;
 	int x,y;
 	vector<int> preds_of_changededgesIDV;
@@ -570,46 +598,46 @@ int planandnavigate2d(int argc, char *argv[])
 	//set parameters - should be done before initialization 
 	if(!trueenvironment_nav2D.SetEnvParameter("is16connected", 1))
 	{
-		printf("ERROR: failed to set parameters\n");
-		exit(1);
+		SBPL_ERROR("ERROR: failed to set parameters\n");
+		throw new SBPL_Exception();
 	}
 	if(!environment_nav2D.SetEnvParameter("is16connected", 1))
 	{
-		printf("ERROR: failed to set parameters\n");
-		exit(1);
+		SBPL_ERROR("ERROR: failed to set parameters\n");
+		throw new SBPL_Exception();
 	}
 
 
     //initialize true map and robot map
 	if(!trueenvironment_nav2D.InitializeEnv(argv[1]))
 	{
-		printf("ERROR: InitializeEnv failed\n");
-		exit(1);
+		SBPL_ERROR("ERROR: InitializeEnv failed\n");
+		throw new SBPL_Exception();
 	}
 	trueenvironment_nav2D.GetEnvParms(&size_x, &size_y, &startx, &starty, &goalx, &goaly, &obsthresh);
     unsigned char* map = (unsigned char*)calloc(size_x*size_y, sizeof(unsigned char));
 
 	//print the map
-	if(bPrint) printf("true map:\n");
+	if(bPrint) SBPL_PRINTF("true map:\n");
 	for(y = 0; bPrint && y < size_y; y++){
 		for(x = 0; x < size_x; x++){
-			printf("%d ", (int)trueenvironment_nav2D.IsObstacle(x,y));
+			SBPL_PRINTF("%d ", (int)trueenvironment_nav2D.IsObstacle(x,y));
 		}
-		printf("\n");
+		SBPL_PRINTF("\n");
 	}
-	if(bPrint) system("pause");
+	if(bPrint) SBPL_PRINTF("System Pause (return=%d)\n",system("pause"));
 
 	//Initialize Environment (should be called before initializing anything else)
     if(!environment_nav2D.InitializeEnv(size_x, size_y, map, startx, starty, goalx, goaly, obsthresh)){
-		printf("ERROR: InitializeEnv failed\n");
-		exit(1);
+		SBPL_ERROR("ERROR: InitializeEnv failed\n");
+		throw new SBPL_Exception();
 	}
 
 	//Initialize MDP Info
 	if(!environment_nav2D.InitializeMDPCfg(&MDPCfg))
 	{
-		printf("ERROR: InitializeMDPCfg failed\n");
-		exit(1);
+		SBPL_ERROR("ERROR: InitializeMDPCfg failed\n");
+		throw new SBPL_Exception();
 	}
 
 
@@ -625,13 +653,13 @@ int planandnavigate2d(int argc, char *argv[])
     //set the start and goal configurations
     if(planner.set_start(MDPCfg.startstateid) == 0)
         {
-            printf("ERROR: failed to set start state\n");
-            exit(1);
+            SBPL_ERROR("ERROR: failed to set start state\n");
+            throw new SBPL_Exception();
         }
     if(planner.set_goal(MDPCfg.goalstateid) == 0)
         {
-            printf("ERROR: failed to set goal state\n");
-            exit(1);
+            SBPL_ERROR("ERROR: failed to set goal state\n");
+            throw new SBPL_Exception();
         }
 
     //now comes the main loop
@@ -652,7 +680,7 @@ int planandnavigate2d(int argc, char *argv[])
             if(map[index] != truecost){
                 map[index] = truecost;
                 environment_nav2D.UpdateCost(x,y,map[index]);
-                printf("setting cost[%d][%d] to %d\n", x,y,map[index]);
+                SBPL_PRINTF("setting cost[%d][%d] to %d\n", x,y,map[index]);
                 bChanges = true;
 				//store the changed cells
 				nav2dcell.x = x;
@@ -673,25 +701,25 @@ int planandnavigate2d(int argc, char *argv[])
         }
 
 
-        fprintf(fSol, "%d %d ",  startx, starty);
+        SBPL_FPRINTF(fSol, "%d %d ",  startx, starty);
 
         //plan a path 
         bool bPlanExists = false;
         while(bPlanExists == false){
-            printf("new planning...\n");   
+            SBPL_PRINTF("new planning...\n");   
             bPlanExists = (planner.replan(allocated_time_secs_foreachplan, &solution_stateIDs_V) == 1);
-            printf("done with the solution of size=%d\n", solution_stateIDs_V.size());   
+            SBPL_PRINTF("done with the solution of size=%d\n", (unsigned int)solution_stateIDs_V.size());   
             environment_nav2D.PrintTimeStat(stdout);
 
             //for(unsigned int i = 0; i < solution_stateIDs_V.size(); i++) {
             //environment_nav2D.PrintState(solution_stateIDs_V[i], true, fSol);
             //}
-            //fprintf(fSol, "*********\n");
+            //SBPL_FPRINTF(fSol, "*********\n");
         }
 
 		double plantime_secs = (clock()-TimeStarted)/((double)CLOCKS_PER_SEC);
-		fprintf(fSol, "%.5f %.5f\n", plantime_secs, planner.get_solution_eps());
-		fflush(fSol);
+		SBPL_FPRINTF(fSol, "%.5f %.5f\n", plantime_secs, planner.get_solution_eps());
+		SBPL_FFLUSH(fSol);
 		if(plantime_secs > 1.0)
 			plantime_over1secs++;
 		else if(plantime_secs > 0.5)
@@ -721,19 +749,19 @@ int planandnavigate2d(int argc, char *argv[])
 				}
 
 				if (index != startindex && index != goalindex && !bOnthePath)
-					printf("%3d ", map[index]);
+					SBPL_PRINTF("%3d ", map[index]);
 				else if(index == startindex)
-					printf("  R ");
+					SBPL_PRINTF("  R ");
 				else if(index == goalindex)
-					printf("  G ");
+					SBPL_PRINTF("  G ");
 				else if (bOnthePath)
-					printf("  * ");
+					SBPL_PRINTF("  * ");
 				else
-					printf("  ? ");
+					SBPL_PRINTF("  ? ");
 			}
-			printf("\n");
+			SBPL_PRINTF("\n");
 		}
-		if(bPrint) system("pause");
+    if(bPrint) SBPL_PRINTF("System Pause (return=%d)\n",system("pause"));
 
 
         //move along the path
@@ -744,12 +772,12 @@ int planandnavigate2d(int argc, char *argv[])
 
 			if(trueenvironment_nav2D.GetMapCost(newx,newy) >= obsthresh)
 			{
-				printf("ERROR: robot is commanded to move into an obstacle\n");
-				exit(1);
+				SBPL_ERROR("ERROR: robot is commanded to move into an obstacle\n");
+				throw new SBPL_Exception();
 			}
 
             //move
-            printf("moving from %d %d to %d %d\n", startx, starty, newx, newy);
+            SBPL_PRINTF("moving from %d %d to %d %d\n", startx, starty, newx, newy);
             startx = newx;
             starty = newy;
 			
@@ -758,20 +786,21 @@ int planandnavigate2d(int argc, char *argv[])
             
             //update the planner
             if(planner.set_start(solution_stateIDs_V[1]) == 0){               
-                printf("ERROR: failed to update robot pose in the planner\n");
-                exit(1);
+                SBPL_ERROR("ERROR: failed to update robot pose in the planner\n");
+                throw new SBPL_Exception();
             }
         }
 
     }
 
 	//print stats
-	printf("stats: plantimes over 1 secs=%d; over 0.5 secs=%d; over 0.1 secs=%d; over 0.05 secs=%d; below 0.05 secs=%d\n",
+	SBPL_PRINTF("stats: plantimes over 1 secs=%d; over 0.5 secs=%d; over 0.1 secs=%d; over 0.05 secs=%d; below 0.05 secs=%d\n",
 		plantime_over1secs, plantime_over0p5secs, plantime_over0p1secs, plantime_over0p05secs, plantime_below0p05secs);
-	fprintf(fSol, "stats: plantimes over 1 secs=%d; over 0.5; secs=%d; over 0.1 secs=%d; over 0.05 secs=%d; below 0.05 secs=%d\n",
+	SBPL_FPRINTF(fSol, "stats: plantimes over 1 secs=%d; over 0.5; secs=%d; over 0.1 secs=%d; over 0.05 secs=%d; below 0.05 secs=%d\n",
 		plantime_over1secs, plantime_over0p5secs, plantime_over0p1secs, plantime_over0p05secs, plantime_below0p05secs);
 
-	fflush(NULL);
+	SBPL_FFLUSH(NULL);
+  SBPL_FCLOSE(fSol);
 
 
     return 1;
@@ -791,7 +820,14 @@ int planandnavigatexythetalat(int argc, char *argv[])
     double startx = 0, starty = 0, starttheta = 0;
     double goalx=-1, goaly=-1, goaltheta = -1;
 	double goaltol_x = 0.001, goaltol_y = 0.001, goaltol_theta = 0.001;
-    FILE* fSol = fopen("sol.txt", "w");
+#ifndef ROS
+  const char* sol = "sol.txt";
+#endif
+  FILE* fSol = SBPL_FOPEN(sol, "w");
+  if(fSol == NULL){
+    SBPL_ERROR("ERROR: could not open solution file\n");
+    throw new SBPL_Exception();
+  }
     //int dx[8] = {-1, -1, -1,  0,  0,  1,  1,  1};
     //int dy[8] = {-1,  0,  1, -1,  1, -1,  0,  1};
 	bool bPrint = true, bPrintMap = false;
@@ -813,12 +849,12 @@ int planandnavigatexythetalat(int argc, char *argv[])
 	{
 		strcpy(sMotPrimFilename, argv[2]);
 		pMotPrimFilename = sMotPrimFilename;
-		printf("using motion primitive file %s\n", pMotPrimFilename);
+		SBPL_PRINTF("using motion primitive file %s\n", pMotPrimFilename);
 	}
 	else
 	{
 		pMotPrimFilename = NULL;
-		printf("no motion primitives file provided\n");
+		SBPL_PRINTF("no motion primitives file provided\n");
 	}
 
 	//srand(0);
@@ -826,8 +862,8 @@ int planandnavigatexythetalat(int argc, char *argv[])
     //initialize true map and robot map
 	if(!trueenvironment_navxythetalat.InitializeEnv(argv[1]))
 	{
-		printf("ERROR: InitializeEnv failed\n");
-		exit(1);
+		SBPL_ERROR("ERROR: InitializeEnv failed\n");
+		throw new SBPL_Exception();
 	}
 
 	//get environment parameters
@@ -840,16 +876,16 @@ int planandnavigatexythetalat(int argc, char *argv[])
     unsigned char* map = (unsigned char*)calloc(size_x*size_y, sizeof(unsigned char));
 
 	//print the map
-	if(bPrintMap) printf("true map:\n");
+	if(bPrintMap) SBPL_PRINTF("true map:\n");
 	for(y = 0; bPrintMap && y < size_y; y++){
 		for(x = 0; x < size_x; x++){
-			printf("%3d ", trueenvironment_navxythetalat.GetMapCost(x,y));
+			SBPL_PRINTF("%3d ", trueenvironment_navxythetalat.GetMapCost(x,y));
 		}
-		printf("\n");
+		SBPL_PRINTF("\n");
 	}
-	if(bPrint) system("pause");
+  if(bPrint) SBPL_PRINTF("System Pause (return=%d)\n",system("pause"));
 
-	printf("start: %f %f %f, goal: %f %f %f\n", startx, starty, starttheta, goalx, goaly, goaltheta);
+	SBPL_PRINTF("start: %f %f %f, goal: %f %f %f\n", startx, starty, starttheta, goalx, goaly, goaltheta);
 
 	//set the perimeter of the robot (it is given with 0,0,0 robot ref. point for which planning is done)
 	vector<sbpl_2Dpt_t> perimeterptsV;
@@ -881,7 +917,7 @@ int planandnavigatexythetalat(int argc, char *argv[])
 	}
 	//TODO - when running it, no obstacle show up when it is 20 and not 2 - bug
 	int sensingrange_c = (int)(__max(maxx, maxy)/cellsize_m) + 2; //should be big enough to cover the motion primitive length
-	printf("sensing range=%d cells\n", sensingrange_c);
+	SBPL_PRINTF("sensing range=%d cells\n", sensingrange_c);
 	vector<sbpl_2Dcell_t> sensecells;
 	for(i = -sensingrange_c; i <= sensingrange_c; i++)
 	{
@@ -906,13 +942,13 @@ int planandnavigatexythetalat(int argc, char *argv[])
 	//set parameters - should be done before initialization 
 	if(!environment_navxythetalat.SetEnvParameter("cost_inscribed_thresh", costinscribed_thresh))
 	{
-		printf("ERROR: failed to set parameters\n");
-		exit(1);
+		SBPL_ERROR("ERROR: failed to set parameters\n");
+		throw new SBPL_Exception();
 	}
 	if(!environment_navxythetalat.SetEnvParameter("cost_possibly_circumscribed_thresh", costcircum_thresh))
 	{
-		printf("ERROR: failed to set parameters\n");
-		exit(1);
+		SBPL_ERROR("ERROR: failed to set parameters\n");
+		throw new SBPL_Exception();
 	}
 	
 	//Initialize Environment (should be called before initializing anything else)
@@ -920,8 +956,8 @@ int planandnavigatexythetalat(int argc, char *argv[])
 		goaltol_x, goaltol_y, goaltol_theta, perimeterptsV,
 		cellsize_m, nominalvel_mpersecs, timetoturn45degsinplace_secs, 
 		obsthresh, pMotPrimFilename)){
-			printf("ERROR: InitializeEnv failed\n");
-			exit(1);
+			SBPL_ERROR("ERROR: InitializeEnv failed\n");
+			throw new SBPL_Exception();
 	}
 
 	/*	
@@ -929,8 +965,8 @@ int planandnavigatexythetalat(int argc, char *argv[])
 		goaltol_x, goaltol_y, goaltol_theta, perimeterptsV,
 		cellsize_m, nominalvel_mpersecs, timetoturn45degsinplace_secs, 
 		obsthresh)){
-		printf("ERROR: InitializeEnv failed\n");
-		exit(1);
+		SBPL_ERROR("ERROR: InitializeEnv failed\n");
+		throw new SBPL_Exception();
 	}
 	*/
 	//set start state
@@ -939,8 +975,8 @@ int planandnavigatexythetalat(int argc, char *argv[])
 	//Initialize MDP Info
 	if(!environment_navxythetalat.InitializeMDPCfg(&MDPCfg))
 	{
-		printf("ERROR: InitializeMDPCfg failed\n");
-		exit(1);
+		SBPL_ERROR("ERROR: InitializeMDPCfg failed\n");
+		throw new SBPL_Exception();
 	}
 
 
@@ -958,8 +994,8 @@ int planandnavigatexythetalat(int argc, char *argv[])
     //set the start and goal configurations
     if(planner.set_start(MDPCfg.startstateid) == 0)
         {
-            printf("ERROR: failed to set start state\n");
-            exit(1);
+            SBPL_ERROR("ERROR: failed to set start state\n");
+            throw new SBPL_Exception();
         }
 
 
@@ -968,15 +1004,15 @@ int planandnavigatexythetalat(int argc, char *argv[])
 
     if(planner.set_goal(MDPCfg.goalstateid) == 0)
         {
-            printf("ERROR: failed to set goal state\n");
-            exit(1);
+            SBPL_ERROR("ERROR: failed to set goal state\n");
+            throw new SBPL_Exception();
         }
 
     //now comes the main loop
 	int goalx_c = CONTXY2DISC(goalx, cellsize_m);
 	int goaly_c = CONTXY2DISC(goaly, cellsize_m);
 	int goaltheta_c = ContTheta2Disc(goaltheta, NAVXYTHETALAT_THETADIRS);
-	printf("goal_c: %d %d %d\n", goalx_c, goaly_c, goaltheta_c);
+	SBPL_PRINTF("goal_c: %d %d %d\n", goalx_c, goaly_c, goaltheta_c);
 	vector<EnvNAVXYTHETALAT3Dpt_t> xythetaPath;
     while(fabs(startx - goalx) > goaltol_x || fabs(starty - goaly) > goaltol_y || fabs(starttheta - goaltheta) > goaltol_theta){
 
@@ -994,7 +1030,7 @@ int planandnavigatexythetalat(int argc, char *argv[])
             if(map[index] != truecost){
                 map[index] = truecost;
                 environment_navxythetalat.UpdateCost(x,y,map[index]);
-                printf("setting cost[%d][%d] to %d\n", x,y,map[index]);
+                SBPL_PRINTF("setting cost[%d][%d] to %d\n", x,y,map[index]);
                 bChanges = true;
 				//store the changed cells
 				nav2dcell.x = x;
@@ -1012,7 +1048,7 @@ int planandnavigatexythetalat(int argc, char *argv[])
 			environment_navxythetalat.GetPredsofChangedEdges(&changedcellsV, &preds_of_changededgesIDV);
 			//let know the incremental planner about them
 			planner.update_preds_of_changededges(&preds_of_changededgesIDV); //use by AD* planner (incremental)
-			//printf("%d states were affected\n", preds_of_changededgesIDV.size());
+			//SBPL_PRINTF("%d states were affected\n", preds_of_changededgesIDV.size());
 
         }
 
@@ -1023,29 +1059,29 @@ int planandnavigatexythetalat(int argc, char *argv[])
         //plan a path 
         bool bPlanExists = false;
 
-		printf("new planning...\n");   
+		SBPL_PRINTF("new planning...\n");   
         bPlanExists = (planner.replan(allocated_time_secs_foreachplan, &solution_stateIDs_V) == 1);
-        printf("done with the solution of size=%d and sol. eps=%f\n", solution_stateIDs_V.size(), planner.get_solution_eps());   
+        SBPL_PRINTF("done with the solution of size=%d and sol. eps=%f\n", (unsigned int)solution_stateIDs_V.size(), planner.get_solution_eps());   
         environment_navxythetalat.PrintTimeStat(stdout);
 
-		fprintf(fSol, "plan time=%.5f eps=%.2f\n", (clock()-TimeStarted)/((double)CLOCKS_PER_SEC), planner.get_solution_eps());
-		fflush(fSol);
+		SBPL_FPRINTF(fSol, "plan time=%.5f eps=%.2f\n", (clock()-TimeStarted)/((double)CLOCKS_PER_SEC), planner.get_solution_eps());
+		SBPL_FFLUSH(fSol);
 		
 		xythetaPath.clear();
 		environment_navxythetalat.ConvertStateIDPathintoXYThetaPath(&solution_stateIDs_V, &xythetaPath);
-		printf("actual path (with intermediate poses) size=%d\n", xythetaPath.size());
+		SBPL_PRINTF("actual path (with intermediate poses) size=%d\n", (unsigned int)xythetaPath.size());
 		for(unsigned int i = 0; i < xythetaPath.size(); i++) {
-			fprintf(fSol, "%.3f %.3f %.3f\n", xythetaPath.at(i).x, xythetaPath.at(i).y, xythetaPath.at(i).theta);
+			SBPL_FPRINTF(fSol, "%.3f %.3f %.3f\n", xythetaPath.at(i).x, xythetaPath.at(i).y, xythetaPath.at(i).theta);
 		}
-        fprintf(fSol, "*********\n");
+        SBPL_FPRINTF(fSol, "*********\n");
 
 		for(int j = 1; j < (int)solution_stateIDs_V.size(); j++)
 		{
 			int newx, newy, newtheta=0;
 			environment_navxythetalat.GetCoordFromState(solution_stateIDs_V[j], newx, newy, newtheta); 
-			fprintf(fSol, "%d %d %d\n", newx, newy, newtheta); 
+			SBPL_FPRINTF(fSol, "%d %d %d\n", newx, newy, newtheta); 
 		}
-		fflush(fSol);
+		SBPL_FFLUSH(fSol);
 
 
 		//print the map
@@ -1066,17 +1102,17 @@ int planandnavigatexythetalat(int argc, char *argv[])
 				}
 
 				if (index != startindex && index != goalindex && !bOnthePath)
-					printf("%3d ", map[index]);
+					SBPL_PRINTF("%3d ", map[index]);
 				else if(index == startindex)
-					printf("  X ");
+					SBPL_PRINTF("  X ");
 				else if(index == goalindex)
-					printf("  G ");
+					SBPL_PRINTF("  G ");
 				else if (bOnthePath)
-					printf("  * ");
+					SBPL_PRINTF("  * ");
 				else
-					printf("? ");
+					SBPL_PRINTF("? ");
 			}
-			printf("\n");
+			SBPL_PRINTF("\n");
 		}
 
         //move along the path
@@ -1087,18 +1123,18 @@ int planandnavigatexythetalat(int argc, char *argv[])
 			//move until we move into the end of motion primitive
 			environment_navxythetalat.GetCoordFromState(solution_stateIDs_V[1], newx, newy, newtheta); 
 
-            printf("moving from %d %d %d to %d %d %d\n", startx_c, starty_c, starttheta_c, newx, newy, newtheta);
+            SBPL_PRINTF("moving from %d %d %d to %d %d %d\n", startx_c, starty_c, starttheta_c, newx, newy, newtheta);
  
 			//this check is weak since true configuration does not know the actual perimeter of the robot
 			if(!trueenvironment_navxythetalat.IsValidConfiguration(newx,newy,newtheta)) 
 			{
-				printf("ERROR: robot is commanded to move into an invalid configuration according to true environment\n");
-				exit(1);
+				SBPL_ERROR("ERROR: robot is commanded to move into an invalid configuration according to true environment\n");
+				throw new SBPL_Exception();
 			}
 			if(!trueenvironment_navxythetalat.IsValidConfiguration(newx,newy,newtheta))
 			{
-				printf("ERROR: robot is commanded to move into an invalid configuration\n");
-				exit(1);
+				SBPL_ERROR("ERROR: robot is commanded to move into an invalid configuration\n");
+				throw new SBPL_Exception();
 			}
 
             //move
@@ -1111,23 +1147,24 @@ int planandnavigatexythetalat(int argc, char *argv[])
 
             //update the planner
             if(planner.set_start(newstartstateID) == 0){               
-                printf("ERROR: failed to update robot pose in the planner\n");
-                exit(1);
+                SBPL_ERROR("ERROR: failed to update robot pose in the planner\n");
+                throw new SBPL_Exception();
             }
         }
 		else
 		{
-			printf("No move is made\n");
+			SBPL_PRINTF("No move is made\n");
 		}
 
-		if(bPrint) system("pause");
+    if(bPrint) SBPL_PRINTF("System Pause (return=%d)\n",system("pause"));
 
 
     }
 
-	printf("goal reached!\n");
+	SBPL_PRINTF("goal reached!\n");
 
-	fflush(NULL);
+	SBPL_FFLUSH(NULL);
+  SBPL_FCLOSE(fSol);
 
 
     return 1;
@@ -1145,15 +1182,15 @@ int planrobarm(int argc, char *argv[])
 	EnvironmentROBARM environment_robarm;
 	if(!environment_robarm.InitializeEnv(argv[1]))
 	{
-		printf("ERROR: InitializeEnv failed\n");
-		exit(1);
+		SBPL_ERROR("ERROR: InitializeEnv failed\n");
+		throw new SBPL_Exception();
 	}
 
 	//Initialize MDP Info
 	if(!environment_robarm.InitializeMDPCfg(&MDPCfg))
 	{
-		printf("ERROR: InitializeMDPCfg failed\n");
-		exit(1);
+		SBPL_ERROR("ERROR: InitializeMDPCfg failed\n");
+		throw new SBPL_Exception();
 	}
 
 	//srand(1); //TODO
@@ -1166,38 +1203,45 @@ int planrobarm(int argc, char *argv[])
 
     if(planner.set_start(MDPCfg.startstateid) == 0)
         {
-            printf("ERROR: failed to set start state\n");
-            exit(1);
+            SBPL_ERROR("ERROR: failed to set start state\n");
+            throw new SBPL_Exception();
         }
 
     if(planner.set_goal(MDPCfg.goalstateid) == 0)
         {
-            printf("ERROR: failed to set goal state\n");
-            exit(1);
+            SBPL_ERROR("ERROR: failed to set goal state\n");
+            throw new SBPL_Exception();
         }
 
-    printf("start planning...\n");
+    SBPL_PRINTF("start planning...\n");
 	bRet = planner.replan(allocated_time_secs, &solution_stateIDs_V);
-    printf("done planning\n");
+    SBPL_PRINTF("done planning\n");
 	std::cout << "size of solution=" << solution_stateIDs_V.size() << std::endl;
 
-    FILE* fSol = fopen("sol.txt", "w");
+#ifndef ROS
+  const char* sol = "sol.txt";
+#endif
+  FILE* fSol = SBPL_FOPEN(sol, "w");
+  if(fSol == NULL){
+    SBPL_ERROR("ERROR: could not open solution file\n");
+    throw new SBPL_Exception();
+  }
 	for(unsigned int i = 0; i < solution_stateIDs_V.size(); i++) {
 	  environment_robarm.PrintState(solution_stateIDs_V[i], true, fSol);
 	}
-    fclose(fSol);
+    SBPL_FCLOSE(fSol);
 
 
  	//print a path
 	if(bRet)
 	{
 		//print the solution
-		printf("Solution is found\n");
+		SBPL_PRINTF("Solution is found\n");
 	}
 	else
-		printf("Solution does not exist\n");
+		SBPL_PRINTF("Solution does not exist\n");
 
-	fflush(NULL);
+	SBPL_FFLUSH(NULL);
 
 
     return bRet;
@@ -1210,11 +1254,14 @@ int planrobarm(int argc, char *argv[])
 
 int main(int argc, char *argv[])
 {
+#ifdef ROS
+  ros::init(argc, argv, "sbpl_test");
+#endif
 
 	if(argc < 2)
 	{
 		PrintUsage(argv);
-		exit(1);
+		throw new SBPL_Exception();
 	}
 
     //2D planning
@@ -1228,7 +1275,7 @@ int main(int argc, char *argv[])
 	//3Denvironmentfile.cfg files can be found sbpl/env_examples/nav3d
 	//the motionprimitives files can be found in matlab/mprim directory
 	//note: the resolution of the motion primitives files should match the resolution of the cfg files
-    //planxythetalat(argc, argv);
+    planxythetalat(argc, argv);
 
     //xytheta planning
 	//usage: see the comments for planxythetalat() above

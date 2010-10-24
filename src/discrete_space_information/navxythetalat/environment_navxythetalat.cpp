@@ -70,7 +70,7 @@ EnvironmentNAVXYTHETALATTICE::EnvironmentNAVXYTHETALATTICE()
 
 EnvironmentNAVXYTHETALATTICE::~EnvironmentNAVXYTHETALATTICE()
 {
-	printf("destroying XYTHETALATTICE\n");
+	SBPL_PRINTF("destroying XYTHETALATTICE\n");
 	if(grid2Dsearchfromstart != NULL)
 		delete grid2Dsearchfromstart;
 	grid2Dsearchfromstart = NULL;
@@ -135,16 +135,16 @@ void EnvironmentNAVXYTHETALATTICE::SetConfiguration(int width, int height,
   EnvNAVXYTHETALATCfg.StartTheta = starttheta;
  
   if(EnvNAVXYTHETALATCfg.StartX_c < 0 || EnvNAVXYTHETALATCfg.StartX_c >= EnvNAVXYTHETALATCfg.EnvWidth_c) {
-    printf("ERROR: illegal start coordinates\n");
-    exit(1);
+    SBPL_ERROR("ERROR: illegal start coordinates\n");
+    throw new SBPL_Exception();
   }
   if(EnvNAVXYTHETALATCfg.StartY_c < 0 || EnvNAVXYTHETALATCfg.StartY_c >= EnvNAVXYTHETALATCfg.EnvHeight_c) {
-    printf("ERROR: illegal start coordinates\n");
-    exit(1);
+    SBPL_ERROR("ERROR: illegal start coordinates\n");
+    throw new SBPL_Exception();
   }
   if(EnvNAVXYTHETALATCfg.StartTheta < 0 || EnvNAVXYTHETALATCfg.StartTheta >= NAVXYTHETALAT_THETADIRS) {
-    printf("ERROR: illegal start coordinates for theta\n");
-    exit(1);
+    SBPL_ERROR("ERROR: illegal start coordinates for theta\n");
+    throw new SBPL_Exception();
   }
   
   EnvNAVXYTHETALATCfg.EndX_c = goalx;
@@ -152,16 +152,16 @@ void EnvironmentNAVXYTHETALATTICE::SetConfiguration(int width, int height,
   EnvNAVXYTHETALATCfg.EndTheta = goaltheta;
 
   if(EnvNAVXYTHETALATCfg.EndX_c < 0 || EnvNAVXYTHETALATCfg.EndX_c >= EnvNAVXYTHETALATCfg.EnvWidth_c) {
-    printf("ERROR: illegal goal coordinates\n");
-    exit(1);
+    SBPL_ERROR("ERROR: illegal goal coordinates\n");
+    throw new SBPL_Exception();
   }
   if(EnvNAVXYTHETALATCfg.EndY_c < 0 || EnvNAVXYTHETALATCfg.EndY_c >= EnvNAVXYTHETALATCfg.EnvHeight_c) {
-    printf("ERROR: illegal goal coordinates\n");
-    exit(1);
+    SBPL_ERROR("ERROR: illegal goal coordinates\n");
+    throw new SBPL_Exception();
   }
   if(EnvNAVXYTHETALATCfg.EndTheta < 0 || EnvNAVXYTHETALATCfg.EndTheta >= NAVXYTHETALAT_THETADIRS) {
-    printf("ERROR: illegal goal coordinates for theta\n");
-    exit(1);
+    SBPL_ERROR("ERROR: illegal goal coordinates for theta\n");
+    throw new SBPL_Exception();
   }
 
   EnvNAVXYTHETALATCfg.FootprintPolygon = robot_perimeterV;
@@ -202,145 +202,214 @@ void EnvironmentNAVXYTHETALATTICE::ReadConfiguration(FILE* fCfg)
 	int x, y;
 
 	//discretization(cells)
-	fscanf(fCfg, "%s", sTemp);
+  if(fscanf(fCfg, "%s", sTemp) != 1){
+    SBPL_ERROR("ERROR: ran out of env file early\n");
+    throw new SBPL_Exception();
+  }
 	strcpy(sTemp1, "discretization(cells):");
 	if(strcmp(sTemp1, sTemp) != 0)
 	{
-		printf("ERROR: configuration file has incorrect format\n");
-		printf("Expected %s got %s\n", sTemp1, sTemp);
-		exit(1);
+		SBPL_ERROR("ERROR: configuration file has incorrect format\n");
+		SBPL_PRINTF("Expected %s got %s\n", sTemp1, sTemp);
+		throw new SBPL_Exception();
 	}
-	fscanf(fCfg, "%s", sTemp);
+  if(fscanf(fCfg, "%s", sTemp) != 1){
+    SBPL_ERROR("ERROR: ran out of env file early\n");
+    throw new SBPL_Exception();
+  }
 	EnvNAVXYTHETALATCfg.EnvWidth_c = atoi(sTemp);
-	fscanf(fCfg, "%s", sTemp);
+  if(fscanf(fCfg, "%s", sTemp) != 1){
+    SBPL_ERROR("ERROR: ran out of env file early\n");
+    throw new SBPL_Exception();
+  }
 	EnvNAVXYTHETALATCfg.EnvHeight_c = atoi(sTemp);
 
 	//obsthresh: 
-	fscanf(fCfg, "%s", sTemp);
+  if(fscanf(fCfg, "%s", sTemp) != 1){
+    SBPL_ERROR("ERROR: ran out of env file early\n");
+    throw new SBPL_Exception();
+  }
 	strcpy(sTemp1, "obsthresh:");
 	if(strcmp(sTemp1, sTemp) != 0)
 	{
-		printf("ERROR: configuration file has incorrect format\n");
-		printf("Expected %s got %s\n", sTemp1, sTemp);
-		printf("see existing examples of env files for the right format of heading\n");
-		exit(1);
+		SBPL_ERROR("ERROR: configuration file has incorrect format\n");
+		SBPL_PRINTF("Expected %s got %s\n", sTemp1, sTemp);
+		SBPL_PRINTF("see existing examples of env files for the right format of heading\n");
+		throw new SBPL_Exception();
 	}
-	fscanf(fCfg, "%s", sTemp);
+  if(fscanf(fCfg, "%s", sTemp) != 1){
+    SBPL_ERROR("ERROR: ran out of env file early\n");
+    throw new SBPL_Exception();
+  }
 	EnvNAVXYTHETALATCfg.obsthresh = atoi(sTemp);
-	printf("obsthresh = %d\n", EnvNAVXYTHETALATCfg.obsthresh);
+	SBPL_PRINTF("obsthresh = %d\n", EnvNAVXYTHETALATCfg.obsthresh);
 
 	//cost_inscribed_thresh: 
-	fscanf(fCfg, "%s", sTemp);
+  if(fscanf(fCfg, "%s", sTemp) != 1){
+    SBPL_ERROR("ERROR: ran out of env file early\n");
+    throw new SBPL_Exception();
+  }
 	strcpy(sTemp1, "cost_inscribed_thresh:");
 	if(strcmp(sTemp1, sTemp) != 0)
 	{
-		printf("ERROR: configuration file has incorrect format\n");
-		printf("Expected %s got %s\n", sTemp1, sTemp);
-		printf("see existing examples of env files for the right format of heading\n");
-		exit(1);
+		SBPL_ERROR("ERROR: configuration file has incorrect format\n");
+		SBPL_PRINTF("Expected %s got %s\n", sTemp1, sTemp);
+		SBPL_PRINTF("see existing examples of env files for the right format of heading\n");
+		throw new SBPL_Exception();
 	}
-	fscanf(fCfg, "%s", sTemp);
+  if(fscanf(fCfg, "%s", sTemp) != 1){
+    SBPL_ERROR("ERROR: ran out of env file early\n");
+    throw new SBPL_Exception();
+  }
 	EnvNAVXYTHETALATCfg.cost_inscribed_thresh = atoi(sTemp);
-	printf("cost_inscribed_thresh = %d\n", EnvNAVXYTHETALATCfg.cost_inscribed_thresh);
+	SBPL_PRINTF("cost_inscribed_thresh = %d\n", EnvNAVXYTHETALATCfg.cost_inscribed_thresh);
 
 
 	//cost_possibly_circumscribed_thresh: 
-	fscanf(fCfg, "%s", sTemp);
+  if(fscanf(fCfg, "%s", sTemp) != 1){
+    SBPL_ERROR("ERROR: ran out of env file early\n");
+    throw new SBPL_Exception();
+  }
 	strcpy(sTemp1, "cost_possibly_circumscribed_thresh:");
 	if(strcmp(sTemp1, sTemp) != 0)
 	{
-		printf("ERROR: configuration file has incorrect format\n");
-		printf("Expected %s got %s\n", sTemp1, sTemp);
-		printf("see existing examples of env files for the right format of heading\n");
-		exit(1);
+		SBPL_ERROR("ERROR: configuration file has incorrect format\n");
+		SBPL_PRINTF("Expected %s got %s\n", sTemp1, sTemp);
+		SBPL_PRINTF("see existing examples of env files for the right format of heading\n");
+		throw new SBPL_Exception();
 	}
-	fscanf(fCfg, "%s", sTemp);
+  if(fscanf(fCfg, "%s", sTemp) != 1){
+    SBPL_ERROR("ERROR: ran out of env file early\n");
+    throw new SBPL_Exception();
+  }
 	EnvNAVXYTHETALATCfg.cost_possibly_circumscribed_thresh = atoi(sTemp);
-	printf("cost_possibly_circumscribed_thresh = %d\n", EnvNAVXYTHETALATCfg.cost_possibly_circumscribed_thresh);
+	SBPL_PRINTF("cost_possibly_circumscribed_thresh = %d\n", EnvNAVXYTHETALATCfg.cost_possibly_circumscribed_thresh);
 
 	
 	//cellsize
-	fscanf(fCfg, "%s", sTemp);
+  if(fscanf(fCfg, "%s", sTemp) != 1){
+    SBPL_ERROR("ERROR: ran out of env file early\n");
+    throw new SBPL_Exception();
+  }
 	strcpy(sTemp1, "cellsize(meters):");
 	if(strcmp(sTemp1, sTemp) != 0)
 	{
-		printf("ERROR: configuration file has incorrect format\n");
-		printf("Expected %s got %s\n", sTemp1, sTemp);
-		exit(1);
+		SBPL_ERROR("ERROR: configuration file has incorrect format\n");
+		SBPL_PRINTF("Expected %s got %s\n", sTemp1, sTemp);
+		throw new SBPL_Exception();
 	}
-	fscanf(fCfg, "%s", sTemp);
+  if(fscanf(fCfg, "%s", sTemp) != 1){
+    SBPL_ERROR("ERROR: ran out of env file early\n");
+    throw new SBPL_Exception();
+  }
 	EnvNAVXYTHETALATCfg.cellsize_m = atof(sTemp);
 	
 	//speeds
-	fscanf(fCfg, "%s", sTemp);
+  if(fscanf(fCfg, "%s", sTemp) != 1){
+    SBPL_ERROR("ERROR: ran out of env file early\n");
+    throw new SBPL_Exception();
+  }
 	strcpy(sTemp1, "nominalvel(mpersecs):");
 	if(strcmp(sTemp1, sTemp) != 0)
 	{
-		printf("ERROR: configuration file has incorrect format\n");
-		printf("Expected %s got %s\n", sTemp1, sTemp);
-		exit(1);
+		SBPL_ERROR("ERROR: configuration file has incorrect format\n");
+		SBPL_PRINTF("Expected %s got %s\n", sTemp1, sTemp);
+		throw new SBPL_Exception();
 	}
-	fscanf(fCfg, "%s", sTemp);
+  if(fscanf(fCfg, "%s", sTemp) != 1){
+    SBPL_ERROR("ERROR: ran out of env file early\n");
+    throw new SBPL_Exception();
+  }
 	EnvNAVXYTHETALATCfg.nominalvel_mpersecs = atof(sTemp);
-	fscanf(fCfg, "%s", sTemp);
+  if(fscanf(fCfg, "%s", sTemp) != 1){
+    SBPL_ERROR("ERROR: ran out of env file early\n");
+    throw new SBPL_Exception();
+  }
 	strcpy(sTemp1, "timetoturn45degsinplace(secs):");
 	if(strcmp(sTemp1, sTemp) != 0)
 	{
-		printf("ERROR: configuration file has incorrect format\n");
-		printf("Expected %s got %s\n", sTemp1, sTemp);
-		exit(1);
+		SBPL_ERROR("ERROR: configuration file has incorrect format\n");
+		SBPL_PRINTF("Expected %s got %s\n", sTemp1, sTemp);
+		throw new SBPL_Exception();
 	}
-	fscanf(fCfg, "%s", sTemp);
+  if(fscanf(fCfg, "%s", sTemp) != 1){
+    SBPL_ERROR("ERROR: ran out of env file early\n");
+    throw new SBPL_Exception();
+  }
 	EnvNAVXYTHETALATCfg.timetoturn45degsinplace_secs = atof(sTemp);
 
 
 	//start(meters,rads): 
-	fscanf(fCfg, "%s", sTemp);
-	fscanf(fCfg, "%s", sTemp);
+  if(fscanf(fCfg, "%s", sTemp) != 1){
+    SBPL_ERROR("ERROR: ran out of env file early\n");
+    throw new SBPL_Exception();
+  }
+  if(fscanf(fCfg, "%s", sTemp) != 1){
+    SBPL_ERROR("ERROR: ran out of env file early\n");
+    throw new SBPL_Exception();
+  }
 	EnvNAVXYTHETALATCfg.StartX_c = CONTXY2DISC(atof(sTemp),EnvNAVXYTHETALATCfg.cellsize_m);
-	fscanf(fCfg, "%s", sTemp);
+  if(fscanf(fCfg, "%s", sTemp) != 1){
+    SBPL_ERROR("ERROR: ran out of env file early\n");
+    throw new SBPL_Exception();
+  }
 	EnvNAVXYTHETALATCfg.StartY_c = CONTXY2DISC(atof(sTemp),EnvNAVXYTHETALATCfg.cellsize_m);
-	fscanf(fCfg, "%s", sTemp);
+  if(fscanf(fCfg, "%s", sTemp) != 1){
+    SBPL_ERROR("ERROR: ran out of env file early\n");
+    throw new SBPL_Exception();
+  }
 	EnvNAVXYTHETALATCfg.StartTheta = ContTheta2Disc(atof(sTemp), NAVXYTHETALAT_THETADIRS);
 
 
 	if(EnvNAVXYTHETALATCfg.StartX_c < 0 || EnvNAVXYTHETALATCfg.StartX_c >= EnvNAVXYTHETALATCfg.EnvWidth_c)
 	{
-		printf("ERROR: illegal start coordinates\n");
-		exit(1);
+		SBPL_ERROR("ERROR: illegal start coordinates\n");
+		throw new SBPL_Exception();
 	}
 	if(EnvNAVXYTHETALATCfg.StartY_c < 0 || EnvNAVXYTHETALATCfg.StartY_c >= EnvNAVXYTHETALATCfg.EnvHeight_c)
 	{
-		printf("ERROR: illegal start coordinates\n");
-		exit(1);
+		SBPL_ERROR("ERROR: illegal start coordinates\n");
+		throw new SBPL_Exception();
 	}
 	if(EnvNAVXYTHETALATCfg.StartTheta < 0 || EnvNAVXYTHETALATCfg.StartTheta >= NAVXYTHETALAT_THETADIRS) {
-		printf("ERROR: illegal start coordinates for theta\n");
-		exit(1);
+		SBPL_ERROR("ERROR: illegal start coordinates for theta\n");
+		throw new SBPL_Exception();
 	}
 
 	//end(meters,rads): 
-	fscanf(fCfg, "%s", sTemp);
-	fscanf(fCfg, "%s", sTemp);
+  if(fscanf(fCfg, "%s", sTemp) != 1){
+    SBPL_ERROR("ERROR: ran out of env file early\n");
+    throw new SBPL_Exception();
+  }
+  if(fscanf(fCfg, "%s", sTemp) != 1){
+    SBPL_ERROR("ERROR: ran out of env file early\n");
+    throw new SBPL_Exception();
+  }
 	EnvNAVXYTHETALATCfg.EndX_c = CONTXY2DISC(atof(sTemp),EnvNAVXYTHETALATCfg.cellsize_m);
-	fscanf(fCfg, "%s", sTemp);
+  if(fscanf(fCfg, "%s", sTemp) != 1){
+    SBPL_ERROR("ERROR: ran out of env file early\n");
+    throw new SBPL_Exception();
+  }
 	EnvNAVXYTHETALATCfg.EndY_c = CONTXY2DISC(atof(sTemp),EnvNAVXYTHETALATCfg.cellsize_m);
-	fscanf(fCfg, "%s", sTemp);
+  if(fscanf(fCfg, "%s", sTemp) != 1){
+    SBPL_ERROR("ERROR: ran out of env file early\n");
+    throw new SBPL_Exception();
+  }
 	EnvNAVXYTHETALATCfg.EndTheta = ContTheta2Disc(atof(sTemp), NAVXYTHETALAT_THETADIRS);;
 
 	if(EnvNAVXYTHETALATCfg.EndX_c < 0 || EnvNAVXYTHETALATCfg.EndX_c >= EnvNAVXYTHETALATCfg.EnvWidth_c)
 	{
-		printf("ERROR: illegal end coordinates\n");
-		exit(1);
+		SBPL_ERROR("ERROR: illegal end coordinates\n");
+		throw new SBPL_Exception();
 	}
 	if(EnvNAVXYTHETALATCfg.EndY_c < 0 || EnvNAVXYTHETALATCfg.EndY_c >= EnvNAVXYTHETALATCfg.EnvHeight_c)
 	{
-		printf("ERROR: illegal end coordinates\n");
-		exit(1);
+		SBPL_ERROR("ERROR: illegal end coordinates\n");
+		throw new SBPL_Exception();
 	}
 	if(EnvNAVXYTHETALATCfg.EndTheta < 0 || EnvNAVXYTHETALATCfg.EndTheta >= NAVXYTHETALAT_THETADIRS) {
-		printf("ERROR: illegal goal coordinates for theta\n");
-		exit(1);
+		SBPL_ERROR("ERROR: illegal goal coordinates for theta\n");
+		throw new SBPL_Exception();
 	}
 
 
@@ -352,14 +421,17 @@ void EnvironmentNAVXYTHETALATTICE::ReadConfiguration(FILE* fCfg)
 	}
 
 	//environment:
-	fscanf(fCfg, "%s", sTemp);	
+  if(fscanf(fCfg, "%s", sTemp) != 1){
+    SBPL_ERROR("ERROR: ran out of env file early\n");
+    throw new SBPL_Exception();
+  }
 	for (y = 0; y < EnvNAVXYTHETALATCfg.EnvHeight_c; y++)
 		for (x = 0; x < EnvNAVXYTHETALATCfg.EnvWidth_c; x++)
 		{
 			if(fscanf(fCfg, "%d", &dTemp) != 1)
 			{
-				printf("ERROR: incorrect format of config file\n");
-				exit(1);
+				SBPL_ERROR("ERROR: incorrect format of config file\n");
+				throw new SBPL_Exception();
 			}
 			EnvNAVXYTHETALATCfg.Grid2D[x][y] = dTemp;
 		}
@@ -417,7 +489,7 @@ bool EnvironmentNAVXYTHETALATTICE::ReadinMotionPrimitive(SBPL_xytheta_mprimitive
     if(fscanf(fIn, "%s", sTemp) == 0)
         return false;
     if(strcmp(sTemp, sExpected) != 0){
-        printf("ERROR: expected %s but got %s\n", sExpected, sTemp);
+        SBPL_ERROR("ERROR: expected %s but got %s\n", sExpected, sTemp);
         return false;
     }
     if(fscanf(fIn, "%d", &pMotPrim->motprimID) != 1)
@@ -428,12 +500,12 @@ bool EnvironmentNAVXYTHETALATTICE::ReadinMotionPrimitive(SBPL_xytheta_mprimitive
     if(fscanf(fIn, "%s", sTemp) == 0)
         return false;
     if(strcmp(sTemp, sExpected) != 0){
-        printf("ERROR: expected %s but got %s\n", sExpected, sTemp);
+        SBPL_ERROR("ERROR: expected %s but got %s\n", sExpected, sTemp);
         return false;
     }
    if(fscanf(fIn, "%d", &dTemp) == 0)
    {
-	   printf("ERROR reading startangle\n");
+	   SBPL_ERROR("ERROR reading startangle\n");
        return false;	
    }
    pMotPrim->starttheta_c = dTemp;
@@ -443,12 +515,12 @@ bool EnvironmentNAVXYTHETALATTICE::ReadinMotionPrimitive(SBPL_xytheta_mprimitive
    if(fscanf(fIn, "%s", sTemp) == 0)
        return false;
    if(strcmp(sTemp, sExpected) != 0){
-       printf("ERROR: expected %s but got %s\n", sExpected, sTemp);
+       SBPL_ERROR("ERROR: expected %s but got %s\n", sExpected, sTemp);
        return false;
    }
 
    if(ReadinCell(&pMotPrim->endcell, fIn) == false){
-		printf("ERROR: failed to read in endsearchpose\n");
+		SBPL_ERROR("ERROR: failed to read in endsearchpose\n");
         return false;
    }
    
@@ -457,7 +529,7 @@ bool EnvironmentNAVXYTHETALATTICE::ReadinMotionPrimitive(SBPL_xytheta_mprimitive
     if(fscanf(fIn, "%s", sTemp) == 0)
         return false;
     if(strcmp(sTemp, sExpected) != 0){
-        printf("ERROR: expected %s but got %s\n", sExpected, sTemp);
+        SBPL_ERROR("ERROR: expected %s but got %s\n", sExpected, sTemp);
         return false;
     }
     if(fscanf(fIn, "%d", &dTemp) != 1)
@@ -469,7 +541,7 @@ bool EnvironmentNAVXYTHETALATTICE::ReadinMotionPrimitive(SBPL_xytheta_mprimitive
     if(fscanf(fIn, "%s", sTemp) == 0)
         return false;
     if(strcmp(sTemp, sExpected) != 0){
-        printf("ERROR: expected %s but got %s\n", sExpected, sTemp);
+        SBPL_ERROR("ERROR: expected %s but got %s\n", sExpected, sTemp);
         return false;
     }
     if(fscanf(fIn, "%d", &numofIntermPoses) != 1)
@@ -479,7 +551,7 @@ bool EnvironmentNAVXYTHETALATTICE::ReadinMotionPrimitive(SBPL_xytheta_mprimitive
     for(int i = 0; i < numofIntermPoses; i++){
         EnvNAVXYTHETALAT3Dpt_t intermpose;
         if(ReadinPose(&intermpose, fIn) == false){
-            printf("ERROR: failed to read in intermediate poses\n");
+            SBPL_ERROR("ERROR: failed to read in intermediate poses\n");
             return false;
         }
 		pMotPrim->intermptV.push_back(intermpose);
@@ -498,7 +570,7 @@ bool EnvironmentNAVXYTHETALATTICE::ReadinMotionPrimitive(SBPL_xytheta_mprimitive
 	int endtheta_c = ContTheta2Disc(mp_endtheta_rad, NAVXYTHETALAT_THETADIRS);
 	if(endx_c != pMotPrim->endcell.x || endy_c != pMotPrim->endcell.y || endtheta_c != pMotPrim->endcell.theta)
 	{	
-		printf("ERROR: incorrect primitive %d with startangle=%d last interm point %f %f %f does not match end pose %d %d %d\n", 
+		SBPL_ERROR("ERROR: incorrect primitive %d with startangle=%d last interm point %f %f %f does not match end pose %d %d %d\n", 
 			pMotPrim->motprimID, pMotPrim->starttheta_c,
 			pMotPrim->intermptV[pMotPrim->intermptV.size()-1].x, pMotPrim->intermptV[pMotPrim->intermptV.size()-1].y, pMotPrim->intermptV[pMotPrim->intermptV.size()-1].theta,
 			pMotPrim->endcell.x, pMotPrim->endcell.y,pMotPrim->endcell.theta);	
@@ -518,20 +590,20 @@ bool EnvironmentNAVXYTHETALATTICE::ReadMotionPrimitives(FILE* fMotPrims)
 	int dTemp;
     int totalNumofActions = 0;
 
-    printf("Reading in motion primitives...");
+    SBPL_PRINTF("Reading in motion primitives...");
     
     //read in the resolution
     strcpy(sExpected, "resolution_m:");
     if(fscanf(fMotPrims, "%s", sTemp) == 0)
         return false;
     if(strcmp(sTemp, sExpected) != 0){
-        printf("ERROR: expected %s but got %s\n", sExpected, sTemp);
+        SBPL_ERROR("ERROR: expected %s but got %s\n", sExpected, sTemp);
         return false;
     }
     if(fscanf(fMotPrims, "%f", &fTemp) == 0)
         return false;
     if(fabs(fTemp-EnvNAVXYTHETALATCfg.cellsize_m) > ERR_EPS){
-        printf("ERROR: invalid resolution %f (instead of %f) in the dynamics file\n", 
+        SBPL_ERROR("ERROR: invalid resolution %f (instead of %f) in the dynamics file\n", 
                fTemp, EnvNAVXYTHETALATCfg.cellsize_m);
         return false;
     }
@@ -541,13 +613,13 @@ bool EnvironmentNAVXYTHETALATTICE::ReadMotionPrimitives(FILE* fMotPrims)
     if(fscanf(fMotPrims, "%s", sTemp) == 0)
         return false;
     if(strcmp(sTemp, sExpected) != 0){
-        printf("ERROR: expected %s but got %s\n", sExpected, sTemp);
+        SBPL_ERROR("ERROR: expected %s but got %s\n", sExpected, sTemp);
         return false;
     }
     if(fscanf(fMotPrims, "%d", &dTemp) == 0)
         return false;
     if(dTemp != NAVXYTHETALAT_THETADIRS){
-        printf("ERROR: invalid angular resolution %d angles (instead of %d angles) in the motion primitives file\n", 
+        SBPL_ERROR("ERROR: invalid angular resolution %d angles (instead of %d angles) in the motion primitives file\n", 
                dTemp, NAVXYTHETALAT_THETADIRS);
         return false;
     }
@@ -558,7 +630,7 @@ bool EnvironmentNAVXYTHETALATTICE::ReadMotionPrimitives(FILE* fMotPrims)
     if(fscanf(fMotPrims, "%s", sTemp) == 0)
         return false;
     if(strcmp(sTemp, sExpected) != 0){
-        printf("ERROR: expected %s but got %s\n", sExpected, sTemp);
+        SBPL_ERROR("ERROR: expected %s but got %s\n", sExpected, sTemp);
         return false;
     }
     if(fscanf(fMotPrims, "%d", &totalNumofActions) == 0){
@@ -574,7 +646,7 @@ bool EnvironmentNAVXYTHETALATTICE::ReadMotionPrimitives(FILE* fMotPrims)
 		EnvNAVXYTHETALATCfg.mprimV.push_back(motprim);
 
 	}
-    printf("done ");
+    SBPL_PRINTF("done ");
 
     return true;
 }
@@ -703,7 +775,7 @@ void EnvironmentNAVXYTHETALATTICE::ComputeReplanningData()
 void EnvironmentNAVXYTHETALATTICE::PrecomputeActionswithBaseMotionPrimitive(vector<SBPL_xytheta_mprimitive>* motionprimitiveV)
 {
 
-	printf("Pre-computing action data using base motion primitives...\n");
+	SBPL_PRINTF("Pre-computing action data using base motion primitives...\n");
 	EnvNAVXYTHETALATCfg.ActionsV = new EnvNAVXYTHETALATAction_t* [NAVXYTHETALAT_THETADIRS];
 	EnvNAVXYTHETALATCfg.PredActionsV = new vector<EnvNAVXYTHETALATAction_t*> [NAVXYTHETALAT_THETADIRS];
 	vector<sbpl_2Dcell_t> footprint;
@@ -711,7 +783,7 @@ void EnvironmentNAVXYTHETALATTICE::PrecomputeActionswithBaseMotionPrimitive(vect
 	//iterate over source angles
 	for(int tind = 0; tind < NAVXYTHETALAT_THETADIRS; tind++)
 	{
-		printf("pre-computing for angle %d out of %d angles\n", tind, NAVXYTHETALAT_THETADIRS);
+		SBPL_PRINTF("pre-computing for angle %d out of %d angles\n", tind, NAVXYTHETALAT_THETADIRS);
 		EnvNAVXYTHETALATCfg.ActionsV[tind] = new EnvNAVXYTHETALATAction_t[motionprimitiveV->size()];
 
 		//compute sourcepose
@@ -792,7 +864,7 @@ void EnvironmentNAVXYTHETALATTICE::PrecomputeActionswithBaseMotionPrimitive(vect
 			RemoveSourceFootprint(sourcepose, &EnvNAVXYTHETALATCfg.ActionsV[tind][aind].intersectingcellsV);
 
 #if DEBUG
-			fprintf(fDeb, "action tind=%d aind=%d: dX=%d dY=%d endtheta=%d (%.2f degs -> %.2f degs) cost=%d (mprim: %.2f %.2f %.2f)\n",
+			SBPL_FPRINTF(fDeb, "action tind=%d aind=%d: dX=%d dY=%d endtheta=%d (%.2f degs -> %.2f degs) cost=%d (mprim: %.2f %.2f %.2f)\n",
 				tind, aind, 			
 				EnvNAVXYTHETALATCfg.ActionsV[tind][aind].dX, EnvNAVXYTHETALATCfg.ActionsV[tind][aind].dY,
 				EnvNAVXYTHETALATCfg.ActionsV[tind][aind].endtheta, sourcepose.theta*180/PI_CONST, 
@@ -817,7 +889,7 @@ void EnvironmentNAVXYTHETALATTICE::PrecomputeActionswithBaseMotionPrimitive(vect
 	//now compute replanning data
 	ComputeReplanningData();
 
-	printf("done pre-computing action data based on motion primitives\n");
+	SBPL_PRINTF("done pre-computing action data based on motion primitives\n");
 
 
 }
@@ -827,15 +899,15 @@ void EnvironmentNAVXYTHETALATTICE::PrecomputeActionswithBaseMotionPrimitive(vect
 void EnvironmentNAVXYTHETALATTICE::PrecomputeActionswithCompleteMotionPrimitive(vector<SBPL_xytheta_mprimitive>* motionprimitiveV)
 {
 
-	printf("Pre-computing action data using motion primitives for every angle...\n");
+	SBPL_PRINTF("Pre-computing action data using motion primitives for every angle...\n");
 	EnvNAVXYTHETALATCfg.ActionsV = new EnvNAVXYTHETALATAction_t* [NAVXYTHETALAT_THETADIRS];
 	EnvNAVXYTHETALATCfg.PredActionsV = new vector<EnvNAVXYTHETALATAction_t*> [NAVXYTHETALAT_THETADIRS];
 	vector<sbpl_2Dcell_t> footprint;
 
 	if(motionprimitiveV->size()%NAVXYTHETALAT_THETADIRS != 0)
 	{
-		printf("ERROR: motionprimitives should be uniform across actions\n");
-		exit(1);
+		SBPL_ERROR("ERROR: motionprimitives should be uniform across actions\n");
+		throw new SBPL_Exception();
 	}
 
 	EnvNAVXYTHETALATCfg.actionwidth = ((int)motionprimitiveV->size())/NAVXYTHETALAT_THETADIRS;
@@ -844,7 +916,7 @@ void EnvironmentNAVXYTHETALATTICE::PrecomputeActionswithCompleteMotionPrimitive(
 	int maxnumofactions = 0;
 	for(int tind = 0; tind < NAVXYTHETALAT_THETADIRS; tind++)
 	{
-		printf("pre-computing for angle %d out of %d angles\n", tind, NAVXYTHETALAT_THETADIRS);
+		SBPL_PRINTF("pre-computing for angle %d out of %d angles\n", tind, NAVXYTHETALAT_THETADIRS);
 
 		EnvNAVXYTHETALATCfg.ActionsV[tind] = new EnvNAVXYTHETALATAction_t[EnvNAVXYTHETALATCfg.actionwidth];  
 
@@ -928,7 +1000,7 @@ void EnvironmentNAVXYTHETALATTICE::PrecomputeActionswithCompleteMotionPrimitive(
 			RemoveSourceFootprint(sourcepose, &EnvNAVXYTHETALATCfg.ActionsV[tind][aind].intersectingcellsV);
 
 #if DEBUG
-			fprintf(fDeb, "action tind=%d aind=%d: dX=%d dY=%d endtheta=%d (%.2f degs -> %.2f degs) cost=%d (mprimID %d: %d %d %d) numofintermcells = %d numofintercells=%d\n",
+			SBPL_FPRINTF(fDeb, "action tind=%d aind=%d: dX=%d dY=%d endtheta=%d (%.2f degs -> %.2f degs) cost=%d (mprimID %d: %d %d %d) numofintermcells = %d numofintercells=%d\n",
 				tind, aind, 			
 				EnvNAVXYTHETALATCfg.ActionsV[tind][aind].dX, EnvNAVXYTHETALATCfg.ActionsV[tind][aind].dY,
 				EnvNAVXYTHETALATCfg.ActionsV[tind][aind].endtheta, 
@@ -958,15 +1030,15 @@ void EnvironmentNAVXYTHETALATTICE::PrecomputeActionswithCompleteMotionPrimitive(
 	//at this point we don't allow nonuniform number of actions
 	if(motionprimitiveV->size() != (size_t)(NAVXYTHETALAT_THETADIRS*maxnumofactions))
 	{
-		printf("ERROR: nonuniform number of actions is not supported (maxnumofactions=%d while motprims=%d thetas=%d\n",
-				maxnumofactions, motionprimitiveV->size(), NAVXYTHETALAT_THETADIRS);
-		exit(1);
+		SBPL_ERROR("ERROR: nonuniform number of actions is not supported (maxnumofactions=%d while motprims=%d thetas=%d\n",
+				maxnumofactions, (unsigned int)motionprimitiveV->size(), NAVXYTHETALAT_THETADIRS);
+		throw new SBPL_Exception();
 	}
 
 	//now compute replanning data
 	ComputeReplanningData();
 
-	printf("done pre-computing action data based on motion primitives\n");
+	SBPL_PRINTF("done pre-computing action data based on motion primitives\n");
 
 
 }
@@ -975,14 +1047,14 @@ void EnvironmentNAVXYTHETALATTICE::PrecomputeActions()
 {
 
 	//construct list of actions
-	printf("Pre-computing action data using the motion primitives for a 3D kinematic planning...\n");
+	SBPL_PRINTF("Pre-computing action data using the motion primitives for a 3D kinematic planning...\n");
 	EnvNAVXYTHETALATCfg.ActionsV = new EnvNAVXYTHETALATAction_t* [NAVXYTHETALAT_THETADIRS];
 	EnvNAVXYTHETALATCfg.PredActionsV = new vector<EnvNAVXYTHETALATAction_t*> [NAVXYTHETALAT_THETADIRS];
 	vector<sbpl_2Dcell_t> footprint;
 	//iterate over source angles
 	for(int tind = 0; tind < NAVXYTHETALAT_THETADIRS; tind++)
 	{
-		printf("processing angle %d\n", tind);
+		SBPL_PRINTF("processing angle %d\n", tind);
 		EnvNAVXYTHETALATCfg.ActionsV[tind] = new EnvNAVXYTHETALATAction_t[EnvNAVXYTHETALATCfg.actionwidth];
 
 		//compute sourcepose
@@ -1015,7 +1087,7 @@ void EnvironmentNAVXYTHETALATTICE::PrecomputeActions()
 			RemoveSourceFootprint(sourcepose, &EnvNAVXYTHETALATCfg.ActionsV[tind][aind].intersectingcellsV);
 
 #if DEBUG
-			printf("action tind=%d aind=%d: endtheta=%d (%f) dX=%d dY=%d cost=%d\n",
+			SBPL_PRINTF("action tind=%d aind=%d: endtheta=%d (%f) dX=%d dY=%d cost=%d\n",
 				tind, aind, EnvNAVXYTHETALATCfg.ActionsV[tind][aind].endtheta, angle, 
 				EnvNAVXYTHETALATCfg.ActionsV[tind][aind].dX, EnvNAVXYTHETALATCfg.ActionsV[tind][aind].dY,
 				EnvNAVXYTHETALATCfg.ActionsV[tind][aind].cost);
@@ -1050,7 +1122,7 @@ void EnvironmentNAVXYTHETALATTICE::PrecomputeActions()
 		RemoveSourceFootprint(sourcepose, &EnvNAVXYTHETALATCfg.ActionsV[tind][aind].intersectingcellsV);
 
 #if DEBUG
-		printf("action tind=%d aind=%d: endtheta=%d (%f) dX=%d dY=%d cost=%d\n",
+		SBPL_PRINTF("action tind=%d aind=%d: endtheta=%d (%f) dX=%d dY=%d cost=%d\n",
 			tind, aind, EnvNAVXYTHETALATCfg.ActionsV[tind][aind].endtheta, DiscTheta2Cont(EnvNAVXYTHETALATCfg.ActionsV[tind][aind].endtheta, NAVXYTHETALAT_THETADIRS),
 			EnvNAVXYTHETALATCfg.ActionsV[tind][aind].dX, EnvNAVXYTHETALATCfg.ActionsV[tind][aind].dY,
 			EnvNAVXYTHETALATCfg.ActionsV[tind][aind].cost);
@@ -1082,7 +1154,7 @@ void EnvironmentNAVXYTHETALATTICE::PrecomputeActions()
 
 
 #if DEBUG
-		printf("action tind=%d aind=%d: endtheta=%d (%f) dX=%d dY=%d cost=%d\n",
+		SBPL_PRINTF("action tind=%d aind=%d: endtheta=%d (%f) dX=%d dY=%d cost=%d\n",
 			tind, aind, EnvNAVXYTHETALATCfg.ActionsV[tind][aind].endtheta, DiscTheta2Cont(EnvNAVXYTHETALATCfg.ActionsV[tind][aind].endtheta, NAVXYTHETALAT_THETADIRS),
 			EnvNAVXYTHETALATCfg.ActionsV[tind][aind].dX, EnvNAVXYTHETALATCfg.ActionsV[tind][aind].dY,
 			EnvNAVXYTHETALATCfg.ActionsV[tind][aind].cost);
@@ -1099,7 +1171,7 @@ void EnvironmentNAVXYTHETALATTICE::PrecomputeActions()
 	//now compute replanning data
 	ComputeReplanningData();
 
-	printf("done pre-computing action data\n");
+	SBPL_PRINTF("done pre-computing action data\n");
 
 
 }
@@ -1135,13 +1207,13 @@ void EnvironmentNAVXYTHETALATTICE::InitializeEnvConfig(vector<SBPL_xytheta_mprim
 	temppose.theta = 0.0;
 	vector<sbpl_2Dcell_t> footprint;
 	CalculateFootprintForPose(temppose, &footprint);
-	printf("number of cells in footprint of the robot = %d\n", footprint.size());
+	SBPL_PRINTF("number of cells in footprint of the robot = %d\n", (unsigned int)footprint.size());
 
 #if DEBUG
-	fprintf(fDeb, "footprint cells (size=%d):\n", footprint.size());
+	SBPL_FPRINTF(fDeb, "footprint cells (size=%d):\n", footprint.size());
 	for(int i = 0; i < (int) footprint.size(); i++)
 	{
-		fprintf(fDeb, "%d %d (cont: %.3f %.3f)\n", footprint.at(i).x, footprint.at(i).y, 
+		SBPL_FPRINTF(fDeb, "%d %d (cont: %.3f %.3f)\n", footprint.at(i).x, footprint.at(i).y, 
 			DISCXY2CONT(footprint.at(i).x, EnvNAVXYTHETALATCfg.cellsize_m), 
 			DISCXY2CONT(footprint.at(i).y, EnvNAVXYTHETALATCfg.cellsize_m));
 	}
@@ -1285,7 +1357,7 @@ void EnvironmentNAVXYTHETALATTICE::CalculateFootprintForPose(EnvNAVXYTHETALAT3Dp
 int pind;
 
 #if DEBUG
-//  printf("---Calculating Footprint for Pose: %f %f %f---\n",
+//  SBPL_PRINTF("---Calculating Footprint for Pose: %f %f %f---\n",
 //	 pose.x, pose.y, pose.theta);
 #endif
 
@@ -1319,7 +1391,7 @@ int pind;
     corner.y = sin(pose.theta)*pt.x + cos(pose.theta)*pt.y + pose.y;
     bounding_polygon.push_back(corner);
 #if DEBUG
-//    printf("Pt: %f %f, Corner: %f %f\n", pt.x, pt.y, corner.x, corner.y);
+//    SBPL_PRINTF("Pt: %f %f, Corner: %f %f\n", pt.x, pt.y, corner.x, corner.y);
 #endif
     if(corner.x < min_x || find==0){
       min_x = corner.x;
@@ -1337,7 +1409,7 @@ int pind;
   }
 
 #if DEBUG
-//  printf("Footprint bounding box: %f %f %f %f\n", min_x, max_x, min_y, max_y);
+//  SBPL_PRINTF("Footprint bounding box: %f %f %f %f\n", min_x, max_x, min_y, max_y);
 #endif
   //initialize previous values to something that will fail the if condition during the first iteration in the for loop
   int prev_discrete_x = CONTXY2DISC(pt.x, EnvNAVXYTHETALATCfg.cellsize_m) + 1; 
@@ -1357,14 +1429,14 @@ int pind;
       if(discrete_x != prev_discrete_x || discrete_y != prev_discrete_y || prev_inside==0){
 
 #if DEBUG
-//		printf("Testing point: %f %f Discrete: %d %d\n", pt.x, pt.y, discrete_x, discrete_y);
+//		SBPL_PRINTF("Testing point: %f %f Discrete: %d %d\n", pt.x, pt.y, discrete_x, discrete_y);
 #endif
 	
 		if(IsInsideFootprint(pt, &bounding_polygon)){ 
 		//convert to a grid point
 
 #if DEBUG
-//			printf("Pt Inside %f %f\n", pt.x, pt.y);
+//			SBPL_PRINTF("Pt Inside %f %f\n", pt.x, pt.y);
 #endif
 
 			sbpl_2Dcell_t cell;
@@ -1383,7 +1455,7 @@ int pind;
 			prev_inside = 1;
 
 #if DEBUG
-//			printf("Added pt to footprint: %f %f\n", pt.x, pt.y);
+//			SBPL_PRINTF("Added pt to footprint: %f %f\n", pt.x, pt.y);
 #endif
 		}
 		else{
@@ -1394,7 +1466,7 @@ int pind;
 	  else
 	  {
 #if DEBUG
-		//printf("Skipping pt: %f %f\n", pt.x, pt.y);
+		//SBPL_PRINTF("Skipping pt: %f %f\n", pt.x, pt.y);
 #endif
       }
       
@@ -1463,7 +1535,7 @@ void EnvironmentNAVXYTHETALATTICE::EnsureHeuristicsUpdated(bool bGoalHeuristics)
 			EnvNAVXYTHETALATCfg.StartX_c, EnvNAVXYTHETALATCfg.StartY_c, EnvNAVXYTHETALATCfg.EndX_c, EnvNAVXYTHETALATCfg.EndY_c, 
 			SBPL_2DGRIDSEARCH_TERM_CONDITION_TWOTIMESOPTPATH); 
 		bNeedtoRecomputeStartHeuristics = false;
-		printf("2dsolcost_infullunits=%d\n", (int)(grid2Dsearchfromstart->getlowerboundoncostfromstart_inmm(EnvNAVXYTHETALATCfg.EndX_c, EnvNAVXYTHETALATCfg.EndY_c)
+		SBPL_PRINTF("2dsolcost_infullunits=%d\n", (int)(grid2Dsearchfromstart->getlowerboundoncostfromstart_inmm(EnvNAVXYTHETALATCfg.EndX_c, EnvNAVXYTHETALATCfg.EndY_c)
 			/EnvNAVXYTHETALATCfg.nominalvel_mpersecs));
 
 	}
@@ -1475,7 +1547,7 @@ void EnvironmentNAVXYTHETALATTICE::EnsureHeuristicsUpdated(bool bGoalHeuristics)
 			EnvNAVXYTHETALATCfg.EndX_c, EnvNAVXYTHETALATCfg.EndY_c, EnvNAVXYTHETALATCfg.StartX_c, EnvNAVXYTHETALATCfg.StartY_c,  
 			SBPL_2DGRIDSEARCH_TERM_CONDITION_TWOTIMESOPTPATH); 
 		bNeedtoRecomputeGoalHeuristics = false;
-		printf("2dsolcost_infullunits=%d\n", (int)(grid2Dsearchfromgoal->getlowerboundoncostfromstart_inmm(EnvNAVXYTHETALATCfg.StartX_c, EnvNAVXYTHETALATCfg.StartY_c)
+		SBPL_PRINTF("2dsolcost_infullunits=%d\n", (int)(grid2Dsearchfromgoal->getlowerboundoncostfromstart_inmm(EnvNAVXYTHETALATCfg.StartX_c, EnvNAVXYTHETALATCfg.StartY_c)
 			/EnvNAVXYTHETALATCfg.nominalvel_mpersecs));
 
 	}
@@ -1488,7 +1560,7 @@ void EnvironmentNAVXYTHETALATTICE::EnsureHeuristicsUpdated(bool bGoalHeuristics)
 void EnvironmentNAVXYTHETALATTICE::ComputeHeuristicValues()
 {
 	//whatever necessary pre-computation of heuristic values is done here 
-	printf("Precomputing heuristics...\n");
+	SBPL_PRINTF("Precomputing heuristics...\n");
 	
 	//allocated 2D grid searches
 	grid2Dsearchfromstart = new SBPL2DGridSearch(EnvNAVXYTHETALATCfg.EnvWidth_c, EnvNAVXYTHETALATCfg.EnvHeight_c, (float)EnvNAVXYTHETALATCfg.cellsize_m);
@@ -1498,7 +1570,7 @@ void EnvironmentNAVXYTHETALATTICE::ComputeHeuristicValues()
 	grid2Dsearchfromstart->setOPENdatastructure(SBPL_2DGRIDSEARCH_OPENTYPE_SLIDINGBUCKETS); 
 	grid2Dsearchfromgoal->setOPENdatastructure(SBPL_2DGRIDSEARCH_OPENTYPE_SLIDINGBUCKETS);
 
-	printf("done\n");
+	SBPL_PRINTF("done\n");
 
 }
 
@@ -1512,11 +1584,11 @@ bool EnvironmentNAVXYTHETALATTICE::CheckQuant(FILE* fOut)
 		double newTheta = DiscTheta2Cont(nTheta, NAVXYTHETALAT_THETADIRS);
 		int nnewTheta = ContTheta2Disc(newTheta, NAVXYTHETALAT_THETADIRS);
 
-		fprintf(fOut, "theta=%f(%f)->%d->%f->%d\n", theta, theta*180/PI_CONST, nTheta, newTheta, nnewTheta);
+		SBPL_FPRINTF(fOut, "theta=%f(%f)->%d->%f->%d\n", theta, theta*180/PI_CONST, nTheta, newTheta, nnewTheta);
 
         if(nTheta != nnewTheta)
         {
-            printf("ERROR: invalid quantization\n");                     
+            SBPL_ERROR("ERROR: invalid quantization\n");                     
             return false;
         }
     }
@@ -1536,30 +1608,32 @@ bool EnvironmentNAVXYTHETALATTICE::InitializeEnv(const char* sEnvFile, const vec
 	FILE* fCfg = fopen(sEnvFile, "r");
 	if(fCfg == NULL)
 	{
-		printf("ERROR: unable to open %s\n", sEnvFile);
-		exit(1);
+		SBPL_ERROR("ERROR: unable to open %s\n", sEnvFile);
+		throw new SBPL_Exception();
 	}
 	ReadConfiguration(fCfg);
+  fclose(fCfg);
 
 	if(sMotPrimFile != NULL)
 	{
 		FILE* fMotPrim = fopen(sMotPrimFile, "r");
 		if(fMotPrim == NULL)
 		{
-			printf("ERROR: unable to open %s\n", sMotPrimFile);
-			exit(1);
+			SBPL_ERROR("ERROR: unable to open %s\n", sMotPrimFile);
+			throw new SBPL_Exception();
 		}
 		if(ReadMotionPrimitives(fMotPrim) == false)
 		{
-			printf("ERROR: failed to read in motion primitive file\n");
-			exit(1);
+			SBPL_ERROR("ERROR: failed to read in motion primitive file\n");
+			throw new SBPL_Exception();
 		}
 		InitGeneral(&EnvNAVXYTHETALATCfg.mprimV);
+    fclose(fMotPrim);
 	}
 	else
 		InitGeneral(NULL);
 
-	printf("size of env: %d by %d\n", EnvNAVXYTHETALATCfg.EnvWidth_c, EnvNAVXYTHETALATCfg.EnvHeight_c);
+	SBPL_PRINTF("size of env: %d by %d\n", EnvNAVXYTHETALATCfg.EnvWidth_c, EnvNAVXYTHETALATCfg.EnvHeight_c);
 
 	return true;
 }
@@ -1571,10 +1645,11 @@ bool EnvironmentNAVXYTHETALATTICE::InitializeEnv(const char* sEnvFile)
 	FILE* fCfg = fopen(sEnvFile, "r");
 	if(fCfg == NULL)
 	{
-		printf("ERROR: unable to open %s\n", sEnvFile);
-		exit(1);
+		SBPL_ERROR("ERROR: unable to open %s\n", sEnvFile);
+		throw new SBPL_Exception();
 	}
 	ReadConfiguration(fCfg);
+  fclose(fCfg);
 
 	InitGeneral(NULL);
 
@@ -1594,14 +1669,14 @@ bool EnvironmentNAVXYTHETALATTICE::InitializeEnv(int width, int height,
 					unsigned char obsthresh,  const char* sMotPrimFile)
 {
 
-	printf("env: initialize with width=%d height=%d start=%.3f %.3f %.3f goalx=%.3f %.3f %.3f cellsize=%.3f nomvel=%.3f timetoturn=%.3f, obsthresh=%d\n",
+	SBPL_PRINTF("env: initialize with width=%d height=%d start=%.3f %.3f %.3f goalx=%.3f %.3f %.3f cellsize=%.3f nomvel=%.3f timetoturn=%.3f, obsthresh=%d\n",
 		width, height, startx, starty, starttheta, goalx, goaly, goaltheta, cellsize_m, nominalvel_mpersecs, timetoturn45degsinplace_secs, obsthresh);
 
-	printf("perimeter has size=%d\n", perimeterptsV.size());
+	SBPL_PRINTF("perimeter has size=%d\n", (unsigned int)perimeterptsV.size());
 
 	for(int i = 0; i < (int)perimeterptsV.size(); i++)
 	{
-		printf("perimeter(%d) = %.4f %.4f\n", i, perimeterptsV.at(i).x, perimeterptsV.at(i).y);
+		SBPL_PRINTF("perimeter(%d) = %.4f %.4f\n", i, perimeterptsV.at(i).x, perimeterptsV.at(i).y);
 	}
 
 
@@ -1620,15 +1695,16 @@ bool EnvironmentNAVXYTHETALATTICE::InitializeEnv(int width, int height,
 		FILE* fMotPrim = fopen(sMotPrimFile, "r");
 		if(fMotPrim == NULL)
 		{
-			printf("ERROR: unable to open %s\n", sMotPrimFile);
-			exit(1);
+			SBPL_ERROR("ERROR: unable to open %s\n", sMotPrimFile);
+			throw new SBPL_Exception();
 		}
 
 		if(ReadMotionPrimitives(fMotPrim) == false)
 		{
-			printf("ERROR: failed to read in motion primitive file\n");
-			exit(1);
+			SBPL_ERROR("ERROR: failed to read in motion primitive file\n");
+			throw new SBPL_Exception();
 		}
+    fclose(fMotPrim);
 	}
 
 	if(EnvNAVXYTHETALATCfg.mprimV.size() != 0)
@@ -1669,7 +1745,14 @@ bool EnvironmentNAVXYTHETALATTICE::InitializeMDPCfg(MDPConfig *MDPCfg)
 
 void EnvironmentNAVXYTHETALATTICE::PrintHeuristicValues()
 {
-	FILE* fHeur = fopen("heur.txt", "w");
+#ifndef ROS
+  const char* heur = "heur.txt";
+#endif
+	FILE* fHeur = SBPL_FOPEN(heur, "w");
+  if(fHeur == NULL){
+    SBPL_ERROR("ERROR: could not open debug file to write heuristic\n");
+    throw new SBPL_Exception();
+  }
 	SBPL2DGridSearch* grid2Dsearch = NULL;
 	
 	for(int i = 0; i < 2; i++)
@@ -1677,12 +1760,12 @@ void EnvironmentNAVXYTHETALATTICE::PrintHeuristicValues()
 		if(i == 0 && grid2Dsearchfromstart != NULL)
 		{
 			grid2Dsearch = grid2Dsearchfromstart;
-			fprintf(fHeur, "start heuristics:\n");
+			SBPL_FPRINTF(fHeur, "start heuristics:\n");
 		}
 		else if(i == 1 && grid2Dsearchfromgoal != NULL)
 		{
 			grid2Dsearch = grid2Dsearchfromgoal;
-			fprintf(fHeur, "goal heuristics:\n");
+			SBPL_FPRINTF(fHeur, "goal heuristics:\n");
 		}
 		else
 			continue;
@@ -1690,14 +1773,14 @@ void EnvironmentNAVXYTHETALATTICE::PrintHeuristicValues()
 		for (int y = 0; y < EnvNAVXYTHETALATCfg.EnvHeight_c; y++) {
 			for (int x = 0; x < EnvNAVXYTHETALATCfg.EnvWidth_c; x++) {
 				if(grid2Dsearch->getlowerboundoncostfromstart_inmm(x, y) < INFINITECOST)
-					fprintf(fHeur, "%5d ", grid2Dsearch->getlowerboundoncostfromstart_inmm(x, y));
+					SBPL_FPRINTF(fHeur, "%5d ", grid2Dsearch->getlowerboundoncostfromstart_inmm(x, y));
 			else
-				fprintf(fHeur, "XXXXX ");
+				SBPL_FPRINTF(fHeur, "XXXXX ");
 			}
-			fprintf(fHeur, "\n");
+			SBPL_FPRINTF(fHeur, "\n");
 		}
 	}
-	fclose(fHeur);
+	SBPL_FCLOSE(fHeur);
 }
 
 
@@ -1707,8 +1790,8 @@ void EnvironmentNAVXYTHETALATTICE::SetAllPreds(CMDPSTATE* state)
 {
 	//implement this if the planner needs access to predecessors
 	
-	printf("ERROR in EnvNAVXYTHETALAT... function: SetAllPreds is undefined\n");
-	exit(1);
+	SBPL_ERROR("ERROR in EnvNAVXYTHETALAT... function: SetAllPreds is undefined\n");
+	throw new SBPL_Exception();
 }
 
 
@@ -1731,7 +1814,7 @@ bool EnvironmentNAVXYTHETALATTICE::UpdateCost(int x, int y, unsigned char newcos
 {
 
 #if DEBUG
-  //fprintf(fDeb, "Cost updated for cell %d %d from old cost=%d to new cost=%d\n", x,y,EnvNAVXYTHETALATCfg.Grid2D[x][y], newcost);
+  //SBPL_FPRINTF(fDeb, "Cost updated for cell %d %d from old cost=%d to new cost=%d\n", x,y,EnvNAVXYTHETALATCfg.Grid2D[x][y], newcost);
 #endif
 
     EnvNAVXYTHETALATCfg.Grid2D[x][y] = newcost;
@@ -1767,8 +1850,8 @@ void EnvironmentNAVXYTHETALATTICE::PrintEnv_Config(FILE* fOut)
 
 	//implement this if the planner needs to print out EnvNAVXYTHETALAT. configuration
 	
-	printf("ERROR in EnvNAVXYTHETALAT... function: PrintEnv_Config is undefined\n");
-	exit(1);
+	SBPL_ERROR("ERROR in EnvNAVXYTHETALAT... function: PrintEnv_Config is undefined\n");
+	throw new SBPL_Exception();
 
 }
 
@@ -1776,7 +1859,7 @@ void EnvironmentNAVXYTHETALATTICE::PrintTimeStat(FILE* fOut)
 {
 
 #if TIME_DEBUG
-    fprintf(fOut, "time3_addallout = %f secs, time_gethash = %f secs, time_createhash = %f secs, time_getsuccs = %f\n",
+    SBPL_FPRINTF(fOut, "time3_addallout = %f secs, time_gethash = %f secs, time_createhash = %f secs, time_getsuccs = %f\n",
             time3_addallout/(double)CLOCKS_PER_SEC, time_gethash/(double)CLOCKS_PER_SEC, 
             time_createhash/(double)CLOCKS_PER_SEC, time_getsuccs/(double)CLOCKS_PER_SEC);
 #endif
@@ -1788,7 +1871,7 @@ bool EnvironmentNAVXYTHETALATTICE::IsObstacle(int x, int y)
 {
 
 #if DEBUG
-	fprintf(fDeb, "Status of cell %d %d is queried. Its cost=%d\n", x,y,EnvNAVXYTHETALATCfg.Grid2D[x][y]);
+	SBPL_FPRINTF(fDeb, "Status of cell %d %d is queried. Its cost=%d\n", x,y,EnvNAVXYTHETALATCfg.Grid2D[x][y]);
 #endif
 
 
@@ -1855,17 +1938,17 @@ bool EnvironmentNAVXYTHETALATTICE::SetEnvParameter(const char* parameter, int va
 
 	if(EnvNAVXYTHETALAT.bInitialized == true)
 	{
-		printf("ERROR: all parameters must be set before initialization of the environment\n");
+		SBPL_ERROR("ERROR: all parameters must be set before initialization of the environment\n");
 		return false;
 	}
 
-	printf("setting parameter %s to %d\n", parameter, value);
+	SBPL_PRINTF("setting parameter %s to %d\n", parameter, value);
 
 	if(strcmp(parameter, "cost_inscribed_thresh") == 0)
 	{
 		if(value < 0 || value > 255)
 		{
-		  printf("ERROR: invalid value %d for parameter %s\n", value, parameter);
+		  SBPL_ERROR("ERROR: invalid value %d for parameter %s\n", value, parameter);
 			return false;
 		}
 		EnvNAVXYTHETALATCfg.cost_inscribed_thresh = (unsigned char)value;
@@ -1874,7 +1957,7 @@ bool EnvironmentNAVXYTHETALATTICE::SetEnvParameter(const char* parameter, int va
 	{
 		if(value < 0 || value > 255)
 		{
-		  printf("ERROR: invalid value %d for parameter %s\n", value, parameter);
+		  SBPL_ERROR("ERROR: invalid value %d for parameter %s\n", value, parameter);
 			return false;
 		}
 		EnvNAVXYTHETALATCfg.cost_possibly_circumscribed_thresh = value;
@@ -1883,14 +1966,14 @@ bool EnvironmentNAVXYTHETALATTICE::SetEnvParameter(const char* parameter, int va
 	{
 		if(value < 0 || value > 255)
 		{
-		  printf("ERROR: invalid value %d for parameter %s\n", value, parameter);
+		  SBPL_ERROR("ERROR: invalid value %d for parameter %s\n", value, parameter);
 			return false;
 		}
 		EnvNAVXYTHETALATCfg.obsthresh = (unsigned char)value;
 	}
 	else
 	{
-		printf("ERROR: invalid parameter %s\n", parameter);
+		SBPL_ERROR("ERROR: invalid parameter %s\n", parameter);
 		return false;
 	}
 
@@ -1914,8 +1997,8 @@ int EnvironmentNAVXYTHETALATTICE::GetEnvParameter(const char* parameter)
 	}
 	else
 	{
-		printf("ERROR: invalid parameter %s\n", parameter);
-		exit(1);
+		SBPL_ERROR("ERROR: invalid parameter %s\n", parameter);
+		throw new SBPL_Exception();
 	}
 
 }
@@ -1928,7 +2011,7 @@ int EnvironmentNAVXYTHETALATTICE::GetEnvParameter(const char* parameter)
 
 EnvironmentNAVXYTHETALAT::~EnvironmentNAVXYTHETALAT()
 {
-	printf("destroying XYTHETALAT\n");
+	SBPL_PRINTF("destroying XYTHETALAT\n");
 
 	//delete the states themselves first
 	for (int i = 0; i < (int)StateID2CoordTable.size(); i++)
@@ -1978,12 +2061,12 @@ void EnvironmentNAVXYTHETALAT::ConvertStateIDPathintoXYThetaPath(vector<int>* st
 	int targetx_c, targety_c, targettheta_c;
 	int sourcex_c, sourcey_c, sourcetheta_c;
 
-	printf("checks=%ld\n", checks);
+	SBPL_PRINTF("checks=%ld\n", checks);
 
 	xythetaPath->clear();
 
 #if DEBUG
-	fprintf(fDeb, "converting stateid path into coordinates:\n");
+	SBPL_FPRINTF(fDeb, "converting stateid path into coordinates:\n");
 #endif
 
 	for(int pind = 0; pind < (int)(stateIDPath->size())-1; pind++)
@@ -2008,7 +2091,7 @@ void EnvironmentNAVXYTHETALAT::ConvertStateIDPathintoXYThetaPath(vector<int>* st
 #if DEBUG
 		GetCoordFromState(sourceID, sourcex_c, sourcey_c, sourcetheta_c);
 		GetCoordFromState(targetID, targetx_c, targety_c, targettheta_c);
-		fprintf(fDeb, "looking for %d %d %d -> %d %d %d (numofsuccs=%d)\n", sourcex_c, sourcey_c, sourcetheta_c,
+		SBPL_FPRINTF(fDeb, "looking for %d %d %d -> %d %d %d (numofsuccs=%d)\n", sourcex_c, sourcey_c, sourcetheta_c,
 					targetx_c, targety_c, targettheta_c, SuccIDV.size()); 
 
 #endif
@@ -2019,7 +2102,7 @@ void EnvironmentNAVXYTHETALAT::ConvertStateIDPathintoXYThetaPath(vector<int>* st
 #if DEBUG
 		int x_c, y_c, theta_c;
 		GetCoordFromState(SuccIDV[sind], x_c, y_c, theta_c);
-		fprintf(fDeb, "succ: %d %d %d\n", x_c, y_c, theta_c); 
+		SBPL_FPRINTF(fDeb, "succ: %d %d %d\n", x_c, y_c, theta_c); 
 #endif
 
 			if(SuccIDV[sind] == targetID && CostV[sind] <= bestcost)
@@ -2030,12 +2113,12 @@ void EnvironmentNAVXYTHETALAT::ConvertStateIDPathintoXYThetaPath(vector<int>* st
 		}
 		if(bestsind == -1)
 		{
-			printf("ERROR: successor not found for transition:\n");
+			SBPL_ERROR("ERROR: successor not found for transition:\n");
 			GetCoordFromState(sourceID, sourcex_c, sourcey_c, sourcetheta_c);
 			GetCoordFromState(targetID, targetx_c, targety_c, targettheta_c);
-			printf("%d %d %d -> %d %d %d\n", sourcex_c, sourcey_c, sourcetheta_c,
+			SBPL_PRINTF("%d %d %d -> %d %d %d\n", sourcex_c, sourcey_c, sourcetheta_c,
 					targetx_c, targety_c, targettheta_c); 
-			exit(1);
+			throw new SBPL_Exception();
 		}
 
 		//now push in the actual path
@@ -2055,12 +2138,12 @@ void EnvironmentNAVXYTHETALAT::ConvertStateIDPathintoXYThetaPath(vector<int>* st
 #if DEBUG
 			int nx = CONTXY2DISC(intermpt.x, EnvNAVXYTHETALATCfg.cellsize_m);
 			int ny = CONTXY2DISC(intermpt.y, EnvNAVXYTHETALATCfg.cellsize_m);
-			fprintf(fDeb, "%.3f %.3f %.3f (%d %d %d cost=%d) ", 
+			SBPL_FPRINTF(fDeb, "%.3f %.3f %.3f (%d %d %d cost=%d) ", 
 				intermpt.x, intermpt.y, intermpt.theta, 
 				nx, ny, 
 				ContTheta2Disc(intermpt.theta, NAVXYTHETALAT_THETADIRS), EnvNAVXYTHETALATCfg.Grid2D[nx][ny]);
-			if(ipind == 0) fprintf(fDeb, "first (heur=%d)\n", GetStartHeuristic(sourceID));
-			else fprintf(fDeb, "\n");
+			if(ipind == 0) SBPL_FPRINTF(fDeb, "first (heur=%d)\n", GetStartHeuristic(sourceID));
+			else SBPL_FPRINTF(fDeb, "\n");
 #endif
 
 			//store
@@ -2077,17 +2160,17 @@ int EnvironmentNAVXYTHETALAT::SetGoal(double x_m, double y_m, double theta_rad){
 	int y = CONTXY2DISC(y_m, EnvNAVXYTHETALATCfg.cellsize_m);
 	int theta = ContTheta2Disc(theta_rad, NAVXYTHETALAT_THETADIRS);
 
-	printf("env: setting goal to %.3f %.3f %.3f (%d %d %d)\n", x_m, y_m, theta_rad, x, y, theta);
+	SBPL_PRINTF("env: setting goal to %.3f %.3f %.3f (%d %d %d)\n", x_m, y_m, theta_rad, x, y, theta);
 
 	if(!IsWithinMapCell(x,y))
 	{
-		printf("ERROR: trying to set a goal cell %d %d that is outside of map\n", x,y);
+		SBPL_ERROR("ERROR: trying to set a goal cell %d %d that is outside of map\n", x,y);
 		return -1;
 	}
 
     if(!IsValidConfiguration(x,y,theta))
 	{
-		printf("WARNING: goal configuration is invalid\n");
+		SBPL_PRINTF("WARNING: goal configuration is invalid\n");
 	}
 
     EnvNAVXYTHETALATHashEntry_t* OutHashEntry;
@@ -2126,15 +2209,15 @@ int EnvironmentNAVXYTHETALAT::SetStart(double x_m, double y_m, double theta_rad)
 
 	if(!IsWithinMapCell(x,y))
 	{
-		printf("ERROR: trying to set a start cell %d %d that is outside of map\n", x,y);
+		SBPL_ERROR("ERROR: trying to set a start cell %d %d that is outside of map\n", x,y);
 		return -1;
 	}
 
-	printf("env: setting start to %.3f %.3f %.3f (%d %d %d)\n", x_m, y_m, theta_rad, x, y, theta);
+	SBPL_PRINTF("env: setting start to %.3f %.3f %.3f (%d %d %d)\n", x_m, y_m, theta_rad, x, y, theta);
 
     if(!IsValidConfiguration(x,y,theta))
 	{
-		printf("WARNING: start configuration %d %d %d is invalid\n", x,y,theta);
+		SBPL_PRINTF("WARNING: start configuration %d %d %d is invalid\n", x,y,theta);
 	}
 
     EnvNAVXYTHETALATHashEntry_t* OutHashEntry;
@@ -2165,8 +2248,8 @@ void EnvironmentNAVXYTHETALAT::PrintState(int stateID, bool bVerbose, FILE* fOut
 #if DEBUG
 	if(stateID >= (int)StateID2CoordTable.size())
 	{
-		printf("ERROR in EnvNAVXYTHETALAT... function: stateID illegal (2)\n");
-		exit(1);
+		SBPL_ERROR("ERROR in EnvNAVXYTHETALAT... function: stateID illegal (2)\n");
+		throw new SBPL_Exception();
 	}
 #endif
 
@@ -2177,13 +2260,13 @@ void EnvironmentNAVXYTHETALAT::PrintState(int stateID, bool bVerbose, FILE* fOut
 
 	if(stateID == EnvNAVXYTHETALAT.goalstateid && bVerbose)
 	{
-		fprintf(fOut, "the state is a goal state\n");
+		SBPL_FPRINTF(fOut, "the state is a goal state\n");
 	}
 
     if(bVerbose)
-    	fprintf(fOut, "X=%d Y=%d Theta=%d\n", HashEntry->X, HashEntry->Y, HashEntry->Theta);
+    	SBPL_FPRINTF(fOut, "X=%d Y=%d Theta=%d\n", HashEntry->X, HashEntry->Y, HashEntry->Theta);
     else
-    	fprintf(fOut, "%.3f %.3f %.3f\n", DISCXY2CONT(HashEntry->X, EnvNAVXYTHETALATCfg.cellsize_m), DISCXY2CONT(HashEntry->Y,EnvNAVXYTHETALATCfg.cellsize_m), 
+    	SBPL_FPRINTF(fOut, "%.3f %.3f %.3f\n", DISCXY2CONT(HashEntry->X, EnvNAVXYTHETALATCfg.cellsize_m), DISCXY2CONT(HashEntry->Y,EnvNAVXYTHETALATCfg.cellsize_m), 
 		DiscTheta2Cont(HashEntry->Theta, NAVXYTHETALAT_THETADIRS));
 
 }
@@ -2210,7 +2293,7 @@ EnvNAVXYTHETALATHashEntry_t* EnvironmentNAVXYTHETALAT::GetHashEntry_hash(int X, 
 #if DEBUG
 	if ((int)Coord2StateIDHashTable[binid].size() > 5)
 	{
-		fprintf(fDeb, "WARNING: Hash table has a bin %d (X=%d Y=%d) of size %d\n", 
+		SBPL_FPRINTF(fDeb, "WARNING: Hash table has a bin %d (X=%d Y=%d) of size %d\n", 
 			binid, X, Y, Coord2StateIDHashTable[binid].size());
 		
 		PrintHashTableHist(fDeb);		
@@ -2263,8 +2346,8 @@ EnvNAVXYTHETALATHashEntry_t* EnvironmentNAVXYTHETALAT::CreateNewHashEntry_lookup
 #if DEBUG
 	if(Coord2StateIDHashTable_lookup[index] != NULL)
 	{
-		printf("ERROR: creating hash entry for non-NULL hashentry\n");
-		exit(1);
+		SBPL_ERROR("ERROR: creating hash entry for non-NULL hashentry\n");
+		throw new SBPL_Exception();
 	}
 #endif
 
@@ -2280,8 +2363,8 @@ EnvNAVXYTHETALATHashEntry_t* EnvironmentNAVXYTHETALAT::CreateNewHashEntry_lookup
 
 	if(HashEntry->stateID != (int)StateID2IndexMapping.size()-1)
 	{
-		printf("ERROR in Env... function: last state has incorrect stateID\n");
-		exit(1);	
+		SBPL_ERROR("ERROR in Env... function: last state has incorrect stateID\n");
+		throw new SBPL_Exception();	
 	}
 
 #if TIME_DEBUG
@@ -2331,8 +2414,8 @@ EnvNAVXYTHETALATHashEntry_t* EnvironmentNAVXYTHETALAT::CreateNewHashEntry_hash(i
 
 	if(HashEntry->stateID != (int)StateID2IndexMapping.size()-1)
 	{
-		printf("ERROR in Env... function: last state has incorrect stateID\n");
-		exit(1);	
+		SBPL_ERROR("ERROR in Env... function: last state has incorrect stateID\n");
+		throw new SBPL_Exception();	
 	}
 
 #if TIME_DEBUG
@@ -2373,7 +2456,7 @@ void EnvironmentNAVXYTHETALAT::GetSuccs(int SourceStateID, vector<int>* SuccIDV,
 	//iterate through actions
 	for (aind = 0; aind < EnvNAVXYTHETALATCfg.actionwidth; aind++)
 	{
-		EnvNAVXYTHETALATAction_t* nav3daction = &EnvNAVXYTHETALATCfg.ActionsV[HashEntry->Theta][aind];
+		EnvNAVXYTHETALATAction_t* nav3daction = &EnvNAVXYTHETALATCfg.ActionsV[(unsigned int)HashEntry->Theta][aind];
         int newX = HashEntry->X + nav3daction->dX;
 		int newY = HashEntry->Y + nav3daction->dY;
 		int newTheta = NORMALIZEDISCTHETA(nav3daction->endtheta, NAVXYTHETALAT_THETADIRS);	
@@ -2424,12 +2507,12 @@ void EnvironmentNAVXYTHETALAT::GetPreds(int TargetStateID, vector<int>* PredIDV,
     //clear the successor array
     PredIDV->clear();
     CostV->clear();
-    PredIDV->reserve(EnvNAVXYTHETALATCfg.PredActionsV[HashEntry->Theta].size()); 
-    CostV->reserve(EnvNAVXYTHETALATCfg.PredActionsV[HashEntry->Theta].size());
+    PredIDV->reserve(EnvNAVXYTHETALATCfg.PredActionsV[(unsigned int)HashEntry->Theta].size()); 
+    CostV->reserve(EnvNAVXYTHETALATCfg.PredActionsV[(unsigned int)HashEntry->Theta].size());
 	
 	//iterate through actions
-	vector<EnvNAVXYTHETALATAction_t*>* actionsV = &EnvNAVXYTHETALATCfg.PredActionsV[HashEntry->Theta];
-	for (aind = 0; aind < (int)EnvNAVXYTHETALATCfg.PredActionsV[HashEntry->Theta].size(); aind++)
+	vector<EnvNAVXYTHETALATAction_t*>* actionsV = &EnvNAVXYTHETALATCfg.PredActionsV[(unsigned int)HashEntry->Theta];
+	for (aind = 0; aind < (int)EnvNAVXYTHETALATCfg.PredActionsV[(unsigned int)HashEntry->Theta].size(); aind++)
 	{
 
 		EnvNAVXYTHETALATAction_t* nav3daction = actionsV->at(aind);
@@ -2474,14 +2557,14 @@ void EnvironmentNAVXYTHETALAT::SetAllActionsandAllOutcomes(CMDPSTATE* state)
 #if DEBUG
 	if(state->StateID >= (int)StateID2CoordTable.size())
 	{
-		printf("ERROR in Env... function: stateID illegal\n");
-		exit(1);
+		SBPL_ERROR("ERROR in Env... function: stateID illegal\n");
+		throw new SBPL_Exception();
 	}
 
 	if((int)state->Actions.size() != 0)
 	{
-		printf("ERROR in Env_setAllActionsandAllOutcomes: actions already exist for the state\n");
-		exit(1);
+		SBPL_ERROR("ERROR in Env_setAllActionsandAllOutcomes: actions already exist for the state\n");
+		throw new SBPL_Exception();
 	}
 #endif
 	
@@ -2496,7 +2579,7 @@ void EnvironmentNAVXYTHETALAT::SetAllActionsandAllOutcomes(CMDPSTATE* state)
 	//iterate through actions
 	for (int aind = 0; aind < EnvNAVXYTHETALATCfg.actionwidth; aind++)
 	{
-		EnvNAVXYTHETALATAction_t* nav3daction = &EnvNAVXYTHETALATCfg.ActionsV[HashEntry->Theta][aind];
+		EnvNAVXYTHETALATAction_t* nav3daction = &EnvNAVXYTHETALATCfg.ActionsV[(unsigned int)HashEntry->Theta][aind];
         int newX = HashEntry->X + nav3daction->dX;
 		int newY = HashEntry->Y + nav3daction->dY;
 		int newTheta = NORMALIZEDISCTHETA(nav3daction->endtheta, NAVXYTHETALAT_THETADIRS);	
@@ -2572,8 +2655,8 @@ void EnvironmentNAVXYTHETALAT::GetSuccsofChangedEdges(vector<nav2dcell_t> const 
 	EnvNAVXYTHETALAT3Dcell_t affectedcell;
 	EnvNAVXYTHETALATHashEntry_t* affectedHashEntry;
 
-	printf("ERROR: getsuccs is not supported currently\n");
-	exit(1);
+	SBPL_ERROR("ERROR: getsuccs is not supported currently\n");
+	throw new SBPL_Exception();
 
 	//increment iteration for processing savings
 	iteration++;
@@ -2611,7 +2694,7 @@ void EnvironmentNAVXYTHETALAT::InitializeEnvironment()
 
 	if(maxsize <= SBPL_XYTHETALAT_MAXSTATESFORLOOKUP)
 	{
-		printf("environment stores states in lookup table\n");
+		SBPL_PRINTF("environment stores states in lookup table\n");
 
 		Coord2StateIDHashTable_lookup = new EnvNAVXYTHETALATHashEntry_t*[maxsize]; 
 		for(int i = 0; i < maxsize; i++)
@@ -2625,7 +2708,7 @@ void EnvironmentNAVXYTHETALAT::InitializeEnvironment()
 	}
 	else
 	{		
-		printf("environment stores states in hashtable\n");
+		SBPL_PRINTF("environment stores states in hashtable\n");
 
 		//initialize the map from Coord to StateID
 		HashTableSize = 4*1024*1024; //should be power of two 
@@ -2691,7 +2774,7 @@ void EnvironmentNAVXYTHETALAT::PrintHashTableHist(FILE* fOut)
 		else
 			slarge++;
 	}
-	fprintf(fOut, "hash table histogram: 0:%d, <5:%d, <25:%d, <50:%d, <100:%d, <400:%d, >400:%d\n",
+	SBPL_FPRINTF(fOut, "hash table histogram: 0:%d, <5:%d, <25:%d, <50:%d, <100:%d, <400:%d, >400:%d\n",
 		s0,s1, s50, s100, s200,s300,slarge);
 }
 
@@ -2707,8 +2790,8 @@ int EnvironmentNAVXYTHETALAT::GetFromToHeuristic(int FromStateID, int ToStateID)
 	if(FromStateID >= (int)StateID2CoordTable.size() 
 		|| ToStateID >= (int)StateID2CoordTable.size())
 	{
-		printf("ERROR in EnvNAVXYTHETALAT... function: stateID illegal\n");
-		exit(1);
+		SBPL_ERROR("ERROR in EnvNAVXYTHETALAT... function: stateID illegal\n");
+		throw new SBPL_Exception();
 	}
 #endif
 
@@ -2733,8 +2816,8 @@ int EnvironmentNAVXYTHETALAT::GetGoalHeuristic(int stateID)
 #if DEBUG
 	if(stateID >= (int)StateID2CoordTable.size())
 	{
-		printf("ERROR in EnvNAVXYTHETALAT... function: stateID illegal\n");
-		exit(1);
+		SBPL_ERROR("ERROR in EnvNAVXYTHETALAT... function: stateID illegal\n");
+		throw new SBPL_Exception();
 	}
 #endif
 
@@ -2760,8 +2843,8 @@ int EnvironmentNAVXYTHETALAT::GetStartHeuristic(int stateID)
 #if DEBUG
 	if(stateID >= (int)StateID2CoordTable.size())
 	{
-		printf("ERROR in EnvNAVXYTHETALAT... function: stateID illegal\n");
-		exit(1);
+		SBPL_ERROR("ERROR in EnvNAVXYTHETALAT... function: stateID illegal\n");
+		throw new SBPL_Exception();
 	}
 #endif
 

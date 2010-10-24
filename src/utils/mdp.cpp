@@ -128,8 +128,8 @@ bool CMDPSTATE::Delete()
 
 	if(this->PlannerSpecificData != NULL)
 	{
-		printf("ERROR deleting state: planner specific data is not deleted\n");
-		exit(1);
+		SBPL_ERROR("ERROR deleting state: planner specific data is not deleted\n");
+		throw new SBPL_Exception();
 	}
 	
 	//delete predecessors array
@@ -198,8 +198,8 @@ bool CMDPSTATE::RemovePred(int stateID)
 	}
 
 	//can happen when a state is twice a successor
-	//printf("ERROR in RemovePred: no Pred is found\n");
-	//exit(1);
+	//SBPL_ERROR("ERROR in RemovePred: no Pred is found\n");
+	//throw new SBPL_Exception();
 
 	return false;
 }
@@ -269,8 +269,8 @@ bool CMDP::Create(int numofstates)
 
 	if(numofstates > MAXSTATESPACESIZE)
 	{
-		printf("ERROR in Create: maximum MDP size is reached\n");
-		exit(1);
+		SBPL_ERROR("ERROR in Create: maximum MDP size is reached\n");
+		throw new SBPL_Exception();
 	}
 
 	for(int i = 0; i < numofstates; i++)
@@ -297,8 +297,8 @@ CMDPSTATE* CMDP::AddState(int StateID)
 
 	if((int)StateArray.size()+1 > MAXSTATESPACESIZE)
 	{
-		printf("ERROR: maximum of states is reached in MDP\n");
-		exit(1);
+		SBPL_ERROR("ERROR: maximum of states is reached in MDP\n");
+		throw new SBPL_Exception();
 	}
 
 	state = new CMDPSTATE(StateID);
@@ -334,22 +334,22 @@ bool CMDP::Delete()
 
 void CMDP::Print(FILE* fOut)
 {
-	fprintf(fOut, "MDP statespace size=%d\n", StateArray.size());
+	SBPL_FPRINTF(fOut, "MDP statespace size=%d\n", (unsigned int)StateArray.size());
 	for(int i = 0; i < (int)StateArray.size(); i++)
 	{
-		fprintf(fOut, "%d: ", StateArray[i]->StateID);
+		SBPL_FPRINTF(fOut, "%d: ", StateArray[i]->StateID);
 		for( int j = 0; j < (int)StateArray[i]->Actions.size(); j++)
 		{
 			CMDPACTION* action = StateArray[i]->Actions[j];
-			fprintf(fOut, "[%d", action->ActionID);
+			SBPL_FPRINTF(fOut, "[%d", action->ActionID);
 			for( int outind = 0; outind < (int)action->SuccsID.size(); outind++)
 			{
-				fprintf(fOut, " %d %d %f", action->SuccsID[outind], action->Costs[outind],
+				SBPL_FPRINTF(fOut, " %d %d %f", action->SuccsID[outind], action->Costs[outind],
 					action->SuccsProb[outind]);
 			}
-			fprintf(fOut, "] ");
+			SBPL_FPRINTF(fOut, "] ");
 		}
-		fprintf(fOut, "\n");
+		SBPL_FPRINTF(fOut, "\n");
 	}
 }
 

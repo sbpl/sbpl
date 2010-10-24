@@ -106,7 +106,7 @@ void EnvironmentROBARM::PrintHashTableHist()
 		else
 			slarge++;
 	}
-	printf("hash table histogram: 0:%d, <50:%d, <100:%d, <200:%d, <300:%d, <400:%d >400:%d\n",
+	SBPL_PRINTF("hash table histogram: 0:%d, <50:%d, <100:%d, <200:%d, <300:%d, <400:%d >400:%d\n",
 		s0,s1, s50, s100, s200,s300,slarge);
 }
 
@@ -126,7 +126,7 @@ EnvROBARMHashEntry_t* EnvironmentROBARM::GetHashEntry(short unsigned int* coord,
 #if DEBUG
 	if ((int)EnvROBARM.Coord2StateIDHashTable[binid].size() > 500)
 	{
-		printf("WARNING: Hash table has a bin %d (coord0=%d) of size %d\n", 
+		SBPL_PRINTF("WARNING: Hash table has a bin %d (coord0=%d) of size %d\n", 
 			binid, coord[0], EnvROBARM.Coord2StateIDHashTable[binid].size());
 		
 		PrintHashTableHist();		
@@ -191,8 +191,8 @@ EnvROBARMHashEntry_t* EnvironmentROBARM::CreateNewHashEntry(short unsigned int* 
 
 	if(HashEntry->stateID != (int)StateID2IndexMapping.size()-1)
 	{
-		printf("ERROR in Env... function: last state has incorrect stateID\n");
-		exit(1);	
+		SBPL_ERROR("ERROR in Env... function: last state has incorrect stateID\n");
+		throw new SBPL_Exception();	
 	}
 
 
@@ -362,8 +362,8 @@ void EnvironmentROBARM::Search2DwithQueue(State2D** statespace, int* HeurGrid, i
 			if(statespace[newx][newy].g != INFINITECOST && 
 				statespace[newx][newy].g > ExpState->g + 1)
 			{
-				printf("ERROR: incorrect heuristic computation\n");
-				exit(1);
+				SBPL_ERROR("ERROR: incorrect heuristic computation\n");
+				throw new SBPL_Exception();
 			}
 		
 
@@ -414,7 +414,7 @@ void EnvironmentROBARM::ComputeHeuristicValues()
 {
     int i;
 
-	printf("Running 2D BFS to compute heuristics\n");
+	SBPL_PRINTF("Running 2D BFS to compute heuristics\n");
 
     //allocate memory
     int hsize = XYTO2DIND(EnvROBARMCfg.EnvWidth_c-1, EnvROBARMCfg.EnvHeight_c-1)+1;
@@ -438,12 +438,12 @@ void EnvironmentROBARM::ComputeHeuristicValues()
 	        //perform the search for pathcosts to x,y and store values in Heur[hind]
 	        Search2DwithQueue(statespace2D, &EnvROBARM.Heur[hind][0], x, y);               
         }
-        //printf("h for %d computed\n", x);
+        //SBPL_PRINTF("h for %d computed\n", x);
     }
 	Delete2DStateSpace(&statespace2D);	
 
 
-	printf("done\n");
+	SBPL_PRINTF("done\n");
 }
 
 //----------------------------------------------------------------------
@@ -458,9 +458,9 @@ void EnvironmentROBARM::PrintHeurGrid()
 	{
 		for (y = 0; y < EnvROBARMCfg.EnvHeight_c; y++)
 		{
-			printf("HeurGrid[%d][%d]=%u\n", x,y,HeurGrid[x][y]);
+			SBPL_PRINTF("HeurGrid[%d][%d]=%u\n", x,y,HeurGrid[x][y]);
 		}
-		printf("\n");
+		SBPL_PRINTF("\n");
 	}
 }
 */
@@ -473,17 +473,17 @@ void EnvironmentROBARM::printangles(FILE* fOut, short unsigned int* coord, bool 
 
 	ComputeContAngles(coord, angles);
     if(bVerbose)
-    	fprintf(fOut, "angles: ");
+    	SBPL_FPRINTF(fOut, "angles: ");
 	for(i = 0; i < NUMOFLINKS; i++)
 	{
         if(!bLocal)
-    		fprintf(fOut, "%f ", angles[i]);
+    		SBPL_FPRINTF(fOut, "%f ", angles[i]);
         else
         {
 		    if(i > 0)
-			    fprintf(fOut, "%f ", angles[i]-angles[i-1]);
+			    SBPL_FPRINTF(fOut, "%f ", angles[i]-angles[i-1]);
 		    else
-			    fprintf(fOut, "%f ", angles[i]);
+			    SBPL_FPRINTF(fOut, "%f ", angles[i]);
         }
 	}
 	ComputeEndEffectorPos(angles, &x, &y);
@@ -493,11 +493,11 @@ void EnvironmentROBARM::printangles(FILE* fOut, short unsigned int* coord, bool 
         y = EnvROBARMCfg.EndEffGoalY_c;
     }
     if(bVerbose)
-    	fprintf(fOut, "endeff: %d %d", x,y);
+    	SBPL_FPRINTF(fOut, "endeff: %d %d", x,y);
     else
-    	fprintf(fOut, "%d %d", x,y);
+    	SBPL_FPRINTF(fOut, "%d %d", x,y);
 
-	fprintf(fOut, "\n");
+	SBPL_FPRINTF(fOut, "\n");
 
 }
 
@@ -511,12 +511,12 @@ void EnvironmentROBARM::PrintPathRec(State* currentstate, State* searchstartstat
 
 	if(currentstate->g > currentstate->v)
 	{
-		printf("ERROR: an underconsistent state is encountered on the path\n");
+		SBPL_ERROR("ERROR: an underconsistent state is encountered on the path\n");
 
 #if PLANNER_TYPE == ARA_PLANNER_TYPE 
 		PrintState(currentstate, stdout);
 #endif
-		exit(1);
+		throw new SBPL_Exception();
 	}
 
 	//cost of the transition to the previous state
@@ -526,15 +526,15 @@ void EnvironmentROBARM::PrintPathRec(State* currentstate, State* searchstartstat
 		!IsValidCoord(currentstate->bestnextstate->statecoord))
 	{
 #if PLANNER_TYPE == ARA_PLANNER_TYPE
-		printf("currentstate\n");
+		SBPL_PRINTF("currentstate\n");
 		PrintState(currentstate, stdout);
-		printf("nextstate\n");
+		SBPL_PRINTF("nextstate\n");
 		PrintState(currentstate->bestnextstate, stdout);
 #endif
-		printf("next statecoord IsValid=%d\n", 
+		SBPL_PRINTF("next statecoord IsValid=%d\n", 
 			IsValidCoord(currentstate->bestnextstate->statecoord));
-		printf("ERROR: cost of the path too high=%d or incorrect transition\n", *cost);
-		exit(1);
+		SBPL_ERROR("ERROR: cost of the path too high=%d or incorrect transition\n", *cost);
+		throw new SBPL_Exception();
 	}
 	//transition itself
 	currentstate = currentstate->bestnextstate;
@@ -569,7 +569,7 @@ int EnvironmentROBARM::PrintPathStat(double erreps, int* pathcost)
 #if FORWARD_SEARCH
 	if(goalstate == NULL || goalstate->bestnextstate == NULL)
 	{
-		printf("No path is found\n");
+		SBPL_PRINTF("No path is found\n");
 		*pathcost = INFINITECOST;
 		return 0;
 	}
@@ -578,28 +578,28 @@ int EnvironmentROBARM::PrintPathStat(double erreps, int* pathcost)
 #else
 	if(startstate == NULL || startstate->bestnextstate == NULL)
 	{
-		printf("No path is found\n");
+		SBPL_PRINTF("No path is found\n");
 		*pathcost = INFINITECOST;
 		return 0;
 	}
 	int goalh = Heuristic(goalstate, startstate);
 	if(startstate->g+startstate->h < goalh)
 	{
-		printf("ERROR: invalid heuristic. goalh(updated)=%d startg=%d\n",
+		SBPL_ERROR("ERROR: invalid heuristic. goalh(updated)=%d startg=%d\n",
 			goalh, startstate->g);
 #if PLANNER_TYPE == ARA_PLANNER_TYPE
 		PrintState(startstate, stdout);
 #endif
-		exit(1);
+		throw new SBPL_Exception();
 	}
 	else
-		printf("goalh=%d startg=%d\n", goalstate->h, startstate->g);
+		SBPL_PRINTF("goalh=%d startg=%d\n", goalstate->h, startstate->g);
 	printangles(fSol, startstate);
 	PrintPathRec(startstate, goalstate, &cost);
 #endif
 
-	fprintf(fSol, "path cost=%d at eps=%f\n", cost, erreps);
-	printf("path cost=%d\n", cost);
+	SBPL_FPRINTF(fSol, "path cost=%d at eps=%f\n", cost, erreps);
+	SBPL_PRINTF("path cost=%d\n", cost);
 
 #if PLANNER_TYPE == ANYASTAR_PLANNER_TYPE
 	inconssize = 0;
@@ -607,13 +607,13 @@ int EnvironmentROBARM::PrintPathStat(double erreps, int* pathcost)
 	inconssize = RobArmStateSpace.inconslist->currentsize;
 #endif
 
-	printf("open size=%d, incons size=%d\n", 
+	SBPL_PRINTF("open size=%d, incons size=%d\n", 
 		RobArmStateSpace.heap->currentsize, inconssize);
-	fprintf(fSol, "open size=%d, incons size=%d\n", 
+	SBPL_FPRINTF(fSol, "open size=%d, incons size=%d\n", 
 		RobArmStateSpace.heap->currentsize, inconssize);
 
-	fprintf(fSol1, "**************\n");
-	fflush(fStat);
+	SBPL_FPRINTF(fSol1, "**************\n");
+	SBPL_FFLUSH(fStat);
 
 	*pathcost = cost;
 
@@ -626,27 +626,27 @@ void EnvironmentROBARM::PrintInfo()
 	unsigned int statespace_size = 1;
 	double fsize = 1.0;
 
-	fprintf(fSol, "statespace dim=%d size= <", NUMOFLINKS);
-	fprintf(fSol1, "%d\n", NUMOFLINKS);
+	SBPL_FPRINTF(fSol, "statespace dim=%d size= <", NUMOFLINKS);
+	SBPL_FPRINTF(fSol1, "%d\n", NUMOFLINKS);
 	for(i = 0; i < NUMOFLINKS; i++)
 	{
 		statespace_size *= RobArmStateSpace.anglevals[i];
-		fprintf(fSol, "%d ", RobArmStateSpace.anglevals[i]);
-		fprintf(fSol1, "%f ", EnvROBARMCfg.LinkLength_m[i]);
+		SBPL_FPRINTF(fSol, "%d ", RobArmStateSpace.anglevals[i]);
+		SBPL_FPRINTF(fSol1, "%f ", EnvROBARMCfg.LinkLength_m[i]);
 		fsize = fsize*RobArmStateSpace.anglevals[i];
 	}
-	fprintf(fSol, "> => %g\n", fsize);
-	fprintf(fSol1, "\n");
+	SBPL_FPRINTF(fSol, "> => %g\n", fsize);
+	SBPL_FPRINTF(fSol1, "\n");
 
-	printf("dimensionality: %d statespace: %u (over 10^%d)\n", NUMOFLINKS, statespace_size, 
+	SBPL_PRINTF("dimensionality: %d statespace: %u (over 10^%d)\n", NUMOFLINKS, statespace_size, 
 		(int)(log10(fsize)));
 }
 
 void PrintCoord(short unsigned int coord[NUMOFLINKS], FILE* fOut)
 {
 	for(int i = 0; i < NUMOFLINKS; i++)
-		fprintf(fOut, "%d ", coord[i]);
-	fprintf(fOut, "\n");
+		SBPL_FPRINTF(fOut, "%d ", coord[i]);
+	SBPL_FPRINTF(fOut, "\n");
 }
 */
 //----------------------------------------------------------------------
@@ -659,49 +659,94 @@ void EnvironmentROBARM::ReadConfiguration(FILE* fCfg)
 	int x, y, i;
 
 	//environmentsize(meters)
-	fscanf(fCfg, "%s", sTemp);
-	fscanf(fCfg, "%s", sTemp);
+  if(fscanf(fCfg, "%s", sTemp) != 1){
+    SBPL_ERROR("ERROR: ran out of env file early\n");
+    throw new SBPL_Exception();
+  }
+  if(fscanf(fCfg, "%s", sTemp) != 1){
+    SBPL_ERROR("ERROR: ran out of env file early\n");
+    throw new SBPL_Exception();
+  }
 	EnvROBARMCfg.EnvWidth_m = atof(sTemp);
-	fscanf(fCfg, "%s", sTemp);
+  if(fscanf(fCfg, "%s", sTemp) != 1){
+    SBPL_ERROR("ERROR: ran out of env file early\n");
+    throw new SBPL_Exception();
+  }
 	EnvROBARMCfg.EnvHeight_m = atof(sTemp);
 
 
 	//discretization(cells)
-	fscanf(fCfg, "%s", sTemp);
-	fscanf(fCfg, "%s", sTemp);
+  if(fscanf(fCfg, "%s", sTemp) != 1){
+    SBPL_ERROR("ERROR: ran out of env file early\n");
+    throw new SBPL_Exception();
+  }
+  if(fscanf(fCfg, "%s", sTemp) != 1){
+    SBPL_ERROR("ERROR: ran out of env file early\n");
+    throw new SBPL_Exception();
+  }
 	EnvROBARMCfg.EnvWidth_c = atoi(sTemp);
-	fscanf(fCfg, "%s", sTemp);
+  if(fscanf(fCfg, "%s", sTemp) != 1){
+    SBPL_ERROR("ERROR: ran out of env file early\n");
+    throw new SBPL_Exception();
+  }
 	EnvROBARMCfg.EnvHeight_c = atoi(sTemp);
 	
 	//basex(cells): 
-	fscanf(fCfg, "%s", sTemp);
-	fscanf(fCfg, "%s", sTemp);
+  if(fscanf(fCfg, "%s", sTemp) != 1){
+    SBPL_ERROR("ERROR: ran out of env file early\n");
+    throw new SBPL_Exception();
+  }
+  if(fscanf(fCfg, "%s", sTemp) != 1){
+    SBPL_ERROR("ERROR: ran out of env file early\n");
+    throw new SBPL_Exception();
+  }
 	EnvROBARMCfg.BaseX_c = atoi(sTemp);
 
 	//linklengths(meters): 
-	fscanf(fCfg, "%s", sTemp);	
+  if(fscanf(fCfg, "%s", sTemp) != 1){
+    SBPL_ERROR("ERROR: ran out of env file early\n");
+    throw new SBPL_Exception();
+  }
 	for(i = 0; i < NUMOFLINKS; i++)
 	{
-		fscanf(fCfg, "%s", sTemp);
+    if(fscanf(fCfg, "%s", sTemp) != 1){
+      SBPL_ERROR("ERROR: ran out of env file early\n");
+      throw new SBPL_Exception();
+    }
 		EnvROBARMCfg.LinkLength_m[i] = atof(sTemp);
 	}
 
 	//linkstartangles(degrees): 
-	fscanf(fCfg, "%s", sTemp);	
+  if(fscanf(fCfg, "%s", sTemp) != 1){
+    SBPL_ERROR("ERROR: ran out of env file early\n");
+    throw new SBPL_Exception();
+  }
 	for(i = 0; i < NUMOFLINKS; i++)
 	{
-		fscanf(fCfg, "%s", sTemp);
+    if(fscanf(fCfg, "%s", sTemp) != 1){
+      SBPL_ERROR("ERROR: ran out of env file early\n");
+      throw new SBPL_Exception();
+    }
 		EnvROBARMCfg.LinkStartAngles_d[i] = atoi(sTemp);
 	}
 
 	//endeffectorgoal(cells) or linkgoalangles(degrees): 
-	fscanf(fCfg, "%s", sTemp);
+  if(fscanf(fCfg, "%s", sTemp) != 1){
+    SBPL_ERROR("ERROR: ran out of env file early\n");
+    throw new SBPL_Exception();
+  }
 	if(strcmp(sTemp, "endeffectorgoal(cells):") == 0)
 	{
 		//only endeffector is specified
-		fscanf(fCfg, "%s", sTemp);
+    if(fscanf(fCfg, "%s", sTemp) != 1){
+      SBPL_ERROR("ERROR: ran out of env file early\n");
+      throw new SBPL_Exception();
+    }
 		EnvROBARMCfg.EndEffGoalX_c = atoi(sTemp);
-		fscanf(fCfg, "%s", sTemp);
+    if(fscanf(fCfg, "%s", sTemp) != 1){
+      SBPL_ERROR("ERROR: ran out of env file early\n");
+      throw new SBPL_Exception();
+    }
 		EnvROBARMCfg.EndEffGoalY_c = atoi(sTemp);
 
 		//set goalangle to invalid number
@@ -714,7 +759,10 @@ void EnvironmentROBARM::ReadConfiguration(FILE* fCfg)
 		//linkgoalangles(degrees): 90.0 180.0 90.0		
 		for(i = 0; i < NUMOFLINKS; i++)
 		{
-			fscanf(fCfg, "%s", sTemp);
+      if(fscanf(fCfg, "%s", sTemp) != 1){
+        SBPL_ERROR("ERROR: ran out of env file early\n");
+        throw new SBPL_Exception();
+      }
 			EnvROBARMCfg.LinkGoalAngles_d[i] = atoi(sTemp);
 		}
 		//compute endeffectorgoal(cells):
@@ -726,8 +774,8 @@ void EnvironmentROBARM::ReadConfiguration(FILE* fCfg)
 	}
 	else
 	{
-		printf("ERROR: invalid string encountered=%s\n", sTemp);
-		exit(1);
+		SBPL_ERROR("ERROR: invalid string encountered=%s\n", sTemp);
+		throw new SBPL_Exception();
 	}
 
 
@@ -740,14 +788,17 @@ void EnvironmentROBARM::ReadConfiguration(FILE* fCfg)
 
 
 	//environment:
-	fscanf(fCfg, "%s", sTemp);	
+  if(fscanf(fCfg, "%s", sTemp) != 1){
+    SBPL_ERROR("ERROR: ran out of env file early\n");
+    throw new SBPL_Exception();
+  }
 	for (y = 0; y < EnvROBARMCfg.EnvHeight_c; y++)
 		for (x = 0; x < EnvROBARMCfg.EnvWidth_c; x++)
 		{
 			if(fscanf(fCfg, "%d", &dTemp) != 1)
 			{
-				printf("ERROR: incorrect format of config file\n");
-				exit(1);
+				SBPL_ERROR("ERROR: incorrect format of config file\n");
+				throw new SBPL_Exception();
 			}
 			EnvROBARMCfg.Grid2D[x][y] = dTemp;
 		}
@@ -757,8 +808,8 @@ void EnvironmentROBARM::ReadConfiguration(FILE* fCfg)
 	EnvROBARMCfg.GridCellWidth = EnvROBARMCfg.EnvWidth_m/EnvROBARMCfg.EnvWidth_c;
 	if(EnvROBARMCfg.GridCellWidth != EnvROBARMCfg.EnvHeight_m/EnvROBARMCfg.EnvHeight_c)
 	{
-		printf("ERROR: The cell should be square\n");
-		exit(1);
+		SBPL_ERROR("ERROR: The cell should be square\n");
+		throw new SBPL_Exception();
 	}
 }
 
@@ -1004,11 +1055,11 @@ int EnvironmentROBARM::cost(short unsigned int state1coord[], short unsigned int
 			//return (NUMOFLINKS-i)*(NUMOFLINKS-i);
 	}
 	
-	printf("ERROR: cost on the same states is called:\n");
+	SBPL_ERROR("ERROR: cost on the same states is called:\n");
     //printangles(stdout, state1coord);
     //printangles(stdout, state2coord);
 
-	exit(1);
+	throw new SBPL_Exception();
 
 #endif
 
@@ -1062,7 +1113,7 @@ bool EnvironmentROBARM::InitializeEnvironment()
 	if(!IsValidCoord(EnvROBARM.startHashEntry->coord) || EnvROBARMCfg.EndEffGoalX_c >= EnvROBARMCfg.EnvWidth_c ||
         EnvROBARMCfg.EndEffGoalY_c >= EnvROBARMCfg.EnvHeight_c)
     {
-        printf("Either start or goal configuration is invalid\n");
+        SBPL_PRINTF("Either start or goal configuration is invalid\n");
         return false;
     }
 
@@ -1084,10 +1135,11 @@ bool EnvironmentROBARM::InitializeEnv(const char* sEnvFile)
 	FILE* fCfg = fopen(sEnvFile, "r");
 	if(fCfg == NULL)
 	{
-		printf("ERROR: unable to open %s\n", sEnvFile);
-		exit(1);
+		SBPL_ERROR("ERROR: unable to open %s\n", sEnvFile);
+		throw new SBPL_Exception();
 	}
 	ReadConfiguration(fCfg);
+  fclose(fCfg);
 
 	//Initialize other parameters of the environment
 	InitializeEnvConfig();
@@ -1125,8 +1177,8 @@ int EnvironmentROBARM::GetFromToHeuristic(int FromStateID, int ToStateID)
 	if(FromStateID >= (int)EnvROBARM.StateID2CoordTable.size() 
 		|| ToStateID >= (int)EnvROBARM.StateID2CoordTable.size())
     {
-		printf("ERROR in EnvROBARM... function: stateID illegal\n");
-		exit(1);
+		SBPL_ERROR("ERROR in EnvROBARM... function: stateID illegal\n");
+		throw new SBPL_Exception();
 	}
 #endif
 
@@ -1166,8 +1218,8 @@ int EnvironmentROBARM::GetGoalHeuristic(int stateID)
 #if DEBUG
 	if(stateID >= (int)EnvROBARM.StateID2CoordTable.size())
 	{
-		printf("ERROR in EnvROBARM... function: stateID illegal\n");
-		exit(1);
+		SBPL_ERROR("ERROR in EnvROBARM... function: stateID illegal\n");
+		throw new SBPL_Exception();
 	}
 #endif
 
@@ -1185,15 +1237,15 @@ int EnvironmentROBARM::GetStartHeuristic(int stateID)
 #if DEBUG
 	if(stateID >= (int)EnvROBARM.StateID2CoordTable.size())
 	{
-		printf("ERROR in EnvROBARM... function: stateID illegal\n");
-		exit(1);
+		SBPL_ERROR("ERROR in EnvROBARM... function: stateID illegal\n");
+		throw new SBPL_Exception();
 	}
 #endif
 
 	//define this function if it used in the planner (heuristic backward search would use it)
 
-	printf("ERROR in EnvROBARM.. function: GetStartHeuristic is undefined\n");
-	exit(1);
+	SBPL_ERROR("ERROR in EnvROBARM.. function: GetStartHeuristic is undefined\n");
+	throw new SBPL_Exception();
 
 	return 0;	
 
@@ -1205,8 +1257,8 @@ void EnvironmentROBARM::SetAllPreds(CMDPSTATE* state)
 {
 	//implement this if the planner needs access to predecessors
 	
-	printf("ERROR in EnvROBARM... function: SetAllPreds is undefined\n");
-	exit(1);
+	SBPL_ERROR("ERROR in EnvROBARM... function: SetAllPreds is undefined\n");
+	throw new SBPL_Exception();
 }
 
 
@@ -1223,8 +1275,8 @@ void EnvironmentROBARM::PrintState(int stateID, bool bVerbose, FILE* fOut /*=NUL
 #if DEBUG
 	if(stateID >= (int)EnvROBARM.StateID2CoordTable.size())
 	{
-		printf("ERROR in EnvROBARM... function: stateID illegal (2)\n");
-		exit(1);
+		SBPL_ERROR("ERROR in EnvROBARM... function: stateID illegal (2)\n");
+		throw new SBPL_Exception();
 	}
 #endif
 
@@ -1239,7 +1291,7 @@ void EnvironmentROBARM::PrintState(int stateID, bool bVerbose, FILE* fOut /*=NUL
 
 	if(stateID == EnvROBARM.goalHashEntry->stateID && bVerbose)
 	{
-		fprintf(fOut, "the state is a goal state\n");
+		SBPL_FPRINTF(fOut, "the state is a goal state\n");
         bGoal = true;
 	}
 
@@ -1300,7 +1352,7 @@ void EnvironmentROBARM::PrintSuccGoal(int SourceStateID, int costtogoal, bool bV
                 if(cost(HashEntry->coord,succcoord) == costtogoal || costtogoal == -1)
                 {
                     if(bVerbose)
-                        fprintf(fOut, "the state is a goal state\n");
+                        SBPL_FPRINTF(fOut, "the state is a goal state\n");
                     printangles(fOut, succcoord, true, bVerbose, bLocal);        
                     return;
                 }
@@ -1319,17 +1371,17 @@ void EnvironmentROBARM::PrintEnv_Config(FILE* fOut)
 
 	//implement this if the planner needs to print out EnvROBARM. configuration
 	
-	printf("ERROR in EnvROBARM... function: PrintEnv_Config is undefined\n");
-	exit(1);
+	SBPL_ERROR("ERROR in EnvROBARM... function: PrintEnv_Config is undefined\n");
+	throw new SBPL_Exception();
 
 }
 
 void EnvironmentROBARM::PrintHeader(FILE* fOut)
 {
-    fprintf(fOut, "%d\n", NUMOFLINKS);
+    SBPL_FPRINTF(fOut, "%d\n", NUMOFLINKS);
     for(int i = 0; i < NUMOFLINKS; i++)
-        fprintf(fOut, "%.3f ", EnvROBARMCfg.LinkLength_m[i]);
-    fprintf(fOut, "\n");
+        SBPL_FPRINTF(fOut, "%.3f ", EnvROBARMCfg.LinkLength_m[i]);
+    SBPL_FPRINTF(fOut, "\n");
 }
 
 
@@ -1337,8 +1389,8 @@ void EnvironmentROBARM::SetAllActionsandAllOutcomes(CMDPSTATE* state)
 {
 
 
-	printf("ERROR in EnvROBARM..function: SetAllActionsandOutcomes is undefined\n");
-	exit(1);
+	SBPL_ERROR("ERROR in EnvROBARM..function: SetAllActionsandOutcomes is undefined\n");
+	throw new SBPL_Exception();
 }
 
 
@@ -1400,7 +1452,7 @@ void EnvironmentROBARM::GetSuccs(int SourceStateID, vector<int>* SuccIDV, vector
                 if(endeffx == EnvROBARMCfg.EndEffGoalX_c && endeffy == EnvROBARMCfg.EndEffGoalY_c)
                 {
                     bSuccisGoal = true;
-                    //printf("goal succ is generated\n");
+                    //SBPL_PRINTF("goal succ is generated\n");
                 }
                 bEndEffComputed = true;
             }
@@ -1428,8 +1480,8 @@ void EnvironmentROBARM::GetSuccs(int SourceStateID, vector<int>* SuccIDV, vector
 void EnvironmentROBARM::GetPreds(int TargetStateID, vector<int>* PredIDV, vector<int>* CostV)
 {
 
-	printf("ERROR in EnvROBARM... function: GetPreds is undefined\n");
-	exit(1);
+	SBPL_ERROR("ERROR in EnvROBARM... function: GetPreds is undefined\n");
+	throw new SBPL_Exception();
 }
 
 
@@ -1481,8 +1533,8 @@ void EnvironmentROBARM::GetRandomSuccsatDistance(int SourceStateID, std::vector<
                         coord[cind] = HashEntry->coord[cind] - ROBARM_LONGACTIONDIST_CELLS;
                     //if(coord[cind] < 0)
                     //{
-                    //    printf("ERROR: ROBARM_LONGACTIONDIST_CELLS is too large for dim %d\n", cind);
-                    //    exit(1);
+                    //    SBPL_ERROR("ERROR: ROBARM_LONGACTIONDIST_CELLS is too large for dim %d\n", cind);
+                    //    throw new SBPL_Exception();
                     //}
                 }
             }
@@ -1507,8 +1559,8 @@ void EnvironmentROBARM::GetRandomSuccsatDistance(int SourceStateID, std::vector<
                         coord[cind] = HashEntry->coord[cind] + EnvROBARMCfg.anglevals[cind] + offset;
                     //if(coord[cind] < 0)
                     //{
-                    //    printf("ERROR: ROBARM_LONGACTIONDIST_CELLS is too large for dim %d\n", cind);
-                    //    exit(1);
+                    //    SBPL_ERROR("ERROR: ROBARM_LONGACTIONDIST_CELLS is too large for dim %d\n", cind);
+                    //    throw new SBPL_Exception();
                     //}
                 }
             }//else random offset
@@ -1536,7 +1588,7 @@ void EnvironmentROBARM::GetRandomSuccsatDistance(int SourceStateID, std::vector<
         if(endeffx == EnvROBARMCfg.EndEffGoalX_c && endeffy == EnvROBARMCfg.EndEffGoalY_c)
         {
             bIsGoal = true;
-            //printf("goal succ is generated\n");
+            //SBPL_PRINTF("goal succ is generated\n");
         }
 
         EnvROBARMHashEntry_t* OutHashEntry = NULL;
@@ -1580,8 +1632,8 @@ int EnvironmentROBARM::GetEdgeCost(int FromStateID, int ToStateID)
 	if(FromStateID >= (int)EnvROBARM.StateID2CoordTable.size() 
 		|| ToStateID >= (int)EnvROBARM.StateID2CoordTable.size())
 	{
-		printf("ERROR in EnvROBARM... function: stateID illegal\n");
-		exit(1);
+		SBPL_ERROR("ERROR in EnvROBARM... function: stateID illegal\n");
+		throw new SBPL_Exception();
 	}
 #endif
 
@@ -1601,7 +1653,7 @@ int EnvironmentROBARM::GetRandomState()
     short unsigned int endeffx, endeffy;
 	EnvROBARMHashEntry_t* HashEntry = NULL;
 
-    printf("picking a random state...\n");
+    SBPL_PRINTF("picking a random state...\n");
     while(1)
     {
 
@@ -1609,7 +1661,7 @@ int EnvironmentROBARM::GetRandomState()
         for(int i = 0; i < NUMOFLINKS; i++)
         {
                 //give it a shot
-                coord[i] = (short unsigned int)(EnvROBARMCfg.anglevals[i]*(((double)rand())/(RAND_MAX+1)));
+                coord[i] = (short unsigned int)(EnvROBARMCfg.anglevals[i]*(((double)rand())/(((double)RAND_MAX)+1)));
         }
 
 
@@ -1655,7 +1707,7 @@ int EnvironmentROBARM::GetRandomState()
             if(j == numoftrials)
             {
                 //failed, reset
-                printf("have to reset\n");
+                SBPL_PRINTF("have to reset\n");
                 break;
             }
             else
@@ -1669,14 +1721,14 @@ int EnvironmentROBARM::GetRandomState()
         //if not valid then try something else
         if(!IsValidCoord(coord))
         {
-            //printf("ERROR: we could not have gotten an invalid sample\n");
+            //SBPL_ERROR("ERROR: we could not have gotten an invalid sample\n");
             continue;
         }
         else
             //done - found
             break;
     }
-    printf("done\n");
+    SBPL_PRINTF("done\n");
 
     //compute end effector
     ComputeContAngles(coord, angles);
@@ -1685,7 +1737,7 @@ int EnvironmentROBARM::GetRandomState()
     if(endeffx == EnvROBARMCfg.EndEffGoalX_c && endeffy == EnvROBARMCfg.EndEffGoalY_c)
     {
         bIsGoal = true;
-        //printf("goal succ is generated\n");
+        //SBPL_PRINTF("goal succ is generated\n");
     }
 
     if((HashEntry = GetHashEntry(coord, NUMOFLINKS, bIsGoal)) == NULL)

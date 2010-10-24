@@ -159,26 +159,26 @@ public:
 	/** \brief not fully implemented yet
     */
 	void SetAllActionsandAllOutcomes(CMDPSTATE* state){
-		printf("ERROR: SetAllActionsandAllOutcomes not supported in NAV2D UNDER UNCERTAINTY\n");
-		exit(1);
+		SBPL_ERROR("ERROR: SetAllActionsandAllOutcomes not supported in NAV2D UNDER UNCERTAINTY\n");
+		throw new SBPL_Exception();
 	};
 	/** \brief not fully implemented yet
     */
 	void SetAllPreds(CMDPSTATE* state){
-		printf("ERROR: SetAllPreds not supported in NAV2D UNDER UNCERTAINTY\n");
-		exit(1);
+		SBPL_ERROR("ERROR: SetAllPreds not supported in NAV2D UNDER UNCERTAINTY\n");
+		throw new SBPL_Exception();
 	};
 	/** \brief not fully implemented yet
   */
 	void GetSuccs(int SourceStateID, vector<int>* SuccIDV, vector<int>* CostV){
-		printf("ERROR: GetSuccs not supported in NAV2D UNDER UNCERTAINTY\n");
-		exit(1);
+		SBPL_ERROR("ERROR: GetSuccs not supported in NAV2D UNDER UNCERTAINTY\n");
+		throw new SBPL_Exception();
 	};
 	/** \brief not fully implemented yet
     */
 	void GetPreds(int TargetStateID, vector<int>* PredIDV, vector<int>* CostV){
-		printf("ERROR: GetPreds not supported in NAV2D UNDER UNCERTAINTY\n");
-		exit(1);
+		SBPL_ERROR("ERROR: GetPreds not supported in NAV2D UNDER UNCERTAINTY\n");
+		throw new SBPL_Exception();
 	};
 	
 	/** \brief not fully implemented yet

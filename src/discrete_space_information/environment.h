@@ -99,14 +99,14 @@ public:
     */
 	virtual bool SetEnvParameter(const char* parameter, int value)
 	{
-		printf("ERROR: Environment has no parameters that can be set via SetEnvParameter function\n");
+		SBPL_ERROR("ERROR: Environment has no parameters that can be set via SetEnvParameter function\n");
 		return false;
 	}
 
 	/** NOTE - for debugging door planner - ben 8.31.09 */
 	virtual std::vector<int> GetExpandedStates()
 	{
-		printf("Error: Not yet defined for any environment other than door environment.\n");
+		SBPL_ERROR("Error: Not yet defined for any environment other than door environment.\n");
 		std::vector<int> list;
 		return list;
 	}
@@ -117,8 +117,8 @@ public:
 	unless overwritten in a child class, this function is not implemented
   */
 	virtual bool AreEquivalent(int StateID1, int StateID2){
-		printf("ERROR: environment does not support calls to AreEquivalent function\n");
-		exit(1);
+		SBPL_ERROR("ERROR: environment does not support calls to AreEquivalent function\n");
+		throw new SBPL_Exception();
 	}
 
 	/** \brief the following two functions generate succs/preds at some domain-dependent distance. The number of generated succs/preds is up
@@ -128,15 +128,15 @@ public:
   */
 	virtual void GetRandomSuccsatDistance(int SourceStateID, std::vector<int>* SuccIDV, std::vector<int>* CLowV)
 	{
-		printf("ERROR: environment does not support calls to GetRandomSuccsatDistance function\n");
-		exit(1);
+		SBPL_ERROR("ERROR: environment does not support calls to GetRandomSuccsatDistance function\n");
+		throw new SBPL_Exception();
 	}
 	/** \brief see comments for GetRandomSuccsatDistance
     */
 	virtual void GetRandomPredsatDistance(int TargetStateID, std::vector<int>* PredIDV, std::vector<int>* CLowV)
 	{
-		printf("ERROR: environment does not support calls to GetRandomPredsatDistance function\n");
-		exit(1);
+		SBPL_ERROR("ERROR: environment does not support calls to GetRandomPredsatDistance function\n");
+		throw new SBPL_Exception();
 	};
 
     
@@ -154,11 +154,12 @@ public:
 	/** \brief destructor
     */
 	virtual ~DiscreteSpaceInformation(){
-	printf("destroying discretespaceinformation\n");
+    SBPL_PRINTF("destroying discretespaceinformation\n");
     for(unsigned int i = 0; i < StateID2IndexMapping.size(); ++i){
       if(StateID2IndexMapping[i] != NULL)
         delete[] StateID2IndexMapping[i];
     }
+    SBPL_FCLOSE(fDeb);
   }
 
 
@@ -167,14 +168,13 @@ public:
 	DiscreteSpaceInformation()
 	{
 
-#ifndef WIN32
-	  if((fDeb = fopen("/tmp/envdebug.txt", "w")) == NULL)
-#else
-	  if((fDeb = fopen("envdebug.txt", "w")) == NULL)
+#ifndef ROS
+    const char* envdebug = "envdebug.txt";
 #endif
+	  if((fDeb = SBPL_FOPEN(envdebug, "w")) == NULL)
 	    {
-	      printf("ERROR: failed to open debug file for environment\n");
-	      exit(1);
+	      SBPL_ERROR("ERROR: failed to open debug file for environment\n");
+	      throw new SBPL_Exception();
 	    }
 
 	}

@@ -77,12 +77,12 @@ void runARAPlannerTest(const std::string& problem){
 
       // output the path
       std::string outputStr = problemStr + ".out";
-      FILE* fSol = fopen(outputStr.c_str(), "w");
+      FILE* fSol = SBPL_FOPEN(outputStr.c_str(), "w");
       for(unsigned int i = 0; i < solution_stateIDs_V.size(); i++) {
 	environment_nav2D.PrintState(solution_stateIDs_V[i], true, fSol);
       }
 
-      fclose(fSol);
+      SBPL_FCLOSE(fSol);
 
       // Now apply the file diff test
       diffTest(outputStr);

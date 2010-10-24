@@ -81,13 +81,13 @@ void insert(AbstractSearchState *AbstractSearchState1, int listindex)
 {
 	if(currentsize >= LISTSIZE)
 	{
-		printf("ERROR: list is full\n");
-		exit(1);
+		SBPL_ERROR("ERROR: list is full\n");
+		throw new SBPL_Exception();
 	}
 	if(AbstractSearchState1->listelem[listindex] != NULL)
 	{
-		printf("ERROR: insert: element is already in the list\n");
-		exit(1);
+		SBPL_ERROR("ERROR: insert: element is already in the list\n");
+		throw new SBPL_Exception();
 	}
 	listelement *insertelem = (listelement*)malloc(sizeof(listelement));
 	insertelem->liststate = AbstractSearchState1;
@@ -111,8 +111,8 @@ void remove(AbstractSearchState *AbstractSearchState1, int listindex)
 {
 	if(currentsize == 0 || AbstractSearchState1->listelem[listindex] == NULL)
 	{
-		printf("ERROR: delete: list does not contain the element\n");
-		exit(1);
+		SBPL_ERROR("ERROR: delete: list does not contain the element\n");
+		throw new SBPL_Exception();
 	}
 	if(AbstractSearchState1->listelem[listindex]->prev != NULL && 
 		AbstractSearchState1->listelem[listindex]->next != NULL)
@@ -292,13 +292,13 @@ public:
 #if DEBUG
 		else if(currentminelement_bucketind >= numofbuckets)
 		{	
-			printf("ERROR: currentminelement_bucketind is invalid\n");
-			exit(1);
+			SBPL_ERROR("ERROR: currentminelement_bucketind is invalid\n");
+			throw new SBPL_Exception();
 		}
 		else if((int)bucketV[currentminelement_bucketind].size() <= currentminelement_bucketVind)
 		{
-			printf("ERROR: failed to get minelement\n");
-			exit(1);
+			SBPL_ERROR("ERROR: failed to get minelement\n");
+			throw new SBPL_Exception();
 		}
 #endif
 		else
@@ -315,13 +315,13 @@ public:
 #if DEBUG
 		else if(currentminelement_bucketind >= numofbuckets)
 		{	
-			printf("ERROR: currentminelement_bucketind is invalid\n");
-			exit(1);
+			SBPL_ERROR("ERROR: currentminelement_bucketind is invalid\n");
+			throw new SBPL_Exception();
 		}
 		else if((int)bucketV[currentminelement_bucketind].size() <= currentminelement_bucketVind)
 		{
-			printf("ERROR: failed to get minelement\n");
-			exit(1);
+			SBPL_ERROR("ERROR: failed to get minelement\n");
+			throw new SBPL_Exception();
 		}
 #endif
 		else
@@ -444,8 +444,8 @@ private:
 			}
 			if(currentminelement_priority == INFINITECOST)
 			{
-				printf("ERROR: in recomputemin in buckets\n");
-				exit(1);
+				SBPL_ERROR("ERROR: in recomputemin in buckets\n");
+				throw new SBPL_Exception();
 			}
 		}
 		else if(bind == (numofbuckets - 1))
@@ -595,8 +595,8 @@ public:
 
 		if(bucket_increment >= numofbuckets || bucket_increment < 0)
 		{
-			printf("ERROR: invalid priority=%d (currentfirstbucket_priority=%d) used with sliding buckets\n", priority, currentfirstbucket_priority);
-			exit(1);
+			SBPL_ERROR("ERROR: invalid priority=%d (currentfirstbucket_priority=%d) used with sliding buckets\n", priority, currentfirstbucket_priority);
+			throw new SBPL_Exception();
 		}
 
 		//insert the element
@@ -604,8 +604,8 @@ public:
 
 		if(lastelementindexV[bucket_index] == bucketsize)
 		{
-			printf("ERROR: bucket %d is full (size=%d)\n", bucket_index, bucketsize);
-			exit(1);
+			SBPL_ERROR("ERROR: bucket %d is full (size=%d)\n", bucket_index, bucketsize);
+			throw new SBPL_Exception();
 		}
 
 		if(bucketV[bucket_index] == NULL)
@@ -666,8 +666,8 @@ private:
 	{
 		if(bucketV[bucketindex] != NULL)
 		{
-			printf("ERROR: trying to create a non-null bucket\n");
-			exit(1);
+			SBPL_ERROR("ERROR: trying to create a non-null bucket\n");
+			throw new SBPL_Exception();
 		}
 
 		bucketV[bucketindex] = new AbstractSearchState* [bucketsize];

@@ -40,7 +40,14 @@ PPCPPlanner::PPCPPlanner(DiscreteSpaceInformation* environment, int sizeofS, int
     environment_ = environment;
     
     
-    fDeb = fopen("debug.txt", "w");
+#ifndef ROS
+    const char* debug = "debug.txt";
+#endif
+    fDeb = SBPL_FOPEN(debug, "w");
+    if(fDeb == NULL){
+      SBPL_ERROR("ERROR: could not open planner debug file\n");
+      throw new SBPL_Exception();
+    }
     
     pStateSpace = new PPCPStateSpace_t;
 
@@ -56,7 +63,7 @@ PPCPPlanner::~PPCPPlanner()
     delete pStateSpace;
 	pStateSpace = NULL;
   }
-  fclose(fDeb);
+  SBPL_FCLOSE(fDeb);
 }
 
 
@@ -116,7 +123,7 @@ int PPCPPlanner::set_start(int start_stateID)
 
 void PPCPPlanner::costs_changed(StateChangeQuery const & stateChange)
 {
-	printf("planner: costs_changed, state-space reset\n");
+	SBPL_PRINTF("planner: costs_changed, state-space reset\n");
 
     pStateSpace->bReinitializeSearchStateSpace = true;
 
@@ -125,7 +132,7 @@ void PPCPPlanner::costs_changed(StateChangeQuery const & stateChange)
 
 void PPCPPlanner::costs_changed()
 {
-	printf("planner: costs_changed, state-space reset\n");
+	SBPL_PRINTF("planner: costs_changed, state-space reset\n");
 
     pStateSpace->bReinitializeSearchStateSpace = true;
 
@@ -135,7 +142,7 @@ void PPCPPlanner::costs_changed()
 
 int PPCPPlanner::force_planning_from_scratch()
 {
-	printf("planner: forceplanfromscratch set, state-space reset\n");
+	SBPL_PRINTF("planner: forceplanfromscratch set, state-space reset\n");
 
     pStateSpace->bReinitializeSearchStateSpace = true;
 

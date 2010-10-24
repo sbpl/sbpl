@@ -35,8 +35,8 @@ using namespace std;
 void heaperror(const char* ErrorString)
 {
   //need to send a message from here somehow
-	printf("%s\n", ErrorString);
-	exit(1);
+	SBPL_PRINTF("%s\n", ErrorString);
+	throw new SBPL_Exception();
 }
 
 
@@ -173,13 +173,13 @@ void CHeap::growheap()
   heapelement* newheap;
   int i;
 
-  printf("growing heap size from %d ", allocated);
+  SBPL_PRINTF("growing heap size from %d ", allocated);
 
   allocated = 2*allocated;
   if(allocated > HEAPSIZE)
 	  allocated = HEAPSIZE;
 
-  printf("to %d\n", allocated);
+  SBPL_PRINTF("to %d\n", allocated);
 
   newheap = new heapelement[allocated];
 
@@ -420,13 +420,13 @@ void CIntHeap::growheap()
   heapintelement* newheap;
   int i;
 
-  printf("growing heap size from %d ", allocated);
+  SBPL_PRINTF("growing heap size from %d ", allocated);
 
   allocated = 2*allocated;
   if(allocated > HEAPSIZE)
 	  allocated = HEAPSIZE;
 
-  printf("to %d\n", allocated);
+  SBPL_PRINTF("to %d\n", allocated);
 
   newheap = new heapintelement[allocated];
 

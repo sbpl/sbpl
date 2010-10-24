@@ -62,8 +62,8 @@ public:
 	{
 		if(PlannerSpecificData != NULL)
 		{
-			fprintf(stderr, "ERROR: state deletion: planner specific data is not deleted\n");
-			exit(1);
+			SBPL_FPRINTF(stderr, "ERROR: state deletion: planner specific data is not deleted\n");
+			throw new SBPL_Exception();
 		}
 	};
 
@@ -106,8 +106,8 @@ public:
 	{
 		if(PlannerSpecificData != NULL)
 		{
-			fprintf(stderr, "ERROR: state deletion: planner specific data is not deleted\n");
-			exit(1);
+			SBPL_FPRINTF(stderr, "ERROR: state deletion: planner specific data is not deleted\n");
+			throw new SBPL_Exception();
 		}
 	};
 

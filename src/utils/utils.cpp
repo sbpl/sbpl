@@ -70,8 +70,8 @@ _CrtSetDbgFlag( tmpFlag );
 void checkmdpstate(CMDPSTATE* state)
 {
 #if DEBUG == 0
-	printf("ERROR: checkMDPstate is too expensive for not in DEBUG mode\n");
-	exit(1);
+	SBPL_ERROR("ERROR: checkMDPstate is too expensive for not in DEBUG mode\n");
+	throw new SBPL_Exception();
 #endif
 
 	for(int aind = 0; aind < (int)state->Actions.size(); aind++)
@@ -81,8 +81,8 @@ void checkmdpstate(CMDPSTATE* state)
 			if(state->Actions[aind1]->ActionID == state->Actions[aind]->ActionID &&
 				aind1 != aind)
 			{
-				printf("ERROR in CheckMDP: multiple actions with the same ID exist\n");
-				exit(1);
+				SBPL_ERROR("ERROR in CheckMDP: multiple actions with the same ID exist\n");
+				throw new SBPL_Exception();
 			}
 		}
 		for(int sind = 0; sind < (int)state->Actions[aind]->SuccsID.size(); sind++)
@@ -92,8 +92,8 @@ void checkmdpstate(CMDPSTATE* state)
 				if(state->Actions[aind]->SuccsID[sind] == state->Actions[aind]->SuccsID[sind1] &&
 					sind != sind1)
 				{
-					printf("ERROR in CheckMDP: multiple outcomes with the same ID exist\n");
-					exit(1);
+					SBPL_ERROR("ERROR in CheckMDP: multiple outcomes with the same ID exist\n");
+					throw new SBPL_Exception();
 				}
 			}
 		}		
@@ -118,9 +118,9 @@ void PrintMatrix(int** matrix, int rows, int cols, FILE* fOut)
 	{
 		for(int c = 0; c < cols; c++)
 		{
-			fprintf(fOut, "%d ", matrix[r][c]);
+			SBPL_FPRINTF(fOut, "%d ", matrix[r][c]);
 		}
-		fprintf(fOut, "\n");
+		SBPL_FPRINTF(fOut, "\n");
 	}
 }
 
@@ -145,8 +145,8 @@ bool PathExists(CMDP* pMarkovChain, CMDPSTATE* sourcestate, CMDPSTATE* targetsta
 		//Markov Chain should just contain a single policy
 		if((int)state->Actions.size() > 1)
 		{
-			printf("ERROR in PathExists: Markov Chain is a general MDP\n");
-			exit(1);
+			SBPL_ERROR("ERROR in PathExists: Markov Chain is a general MDP\n");
+			throw new SBPL_Exception();
 		}
 
 		if(state == targetstate)
@@ -167,8 +167,8 @@ bool PathExists(CMDP* pMarkovChain, CMDPSTATE* sourcestate, CMDPSTATE* targetsta
 			}
 			if(i == (int)pMarkovChain->StateArray.size())
 			{	
-				printf("ERROR in PathExists: successor is not found\n");
-				exit(1);
+				SBPL_ERROR("ERROR in PathExists: successor is not found\n");
+				throw new SBPL_Exception();
 			}
 			CMDPSTATE* SuccState = pMarkovChain->StateArray[i];
 					
@@ -190,7 +190,7 @@ int ComputeNumofStochasticActions(CMDP* pMDP)
 {
 	int i;
 	int nNumofStochActions = 0;
-	printf("ComputeNumofStochasticActions...\n");
+	SBPL_PRINTF("ComputeNumofStochasticActions...\n");
 
 	for(i = 0; i < (int)pMDP->StateArray.size(); i++)
 	{
@@ -200,7 +200,7 @@ int ComputeNumofStochasticActions(CMDP* pMDP)
 				nNumofStochActions++;
 		}
 	}
-	printf("done\n");
+	SBPL_PRINTF("done\n");
 
 	return nNumofStochActions;
 }
@@ -217,7 +217,7 @@ void EvaluatePolicy(CMDP* PolicyMDP, int StartStateID, int GoalStateID,
 	*Pcgoal = 0;
 	*nMerges = 0;
 
-	printf("Evaluating policy...\n");
+	SBPL_PRINTF("Evaluating policy...\n");
 
 	//create and initialize values
 	double* vals = new double [PolicyMDP->StateArray.size()];
@@ -275,17 +275,17 @@ void EvaluatePolicy(CMDP* PolicyMDP, int StartStateID, int GoalStateID,
 					}
 					if(j == (int)PolicyMDP->StateArray.size())
 					{
-						printf("ERROR in EvaluatePolicy: incorrect successor %d\n", 
+						SBPL_ERROR("ERROR in EvaluatePolicy: incorrect successor %d\n", 
 							action->SuccsID[oind]);
-						exit(1);
+						throw new SBPL_Exception();
 					}
 					Q += action->SuccsProb[oind]*(vals[j] + action->Costs[oind]);
 				}
 
 				if(vals[i] > Q)
 				{
-					printf("ERROR in EvaluatePolicy: val is decreasing\n"); 
-					exit(1);
+					SBPL_ERROR("ERROR in EvaluatePolicy: val is decreasing\n"); 
+					throw new SBPL_Exception();
 				}
 
 				//update delta
@@ -339,7 +339,7 @@ void EvaluatePolicy(CMDP* PolicyMDP, int StartStateID, int GoalStateID,
 
 	*PolValue = vals[startind];
 	
-	printf("done\n");
+	SBPL_PRINTF("done\n");
 }
 
 
@@ -468,7 +468,7 @@ double normalizeAngle(double angle)
 
     if(retangle < 0 || retangle > 2*PI_CONST)
 	{
-        printf("ERROR: after normalization of angle=%f we get angle=%f\n", angle, retangle);
+        SBPL_ERROR("ERROR: after normalization of angle=%f we get angle=%f\n", angle, retangle);
 	}
 
     return retangle;
@@ -512,7 +512,7 @@ bool IsInsideFootprint(sbpl_2Dpt_t pt, vector<sbpl_2Dpt_t>* bounding_polygon){
   else
     return true;
 #if DEBUG
-  //printf("Returning from inside footprint: %d\n", c);
+  //SBPL_PRINTF("Returning from inside footprint: %d\n", c);
 #endif
   //  return c;
 
@@ -733,7 +733,7 @@ void computeDistancestoNonfreeAreas(unsigned char** Grid2D, int width_x, int hei
 					disttoObs_incells[x][y] = mindisttoObs;
 					disttoNonfree_incells[x][y] = mindisttoNonfree;
 				}   
-			//printf("x=%d\n", x);
+			//SBPL_PRINTF("x=%d\n", x);
 		}
 	}
 

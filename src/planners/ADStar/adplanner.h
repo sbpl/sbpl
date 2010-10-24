@@ -172,6 +172,26 @@ public:
     */
     virtual int get_n_expands() const { return searchexpands; }
 
+	/** \brief returns the initial epsilon
+    */
+  double get_initial_eps(){return finitial_eps;};
+
+	/** \brief returns the time taken to find the first solution
+    */
+  double get_initial_eps_planning_time(){return finitial_eps_planning_time;}
+
+	/** \brief returns the time taken to get the final solution
+    */
+  double get_final_eps_planning_time(){return final_eps_planning_time;};
+
+	/** \brief returns the number of expands to find the first solution
+    */
+  int get_n_expands_init_solution(){return num_of_expands_initial_solution;};
+
+	/** \brief returns the final epsilon achieved during the search
+    */
+  double get_final_epsilon(){return final_eps;};
+
 	/** \brief returns the value of the initial epsilon (suboptimality bound) used
     */
 	virtual void set_initialsolution_eps(double initialsolution_eps) {finitial_eps = initialsolution_eps;};
@@ -189,7 +209,8 @@ public:
 private:
 
 	//member variables
-	double finitial_eps;
+	double finitial_eps, finitial_eps_planning_time, final_eps_planning_time, final_eps;
+	int num_of_expands_initial_solution;
 	MDPConfig* MDPCfg_;
 
 	bool bforwardsearch;

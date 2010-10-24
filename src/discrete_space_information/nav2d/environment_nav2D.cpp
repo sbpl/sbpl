@@ -102,7 +102,7 @@ void EnvironmentNAV2D::PrintHashTableHist()
 		else
 			slarge++;
 	}
-	printf("hash table histogram: 0:%d, <50:%d, <100:%d, <200:%d, <300:%d, <400:%d >400:%d\n",
+	SBPL_PRINTF("hash table histogram: 0:%d, <50:%d, <100:%d, <200:%d, <300:%d, <400:%d >400:%d\n",
 		s0,s1, s50, s100, s200,s300,slarge);
 }
 
@@ -117,12 +117,12 @@ void EnvironmentNAV2D::SetConfiguration(int width, int height,
   int x;
 
   if(EnvNAV2DCfg.StartX_c < 0 || EnvNAV2DCfg.StartX_c >= EnvNAV2DCfg.EnvWidth_c) {
-    printf("ERROR: illegal start coordinates\n");
-    exit(1);
+    SBPL_ERROR("ERROR: illegal start coordinates\n");
+    throw new SBPL_Exception();
   }
   if(EnvNAV2DCfg.StartY_c < 0 || EnvNAV2DCfg.StartY_c >= EnvNAV2DCfg.EnvHeight_c) {
-    printf("ERROR: illegal start coordinates\n");
-    exit(1);
+    SBPL_ERROR("ERROR: illegal start coordinates\n");
+    throw new SBPL_Exception();
   }
   
   EnvNAV2DCfg.EndX_c = goalx;
@@ -162,60 +162,93 @@ void EnvironmentNAV2D::ReadConfiguration(FILE* fCfg)
 	int x, y;
 
 	//discretization(cells)
-	fscanf(fCfg, "%s", sTemp);
-	fscanf(fCfg, "%s", sTemp);
+  if(fscanf(fCfg, "%s", sTemp) != 1){
+    SBPL_ERROR("ERROR: ran out of env file early\n");
+    throw new SBPL_Exception();
+  }
+  if(fscanf(fCfg, "%s", sTemp) != 1){
+    SBPL_ERROR("ERROR: ran out of env file early\n");
+    throw new SBPL_Exception();
+  }
 	EnvNAV2DCfg.EnvWidth_c = atoi(sTemp);
-	fscanf(fCfg, "%s", sTemp);
+  if(fscanf(fCfg, "%s", sTemp) != 1){
+    SBPL_ERROR("ERROR: ran out of env file early\n");
+    throw new SBPL_Exception();
+  }
 	EnvNAV2DCfg.EnvHeight_c = atoi(sTemp);
 	
 	//obsthresh: 
-	fscanf(fCfg, "%s", sTemp);
+  if(fscanf(fCfg, "%s", sTemp) != 1){
+    SBPL_ERROR("ERROR: ran out of env file early\n");
+    throw new SBPL_Exception();
+  }
 	strcpy(sTemp1, "obsthresh:");
 	if(strcmp(sTemp1, sTemp) != 0)
 	{
-		printf("ERROR: configuration file has incorrect format\n");
-		printf("Expected %s got %s\n", sTemp1, sTemp);
-		exit(1);
+		SBPL_ERROR("ERROR: configuration file has incorrect format\n");
+		SBPL_PRINTF("Expected %s got %s\n", sTemp1, sTemp);
+		throw new SBPL_Exception();
 	}
-	fscanf(fCfg, "%s", sTemp);
+  if(fscanf(fCfg, "%s", sTemp) != 1){
+    SBPL_ERROR("ERROR: ran out of env file early\n");
+    throw new SBPL_Exception();
+  }
 	EnvNAV2DCfg.obsthresh = (int)(atof(sTemp));
-	printf("obsthresh = %d\n", EnvNAV2DCfg.obsthresh);
+	SBPL_PRINTF("obsthresh = %d\n", EnvNAV2DCfg.obsthresh);
 
 
 	//start(cells): 
-	fscanf(fCfg, "%s", sTemp);
-	fscanf(fCfg, "%s", sTemp);
+  if(fscanf(fCfg, "%s", sTemp) != 1){
+    SBPL_ERROR("ERROR: ran out of env file early\n");
+    throw new SBPL_Exception();
+  }
+  if(fscanf(fCfg, "%s", sTemp) != 1){
+    SBPL_ERROR("ERROR: ran out of env file early\n");
+    throw new SBPL_Exception();
+  }
 	EnvNAV2DCfg.StartX_c = atoi(sTemp);
-	fscanf(fCfg, "%s", sTemp);
+  if(fscanf(fCfg, "%s", sTemp) != 1){
+    SBPL_ERROR("ERROR: ran out of env file early\n");
+    throw new SBPL_Exception();
+  }
 	EnvNAV2DCfg.StartY_c = atoi(sTemp);
 
 	if(EnvNAV2DCfg.StartX_c < 0 || EnvNAV2DCfg.StartX_c >= EnvNAV2DCfg.EnvWidth_c)
 	{
-		printf("ERROR: illegal start coordinates\n");
-		exit(1);
+		SBPL_ERROR("ERROR: illegal start coordinates\n");
+		throw new SBPL_Exception();
 	}
 	if(EnvNAV2DCfg.StartY_c < 0 || EnvNAV2DCfg.StartY_c >= EnvNAV2DCfg.EnvHeight_c)
 	{
-		printf("ERROR: illegal start coordinates\n");
-		exit(1);
+		SBPL_ERROR("ERROR: illegal start coordinates\n");
+		throw new SBPL_Exception();
 	}
 
 	//end(cells): 
-	fscanf(fCfg, "%s", sTemp);
-	fscanf(fCfg, "%s", sTemp);
+  if(fscanf(fCfg, "%s", sTemp) != 1){
+    SBPL_ERROR("ERROR: ran out of env file early\n");
+    throw new SBPL_Exception();
+  }
+  if(fscanf(fCfg, "%s", sTemp) != 1){
+    SBPL_ERROR("ERROR: ran out of env file early\n");
+    throw new SBPL_Exception();
+  }
 	EnvNAV2DCfg.EndX_c = atoi(sTemp);
-	fscanf(fCfg, "%s", sTemp);
+  if(fscanf(fCfg, "%s", sTemp) != 1){
+    SBPL_ERROR("ERROR: ran out of env file early\n");
+    throw new SBPL_Exception();
+  }
 	EnvNAV2DCfg.EndY_c = atoi(sTemp);
 
 	if(EnvNAV2DCfg.EndX_c < 0 || EnvNAV2DCfg.EndX_c >= EnvNAV2DCfg.EnvWidth_c)
 	{
-		printf("ERROR: illegal end coordinates\n");
-		exit(1);
+		SBPL_ERROR("ERROR: illegal end coordinates\n");
+		throw new SBPL_Exception();
 	}
 	if(EnvNAV2DCfg.EndY_c < 0 || EnvNAV2DCfg.EndY_c >= EnvNAV2DCfg.EnvHeight_c)
 	{
-		printf("ERROR: illegal end coordinates\n");
-		exit(1);
+		SBPL_ERROR("ERROR: illegal end coordinates\n");
+		throw new SBPL_Exception();
 	}
 
 
@@ -227,21 +260,24 @@ void EnvironmentNAV2D::ReadConfiguration(FILE* fCfg)
 	}
 
 	//environment:
-	fscanf(fCfg, "%s", sTemp);	
+  if(fscanf(fCfg, "%s", sTemp) != 1){
+    SBPL_ERROR("ERROR: ran out of env file early\n");
+    throw new SBPL_Exception();
+  }
 	for (y = 0; y < EnvNAV2DCfg.EnvHeight_c; y++)
 		for (x = 0; x < EnvNAV2DCfg.EnvWidth_c; x++)
 		{
 			if(fscanf(fCfg, "%d", &dTemp) != 1)
 			{
-				printf("ERROR: incorrect format of config file\n");
-				exit(1);
+				SBPL_ERROR("ERROR: incorrect format of config file\n");
+				throw new SBPL_Exception();
 			}
 			EnvNAV2DCfg.Grid2D[x][y] = dTemp;
 		}
 
 
 
-	printf("start has cost=%d goal has cost=%d\n", EnvNAV2DCfg.Grid2D[EnvNAV2DCfg.StartX_c][EnvNAV2DCfg.StartY_c], EnvNAV2DCfg.Grid2D[EnvNAV2DCfg.EndX_c][EnvNAV2DCfg.EndY_c]);
+	SBPL_PRINTF("start has cost=%d goal has cost=%d\n", EnvNAV2DCfg.Grid2D[EnvNAV2DCfg.StartX_c][EnvNAV2DCfg.StartY_c], EnvNAV2DCfg.Grid2D[EnvNAV2DCfg.EndX_c][EnvNAV2DCfg.EndY_c]);
 }
 
 
@@ -326,7 +362,7 @@ EnvNAV2DHashEntry_t* EnvironmentNAV2D::GetHashEntry(int X, int Y)
 #if DEBUG
 	if ((int)EnvNAV2D.Coord2StateIDHashTable[binid].size() > 500)
 	{
-		printf("WARNING: Hash table has a bin %d (X=%d Y=%d) of size %d\n", 
+		SBPL_PRINTF("WARNING: Hash table has a bin %d (X=%d Y=%d) of size %d\n", 
 			binid, X, Y, EnvNAV2D.Coord2StateIDHashTable[binid].size());
 		
 		PrintHashTableHist();		
@@ -389,8 +425,8 @@ EnvNAV2DHashEntry_t* EnvironmentNAV2D::CreateNewHashEntry(int X, int Y)
 
 	if(HashEntry->stateID != (int)StateID2IndexMapping.size()-1)
 	{
-		printf("ERROR in Env... function: last state has incorrect stateID\n");
-		exit(1);	
+		SBPL_ERROR("ERROR in Env... function: last state has incorrect stateID\n");
+		throw new SBPL_Exception();	
 	}
 
 #if TIME_DEBUG
@@ -513,8 +549,8 @@ void EnvironmentNAV2D::GetRandomNeighs(int stateID, std::vector<int>* NeighIDV, 
         if((fabs((float)dX) < nDist_c && fabs((float)dY) < nDist_c) || fabs((float)dX) > nDist_c ||
            fabs((float)dY) > nDist_c)
         {
-            printf("ERROR in EnvNav2D genneighs function: dX=%d dY=%d\n", dX, dY);
-            exit(1);
+            SBPL_ERROR("ERROR in EnvNav2D genneighs function: dX=%d dY=%d\n", dX, dY);
+            throw new SBPL_Exception();
         }
 		
 		//get the coords of the state
@@ -583,11 +619,11 @@ void EnvironmentNAV2D::GetRandomNeighs(int stateID, std::vector<int>* NeighIDV, 
 void EnvironmentNAV2D::ComputeHeuristicValues()
 {
 	//whatever necessary pre-computation of heuristic values is done here 
-	printf("Precomputing heuristics...\n");
+	SBPL_PRINTF("Precomputing heuristics...\n");
 	
 
 
-	printf("done\n");
+	SBPL_PRINTF("done\n");
 
 }
 
@@ -598,10 +634,11 @@ bool EnvironmentNAV2D::InitializeEnv(const char* sEnvFile)
 	FILE* fCfg = fopen(sEnvFile, "r");
 	if(fCfg == NULL)
 	{
-		printf("ERROR: unable to open %s\n", sEnvFile);
-		exit(1);
+		SBPL_ERROR("ERROR: unable to open %s\n", sEnvFile);
+		throw new SBPL_Exception();
 	}
 	ReadConfiguration(fCfg);
+  fclose(fCfg);
 
 	InitGeneral();
 
@@ -625,7 +662,7 @@ bool EnvironmentNAV2D::InitializeEnv(int width, int height,
 					int goalx, int goaly, unsigned char obsthresh)
 {
 
-	printf("env: initialized with width=%d height=%d, start=%d %d, goal=%d %d, obsthresh=%d\n", 
+	SBPL_PRINTF("env: initialized with width=%d height=%d, start=%d %d, goal=%d %d, obsthresh=%d\n", 
 		width, height, startx, starty, goalx, goaly, obsthresh);
 
 	EnvNAV2DCfg.obsthresh = obsthresh;
@@ -676,8 +713,8 @@ int EnvironmentNAV2D::GetFromToHeuristic(int FromStateID, int ToStateID)
 	if(FromStateID >= (int)EnvNAV2D.StateID2CoordTable.size() 
 		|| ToStateID >= (int)EnvNAV2D.StateID2CoordTable.size())
 	{
-		printf("ERROR in EnvNAV2D... function: stateID illegal\n");
-		exit(1);
+		SBPL_ERROR("ERROR in EnvNAV2D... function: stateID illegal\n");
+		throw new SBPL_Exception();
 	}
 #endif
 
@@ -700,8 +737,8 @@ int EnvironmentNAV2D::GetGoalHeuristic(int stateID)
 #if DEBUG
 	if(stateID >= (int)EnvNAV2D.StateID2CoordTable.size())
 	{
-		printf("ERROR in EnvNAV2D... function: stateID illegal\n");
-		exit(1);
+		SBPL_ERROR("ERROR in EnvNAV2D... function: stateID illegal\n");
+		throw new SBPL_Exception();
 	}
 #endif
 
@@ -722,8 +759,8 @@ int EnvironmentNAV2D::GetStartHeuristic(int stateID)
 #if DEBUG
 	if(stateID >= (int)EnvNAV2D.StateID2CoordTable.size())
 	{
-		printf("ERROR in EnvNAV2D... function: stateID illegal\n");
-		exit(1);
+		SBPL_ERROR("ERROR in EnvNAV2D... function: stateID illegal\n");
+		throw new SBPL_Exception();
 	}
 #endif
 
@@ -744,14 +781,14 @@ void EnvironmentNAV2D::SetAllActionsandAllOutcomes(CMDPSTATE* state)
 #if DEBUG
 	if(state->StateID >= (int)EnvNAV2D.StateID2CoordTable.size())
 	{
-		printf("ERROR in Env... function: stateID illegal\n");
-		exit(1);
+		SBPL_ERROR("ERROR in Env... function: stateID illegal\n");
+		throw new SBPL_Exception();
 	}
 
 	if((int)state->Actions.size() != 0)
 	{
-		printf("ERROR in Env_setAllActionsandAllOutcomes: actions already exist for the state\n");
-		exit(1);
+		SBPL_ERROR("ERROR in Env_setAllActionsandAllOutcomes: actions already exist for the state\n");
+		throw new SBPL_Exception();
 	}
 #endif
 	
@@ -832,8 +869,8 @@ void EnvironmentNAV2D::SetAllPreds(CMDPSTATE* state)
 {
 	//implement this if the planner needs access to predecessors
 	
-	printf("ERROR in EnvNAV2D... function: SetAllPreds is undefined\n");
-	exit(1);
+	SBPL_ERROR("ERROR in EnvNAV2D... function: SetAllPreds is undefined\n");
+	throw new SBPL_Exception();
 }
 
 
@@ -1011,8 +1048,8 @@ void EnvironmentNAV2D::PrintState(int stateID, bool bVerbose, FILE* fOut /*=NULL
 #if DEBUG
 	if(stateID >= (int)EnvNAV2D.StateID2CoordTable.size())
 	{
-		printf("ERROR in EnvNAV2D... function: stateID illegal (2)\n");
-		exit(1);
+		SBPL_ERROR("ERROR in EnvNAV2D... function: stateID illegal (2)\n");
+		throw new SBPL_Exception();
 	}
 #endif
 
@@ -1023,13 +1060,13 @@ void EnvironmentNAV2D::PrintState(int stateID, bool bVerbose, FILE* fOut /*=NULL
 
 	if(stateID == EnvNAV2D.goalstateid && bVerbose)
 	{
-		fprintf(fOut, "the state is a goal state\n");
+		SBPL_FPRINTF(fOut, "the state is a goal state\n");
 	}
 
     if(bVerbose)
-    	fprintf(fOut, "X=%d Y=%d\n", HashEntry->X, HashEntry->Y);
+    	SBPL_FPRINTF(fOut, "X=%d Y=%d\n", HashEntry->X, HashEntry->Y);
     else
-    	fprintf(fOut, "%d %d\n", HashEntry->X, HashEntry->Y);
+    	SBPL_FPRINTF(fOut, "%d %d\n", HashEntry->X, HashEntry->Y);
 
 }
 
@@ -1058,13 +1095,13 @@ int EnvironmentNAV2D::SetGoal(int x, int y){
 
 	if(!IsWithinMapCell(x,y))
 	{
-		printf("ERROR: trying to set a goal cell %d %d that is outside of map\n", x,y);
+		SBPL_ERROR("ERROR: trying to set a goal cell %d %d that is outside of map\n", x,y);
 		return -1;
 	}
 
     if(!IsValidCell(x,y))
 	{
-		printf("WARNING: goal cell is invalid\n");
+		SBPL_PRINTF("WARNING: goal cell is invalid\n");
 	}
 
 
@@ -1094,13 +1131,13 @@ int EnvironmentNAV2D::SetStart(int x, int y){
 
 	if(!IsWithinMapCell(x,y))
 	{
-		printf("ERROR: trying to set a start cell %d %d that is outside of map\n", x,y);
+		SBPL_ERROR("ERROR: trying to set a start cell %d %d that is outside of map\n", x,y);
 		return -1;
 	}
 
     if(!IsValidCell(x,y))
 	{
-		printf("WARNING: start cell is invalid\n");
+		SBPL_PRINTF("WARNING: start cell is invalid\n");
 	}
 
 
@@ -1131,8 +1168,8 @@ void EnvironmentNAV2D::PrintEnv_Config(FILE* fOut)
 
 	//implement this if the planner needs to print out EnvNAV2D. configuration
 	
-	printf("ERROR in EnvNAV2D... function: PrintEnv_Config is undefined\n");
-	exit(1);
+	SBPL_ERROR("ERROR in EnvNAV2D... function: PrintEnv_Config is undefined\n");
+	throw new SBPL_Exception();
 
 }
 
@@ -1140,7 +1177,7 @@ void EnvironmentNAV2D::PrintTimeStat(FILE* fOut)
 {
 
 #if TIME_DEBUG
-    fprintf(fOut, "time3_addallout = %f secs, time_gethash = %f secs, time_createhash = %f secs, time_getsuccs = %f\n",
+    SBPL_FPRINTF(fOut, "time3_addallout = %f secs, time_gethash = %f secs, time_createhash = %f secs, time_getsuccs = %f\n",
             time3_addallout/(double)CLOCKS_PER_SEC, time_gethash/(double)CLOCKS_PER_SEC, 
             time_createhash/(double)CLOCKS_PER_SEC, time_getsuccs/(double)CLOCKS_PER_SEC);
 #endif
@@ -1225,11 +1262,11 @@ bool EnvironmentNAV2D::SetEnvParameter(const char* parameter, int value)
 
 	if(EnvNAV2D.bInitialized == true)
 	{
-		printf("ERROR: all parameters must be set before initialization of the environment\n");
+		SBPL_ERROR("ERROR: all parameters must be set before initialization of the environment\n");
 		return false;
 	}
 
-	printf("setting parameter %s to %d\n", parameter, value);
+	SBPL_PRINTF("setting parameter %s to %d\n", parameter, value);
 
 	if(strcmp(parameter, "is16connected") == 0)
 	{
@@ -1240,7 +1277,7 @@ bool EnvironmentNAV2D::SetEnvParameter(const char* parameter, int value)
 	}
 	else
 	{
-		printf("ERROR: invalid parameter %s\n", parameter);
+		SBPL_ERROR("ERROR: invalid parameter %s\n", parameter);
 		return false;
 	}
 
@@ -1255,8 +1292,8 @@ bool EnvironmentNAV2D::AreEquivalent(int StateID1, int StateID2)
 #if DEBUG
 	if(StateID1 >= (int)EnvNAV2D.StateID2CoordTable.size() || StateID2 >= (int)EnvNAV2D.StateID2CoordTable.size())
 	{
-		printf("ERROR in EnvNAV2D... function: stateID illegal (2)\n");
-		exit(1);
+		SBPL_ERROR("ERROR in EnvNAV2D... function: stateID illegal (2)\n");
+		throw new SBPL_Exception();
 	}
 #endif
 		
@@ -1282,8 +1319,8 @@ void EnvironmentNAV2D::GetRandomSuccsatDistance(int SourceStateID, std::vector<i
 #if DEBUG
 	if(SourceStateID >= (int)EnvNAV2D.StateID2CoordTable.size())
 	{
-		printf("ERROR in EnvNAV2DGetRandSuccs... function: stateID illegal\n");
-		exit(1);
+		SBPL_ERROR("ERROR in EnvNAV2DGetRandSuccs... function: stateID illegal\n");
+		throw new SBPL_Exception();
 	}
 #endif
 
@@ -1309,8 +1346,8 @@ void EnvironmentNAV2D::GetRandomPredsatDistance(int TargetStateID, std::vector<i
 #if DEBUG
 	if(TargetStateID >= (int)EnvNAV2D.StateID2CoordTable.size())
 	{
-		printf("ERROR in EnvNAV2DGetRandSuccs... function: stateID illegal\n");
-		exit(1);
+		SBPL_ERROR("ERROR in EnvNAV2DGetRandSuccs... function: stateID illegal\n");
+		throw new SBPL_Exception();
 	}
 #endif
 

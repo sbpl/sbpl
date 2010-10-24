@@ -165,8 +165,8 @@ bool EnvironmentNAVXYTHETAMLEVLAT::IsObstacle(int X, int Y, int levind)
 #if DEBUG
 	if(levind >= numofadditionalzlevs)
 	{
-		printf("ERROR: IsObstacle invoked at level %d\n", levind);
-		fprintf(fDeb, "ERROR: IsObstacle invoked at level %d\n", levind);
+		SBPL_ERROR("ERROR: IsObstacle invoked at level %d\n", levind);
+		SBPL_FPRINTF(fDeb, "ERROR: IsObstacle invoked at level %d\n", levind);
 		return false;
 	}
 #endif
@@ -193,8 +193,8 @@ unsigned char EnvironmentNAVXYTHETAMLEVLAT::GetMapCost(int X, int Y, int levind)
 #if DEBUG
 	if(levind >= numofadditionalzlevs)
 	{
-		printf("ERROR: GetMapCost invoked at level %d\n", levind);
-		fprintf(fDeb, "ERROR: GetMapCost invoked at level %d\n", levind);
+		SBPL_ERROR("ERROR: GetMapCost invoked at level %d\n", levind);
+		SBPL_FPRINTF(fDeb, "ERROR: GetMapCost invoked at level %d\n", levind);
 		return false;
 	}
 #endif
@@ -330,7 +330,7 @@ int EnvironmentNAVXYTHETAMLEVLAT::GetActionCostacrossAddLevels(int SourceX, int 
 			checks++;
 
 			//get intersecting cells for this level
-			vector<sbpl_2Dcell_t>* intersectingcellsV = &AdditionalInfoinActionsV[action->starttheta][action->aind].intersectingcellsV[levelind]; 
+			vector<sbpl_2Dcell_t>* intersectingcellsV = &AdditionalInfoinActionsV[(unsigned int)action->starttheta][action->aind].intersectingcellsV[levelind]; 
 			for(i = 0; i < (int)intersectingcellsV->size(); i++) 
 			{
 				//get the cell in the map
@@ -390,7 +390,7 @@ bool EnvironmentNAVXYTHETAMLEVLAT::InitializeAdditionalLevels(int numofadditiona
 
 
 	numofadditionalzlevs = numofadditionalzlevs_in;
-	printf("Planning with additional z levels. Number of additional z levels = %d\n", numofadditionalzlevs);
+	SBPL_PRINTF("Planning with additional z levels. Number of additional z levels = %d\n", numofadditionalzlevs);
 
 	//allocate memory and set FootprintPolygons for additional levels
 	AddLevelFootprintPolygonV = new vector<sbpl_2Dpt_t> [numofadditionalzlevs];
@@ -404,15 +404,15 @@ bool EnvironmentNAVXYTHETAMLEVLAT::InitializeAdditionalLevels(int numofadditiona
 	for(levelind = 0; levelind < numofadditionalzlevs; levelind++)
 	{
 		CalculateFootprintForPose(temppose, &footprint, AddLevelFootprintPolygonV[levelind]);
-		printf("number of cells in footprint for additional level %d = %d\n", levelind, footprint.size());
+		SBPL_PRINTF("number of cells in footprint for additional level %d = %d\n", levelind, (unsigned int)footprint.size());
 	}
 
 	//compute additional levels action info
-	printf("pre-computing action data for additional levels:\n");
+	SBPL_PRINTF("pre-computing action data for additional levels:\n");
 	AdditionalInfoinActionsV = new EnvNAVXYTHETAMLEVLATAddInfoAction_t*[NAVXYTHETALAT_THETADIRS]; 
 	for(int tind = 0; tind < NAVXYTHETALAT_THETADIRS; tind++)
 	{
-		printf("pre-computing for angle %d out of %d angles\n", tind, NAVXYTHETALAT_THETADIRS);
+		SBPL_PRINTF("pre-computing for angle %d out of %d angles\n", tind, NAVXYTHETALAT_THETADIRS);
 
 		//compute sourcepose
 		EnvNAVXYTHETALAT3Dpt_t sourcepose;
@@ -489,7 +489,7 @@ bool EnvironmentNAVXYTHETAMLEVLAT::Set2DMapforAddLev(const unsigned char* mapdat
 
 	if(AddLevelGrid2D == NULL)
 	{
-		printf("ERROR: failed to set2Dmap because the map was not allocated previously\n");
+		SBPL_ERROR("ERROR: failed to set2Dmap because the map was not allocated previously\n");
 		return false;
 	}
 
@@ -510,7 +510,7 @@ bool EnvironmentNAVXYTHETAMLEVLAT::Set2DMapforAddLev(const unsigned char** NewGr
 
 	if(AddLevelGrid2D == NULL)
 	{
-		printf("ERROR: failed to set2Dmap because the map was not allocated previously\n");
+		SBPL_ERROR("ERROR: failed to set2Dmap because the map was not allocated previously\n");
 		return false;
 	}
 
@@ -532,7 +532,7 @@ bool EnvironmentNAVXYTHETAMLEVLAT::UpdateCostinAddLev(int x, int y, unsigned cha
   {
 
 #if DEBUG
-	//fprintf(fDeb, "Cost updated for cell %d %d at level %d from old cost=%d to new cost=%d\n", 
+	//SBPL_FPRINTF(fDeb, "Cost updated for cell %d %d at level %d from old cost=%d to new cost=%d\n", 
 	  x,y,zlev,   AddLevelGrid2D[zlev][x][y], newcost);
 #endif
 

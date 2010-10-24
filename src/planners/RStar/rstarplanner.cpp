@@ -49,8 +49,15 @@ RSTARPlanner::RSTARPlanner(DiscreteSpaceInformation* environment, bool bSearchFo
     lowlevel_searchexpands = 0;
     MaxMemoryCounter = 0;
     
-    fDeb = fopen("debug.txt", "w");
-    printf("debug on\n");
+#ifndef ROS
+    const char* debug = "debug.txt";
+#endif
+    fDeb = SBPL_FOPEN(debug, "w");
+    if(fDeb == NULL){
+      SBPL_ERROR("ERROR: could not open planner debug file\n");
+      throw new SBPL_Exception();
+    }
+    SBPL_PRINTF("debug on\n");
     
 	//create global searchstatespace
     pSearchStateSpace = new RSTARSearchStateSpace_t;
@@ -65,14 +72,14 @@ RSTARPlanner::RSTARPlanner(DiscreteSpaceInformation* environment, bool bSearchFo
     //create the RSTAR planner
     if(CreateSearchStateSpace() != 1)
         {
-            printf("ERROR: failed to create statespace\n");
+            SBPL_ERROR("ERROR: failed to create statespace\n");
             return;
         }
     
     //set the start and goal states
     if(InitializeSearchStateSpace() != 1)
         {
-            printf("ERROR: failed to create statespace\n");
+            SBPL_ERROR("ERROR: failed to create statespace\n");
             return;
         }    
 }
@@ -84,7 +91,7 @@ RSTARPlanner::~RSTARPlanner()
     DeleteSearchStateSpace();
     delete pSearchStateSpace;
   }
-  fclose(fDeb);
+  SBPL_FCLOSE(fDeb);
 }
 
 
@@ -105,8 +112,8 @@ CMDPSTATE* RSTARPlanner::CreateState(int stateID)
 #if DEBUG
 	if(environment_->StateID2IndexMapping[stateID][RSTARMDP_STATEID2IND] != -1)
 	{
-		printf("ERROR in CreateState: state already created\n");
-		exit(1);
+		SBPL_ERROR("ERROR in CreateState: state already created\n");
+		throw new SBPL_Exception();
 	}
 #endif
 
@@ -119,8 +126,8 @@ CMDPSTATE* RSTARPlanner::CreateState(int stateID)
 #if DEBUG
 	if(state != pSearchStateSpace->searchMDP.StateArray[environment_->StateID2IndexMapping[stateID][RSTARMDP_STATEID2IND]])
 	{
-		printf("ERROR in CreateState: invalid state index\n");
-		exit(1);
+		SBPL_ERROR("ERROR in CreateState: invalid state index\n");
+		throw new SBPL_Exception();
 	}
 #endif
 
@@ -139,8 +146,8 @@ CMDPSTATE* RSTARPlanner::GetState(int stateID)
 
 	if(stateID >= (int)environment_->StateID2IndexMapping.size())
 	{
-          printf("ERROR int GetState: stateID %d is invalid\n", stateID);
-		exit(1);
+          SBPL_ERROR("ERROR int GetState: stateID %d is invalid\n", stateID);
+		throw new SBPL_Exception();
 	}
 
 	if(environment_->StateID2IndexMapping[stateID][RSTARMDP_STATEID2IND] == -1)
@@ -181,8 +188,8 @@ CMDPSTATE* RSTARPlanner::CreateLSearchState(int stateID)
 #if DEBUG
 	if(environment_->StateID2IndexMapping[stateID][RSTARMDP_LSEARCH_STATEID2IND] != -1)
 	{
-		printf("ERROR in CreateState: state already created\n");
-		exit(1);
+		SBPL_ERROR("ERROR in CreateState: state already created\n");
+		throw new SBPL_Exception();
 	}
 #endif
 
@@ -195,8 +202,8 @@ CMDPSTATE* RSTARPlanner::CreateLSearchState(int stateID)
 #if DEBUG
 	if(state != pLSearchStateSpace->MDP.StateArray[environment_->StateID2IndexMapping[stateID][RSTARMDP_LSEARCH_STATEID2IND]])
 	{
-		printf("ERROR in CreateState: invalid state index\n");
-		exit(1);
+		SBPL_ERROR("ERROR in CreateState: invalid state index\n");
+		throw new SBPL_Exception();
 	}
 #endif
 
@@ -213,8 +220,8 @@ CMDPSTATE* RSTARPlanner::GetLSearchState(int stateID)
 
 	if(stateID >= (int)environment_->StateID2IndexMapping.size())
 	{
-		printf("ERROR int GetLSearchState: stateID is invalid\n");
-		exit(1);
+		SBPL_ERROR("ERROR int GetLSearchState: stateID is invalid\n");
+		throw new SBPL_Exception();
 	}
 
 	if(environment_->StateID2IndexMapping[stateID][RSTARMDP_LSEARCH_STATEID2IND] == -1)
@@ -335,7 +342,7 @@ bool RSTARPlanner::ComputeLocalPath(int StartStateID, int GoalStateID, int maxc,
 		{
 			if((clock()-TimeStarted) >= maxnumofsecs*(double)CLOCKS_PER_SEC) 
 			{
-				printf("breaking local search because global planning time expires\n");
+				SBPL_PRINTF("breaking local search because global planning time expires\n");
 				break;
 			}
 		}
@@ -344,7 +351,7 @@ bool RSTARPlanner::ComputeLocalPath(int StartStateID, int GoalStateID, int maxc,
     }//while
 
     lowlevel_searchexpands += local_expands;
-    fprintf(fDeb, "local search: expands=%d\n", local_expands);
+    SBPL_FPRINTF(fDeb, "local search: expands=%d\n", local_expands);
 
     //set the return path and other path related variables
     vector<int> tempPathID;
@@ -372,14 +379,14 @@ bool RSTARPlanner::ComputeLocalPath(int StartStateID, int GoalStateID, int maxc,
         }
         *pCost = pathcost;
         *pCostLow = rstarlsearchgoalstate->g;
-        fprintf(fDeb, "pathcost=%d while g=%d\n", pathcost, rstarlsearchgoalstate->g);
+        SBPL_FPRINTF(fDeb, "pathcost=%d while g=%d\n", pathcost, rstarlsearchgoalstate->g);
     }
     else
     {
         *pCost = INFINITECOST;
         *pCostLow = pLSearchStateSpace->OPEN->getminkeyheap().key[0]; 
         if(*pCostLow != pLSearchStateSpace->OPEN->getminkeyheap().key[0]){
-	  fprintf(fDeb, "after localsearch clow=%d while keymin=%d\n", (int)(*pCostLow), 
+	  SBPL_FPRINTF(fDeb, "after localsearch clow=%d while keymin=%d\n", (int)(*pCostLow), 
 		  (int)pLSearchStateSpace->OPEN->getminkeyheap().key[0]);
         }
     }
@@ -409,8 +416,8 @@ bool RSTARPlanner::DestroyLocalSearchMemory()
     //now we can delete the states themselves
     if(pLSearchStateSpace->MDP.Delete() == false)
     {
-        printf("ERROR: failed to delete local search MDP\n");
-        exit(1);
+        SBPL_ERROR("ERROR: failed to delete local search MDP\n");
+        throw new SBPL_Exception();
     }
 
     //TODO - ask Env to delete the new memory allocated during the local search (usings the fact that stateID's for local search continuously and no states were
@@ -613,8 +620,8 @@ int RSTARPlanner::ImprovePath(double MaxNumofSecs)
 
 	if(pSearchStateSpace->searchgoalstate == NULL)
 	{
-		printf("ERROR searching: no goal state is set\n");
-		exit(1);
+		SBPL_ERROR("ERROR searching: no goal state is set\n");
+		throw new SBPL_Exception();
 	}
 
 	//goal state
@@ -654,13 +661,13 @@ int RSTARPlanner::ImprovePath(double MaxNumofSecs)
         //pop the min element
         rstarstate = (RSTARState*)pSearchStateSpace->OPEN->deleteminheap();
 
-        fprintf(fDeb, "ComputePath:  selected state %d g=%d\n", rstarstate->MDPstate->StateID, rstarstate->g);
+        SBPL_FPRINTF(fDeb, "ComputePath:  selected state %d g=%d\n", rstarstate->MDPstate->StateID, rstarstate->g);
         environment_->PrintState(rstarstate->MDPstate->StateID, true, fDeb);
         
         if (rstarstate->MDPstate != pSearchStateSpace->searchstartstate &&
             ((RSTARACTIONDATA*)rstarstate->bestpredaction->PlannerSpecificData)->pathIDs.size() == 0) 
         {
-            fprintf(fDeb, "re-compute path\n");
+            SBPL_FPRINTF(fDeb, "re-compute path\n");
   
             int maxe = INFINITECOST;
             int maxc = INFINITECOST;
@@ -677,8 +684,8 @@ int RSTARPlanner::ImprovePath(double MaxNumofSecs)
             }
             else
             {
-                printf("Trying to compute hard-to-find path\n");
-                fprintf(fDeb, "Trying to compute hard-to-find path\n");
+                SBPL_PRINTF("Trying to compute hard-to-find path\n");
+                SBPL_FPRINTF(fDeb, "Trying to compute hard-to-find path\n");
                 /* TODO
                 CKey nextkey = rstarPlanner.OPEN->getminkeyheap();
                 
@@ -693,9 +700,9 @@ int RSTARPlanner::ImprovePath(double MaxNumofSecs)
             }
 
 
-            fprintf(fDeb, "recomputing path from bp %d to state %d with maxc=%d maxe=%d\n", 
+            SBPL_FPRINTF(fDeb, "recomputing path from bp %d to state %d with maxc=%d maxe=%d\n", 
                 rstarpredstate->MDPstate->StateID, rstarstate->MDPstate->StateID, maxc, maxe);
-            fprintf(fDeb, "bp state:\n");
+            SBPL_FPRINTF(fDeb, "bp state:\n");
             environment_->PrintState(rstarpredstate->MDPstate->StateID, true, fDeb);
 
             //re-compute the path
@@ -703,14 +710,14 @@ int RSTARPlanner::ImprovePath(double MaxNumofSecs)
 	       ComputeLocalPath(rstarpredstate->MDPstate->StateID, rstarstate->MDPstate->StateID, maxc, maxe, 
                 &computedaction->Costs[0], &computedactiondata->clow, &computedactiondata->exp, &computedactiondata->pathIDs, &NewGoalStateID, MaxNumofSecs);
 
-            fprintf(fDeb, "return values: pathcost=%d clow=%d exp=%d\n", 
+            SBPL_FPRINTF(fDeb, "return values: pathcost=%d clow=%d exp=%d\n", 
                 computedaction->Costs[0], computedactiondata->clow, computedactiondata->exp);
             bool bSwitch = false;
             if(NewGoalStateID != rstarstate->MDPstate->StateID)
             {
                 bSwitch = true;
-                fprintf(fDeb, "targetstate was switched from %d to %d\n", rstarstate->MDPstate->StateID, NewGoalStateID);
-                fprintf(stdout, "targetstate was switched from %d to %d\n", rstarstate->MDPstate->StateID, NewGoalStateID);
+                SBPL_FPRINTF(fDeb, "targetstate was switched from %d to %d\n", rstarstate->MDPstate->StateID, NewGoalStateID);
+                SBPL_FPRINTF(stdout, "targetstate was switched from %d to %d\n", rstarstate->MDPstate->StateID, NewGoalStateID);
                 environment_->PrintState(NewGoalStateID, true, fDeb);
 
                 RSTARState* rstarNewTargetState = (RSTARState*)GetState(NewGoalStateID)->PlannerSpecificData;
@@ -719,7 +726,7 @@ int RSTARPlanner::ImprovePath(double MaxNumofSecs)
 				if(rstarNewTargetState->callnumberaccessed != pSearchStateSpace->callnumber)
 					ReInitializeSearchStateInfo(rstarNewTargetState);
 
-                fprintf(fDeb, "predstate.g=%d actual actioncost=%d clow=%d newtartetstate.g=%d\n", rstarpredstate->g, computedaction->Costs[0], 
+                SBPL_FPRINTF(fDeb, "predstate.g=%d actual actioncost=%d clow=%d newtartetstate.g=%d\n", rstarpredstate->g, computedaction->Costs[0], 
                         ((RSTARACTIONDATA*)computedaction->PlannerSpecificData)->clow, rstarNewTargetState->g);
 
                 //add the successor to our graph
@@ -761,8 +768,8 @@ int RSTARPlanner::ImprovePath(double MaxNumofSecs)
             if (computedactiondata->pathIDs.size() == 0 || 
                 rstarpredstate->g + computedactiondata->clow > pSearchStateSpace->eps*hfromstarttostate)
             {
-               fprintf(fDeb, "selecting best pred\n");
-               //fprintf(stdout, "selecting best pred\n");
+               SBPL_FPRINTF(fDeb, "selecting best pred\n");
+               //SBPL_FPRINTF(stdout, "selecting best pred\n");
 
                 //select other best predecessor
                 unsigned int minQ = INFINITECOST;
@@ -783,8 +790,8 @@ int RSTARPlanner::ImprovePath(double MaxNumofSecs)
             }
             else if(rstarpredstate->g + computedactiondata->clow < rstarstate->g || bSwitch == false)
             {
-               fprintf(fDeb, "keeping the same computedaction\n");
-               //fprintf(stdout, "keeping the same best pred\n");
+               SBPL_FPRINTF(fDeb, "keeping the same computedaction\n");
+               //SBPL_FPRINTF(stdout, "keeping the same best pred\n");
 
                 stateu = rstarpredstate;
                 utosaction = computedaction;
@@ -795,12 +802,12 @@ int RSTARPlanner::ImprovePath(double MaxNumofSecs)
             }
             else
             {
-                fprintf(fDeb, "keeping the same bestpredaction even though switch of targetstates happened\n");
+                SBPL_FPRINTF(fDeb, "keeping the same bestpredaction even though switch of targetstates happened\n");
             }           
         }
         else
         {
-            fprintf(fDeb, "high-level normal expansion of state %d\n", rstarstate->MDPstate->StateID);
+            SBPL_FPRINTF(fDeb, "high-level normal expansion of state %d\n", rstarstate->MDPstate->StateID);
             environment_->PrintState(rstarstate->MDPstate->StateID, true, fDeb);
             highlevelexpands++;
 
@@ -819,7 +826,7 @@ int RSTARPlanner::ImprovePath(double MaxNumofSecs)
 	            environment_->GetRandomPredsatDistance(rstarstate->MDPstate->StateID, &SuccIDV, &CLowV); 
 
 
-            fprintf(fDeb, "%d succs were generated at random\n", SuccIDV.size());
+            SBPL_FPRINTF(fDeb, "%d succs were generated at random\n", (unsigned int)SuccIDV.size());
 
             //iterate over states in SUCCS set
             int notclosed = 0;
@@ -827,13 +834,13 @@ int RSTARPlanner::ImprovePath(double MaxNumofSecs)
             {
                 RSTARState* rstarSuccState = (RSTARState*)GetState(SuccIDV.at(i))->PlannerSpecificData;
 
-                fprintf(fDeb, "succ %d:\n", i);
+                SBPL_FPRINTF(fDeb, "succ %d:\n", i);
                 environment_->PrintState(rstarSuccState->MDPstate->StateID, true, fDeb);
                 
                 //skip if the state is already closed
                 if(rstarSuccState->iterationclosed == pSearchStateSpace->searchiteration)
                 {
-                    fprintf(fDeb, "this succ was already closed -- skipping it\n");
+                    SBPL_FPRINTF(fDeb, "this succ was already closed -- skipping it\n");
                     continue;
                 }
                 notclosed++;
@@ -843,7 +850,7 @@ int RSTARPlanner::ImprovePath(double MaxNumofSecs)
 					ReInitializeSearchStateInfo(rstarSuccState);
                 
                 //if(rstarSuccState->MDPstate->StateID == 3838){
-                //    fprintf(fDeb, "generating state %d with g=%d bp=%d:\n", rstarSuccState->MDPstate->StateID, rstarSuccState->g, 
+                //    SBPL_FPRINTF(fDeb, "generating state %d with g=%d bp=%d:\n", rstarSuccState->MDPstate->StateID, rstarSuccState->g, 
                 //            (rstarSuccState->bestpredaction==NULL?-1:rstarSuccState->bestpredaction->SourceStateID));
                 //    Env_PrintState(rstarSuccState->MDPstate->StateID, true, false, fDeb);
                 //}
@@ -865,16 +872,16 @@ int RSTARPlanner::ImprovePath(double MaxNumofSecs)
                 if(rstarSuccState->bestpredaction == NULL || rstarstate->g + CLowV[i] < rstarSuccState->g)
                 {
                     SetBestPredecessor(rstarSuccState, rstarstate, action);
-                    fprintf(fDeb, "bestpred was set for the succ (clow=%d)\n", CLowV[i]);
+                    SBPL_FPRINTF(fDeb, "bestpred was set for the succ (clow=%d)\n", CLowV[i]);
                 }
                 else
                 {
-                    fprintf(fDeb, "bestpred was NOT modified - old one is better\n");
+                    SBPL_FPRINTF(fDeb, "bestpred was NOT modified - old one is better\n");
                 }
 
             }
 
-            //printf("%d successors were not closed\n", notclosed);
+            //SBPL_PRINTF("%d successors were not closed\n", notclosed);
         }//else
 
 
@@ -886,36 +893,36 @@ int RSTARPlanner::ImprovePath(double MaxNumofSecs)
 
 		if(expands%10 == 0 && expands > 0)
 		{
-			printf("high-level expands so far=%u\n", expands);
+			SBPL_PRINTF("high-level expands so far=%u\n", expands);
 		}
 
 	}
-    printf("main loop done\n");
-    fprintf(fDeb, "main loop done\n");
+    SBPL_PRINTF("main loop done\n");
+    SBPL_FPRINTF(fDeb, "main loop done\n");
 
 	int retv = 1;
 	if(searchgoalstate->g == INFINITECOST && pSearchStateSpace->OPEN->emptyheap())
 	{
-		printf("solution does not exist: search exited because heap is empty\n");
+		SBPL_PRINTF("solution does not exist: search exited because heap is empty\n");
 		retv = 0;
 	}
 	else if(!pSearchStateSpace->OPEN->emptyheap() && goalkey > minkey)
 	{
-		printf("search exited because it ran out of time\n");
+		SBPL_PRINTF("search exited because it ran out of time\n");
 		retv = 2;
 	}
 	else if(searchgoalstate->g == INFINITECOST && !pSearchStateSpace->OPEN->emptyheap())
 	{
-		printf("solution does not exist: search exited because all candidates for expansion have infinite heuristics\n");
+		SBPL_PRINTF("solution does not exist: search exited because all candidates for expansion have infinite heuristics\n");
 		retv = 0;
 	}
 	else
 	{
-		printf("search exited with a solution for eps=%.3f\n", pSearchStateSpace->eps);
+		SBPL_PRINTF("search exited with a solution for eps=%.3f\n", pSearchStateSpace->eps);
 		retv = 1;
 	}
 
-	fprintf(fDeb, "high-level expanded=%d\n", expands);
+	SBPL_FPRINTF(fDeb, "high-level expanded=%d\n", expands);
 
 	highlevel_searchexpands += expands;
 
@@ -1032,7 +1039,7 @@ void RSTARPlanner::ReInitializeSearchStateSpace()
 	pSearchStateSpace->bNewSearchIteration = true;
 
 #if DEBUG
-    fprintf(fDeb, "reinitializing search state-space (new call number=%d search iter=%d)\n", 
+    SBPL_FPRINTF(fDeb, "reinitializing search state-space (new call number=%d search iter=%d)\n", 
             pSearchStateSpace->callnumber,pSearchStateSpace->searchiteration );
 #endif
 
@@ -1066,8 +1073,8 @@ int RSTARPlanner::InitializeSearchStateSpace()
 	if(pSearchStateSpace->OPEN->currentsize != 0) 
 //		|| pSearchStateSpace->inconslist->currentsize != 0)
 	{
-		printf("ERROR in InitializeSearchStateSpace: OPEN or INCONS is not empty\n");
-		exit(1);
+		SBPL_ERROR("ERROR in InitializeSearchStateSpace: OPEN or INCONS is not empty\n");
+		throw new SBPL_Exception();
 	}
 
 	pSearchStateSpace->eps = this->finitial_eps;
@@ -1142,7 +1149,7 @@ int RSTARPlanner::SetSearchStartState(int SearchStartStateID)
 
 void RSTARPlanner::PrintSearchState(RSTARState* state, FILE* fOut)
 {
-	fprintf(fOut, "state %d: h=%d g=%u iterc=%d callnuma=%d heapind=%d \n",
+	SBPL_FPRINTF(fOut, "state %d: h=%d g=%u iterc=%d callnuma=%d heapind=%d \n",
 		state->MDPstate->StateID, state->h, state->g, 
 		state->iterationclosed, state->callnumberaccessed, state->heapindex);
 	environment_->PrintState(state->MDPstate->StateID, true, fOut);
@@ -1197,10 +1204,10 @@ vector<int> RSTARPlanner::GetSearchPath(int& solcost)
 		//check validity
         if(predstate->g + bestpredactiondata->clow != rstarstate->g)
         {
-            printf("ERROR: clow(=%d) + predstate.g(=%d) = %d != succstate.g = %d\n", 
+            SBPL_ERROR("ERROR: clow(=%d) + predstate.g(=%d) = %d != succstate.g = %d\n", 
                     bestpredactiondata->clow, predstate->g, bestpredactiondata->clow + predstate->g, rstarstate->g);
-            printf("PredState: stateID=%d g=%d iterc=%d h=%d\n", predstate->MDPstate->StateID, predstate->g, predstate->iterationclosed, predstate->h);
-            exit(1);
+            SBPL_PRINTF("PredState: stateID=%d g=%d iterc=%d h=%d\n", predstate->MDPstate->StateID, predstate->g, predstate->iterationclosed, predstate->h);
+            throw new SBPL_Exception();
         }
 		
 		//store the action and its cost
@@ -1213,8 +1220,8 @@ vector<int> RSTARPlanner::GetSearchPath(int& solcost)
 		//another check
         if(pathcost + rstarstate->g > rstargoalstate->g)
         {
-            printf("ERROR: pathcost+rstarstate.g = %d > goalstate.g = %d\n", pathcost + rstarstate->g, rstargoalstate->g);
-            exit(1);
+            SBPL_ERROR("ERROR: pathcost+rstarstate.g = %d > goalstate.g = %d\n", pathcost + rstarstate->g, rstargoalstate->g);
+            throw new SBPL_Exception();
         }
 	}
 
@@ -1234,7 +1241,7 @@ vector<int> RSTARPlanner::GetSearchPath(int& solcost)
             wholePathIds.push_back(actiondata->pathIDs.at(j)); //note: path corresponding to the action is already in right direction
         }
     }
-    fprintf(fDeb, "high-level pathcost=%d and high-level g(searchgoal)=%d\n", pathcost, rstargoalstate->g);
+    SBPL_FPRINTF(fDeb, "high-level pathcost=%d and high-level g(searchgoal)=%d\n", pathcost, rstargoalstate->g);
 
 	//get the solcost
     solcost = pathcost;
@@ -1248,7 +1255,7 @@ void RSTARPlanner::PrintSearchPath(FILE* fOut)
 
 	pathIds = GetSearchPath(solcost);
 	
-	fprintf(fOut, "high-level solution cost = %d, solution length=%d\n", solcost, pathIds.size());
+	SBPL_FPRINTF(fOut, "high-level solution cost = %d, solution length=%d\n", solcost, (unsigned int)pathIds.size());
 	for(int sind = 0; sind < (int)pathIds.size(); sind++)
 	{
 		environment_->PrintState(pathIds.at(sind), false, fOut);
@@ -1265,7 +1272,7 @@ bool RSTARPlanner::Search(vector<int>& pathIds, int & PathCost, bool bFirstSolut
 
 
 #if DEBUG
-	fprintf(fDeb, "new search call (call number=%d)\n", pSearchStateSpace->callnumber);
+	SBPL_FPRINTF(fDeb, "new search call (call number=%d)\n", pSearchStateSpace->callnumber);
 #endif
 
     if(pSearchStateSpace->bReinitializeSearchStateSpace == true){
@@ -1332,11 +1339,11 @@ bool RSTARPlanner::Search(vector<int>& pathIds, int & PathCost, bool bFirstSolut
         }
 
 		//print the solution cost and eps bound
-		printf("eps=%f highlevel expands=%d g(searchgoal)=%d time=%.3f\n", pSearchStateSpace->eps_satisfied, highlevel_searchexpands - prevexpands,
+		SBPL_PRINTF("eps=%f highlevel expands=%d g(searchgoal)=%d time=%.3f\n", pSearchStateSpace->eps_satisfied, highlevel_searchexpands - prevexpands,
 							((RSTARState*)pSearchStateSpace->searchgoalstate->PlannerSpecificData)->g,double(clock()-loop_time)/CLOCKS_PER_SEC);
 
 #if DEBUG
-        fprintf(fDeb, "eps=%f highlevel expands=%d g(searchgoal)=%d time=%.3f\n", pSearchStateSpace->eps_satisfied, highlevel_searchexpands - prevexpands,
+        SBPL_FPRINTF(fDeb, "eps=%f highlevel expands=%d g(searchgoal)=%d time=%.3f\n", pSearchStateSpace->eps_satisfied, highlevel_searchexpands - prevexpands,
 							((RSTARState*)pSearchStateSpace->searchgoalstate->PlannerSpecificData)->g,double(clock()-loop_time)/CLOCKS_PER_SEC);
 		PrintSearchState((RSTARState*)pSearchStateSpace->searchgoalstate->PlannerSpecificData, fDeb);
 #endif
@@ -1355,7 +1362,7 @@ bool RSTARPlanner::Search(vector<int>& pathIds, int & PathCost, bool bFirstSolut
 
 
 #if DEBUG
-	fflush(fDeb);
+	SBPL_FFLUSH(fDeb);
 #endif
 
 	PathCost = ((RSTARState*)pSearchStateSpace->searchgoalstate->PlannerSpecificData)->g;
@@ -1364,27 +1371,27 @@ bool RSTARPlanner::Search(vector<int>& pathIds, int & PathCost, bool bFirstSolut
 
 	MaxMemoryCounter += (oldenvsize - environment_->StateID2IndexMapping.size()*sizeof(int));
 	
-	printf("MaxMemoryCounter = %d\n", MaxMemoryCounter);
+	SBPL_PRINTF("MaxMemoryCounter = %d\n", MaxMemoryCounter);
 
 	int solcost = INFINITECOST;
 	bool ret = false;
 	if(PathCost == INFINITECOST)
 	{
-		printf("could not find a solution\n");
+		SBPL_PRINTF("could not find a solution\n");
 		ret = false;
 	}
 	else
 	{
-		printf("solution is found\n");      
+		SBPL_PRINTF("solution is found\n");      
     	pathIds = GetSearchPath(solcost);
         ret = true;
 	}
 
-	printf("total highlevel expands this call = %d, planning time = %.3f secs, solution cost=%d\n", 
+	SBPL_PRINTF("total highlevel expands this call = %d, planning time = %.3f secs, solution cost=%d\n", 
            highlevel_searchexpands, (clock()-TimeStarted)/((double)CLOCKS_PER_SEC), solcost);
     
 
-    //fprintf(fStat, "%d %d\n", highlevel_searchexpands, solcost);
+    //SBPL_FPRINTF(fStat, "%d %d\n", highlevel_searchexpands, solcost);
 
 	return ret;
 
@@ -1411,12 +1418,12 @@ int RSTARPlanner::replan(double allocated_time_secs, vector<int>* solution_state
   bool bOptimalSolution = false;
   *psolcost = 0;
   
-  printf("planner: replan called (bFirstSol=%d, bOptSol=%d)\n", bFirstSolution, bOptimalSolution);
+  SBPL_PRINTF("planner: replan called (bFirstSol=%d, bOptSol=%d)\n", bFirstSolution, bOptimalSolution);
   
   //plan
   if((bFound = Search(pathIds, PathCost, bFirstSolution, bOptimalSolution, allocated_time_secs)) == false) 
     {
-      printf("failed to find a solution\n");
+      SBPL_PRINTF("failed to find a solution\n");
     }
   
   //copy the solution
@@ -1431,14 +1438,14 @@ int RSTARPlanner::replan(double allocated_time_secs, vector<int>* solution_state
 int RSTARPlanner::set_goal(int goal_stateID)
 {
 
-	printf("planner: setting goal to %d\n", goal_stateID);
+	SBPL_PRINTF("planner: setting goal to %d\n", goal_stateID);
 	environment_->PrintState(goal_stateID, true, stdout);
 
 	if(bforwardsearch)
 	{	
 		if(SetSearchGoalState(goal_stateID) != 1)
 			{
-				printf("ERROR: failed to set search goal state\n");
+				SBPL_ERROR("ERROR: failed to set search goal state\n");
 				return 0;
 			}
 	}
@@ -1446,7 +1453,7 @@ int RSTARPlanner::set_goal(int goal_stateID)
 	{
 	    if(SetSearchStartState(goal_stateID) != 1)
         {
-            printf("ERROR: failed to set search start state\n");
+            SBPL_ERROR("ERROR: failed to set search start state\n");
             return 0;
         }
 	}
@@ -1458,7 +1465,7 @@ int RSTARPlanner::set_goal(int goal_stateID)
 int RSTARPlanner::set_start(int start_stateID)
 {
 
-	printf("planner: setting start to %d\n", start_stateID);
+	SBPL_PRINTF("planner: setting start to %d\n", start_stateID);
 	environment_->PrintState(start_stateID, true, stdout);
 
 	if(bforwardsearch)
@@ -1466,7 +1473,7 @@ int RSTARPlanner::set_start(int start_stateID)
 
 	    if(SetSearchStartState(start_stateID) != 1)
         {
-            printf("ERROR: failed to set search start state\n");
+            SBPL_ERROR("ERROR: failed to set search start state\n");
             return 0;
         }
 	}
@@ -1474,7 +1481,7 @@ int RSTARPlanner::set_start(int start_stateID)
 	{
 	    if(SetSearchGoalState(start_stateID) != 1)
         {
-            printf("ERROR: failed to set search goal state\n");
+            SBPL_ERROR("ERROR: failed to set search goal state\n");
             return 0;
         }
 	}
@@ -1503,7 +1510,7 @@ void RSTARPlanner::costs_changed()
 
 int RSTARPlanner::force_planning_from_scratch()
 {
-	printf("planner: forceplanfromscratch set\n");
+	SBPL_PRINTF("planner: forceplanfromscratch set\n");
 
     pSearchStateSpace->bReinitializeSearchStateSpace = true;
 
@@ -1514,7 +1521,7 @@ int RSTARPlanner::force_planning_from_scratch()
 int RSTARPlanner::set_search_mode(bool bSearchUntilFirstSolution)
 {
 
-	printf("planner: search mode set to %d\n", bSearchUntilFirstSolution);
+	SBPL_PRINTF("planner: search mode set to %d\n", bSearchUntilFirstSolution);
 
 	bsearchuntilfirstsolution = bSearchUntilFirstSolution;
 

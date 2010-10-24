@@ -47,7 +47,14 @@ ARAPlanner::ARAPlanner(DiscreteSpaceInformation* environment, bool bSearchForwar
     searchexpands = 0;
     MaxMemoryCounter = 0;
     
-    fDeb = fopen("debug.txt", "w");
+#ifndef ROS
+  const char* debug = "debug.txt";
+#endif
+  fDeb = SBPL_FOPEN(debug, "w");
+  if(fDeb == NULL){
+    SBPL_ERROR("ERROR: could not open planner debug file\n");
+    throw new SBPL_Exception();
+  }
     
     pSearchStateSpace_ = new ARASearchStateSpace_t;
     
@@ -55,14 +62,14 @@ ARAPlanner::ARAPlanner(DiscreteSpaceInformation* environment, bool bSearchForwar
     //create the ARA planner
     if(CreateSearchStateSpace(pSearchStateSpace_) != 1)
         {
-            printf("ERROR: failed to create statespace\n");
+            SBPL_ERROR("ERROR: failed to create statespace\n");
             return;
         }
     
     //set the start and goal states
     if(InitializeSearchStateSpace(pSearchStateSpace_) != 1)
         {
-            printf("ERROR: failed to create statespace\n");
+            SBPL_ERROR("ERROR: failed to create statespace\n");
             return;
         }    
     finitial_eps_planning_time = -1.0;
@@ -78,7 +85,7 @@ ARAPlanner::~ARAPlanner()
     DeleteSearchStateSpace(pSearchStateSpace_);
     delete pSearchStateSpace_;
   }
-  fclose(fDeb);
+  SBPL_FCLOSE(fDeb);
 }
 
 
@@ -99,8 +106,8 @@ CMDPSTATE* ARAPlanner::CreateState(int stateID, ARASearchStateSpace_t* pSearchSt
 #if DEBUG
 	if(environment_->StateID2IndexMapping[stateID][ARAMDP_STATEID2IND] != -1)
 	{
-		printf("ERROR in CreateState: state already created\n");
-		exit(1);
+		SBPL_ERROR("ERROR in CreateState: state already created\n");
+		throw new SBPL_Exception();
 	}
 #endif
 
@@ -113,8 +120,8 @@ CMDPSTATE* ARAPlanner::CreateState(int stateID, ARASearchStateSpace_t* pSearchSt
 #if DEBUG
 	if(state != pSearchStateSpace->searchMDP.StateArray[environment_->StateID2IndexMapping[stateID][ARAMDP_STATEID2IND]])
 	{
-		printf("ERROR in CreateState: invalid state index\n");
-		exit(1);
+		SBPL_ERROR("ERROR in CreateState: invalid state index\n");
+		throw new SBPL_Exception();
 	}
 #endif
 
@@ -133,8 +140,8 @@ CMDPSTATE* ARAPlanner::GetState(int stateID, ARASearchStateSpace_t* pSearchState
 
 	if(stateID >= (int)environment_->StateID2IndexMapping.size())
 	{
-          printf("ERROR int GetState: stateID %d is invalid\n", stateID);
-		exit(1);
+          SBPL_ERROR("ERROR int GetState: stateID %d is invalid\n", stateID);
+		throw new SBPL_Exception();
 	}
 
 	if(environment_->StateID2IndexMapping[stateID][ARAMDP_STATEID2IND] == -1)
@@ -372,8 +379,8 @@ int ARAPlanner::ImprovePath(ARASearchStateSpace_t* pSearchStateSpace, double Max
 
 	if(pSearchStateSpace->searchgoalstate == NULL)
 	{
-		printf("ERROR searching: no goal state is set\n");
-		exit(1);
+		SBPL_ERROR("ERROR searching: no goal state is set\n");
+		throw new SBPL_Exception();
 	}
 
 	//goal state
@@ -397,35 +404,35 @@ int ARAPlanner::ImprovePath(ARASearchStateSpace_t* pSearchStateSpace, double Max
 
 
 #if DEBUG
-		//fprintf(fDeb, "expanding state(%d): h=%d g=%u key=%u v=%u iterc=%d callnuma=%d expands=%d (g(goal)=%u)\n",
+		//SBPL_FPRINTF(fDeb, "expanding state(%d): h=%d g=%u key=%u v=%u iterc=%d callnuma=%d expands=%d (g(goal)=%u)\n",
 		//	state->MDPstate->StateID, state->h, state->g, state->g+(int)(pSearchStateSpace->eps*state->h), state->v, 
 		//	state->iterationclosed, state->callnumberaccessed, state->numofexpands, searchgoalstate->g);
-		//fprintf(fDeb, "expanding: ");
+		//SBPL_FPRINTF(fDeb, "expanding: ");
 		//PrintSearchState(state, fDeb);
 		if(state->listelem[ARA_INCONS_LIST_ID]  != NULL)
 		{
-			fprintf(fDeb, "ERROR: expanding a state from inconslist\n");
-			printf("ERROR: expanding a state from inconslist\n");
-			exit(1);
+			SBPL_FPRINTF(fDeb, "ERROR: expanding a state from inconslist\n");
+			SBPL_ERROR("ERROR: expanding a state from inconslist\n");
+			throw new SBPL_Exception();
 		}
-		//fflush(fDeb);
+		//SBPL_FFLUSH(fDeb);
 #endif
 
 #if DEBUG
 		if(minkey.key[0] < oldkey.key[0] && fabs(this->finitial_eps - 1.0) < ERR_EPS)
 		{
-			//printf("WARN in search: the sequence of keys decreases\n");
-			//exit(1);
+			//SBPL_PRINTF("WARN in search: the sequence of keys decreases\n");
+			//throw new SBPL_Exception();
 		}
 		oldkey = minkey;
 #endif
 
 		if(state->v == state->g)
 		{
-			printf("ERROR: consistent state is being expanded\n");
+			SBPL_ERROR("ERROR: consistent state is being expanded\n");
 #if DEBUG
-			fprintf(fDeb, "ERROR: consistent state is being expanded\n");
-			exit(1);
+			SBPL_FPRINTF(fDeb, "ERROR: consistent state is being expanded\n");
+			throw new SBPL_Exception();
 #endif
 		}
 
@@ -449,7 +456,7 @@ int ARAPlanner::ImprovePath(ARASearchStateSpace_t* pSearchStateSpace, double Max
 		//recompute goalkey if necessary
 		if(goalkey.key[0] != (int)searchgoalstate->g)
 		{
-			//printf("re-computing goal key\n");
+			//SBPL_PRINTF("re-computing goal key\n");
 			//recompute the goal key (heuristics should be zero)
 			goalkey.key[0] = searchgoalstate->g;
 			//goalkey.key[1] = searchgoalstate->h;
@@ -457,7 +464,7 @@ int ARAPlanner::ImprovePath(ARASearchStateSpace_t* pSearchStateSpace, double Max
 
 		if(expands%100000 == 0 && expands > 0)
 		{
-			printf("expands so far=%u\n", expands);
+			SBPL_PRINTF("expands so far=%u\n", expands);
 		}
 
 	}
@@ -465,26 +472,26 @@ int ARAPlanner::ImprovePath(ARASearchStateSpace_t* pSearchStateSpace, double Max
 	int retv = 1;
 	if(searchgoalstate->g == INFINITECOST && pSearchStateSpace->heap->emptyheap())
 	{
-		printf("solution does not exist: search exited because heap is empty\n");
+		SBPL_PRINTF("solution does not exist: search exited because heap is empty\n");
 		retv = 0;
 	}
 	else if(!pSearchStateSpace->heap->emptyheap() && goalkey > minkey)
 	{
-		printf("search exited because it ran out of time\n");
+		SBPL_PRINTF("search exited because it ran out of time\n");
 		retv = 2;
 	}
 	else if(searchgoalstate->g == INFINITECOST && !pSearchStateSpace->heap->emptyheap())
 	{
-		printf("solution does not exist: search exited because all candidates for expansion have infinite heuristics\n");
+		SBPL_PRINTF("solution does not exist: search exited because all candidates for expansion have infinite heuristics\n");
 		retv = 0;
 	}
 	else
 	{
-		printf("search exited with a solution for eps=%.3f\n", pSearchStateSpace->eps);
+		SBPL_PRINTF("search exited with a solution for eps=%.3f\n", pSearchStateSpace->eps);
 		retv = 1;
 	}
 
-	//fprintf(fDeb, "expanded=%d\n", expands);
+	//SBPL_FPRINTF(fDeb, "expanded=%d\n", expands);
 
 	searchexpands += expands;
 
@@ -616,7 +623,7 @@ void ARAPlanner::ReInitializeSearchStateSpace(ARASearchStateSpace_t* pSearchStat
 	pSearchStateSpace->bNewSearchIteration = true;
 
 #if DEBUG
-    fprintf(fDeb, "reinitializing search state-space (new call number=%d search iter=%d)\n", 
+    SBPL_FPRINTF(fDeb, "reinitializing search state-space (new call number=%d search iter=%d)\n", 
             pSearchStateSpace->callnumber,pSearchStateSpace->searchiteration );
 #endif
 
@@ -652,8 +659,8 @@ int ARAPlanner::InitializeSearchStateSpace(ARASearchStateSpace_t* pSearchStateSp
 	if(pSearchStateSpace->heap->currentsize != 0 || 
 		pSearchStateSpace->inconslist->currentsize != 0)
 	{
-		printf("ERROR in InitializeSearchStateSpace: heap or list is not empty\n");
-		exit(1);
+		SBPL_ERROR("ERROR in InitializeSearchStateSpace: heap or list is not empty\n");
+		throw new SBPL_Exception();
 	}
 
 	pSearchStateSpace->eps = this->finitial_eps;
@@ -739,7 +746,7 @@ int ARAPlanner::ReconstructPath(ARASearchStateSpace_t* pSearchStateSpace)
 
 
 #if DEBUG
-		fprintf(fDeb, "reconstructing a path:\n");
+		SBPL_FPRINTF(fDeb, "reconstructing a path:\n");
 #endif
 
 		while(MDPstate != pSearchStateSpace->searchstartstate)
@@ -751,15 +758,15 @@ int ARAPlanner::ReconstructPath(ARASearchStateSpace_t* pSearchStateSpace)
 #endif
 			if(stateinfo->g == INFINITECOST)
 			{	
-				//printf("ERROR in ReconstructPath: g of the state on the path is INFINITE\n");
-				//exit(1);
+				//SBPL_ERROR("ERROR in ReconstructPath: g of the state on the path is INFINITE\n");
+				//throw new SBPL_Exception();
 				return -1;
 			}
 
 			if(stateinfo->bestpredstate == NULL)
 			{
-				printf("ERROR in ReconstructPath: bestpred is NULL\n");
-				exit(1);
+				SBPL_ERROR("ERROR in ReconstructPath: bestpred is NULL\n");
+				throw new SBPL_Exception();
 			}
 
 			//get the parent state
@@ -772,9 +779,9 @@ int ARAPlanner::ReconstructPath(ARASearchStateSpace_t* pSearchStateSpace)
 			//check the decrease of g-values along the path
 			if(predstateinfo->v >= stateinfo->g)
 			{
-				printf("ERROR in ReconstructPath: g-values are non-decreasing\n");			
+				SBPL_ERROR("ERROR in ReconstructPath: g-values are non-decreasing\n");			
 				PrintSearchState(predstateinfo, fDeb);
-				exit(1);
+				throw new SBPL_Exception();
 			}
 
 			//transition back
@@ -809,9 +816,9 @@ void ARAPlanner::PrintSearchPath(ARASearchStateSpace_t* pSearchStateSpace, FILE*
 
 	PathCost = ((ARAState*)pSearchStateSpace->searchgoalstate->PlannerSpecificData)->g;
 
-	fprintf(fOut, "Printing a path from state %d to the goal state %d\n", 
+	SBPL_FPRINTF(fOut, "Printing a path from state %d to the goal state %d\n", 
 			state->StateID, pSearchStateSpace->searchgoalstate->StateID);
-	fprintf(fOut, "Path cost = %d:\n", PathCost);
+	SBPL_FPRINTF(fOut, "Path cost = %d:\n", PathCost);
 			
 	
 	environment_->PrintState(state->StateID, false, fOut);
@@ -819,11 +826,11 @@ void ARAPlanner::PrintSearchPath(ARASearchStateSpace_t* pSearchStateSpace, FILE*
 	int costFromStart = 0;
 	while(state->StateID != goalID)
 	{
-		fprintf(fOut, "state %d ", state->StateID);
+		SBPL_FPRINTF(fOut, "state %d ", state->StateID);
 
 		if(state->PlannerSpecificData == NULL)
 		{
-			fprintf(fOut, "path does not exist since search data does not exist\n");
+			SBPL_FPRINTF(fOut, "path does not exist since search data does not exist\n");
 			break;
 		}
 
@@ -831,12 +838,12 @@ void ARAPlanner::PrintSearchPath(ARASearchStateSpace_t* pSearchStateSpace, FILE*
 
 		if(searchstateinfo->bestnextstate == NULL)
 		{
-			fprintf(fOut, "path does not exist since bestnextstate == NULL\n");
+			SBPL_FPRINTF(fOut, "path does not exist since bestnextstate == NULL\n");
 			break;
 		}
 		if(searchstateinfo->g == INFINITECOST)
 		{
-			fprintf(fOut, "path does not exist since bestnextstate == NULL\n");
+			SBPL_FPRINTF(fOut, "path does not exist since bestnextstate == NULL\n");
 			break;
 		}
 
@@ -847,7 +854,7 @@ void ARAPlanner::PrintSearchPath(ARASearchStateSpace_t* pSearchStateSpace, FILE*
 
 		costFromStart += transcost;
 
-		fprintf(fOut, "g=%d-->state %d, h = %d ctg = %d  ", searchstateinfo->g, 			
+		SBPL_FPRINTF(fOut, "g=%d-->state %d, h = %d ctg = %d  ", searchstateinfo->g, 			
 			searchstateinfo->bestnextstate->StateID, searchstateinfo->h, costToGoal);
 
 		state = searchstateinfo->bestnextstate;
@@ -861,7 +868,7 @@ void ARAPlanner::PrintSearchPath(ARASearchStateSpace_t* pSearchStateSpace, FILE*
 
 void ARAPlanner::PrintSearchState(ARAState* state, FILE* fOut)
 {
-	fprintf(fOut, "state %d: h=%d g=%u v=%u iterc=%d callnuma=%d expands=%d heapind=%d inconslist=%d\n",
+	SBPL_FPRINTF(fOut, "state %d: h=%d g=%u v=%u iterc=%d callnuma=%d expands=%d heapind=%d inconslist=%d\n",
 		state->MDPstate->StateID, state->h, state->g, state->v, 
 		state->iterationclosed, state->callnumberaccessed, state->numofexpands, state->heapindex, state->listelem[ARA_INCONS_LIST_ID]?1:0);
 	environment_->PrintState(state->MDPstate->StateID, true, fOut);
@@ -909,11 +916,15 @@ vector<int> ARAPlanner::GetSearchPath(ARASearchStateSpace_t* pSearchStateSpace, 
   solcost = 0;
   
   FILE* fOut = stdout;
+  if(fOut == NULL){
+    SBPL_ERROR("ERROR: could not open file\n");
+    throw new SBPL_Exception();
+  }
   while(state->StateID != goalstate->StateID)
     {
       if(state->PlannerSpecificData == NULL)
 	{
-	  fprintf(fOut, "path does not exist since search data does not exist\n");
+	  SBPL_FPRINTF(fOut, "path does not exist since search data does not exist\n");
 	  break;
 	}
       
@@ -921,12 +932,12 @@ vector<int> ARAPlanner::GetSearchPath(ARASearchStateSpace_t* pSearchStateSpace, 
       
       if(searchstateinfo->bestnextstate == NULL)
 	{
-	  fprintf(fOut, "path does not exist since bestnextstate == NULL\n");
+	  SBPL_FPRINTF(fOut, "path does not exist since bestnextstate == NULL\n");
 	  break;
 	}
       if(searchstateinfo->g == INFINITECOST)
 	{
-	  fprintf(fOut, "path does not exist since bestnextstate == NULL\n");
+	  SBPL_FPRINTF(fOut, "path does not exist since bestnextstate == NULL\n");
 	  break;
 	}
       
@@ -940,11 +951,11 @@ vector<int> ARAPlanner::GetSearchPath(ARASearchStateSpace_t* pSearchStateSpace, 
 	  
         }
       if(actioncost == INFINITECOST)
-	printf("WARNING: actioncost = %d\n", actioncost);
+	SBPL_PRINTF("WARNING: actioncost = %d\n", actioncost);
       
       solcost += actioncost;
       
-      //fprintf(fDeb, "actioncost=%d between states %d and %d\n", 
+      //SBPL_FPRINTF(fDeb, "actioncost=%d between states %d and %d\n", 
       //        actioncost, state->StateID, searchstateinfo->bestnextstate->StateID);
       //environment_->PrintState(state->StateID, false, fDeb);
       //environment_->PrintState(searchstateinfo->bestnextstate->StateID, false, fDeb);
@@ -954,9 +965,9 @@ vector<int> ARAPlanner::GetSearchPath(ARASearchStateSpace_t* pSearchStateSpace, 
       ARAState* nextstateinfo = (ARAState*)(searchstateinfo->bestnextstate->PlannerSpecificData);
       if(actioncost != abs((int)(searchstateinfo->g - nextstateinfo->g)) && pSearchStateSpace->eps_satisfied <= 1.001)
 	{
-	  fprintf(fDeb, "ERROR: actioncost=%d is not matching the difference in g-values of %d\n", 
+	  SBPL_FPRINTF(fDeb, "ERROR: actioncost=%d is not matching the difference in g-values of %d\n", 
 		  actioncost, abs((int)(searchstateinfo->g - nextstateinfo->g)));
-	  printf("ERROR: actioncost=%d is not matching the difference in g-values of %d\n", 
+	  SBPL_ERROR("ERROR: actioncost=%d is not matching the difference in g-values of %d\n", 
 		 actioncost,abs((int)(searchstateinfo->g - nextstateinfo->g)));
 	  PrintSearchState(searchstateinfo, fDeb);
 	  PrintSearchState(nextstateinfo, fDeb);
@@ -982,7 +993,7 @@ bool ARAPlanner::Search(ARASearchStateSpace_t* pSearchStateSpace, vector<int>& p
     searchexpands = 0;
 
 #if DEBUG
-	fprintf(fDeb, "new search call (call number=%d)\n", pSearchStateSpace->callnumber);
+	SBPL_FPRINTF(fDeb, "new search call (call number=%d)\n", pSearchStateSpace->callnumber);
 #endif
 
     if(pSearchStateSpace->bReinitializeSearchStateSpace == true){
@@ -1045,7 +1056,7 @@ bool ARAPlanner::Search(ARASearchStateSpace_t* pSearchStateSpace, vector<int>& p
         }
 
 		//print the solution cost and eps bound
-		printf("eps=%f expands=%d g(searchgoal)=%d time=%.3f\n", pSearchStateSpace->eps_satisfied, searchexpands - prevexpands,
+		SBPL_PRINTF("eps=%f expands=%d g(searchgoal)=%d time=%.3f\n", pSearchStateSpace->eps_satisfied, searchexpands - prevexpands,
 							((ARAState*)pSearchStateSpace->searchgoalstate->PlannerSpecificData)->g,double(clock()-loop_time)/CLOCKS_PER_SEC);
 
                 if(pSearchStateSpace->eps_satisfied == finitial_eps && pSearchStateSpace->eps == finitial_eps)
@@ -1055,7 +1066,7 @@ bool ARAPlanner::Search(ARASearchStateSpace_t* pSearchStateSpace, vector<int>& p
                 }
 
 #if DEBUG
-        fprintf(fDeb, "eps=%f expands=%d g(searchgoal)=%d time=%.3f\n", pSearchStateSpace->eps_satisfied, searchexpands - prevexpands,
+        SBPL_FPRINTF(fDeb, "eps=%f expands=%d g(searchgoal)=%d time=%.3f\n", pSearchStateSpace->eps_satisfied, searchexpands - prevexpands,
 							((ARAState*)pSearchStateSpace->searchgoalstate->PlannerSpecificData)->g,double(clock()-loop_time)/CLOCKS_PER_SEC);
 		PrintSearchState((ARAState*)pSearchStateSpace->searchgoalstate->PlannerSpecificData, fDeb);
 #endif
@@ -1074,33 +1085,33 @@ bool ARAPlanner::Search(ARASearchStateSpace_t* pSearchStateSpace, vector<int>& p
 
 
 #if DEBUG
-	fflush(fDeb);
+	SBPL_FFLUSH(fDeb);
 #endif
 
 	PathCost = ((ARAState*)pSearchStateSpace->searchgoalstate->PlannerSpecificData)->g;
 	MaxMemoryCounter += environment_->StateID2IndexMapping.size()*sizeof(int);
 	
-	printf("MaxMemoryCounter = %d\n", MaxMemoryCounter);
+	SBPL_PRINTF("MaxMemoryCounter = %d\n", MaxMemoryCounter);
 
 	int solcost = INFINITECOST;
 	bool ret = false;
 	if(PathCost == INFINITECOST)
 	{
-		printf("could not find a solution\n");
+		SBPL_PRINTF("could not find a solution\n");
 		ret = false;
 	}
 	else
 	{
-		printf("solution is found\n");      
+		SBPL_PRINTF("solution is found\n");      
     	pathIds = GetSearchPath(pSearchStateSpace, solcost);
         ret = true;
 	}
 
-	printf("total expands this call = %d, planning time = %.3f secs, solution cost=%d\n", 
+	SBPL_PRINTF("total expands this call = %d, planning time = %.3f secs, solution cost=%d\n", 
            searchexpands, (clock()-TimeStarted)/((double)CLOCKS_PER_SEC), solcost);
         final_eps_planning_time = (clock()-TimeStarted)/((double)CLOCKS_PER_SEC);
         final_eps = pSearchStateSpace->eps_satisfied;
-    //fprintf(fStat, "%d %d\n", searchexpands, solcost);
+    //SBPL_FPRINTF(fStat, "%d %d\n", searchexpands, solcost);
 
 	return ret;
 
@@ -1127,12 +1138,12 @@ int ARAPlanner::replan(double allocated_time_secs, vector<int>* solution_stateID
   bool bOptimalSolution = false;
   *psolcost = 0;
   
-  printf("planner: replan called (bFirstSol=%d, bOptSol=%d)\n", bFirstSolution, bOptimalSolution);
+  SBPL_PRINTF("planner: replan called (bFirstSol=%d, bOptSol=%d)\n", bFirstSolution, bOptimalSolution);
   
   //plan
   if((bFound = Search(pSearchStateSpace_, pathIds, PathCost, bFirstSolution, bOptimalSolution, allocated_time_secs)) == false) 
     {
-      printf("failed to find a solution\n");
+      SBPL_PRINTF("failed to find a solution\n");
     }
   
   //copy the solution
@@ -1147,14 +1158,14 @@ int ARAPlanner::replan(double allocated_time_secs, vector<int>* solution_stateID
 int ARAPlanner::set_goal(int goal_stateID)
 {
 
-	printf("planner: setting goal to %d\n", goal_stateID);
+	SBPL_PRINTF("planner: setting goal to %d\n", goal_stateID);
 	environment_->PrintState(goal_stateID, true, stdout);
 
 	if(bforwardsearch)
 	{	
 		if(SetSearchGoalState(goal_stateID, pSearchStateSpace_) != 1)
 			{
-				printf("ERROR: failed to set search goal state\n");
+				SBPL_ERROR("ERROR: failed to set search goal state\n");
 				return 0;
 			}
 	}
@@ -1162,7 +1173,7 @@ int ARAPlanner::set_goal(int goal_stateID)
 	{
 	    if(SetSearchStartState(goal_stateID, pSearchStateSpace_) != 1)
         {
-            printf("ERROR: failed to set search start state\n");
+            SBPL_ERROR("ERROR: failed to set search start state\n");
             return 0;
         }
 	}
@@ -1174,7 +1185,7 @@ int ARAPlanner::set_goal(int goal_stateID)
 int ARAPlanner::set_start(int start_stateID)
 {
 
-	printf("planner: setting start to %d\n", start_stateID);
+	SBPL_PRINTF("planner: setting start to %d\n", start_stateID);
 	environment_->PrintState(start_stateID, true, stdout);
 
 	if(bforwardsearch)
@@ -1182,7 +1193,7 @@ int ARAPlanner::set_start(int start_stateID)
 
 	    if(SetSearchStartState(start_stateID, pSearchStateSpace_) != 1)
         {
-            printf("ERROR: failed to set search start state\n");
+            SBPL_ERROR("ERROR: failed to set search start state\n");
             return 0;
         }
 	}
@@ -1190,7 +1201,7 @@ int ARAPlanner::set_start(int start_stateID)
 	{
 	    if(SetSearchGoalState(start_stateID, pSearchStateSpace_) != 1)
         {
-            printf("ERROR: failed to set search goal state\n");
+            SBPL_ERROR("ERROR: failed to set search goal state\n");
             return 0;
         }
 	}
@@ -1221,7 +1232,7 @@ void ARAPlanner::costs_changed()
 
 int ARAPlanner::force_planning_from_scratch()
 {
-	printf("planner: forceplanfromscratch set\n");
+	SBPL_PRINTF("planner: forceplanfromscratch set\n");
 
     pSearchStateSpace_->bReinitializeSearchStateSpace = true;
 
@@ -1232,7 +1243,7 @@ int ARAPlanner::force_planning_from_scratch()
 int ARAPlanner::set_search_mode(bool bSearchUntilFirstSolution)
 {
 
-	printf("planner: search mode set to %d\n", bSearchUntilFirstSolution);
+	SBPL_PRINTF("planner: search mode set to %d\n", bSearchUntilFirstSolution);
 
 	bsearchuntilfirstsolution = bSearchUntilFirstSolution;
 

@@ -50,8 +50,23 @@
   */
 #define ERR_EPS 0.0000001
 
-
-
+//Macros for compiling with an without ROS
+#ifdef ROS
+  #include <ros/ros.h>
+  #define SBPL_PRINTF         ROS_DEBUG
+  #define SBPL_ERROR          ROS_ERROR
+  #define SBPL_FOPEN(...)     (FILE*)1
+  #define SBPL_FCLOSE(...)    
+  #define SBPL_FPRINTF(a,...) ROS_DEBUG_NAMED("SBPL_" #a,__VA_ARGS__)
+  #define SBPL_FFLUSH(...)    
+#else
+  #define SBPL_PRINTF  printf
+  #define SBPL_ERROR   printf
+  #define SBPL_FOPEN   fopen
+  #define SBPL_FCLOSE  fclose
+  #define SBPL_FPRINTF fprintf
+  #define SBPL_FFLUSH  fflush
+#endif
 
 #endif
 

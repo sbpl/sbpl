@@ -133,15 +133,15 @@ public:
 	/** \brief not supported version of replan
     */
 	int replan(double allocated_time_sec, vector<int>* solution_stateIDs_V){
-		printf("ERROR: this version of replan not supported in PPCP planner\n");
-		exit(1);
+		SBPL_ERROR("ERROR: this version of replan not supported in PPCP planner\n");
+		throw new SBPL_Exception();
 	};
 
 	/** \brief not supported version of replan
     */
 	int replan(double allocated_time_sec, vector<int>* solution_stateIDs_V, int* solcost){
-		printf("ERROR: this version of replan not supported in PPCP planner\n");
-		exit(1);
+		SBPL_ERROR("ERROR: this version of replan not supported in PPCP planner\n");
+		throw new SBPL_Exception();
 	};
 
     /** \brief forgets previous planning efforts and starts planning from scratch next time replan is called
@@ -152,8 +152,8 @@ public:
 	/** \brief sets how to search - not supported in PPCP
     */
 	int set_search_mode(bool bSearchUntilFirstSolution){
-		printf("ERROR: set_search_mode not supported in PPCP planner\n");
-		exit(1);
+		SBPL_ERROR("ERROR: set_search_mode not supported in PPCP planner\n");
+		throw new SBPL_Exception();
 	};
 
 

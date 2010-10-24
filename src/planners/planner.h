@@ -142,11 +142,32 @@ public:
       replan(), if such an epsilon is used by the planner. The base
       class implementation returns -1 to express that it has no such
       thing. */
-   virtual double get_solution_eps() const { return -1; }
+   virtual double get_solution_eps() const {SBPL_ERROR("get_solution_eps is unimplemented for this planner\n"); return -1; }
 
   /** \return The number of states expanded during the last replan()
       operation, or -1 if this information is not available. */
-  virtual int get_n_expands() const { return -1; }
+  virtual int get_n_expands() const {SBPL_ERROR("get_n_expands is unimplemented for this planner\n");  return -1; }
+
+	/** \brief returns the initial epsilon
+    */
+  virtual double get_initial_eps(){SBPL_ERROR("get_initial_eps is unimplemented for this planner\n"); return -1;};
+
+	/** \brief returns the time taken to find the first solution
+    */
+  virtual double get_initial_eps_planning_time(){SBPL_ERROR("get_initial_eps_planning_time is unimplemented for this planner\n"); return -1;}
+
+	/** \brief returns the time taken to get the final solution
+    */
+  virtual double get_final_eps_planning_time(){SBPL_ERROR("get_final_eps_planning_time is unimplemented for this planner\n"); return -1;};
+
+	/** \brief returns the number of expands to find the first solution
+    */
+  virtual int get_n_expands_init_solution(){SBPL_ERROR("get_n_expands_init_solution is unimplemented for this planner\n"); return -1;};
+
+	/** \brief returns the final epsilon achieved during the search
+    */
+  virtual double get_final_epsilon(){SBPL_ERROR("get_final_epsilon is unimplemented for this planner\n"); return -1;};
+
 
 	/** \brief setting initial solution eps 
        This parameter is ignored in planners that don't have a notion of eps

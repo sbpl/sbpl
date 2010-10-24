@@ -181,15 +181,26 @@ public:
     */
     ~ARAPlanner();
 
+	/** \brief returns the initial epsilon
+    */
   double get_initial_eps(){return finitial_eps;};
 
+	/** \brief returns the time taken to find the first solution
+    */
   double get_initial_eps_planning_time(){return finitial_eps_planning_time;}
 
+	/** \brief returns the time taken to get the final solution
+    */
   double get_final_eps_planning_time(){return final_eps_planning_time;};
 
+	/** \brief returns the number of expands to find the first solution
+    */
   int get_n_expands_init_solution(){return num_of_expands_initial_solution;};
 
-    double get_final_epsilon(){return final_eps;};
+	/** \brief returns the final epsilon achieved during the search
+    */
+  double get_final_epsilon(){return final_eps;};
+
 private:
 
 	//member variables

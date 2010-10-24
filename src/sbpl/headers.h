@@ -36,7 +36,7 @@
 #include <vector>
 #include <stdlib.h>
 
-
+#include "sbpl_exception.h"
 #include "config.h"
 
 

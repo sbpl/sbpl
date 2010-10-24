@@ -90,7 +90,7 @@ void EnvironmentXXX::PrintHashTableHist()
 		else
 			slarge++;
 	}
-	printf("hash table histogram: 0:%d, <50:%d, <100:%d, <200:%d, <300:%d, <400:%d >400:%d\n",
+	SBPL_PRINTF("hash table histogram: 0:%d, <50:%d, <100:%d, <200:%d, <300:%d, <400:%d >400:%d\n",
 		s0,s1, s50, s100, s200,s300,slarge);
 }
 
@@ -118,7 +118,7 @@ EnvXXXHashEntry_t* EnvironmentXXX::GetHashEntry(unsigned int X1, unsigned int X2
 #if DEBUG
 	if ((int)EnvXXX.Coord2StateIDHashTable[binid].size() > 500)
 	{
-		printf("WARNING: Hash table has a bin %d (X1=%d X2=%d X3=%d X4=%d) of size %d\n", 
+		SBPL_PRINTF("WARNING: Hash table has a bin %d (X1=%d X2=%d X3=%d X4=%d) of size %d\n", 
 			binid, X1, X2, X3, X4, EnvXXX.Coord2StateIDHashTable[binid].size());
 		
 		PrintHashTableHist();		
@@ -181,8 +181,8 @@ EnvXXXHashEntry_t* EnvironmentXXX::CreateNewHashEntry(unsigned int X1, unsigned 
 
 	if(HashEntry->stateID != (int)StateID2IndexMapping.size()-1)
 	{
-		printf("ERROR in Env... function: last state has incorrect stateID\n");
-		exit(1);	
+		SBPL_ERROR("ERROR in Env... function: last state has incorrect stateID\n");
+		throw new SBPL_Exception();	
 	}
 
 
@@ -257,8 +257,8 @@ void EnvironmentXXX::AddAllOutcomes(unsigned int SourceX1, unsigned int SourceX2
 
 	if(CumProb != 1.0)
 	{
-		printf("ERROR in EnvXXX... function: prob. of all action outcomes=%f\n", CumProb);
-		exit(1);
+		SBPL_ERROR("ERROR in EnvXXX... function: prob. of all action outcomes=%f\n", CumProb);
+		throw new SBPL_Exception();
 	}
 
 }
@@ -271,11 +271,11 @@ void EnvironmentXXX::AddAllOutcomes(unsigned int SourceX1, unsigned int SourceX2
 void EnvironmentXXX::ComputeHeuristicValues()
 {
 	//whatever necessary pre-computation of heuristic values is done here 
-	printf("Precomputing heuristics\n");
+	SBPL_PRINTF("Precomputing heuristics\n");
 	
 
 
-	printf("done\n");
+	SBPL_PRINTF("done\n");
 
 }
 
@@ -286,10 +286,11 @@ bool EnvironmentXXX::InitializeEnv(const char* sEnvFile)
 	FILE* fCfg = fopen(sEnvFile, "r");
 	if(fCfg == NULL)
 	{
-		printf("ERROR: unable to open %s\n", sEnvFile);
-		exit(1);
+		SBPL_ERROR("ERROR: unable to open %s\n", sEnvFile);
+		throw new SBPL_Exception();
 	}
 	ReadConfiguration(fCfg);
+  fclose(fCfg);
 
 	//Initialize other parameters of the environment
 	InitializeEnvConfig();
@@ -326,15 +327,15 @@ int EnvironmentXXX::GetFromToHeuristic(int FromStateID, int ToStateID)
 	if(FromStateID >= (int)EnvXXX.StateID2CoordTable.size() 
 		|| ToStateID >= (int)EnvXXX.StateID2CoordTable.size())
 	{
-		printf("ERROR in EnvXXX... function: stateID illegal\n");
-		exit(1);
+		SBPL_ERROR("ERROR in EnvXXX... function: stateID illegal\n");
+		throw new SBPL_Exception();
 	}
 #endif
 
 	//define this function if it is used in the planner 
 
-	printf("ERROR in EnvXXX.. function: FromToHeuristic is undefined\n");
-	exit(1);
+	SBPL_ERROR("ERROR in EnvXXX.. function: FromToHeuristic is undefined\n");
+	throw new SBPL_Exception();
 
 	return 0;	
 
@@ -350,16 +351,16 @@ int EnvironmentXXX::GetGoalHeuristic(int stateID)
 #if DEBUG
 	if(stateID >= (int)EnvXXX.StateID2CoordTable.size())
 	{
-		printf("ERROR in EnvXXX... function: stateID illegal\n");
-		exit(1);
+		SBPL_ERROR("ERROR in EnvXXX... function: stateID illegal\n");
+		throw new SBPL_Exception();
 	}
 #endif
 
 
 	//define this function if it used in the planner (heuristic forward search would use it)
 
-	printf("ERROR in EnvXXX..function: GetGoalHeuristic is undefined\n");
-	exit(1);
+	SBPL_ERROR("ERROR in EnvXXX..function: GetGoalHeuristic is undefined\n");
+	throw new SBPL_Exception();
 }
 
 
@@ -373,15 +374,15 @@ int EnvironmentXXX::GetStartHeuristic(int stateID)
 #if DEBUG
 	if(stateID >= (int)EnvXXX.StateID2CoordTable.size())
 	{
-		printf("ERROR in EnvXXX... function: stateID illegal\n");
-		exit(1);
+		SBPL_ERROR("ERROR in EnvXXX... function: stateID illegal\n");
+		throw new SBPL_Exception();
 	}
 #endif
 
 	//define this function if it used in the planner (heuristic backward search would use it)
 
-	printf("ERROR in EnvXXX.. function: GetStartHeuristic is undefined\n");
-	exit(1);
+	SBPL_ERROR("ERROR in EnvXXX.. function: GetStartHeuristic is undefined\n");
+	throw new SBPL_Exception();
 
 	return 0;	
 
@@ -397,14 +398,14 @@ void EnvironmentXXX::SetAllActionsandAllOutcomes(CMDPSTATE* state)
 #if DEBUG
 	if(state->StateID >= (int)EnvXXX.StateID2CoordTable.size())
 	{
-		printf("ERROR in EnvXXX... function: stateID illegal\n");
-		exit(1);
+		SBPL_ERROR("ERROR in EnvXXX... function: stateID illegal\n");
+		throw new SBPL_Exception();
 	}
 
 	if((int)state->Actions.size() != 0)
 	{
-		printf("ERROR in Env_setAllActionsandAllOutcomes: actions already exist for the state\n");
-		exit(1);
+		SBPL_ERROR("ERROR in Env_setAllActionsandAllOutcomes: actions already exist for the state\n");
+		throw new SBPL_Exception();
 	}
 #endif
 	
@@ -439,23 +440,23 @@ void EnvironmentXXX::SetAllPreds(CMDPSTATE* state)
 {
 	//implement this if the planner needs access to predecessors
 	
-	printf("ERROR in EnvXXX... function: SetAllPreds is undefined\n");
-	exit(1);
+	SBPL_ERROR("ERROR in EnvXXX... function: SetAllPreds is undefined\n");
+	throw new SBPL_Exception();
 }
 
 
 void EnvironmentXXX::GetSuccs(int SourceStateID, vector<int>* SuccIDV, vector<int>* CostV)
 {
 
-	printf("ERROR in EnvXXX... function: GetSuccs is undefined\n");
-	exit(1);
+	SBPL_ERROR("ERROR in EnvXXX... function: GetSuccs is undefined\n");
+	throw new SBPL_Exception();
 }
 
 void EnvironmentXXX::GetPreds(int TargetStateID, vector<int>* PredIDV, vector<int>* CostV)
 {
 
-	printf("ERROR in EnvXXX... function: GetPreds is undefined\n");
-	exit(1);
+	SBPL_ERROR("ERROR in EnvXXX... function: GetPreds is undefined\n");
+	throw new SBPL_Exception();
 }
 
 
@@ -470,8 +471,8 @@ void EnvironmentXXX::PrintState(int stateID, bool bVerbose, FILE* fOut /*=NULL*/
 #if DEBUG
 	if(stateID >= (int)EnvXXX.StateID2CoordTable.size())
 	{
-		printf("ERROR in EnvXXX... function: stateID illegal (2)\n");
-		exit(1);
+		SBPL_ERROR("ERROR in EnvXXX... function: stateID illegal (2)\n");
+		throw new SBPL_Exception();
 	}
 #endif
 
@@ -482,10 +483,10 @@ void EnvironmentXXX::PrintState(int stateID, bool bVerbose, FILE* fOut /*=NULL*/
 
 	if(stateID == EnvXXX.goalstateid)
 	{
-		fprintf(fOut, "the state is a goal state\n");
+		SBPL_FPRINTF(fOut, "the state is a goal state\n");
 	}
 
-	fprintf(fOut, "X1=%d X2=%d X3=%d X4=%d\n", 
+	SBPL_FPRINTF(fOut, "X1=%d X2=%d X3=%d X4=%d\n", 
 		HashEntry->X1, HashEntry->X2,
 		HashEntry->X3, HashEntry->X4);
 
@@ -498,8 +499,8 @@ void EnvironmentXXX::PrintEnv_Config(FILE* fOut)
 
 	//implement this if the planner needs to print out EnvXXX. configuration
 	
-	printf("ERROR in EnvXXX... function: PrintEnv_Config is undefined\n");
-	exit(1);
+	SBPL_ERROR("ERROR in EnvXXX... function: PrintEnv_Config is undefined\n");
+	throw new SBPL_Exception();
 
 }
 //------------------------------------------------------------------------------

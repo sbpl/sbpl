@@ -86,8 +86,8 @@ public:
   */
 	virtual void GetPredsofChangedEdges(vector<nav2dcell_t> const * changedcellsV, vector<int> *preds_of_changededgesIDV)
 	{
-		printf("ERROR: GetPredsofChangedEdges function not supported\n");
-		exit(1);
+		SBPL_ERROR("ERROR: GetPredsofChangedEdges function not supported\n");
+		throw new SBPL_Exception();
 	}
 
 	
@@ -96,8 +96,8 @@ public:
   */
 	virtual void GetSuccsofChangedEdges(vector<nav2dcell_t> const * changedcellsV, vector<int> *succs_of_changededgesIDV)
 	{
-		printf("ERROR: GetSuccsofChangedEdges function not supported\n");
-		exit(1);
+		SBPL_ERROR("ERROR: GetSuccsofChangedEdges function not supported\n");
+		throw new SBPL_Exception();
 	}
 
 	/**

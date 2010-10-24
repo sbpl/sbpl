@@ -320,7 +320,7 @@ void AdjacencyListSBPLEnv<Coords>::SetAllPreds(CMDPSTATE* state)
 {
   // Apparently this is not always necessary
   cout << "Error: SetAllPreds not implemented for adjacency list";
-  exit(1);
+  throw new SBPL_Exception();
 }
 
 template <class Coords>
@@ -344,7 +344,7 @@ template <class Coords>
 void AdjacencyListSBPLEnv<Coords>::GetPreds(int TargetStateID, vector<int>* PredIDV, vector<int>* CostV)
 {
   cout << "Error: GetPreds not currently implemented for adjacency list";
-  exit(1);
+  throw new SBPL_Exception();
 }
 
 template <class Coords>
