@@ -43,6 +43,7 @@ UNICYCLE_MPRIM_16DEGS = 1;
 if UNICYCLE_MPRIM_16DEGS == 1
     resolution = 0.025;
     numberofangles = 16; %preferably a power of 2, definitely multiple of 8
+    numberofprimsperangle = 5;
 
     %multipliers (multiplier is used as costmult*cost)
     forwardcostmult = 1;
@@ -54,7 +55,6 @@ if UNICYCLE_MPRIM_16DEGS == 1
     %note, what is shown x,y,theta changes (not absolute numbers)
     
     %0 degreees
-    numberofprimsperangle = 5;
     basemprimendpts0_c = zeros(numberofprimsperangle, 4); %x,y,theta,costmult 
     %x aligned with the heading of the robot, angles are positive
     %counterclockwise
@@ -70,7 +70,6 @@ if UNICYCLE_MPRIM_16DEGS == 1
     %basemprimendpts0_c(7,:) = [0 0 -1 turninplacecostmult];
     
     %45 degrees
-    numberofprimsperangle = 5;
     basemprimendpts45_c = zeros(numberofprimsperangle, 4); %x,y,theta,costmult (multiplier is used as costmult*cost)
     %x aligned with the heading of the robot, angles are positive
     %counterclockwise
@@ -86,7 +85,6 @@ if UNICYCLE_MPRIM_16DEGS == 1
     %basemprimendpts45_c(7,:) = [0 0 -1 turninplacecostmult];
     
     %22.5 degrees
-    numberofprimsperangle = 5;
     basemprimendpts22p5_c = zeros(numberofprimsperangle, 4); %x,y,theta,costmult (multiplier is used as costmult*cost)
     %x aligned with the heading of the robot, angles are positive
     %counterclockwise

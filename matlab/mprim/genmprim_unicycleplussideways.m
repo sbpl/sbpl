@@ -43,6 +43,7 @@ UNICYCLE_MPRIM_16DEGS = 1;
 if UNICYCLE_MPRIM_16DEGS == 1
     resolution = 0.025;
     numberofangles = 16; %preferably a power of 2, definitely multiple of 8
+    numberofprimsperangle = 9;
 
     %multipliers (multiplier is used as costmult*cost)
     forwardcostmult = 1;
@@ -54,7 +55,6 @@ if UNICYCLE_MPRIM_16DEGS == 1
     %note, what is shown x,y,theta *changes* (that is, dx,dy,dtheta and not absolute numbers)
     
     %0 degreees
-    numberofprimsperangle = 9;
     basemprimendpts0_c = zeros(numberofprimsperangle, 4); %x,y,theta,costmult 
     %angles are positive counterclockwise
     %0 theta change
@@ -72,7 +72,6 @@ if UNICYCLE_MPRIM_16DEGS == 1
     basemprimendpts0_c(9,:) = [0 -1 0 sidestepcostmult];
         
     %45 degrees
-    numberofprimsperangle = 9;
     basemprimendpts45_c = zeros(numberofprimsperangle, 4); %x,y,theta,costmult (multiplier is used as costmult*cost)
     %angles are positive counterclockwise
     %0 theta change 
@@ -90,7 +89,6 @@ if UNICYCLE_MPRIM_16DEGS == 1
     basemprimendpts45_c(9,:) = [1 -1 0 sidestepcostmult];
     
     %22.5 degrees
-    numberofprimsperangle = 9;
     basemprimendpts22p5_c = zeros(numberofprimsperangle, 4); %x,y,theta,costmult (multiplier is used as costmult*cost)
     %angles are positive counterclockwise
     %0 theta change     

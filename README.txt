@@ -29,3 +29,11 @@ motion primitives according to which the robot can move in x,y,theta. Motion pri
 
 
 Finally, few visualization scripts can be found in sbpl/matlab/visualization. In particular, plot_3Dpath.m function can be used to visualize the path found by xytheta lattice planner. This functions takes in .cfg file that specified environment and sol.txt file that was generated within main.cpp by xythetalattice planners.
+
+
+Links:
+For more information and documentation on SBPL visit:
+http://www.ros.org/wiki/sbpl
+
+For more information and documentation on using the x,y,theta environment under ROS visit:
+http://www.ros.org/wiki/sbpl_lattice_planner

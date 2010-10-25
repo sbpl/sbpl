@@ -46,6 +46,7 @@ UNICYCLE_MPRIMS = 0;
 if LINESEGMENT_MPRIMS == 1
     resolution = 0.01;
     numberofangles = 32; %preferably a power of 2, definitely multiple of 8
+    numberofprimsperangle = 16;
 
     %multipliers (multiplier is used as costmult*cost)
     forwardcostmult = 1;
@@ -57,7 +58,6 @@ if LINESEGMENT_MPRIMS == 1
     %note, what is shown x,y,theta changes (not absolute numbers)
     
     %0 degreees
-    numberofprimsperangle = 16;
     basemprimendpts0_c = zeros(numberofprimsperangle, 4); %x,y,theta,costmult 
     %x aligned with the heading of the robot, angles are positive
     %counterclockwise
@@ -83,7 +83,6 @@ if LINESEGMENT_MPRIMS == 1
     basemprimendpts0_c(16,:) = [0 0 -3 turninplacecostmult];    
     
     %45 degrees
-    numberofprimsperangle = 16;
     basemprimendpts45_c = zeros(numberofprimsperangle, 4); %x,y,theta,costmult (multiplier is used as costmult*cost)
     %x aligned with the heading of the robot, angles are positive
     %counterclockwise
@@ -109,7 +108,6 @@ if LINESEGMENT_MPRIMS == 1
     basemprimendpts45_c(16,:) = [0 0 -3 turninplacecostmult];    
     
     %22.5 degrees
-    numberofprimsperangle = 16;
     basemprimendpts22p5_c = zeros(numberofprimsperangle, 4); %x,y,theta,costmult (multiplier is used as costmult*cost)
     %x aligned with the heading of the robot, angles are positive
     %counterclockwise
@@ -135,7 +133,6 @@ if LINESEGMENT_MPRIMS == 1
     basemprimendpts22p5_c(16,:) = [0 0 -3 turninplacecostmult];    
     
     %11.25 degrees
-    numberofprimsperangle = 16;
     basemprimendpts11p25_c = zeros(numberofprimsperangle, 4); %x,y,theta,costmult (multiplier is used as costmult*cost)
     %x aligned with the heading of the robot, angles are positive
     %counterclockwise
@@ -161,7 +158,6 @@ if LINESEGMENT_MPRIMS == 1
     basemprimendpts11p25_c(16,:) = [0 0 -3 turninplacecostmult];    
     
     %33.75 degrees
-    numberofprimsperangle = 16;
     basemprimendpts33p75_c = zeros(numberofprimsperangle, 4); %x,y,theta,costmult 
     %x aligned with the heading of the robot, angles are positive
     %counterclockwise
