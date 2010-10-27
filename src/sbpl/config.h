@@ -53,25 +53,30 @@
 //Macros for compiling with an without ROS
 #ifdef ROS
   #include <ros/ros.h>
-  #define SBPL_PRINTF         ROS_DEBUG
+
   #define SBPL_DEBUG          ROS_DEBUG
+  #define SBPL_DEBUG_NAMED(a,...) ROS_DEBUG_NAMED("SBPL_" #a,__VA_ARGS__) 
   #define SBPL_INFO           ROS_INFO
   #define SBPL_WARN           ROS_WARN
   #define SBPL_ERROR          ROS_ERROR
   #define SBPL_FATAL          ROS_FATAL
+  
   #define SBPL_FOPEN(...)     (FILE*)1
   #define SBPL_FCLOSE(...)    
+  #define SBPL_PRINTF         ROS_DEBUG
   #define SBPL_FPRINTF(a,...) ROS_DEBUG_NAMED("SBPL_" #a,__VA_ARGS__)
   #define SBPL_FFLUSH(...)    
 #else
-  #define SBPL_PRINTF         printf
   #define SBPL_DEBUG          printf
+  #define SBPL_DEBUG_NAMED    fprintf
   #define SBPL_INFO           printf
   #define SBPL_WARN           printf
   #define SBPL_ERROR          printf
   #define SBPL_FATAL          printf
+  
   #define SBPL_FOPEN          fopen
   #define SBPL_FCLOSE         fclose
+  #define SBPL_PRINTF         printf
   #define SBPL_FPRINTF        fprintf
   #define SBPL_FFLUSH         fflush
 #endif
