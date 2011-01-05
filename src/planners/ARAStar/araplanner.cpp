@@ -946,7 +946,7 @@ vector<int> ARAPlanner::GetSearchPath(ARASearchStateSpace_t* pSearchStateSpace, 
       for(int i = 0; i < (int)SuccIDV.size(); i++)
         {   
 	  
-	  if(SuccIDV.at(i) == searchstateinfo->bestnextstate->StateID)
+    if(SuccIDV.at(i) == searchstateinfo->bestnextstate->StateID && CostV.at(i)<actioncost)
 	    actioncost = CostV.at(i);
 	  
         }

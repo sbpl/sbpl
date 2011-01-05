@@ -1182,7 +1182,7 @@ vector<int> ADPlanner::GetSearchPath(ADSearchStateSpace_t* pSearchStateSpace, in
       int actioncost = INFINITECOST;
       for(int i = 0; i < (int)SuccIDV.size(); i++)
         {   
-	  if(SuccIDV.at(i) == searchstateinfo->bestnextstate->StateID)
+    if(SuccIDV.at(i) == searchstateinfo->bestnextstate->StateID && CostV.at(i)<actioncost)
 	    actioncost = CostV.at(i);
 
         }
