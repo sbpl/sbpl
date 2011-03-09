@@ -1358,6 +1358,8 @@ bool RSTARPlanner::Search(vector<int>& pathIds, int & PathCost, bool bFirstSolut
 		if(((RSTARState*)pSearchStateSpace->searchgoalstate->PlannerSpecificData)->g == INFINITECOST)
 			break;
 
+
+		system("pause"); //TODO
 	}
 
 
@@ -1366,7 +1368,7 @@ bool RSTARPlanner::Search(vector<int>& pathIds, int & PathCost, bool bFirstSolut
 #endif
 
 	PathCost = ((RSTARState*)pSearchStateSpace->searchgoalstate->PlannerSpecificData)->g;
-	if(((RSTARACTIONDATA*)((RSTARState*)pSearchStateSpace->searchgoalstate->PlannerSpecificData)->bestpredaction->PlannerSpecificData)->pathIDs.size() == 0)
+	if(PathCost == INFINITECOST || ((RSTARACTIONDATA*)((RSTARState*)pSearchStateSpace->searchgoalstate->PlannerSpecificData)->bestpredaction->PlannerSpecificData)->pathIDs.size() == 0)
 		PathCost = INFINITECOST; //the path to the goal is not found, it is just goal has been generated but the last edge to it wasn't computed yet
 
 	MaxMemoryCounter += (oldenvsize - environment_->StateID2IndexMapping.size()*sizeof(int));

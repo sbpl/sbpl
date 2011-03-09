@@ -1313,7 +1313,7 @@ void EnvironmentNAV2D::GetRandomSuccsatDistance(int SourceStateID, std::vector<i
 	//number of random neighbors
 	int nNumofNeighs = 10;
 	//distance at which the neighbors are generated
-	int nDist_c = 100;
+	int nDist_c = 100; 
 
 
 #if DEBUG
@@ -1340,7 +1340,7 @@ void EnvironmentNAV2D::GetRandomPredsatDistance(int TargetStateID, std::vector<i
 	//number of random neighbors
 	int nNumofNeighs = 10;
 	//distance at which the neighbors are generated
-	int nDist_c = 100;
+	int nDist_c = 5; //TODO-was100
 
 
 #if DEBUG
