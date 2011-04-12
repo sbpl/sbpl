@@ -729,7 +729,7 @@ int planandnavigate2d(int argc, char *argv[])
             //environment_nav2D.PrintState(solution_stateIDs_V[i], true, fSol);
             //}
             //SBPL_FPRINTF(fSol, "*********\n");
-        }
+         }
 
 		double plantime_secs = (clock()-TimeStarted)/((double)CLOCKS_PER_SEC);
 		SBPL_FPRINTF(fSol, "%.5f %.5f\n", plantime_secs, planner.get_solution_eps());
@@ -813,8 +813,10 @@ int planandnavigate2d(int argc, char *argv[])
 	SBPL_FPRINTF(fSol, "stats: plantimes over 1 secs=%d; over 0.5; secs=%d; over 0.1 secs=%d; over 0.05 secs=%d; below 0.05 secs=%d\n",
 		plantime_over1secs, plantime_over0p5secs, plantime_over0p1secs, plantime_over0p05secs, plantime_below0p05secs);
 
+    if(bPrint) SBPL_PRINTF("System Pause (return=%d)\n",system("pause"));
+
 	SBPL_FFLUSH(NULL);
-  SBPL_FCLOSE(fSol);
+	SBPL_FCLOSE(fSol);
 
 
     return 1;
@@ -826,7 +828,7 @@ int planandnavigate2d(int argc, char *argv[])
 int planandnavigatexythetalat(int argc, char *argv[])
 {
 
-	double allocated_time_secs_foreachplan = 3.0; //in seconds
+	double allocated_time_secs_foreachplan = 1.0; //in seconds
 	MDPConfig MDPCfg;
 	EnvironmentNAVXYTHETALAT environment_navxythetalat;
 	EnvironmentNAVXYTHETALAT trueenvironment_navxythetalat;
@@ -844,7 +846,7 @@ int planandnavigatexythetalat(int argc, char *argv[])
   }
     //int dx[8] = {-1, -1, -1,  0,  0,  1,  1,  1};
     //int dy[8] = {-1,  0,  1, -1,  1, -1,  0,  1};
-	bool bPrint = true, bPrintMap = false;
+	bool bPrint = false, bPrintMap = false;
 	int x,y;
 	vector<int> preds_of_changededgesIDV;
 	vector<nav2dcell_t> changedcellsV;
@@ -930,6 +932,7 @@ int planandnavigatexythetalat(int argc, char *argv[])
 			maxy = fabs(perimeterptsV.at(i).y);
 	}
 	//TODO - when running it, no obstacle show up when it is 20 and not 2 - bug
+	//TODO - make sensingrange to be the length of the longest motion primitive
 	int sensingrange_c = (int)(__max(maxx, maxy)/cellsize_m) + 2; //should be big enough to cover the motion primitive length
 	SBPL_PRINTF("sensing range=%d cells\n", sensingrange_c);
 	vector<sbpl_2Dcell_t> sensecells;
@@ -997,8 +1000,8 @@ int planandnavigatexythetalat(int argc, char *argv[])
 	//create a planner
 	vector<int> solution_stateIDs_V;
 	bool bforwardsearch = false;
-    //ARAPlanner planner(&environment_navxythetalat, bforwardsearch);
-	ADPlanner planner(&environment_navxythetalat, bforwardsearch);
+    ARAPlanner planner(&environment_navxythetalat, bforwardsearch);
+	//ADPlanner planner(&environment_navxythetalat, bforwardsearch);
 
 	planner.set_initialsolution_eps(5.0); 
 
@@ -1056,12 +1059,12 @@ int planandnavigatexythetalat(int argc, char *argv[])
 		double TimeStarted = clock();
 
         if(bChanges){
-            //planner.costs_changed(); //use by ARA* planner (non-incremental)
+            planner.costs_changed(); //use by ARA* planner (non-incremental)
 
 			//get the affected states
-			environment_navxythetalat.GetPredsofChangedEdges(&changedcellsV, &preds_of_changededgesIDV);
+			//environment_navxythetalat.GetPredsofChangedEdges(&changedcellsV, &preds_of_changededgesIDV);
 			//let know the incremental planner about them
-			planner.update_preds_of_changededges(&preds_of_changededgesIDV); //use by AD* planner (incremental)
+			//planner.update_preds_of_changededges(&preds_of_changededgesIDV); //use by AD* planner (incremental)
 			//SBPL_PRINTF("%d states were affected\n", preds_of_changededgesIDV.size());
 
         }
@@ -1282,7 +1285,7 @@ int main(int argc, char *argv[])
 	//usage: exename 2Denvironmentfile.cfg
 	//2Denvironmentfile.cfg files can be found sbpl/env_examples/nav2d
     //plan2d(argc, argv);
-    //planandnavigate2d(argc, argv);
+    planandnavigate2d(argc, argv);
 
     //xytheta planning
 	//usage: exename 3Denvironmentfile.cfg motionprimitivesfile.mprim 
@@ -1293,7 +1296,7 @@ int main(int argc, char *argv[])
 
     //xytheta planning
 	//usage: see the comments for planxythetalat() above
-    planandnavigatexythetalat(argc, argv);
+    //planandnavigatexythetalat(argc, argv);
 
 	//xytheta with multiple levels (i.e., base of the robot and upper body)
 	//usage: see the comments for planxythetalat() above

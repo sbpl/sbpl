@@ -655,7 +655,7 @@ int RSTARPlanner::ImprovePath(double MaxNumofSecs)
       goalkey = ComputeKey(searchgoalstate);
       
       if(goalkey < minkey)
-	break; //termination condition
+		break; //termination condition
 
 
         //pop the min element
@@ -837,6 +837,10 @@ int RSTARPlanner::ImprovePath(double MaxNumofSecs)
                 SBPL_FPRINTF(fDeb, "succ %d:\n", i);
                 environment_->PrintState(rstarSuccState->MDPstate->StateID, true, fDeb);
                 
+				//re-initialize the state if necessary
+				if(rstarSuccState->callnumberaccessed != pSearchStateSpace->callnumber)
+					ReInitializeSearchStateInfo(rstarSuccState);
+
                 //skip if the state is already closed
                 if(rstarSuccState->iterationclosed == pSearchStateSpace->searchiteration)
                 {
@@ -844,11 +848,7 @@ int RSTARPlanner::ImprovePath(double MaxNumofSecs)
                     continue;
                 }
                 notclosed++;
- 				
-				//re-initialize the state if necessary
-				if(rstarSuccState->callnumberaccessed != pSearchStateSpace->callnumber)
-					ReInitializeSearchStateInfo(rstarSuccState);
-                
+ 				                
                 //if(rstarSuccState->MDPstate->StateID == 3838){
                 //    SBPL_FPRINTF(fDeb, "generating state %d with g=%d bp=%d:\n", rstarSuccState->MDPstate->StateID, rstarSuccState->g, 
                 //            (rstarSuccState->bestpredaction==NULL?-1:rstarSuccState->bestpredaction->SourceStateID));
@@ -1204,9 +1204,19 @@ vector<int> RSTARPlanner::GetSearchPath(int& solcost)
 		//check validity
         if(predstate->g + bestpredactiondata->clow != rstarstate->g)
         {
-            SBPL_ERROR("ERROR: clow(=%d) + predstate.g(=%d) = %d != succstate.g = %d\n", 
-                    bestpredactiondata->clow, predstate->g, bestpredactiondata->clow + predstate->g, rstarstate->g);
-            SBPL_PRINTF("PredState: stateID=%d g=%d iterc=%d h=%d\n", predstate->MDPstate->StateID, predstate->g, predstate->iterationclosed, predstate->h);
+            SBPL_ERROR("ERROR: clow(=%d) + predstate.g(=%d) = %d != succstate.g = %d (callnum=%d, iter=%d)\n", 
+                    bestpredactiondata->clow, predstate->g, bestpredactiondata->clow + predstate->g, rstarstate->g,
+					pSearchStateSpace->callnumber, pSearchStateSpace->searchiteration);
+			SBPL_PRINTF("predstate: ");
+			environment_->PrintState(predstate->MDPstate->StateID, true, stdout);
+			SBPL_PRINTF("succstate: ");
+			environment_->PrintState(rstarstate->MDPstate->StateID, true, stdout);
+            SBPL_PRINTF("PredState: stateID=%d g=%d calln=%d iterc=%d h=%d\n", 
+				predstate->MDPstate->StateID, predstate->g, predstate->callnumberaccessed, predstate->iterationclosed, predstate->h);
+            SBPL_PRINTF("Succstate: stateID=%d g=%d calln=%d iterc=%d h=%d\n", 
+				rstarstate->MDPstate->StateID, rstarstate->g, rstarstate->callnumberaccessed, rstarstate->iterationclosed, rstarstate->h);
+			fflush(fDeb);
+
             throw new SBPL_Exception();
         }
 		
@@ -1241,6 +1251,12 @@ vector<int> RSTARPlanner::GetSearchPath(int& solcost)
             wholePathIds.push_back(actiondata->pathIDs.at(j)); //note: path corresponding to the action is already in right direction
         }
     }
+	//add the goal state
+	if(bforwardsearch)
+		wholePathIds.push_back(rstargoalstate->MDPstate->StateID);
+	else
+		wholePathIds.push_back(pSearchStateSpace->searchstartstate->StateID);
+
     SBPL_FPRINTF(fDeb, "high-level pathcost=%d and high-level g(searchgoal)=%d\n", pathcost, rstargoalstate->g);
 
 	//get the solcost
@@ -1270,6 +1286,10 @@ bool RSTARPlanner::Search(vector<int>& pathIds, int & PathCost, bool bFirstSolut
     highlevel_searchexpands = 0;
     lowlevel_searchexpands = 0;
 
+	bFirstSolution = true; //TODO-remove this but then fix crashing because later 
+	//searches within cycle re-initialize g-vals and test path found fails if last search ran out of time
+	//so we need to save solutions between iterations
+	//also, we need to call change callnumber before each search
 
 #if DEBUG
 	SBPL_FPRINTF(fDeb, "new search call (call number=%d)\n", pSearchStateSpace->callnumber);
@@ -1318,10 +1338,10 @@ bool RSTARPlanner::Search(vector<int>& pathIds, int & PathCost, bool bFirstSolut
 			pSearchStateSpace->bReinitializeSearchStateSpace = true;
 		}
 
-		if(pSearchStateSpace->bReinitializeSearchStateSpace == true){
+		//if(pSearchStateSpace->bReinitializeSearchStateSpace == true){
 			//re-initialize state space 
-			ReInitializeSearchStateSpace();
-		}
+			ReInitializeSearchStateSpace(); //TODO - we have to do it currently since g-vals from old searches are invalid
+		//}
 
 		if(pSearchStateSpace->bNewSearchIteration)
 		{
@@ -1357,9 +1377,6 @@ bool RSTARPlanner::Search(vector<int>& pathIds, int & PathCost, bool bFirstSolut
 		//no solution exists
 		if(((RSTARState*)pSearchStateSpace->searchgoalstate->PlannerSpecificData)->g == INFINITECOST)
 			break;
-
-
-		system("pause"); //TODO
 	}
 
 
