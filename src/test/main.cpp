@@ -587,8 +587,8 @@ int planandnavigate2d(int argc, char *argv[])
     SBPL_ERROR("ERROR: could not open solution file\n");
     throw new SBPL_Exception();
   }
-  int dx[8] = {-1, -1, -1,  0,  0,  1,  1,  1};
-  int dy[8] = {-1,  0,  1, -1,  1, -1,  0,  1};
+  //int dx[8] = {-1, -1, -1,  0,  0,  1,  1,  1};
+  //int dy[8] = {-1,  0,  1, -1,  1, -1,  0,  1};
 	bool bPrint = true;
 	int x,y;
 	vector<int> preds_of_changededgesIDV;
