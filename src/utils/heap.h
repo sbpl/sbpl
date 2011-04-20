@@ -71,6 +71,10 @@ public:
   CKey getminkeyheap();
   AbstractSearchState *deleteminheap();
   void makeheap();
+  void insert_unsafe(AbstractSearchState *state, CKey key);
+  void updateheap_unsafe(AbstractSearchState *AbstractSearchState, CKey NewKey);
+  void deleteheap_unsafe(AbstractSearchState *AbstractSearchState);
+
 
 private:
   void percolatedown(int hole, heapelement tmp);

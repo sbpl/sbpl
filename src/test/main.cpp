@@ -67,6 +67,7 @@ int plan2d(int argc, char *argv[])
 	bool bforwardsearch = false;
 	ARAPlanner planner(&environment_nav2D, bforwardsearch);
 	//RSTARPlanner planner(&environment_nav2D, bforwardsearch);
+	//anaPlanner planner(&environment_nav2D, bforwardsearch);
 
 	//set search mode
 	planner.set_search_mode(bsearchuntilfirstsolution);
@@ -283,7 +284,9 @@ int planxythetalat(int argc, char *argv[])
 	//plan a path
 	vector<int> solution_stateIDs_V;
 	bool bforwardsearch = false;
-	ADPlanner planner(&environment_navxythetalat, bforwardsearch);
+	//ADPlanner planner(&environment_navxythetalat, bforwardsearch);
+	ARAPlanner planner(&environment_navxythetalat, bforwardsearch);
+	//anaPlanner planner(&environment_navxythetalat, bforwardsearch);
 
     if(planner.set_start(MDPCfg.startstateid) == 0)
         {
@@ -1217,6 +1220,7 @@ int planrobarm(int argc, char *argv[])
 	bool bforwardsearch = true;
 	ARAPlanner planner(&environment_robarm, bforwardsearch);
 	//RSTARPlanner planner(&environment_robarm, bforwardsearch);
+	//anaPlanner planner(&environment_robarm, bforwardsearch);
 
     if(planner.set_start(MDPCfg.startstateid) == 0)
         {
@@ -1268,7 +1272,6 @@ int planrobarm(int argc, char *argv[])
 
 
 
-
 int main(int argc, char *argv[])
 {
 #ifdef ROS
@@ -1285,14 +1288,14 @@ int main(int argc, char *argv[])
 	//usage: exename 2Denvironmentfile.cfg
 	//2Denvironmentfile.cfg files can be found sbpl/env_examples/nav2d
     //plan2d(argc, argv);
-    planandnavigate2d(argc, argv);
+    //planandnavigate2d(argc, argv);
 
     //xytheta planning
 	//usage: exename 3Denvironmentfile.cfg motionprimitivesfile.mprim 
 	//3Denvironmentfile.cfg files can be found sbpl/env_examples/nav3d
 	//the motionprimitives files can be found in matlab/mprim directory
 	//note: the resolution of the motion primitives files should match the resolution of the cfg files
-    //planxythetalat(argc, argv);
+    planxythetalat(argc, argv);
 
     //xytheta planning
 	//usage: see the comments for planxythetalat() above

@@ -520,6 +520,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\planners\ANA\ANAplanner.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\planners\ANA\ANAplanner.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\planners\ARAStar\araplanner.h"
 				>
 			</File>

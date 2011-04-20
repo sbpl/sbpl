@@ -71,6 +71,7 @@
 #include "../utils/2Dgridsearch.h"
 #include "../planners/PPCP/ppcpplanner.h"
 #include "../planners/RStar/rstarplanner.h"
+#include "../planners/ANA/ANAplanner.h"
 
 
 #endif
