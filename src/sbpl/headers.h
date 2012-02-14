@@ -34,6 +34,7 @@
 #include <time.h>
 #include <math.h>
 #include <vector>
+#include <set>
 #include <stdlib.h>
 
 #include "sbpl_exception.h"
@@ -55,6 +56,9 @@
 #include "../utils/mdpconfig.h"
 #include "../utils/mdp.h"
 #include "../utils/utils.h"
+#include "../utils/sbpl_fifo.h"
+#include "../utils/sbpl_bfs_2d.h"
+#include "../utils/sbpl_bfs_3d.h"
 #include "../planners/planner.h"
 #include "../discrete_space_information/environment.h"
 #include "../discrete_space_information/template/environment_XXX.h"

@@ -522,7 +522,7 @@ void anaPlanner::Reevaluatefvals(anaSearchStateSpace_t* pSearchStateSpace)
 	//recompute priorities for states in OPEN and reorder it
 	for (i = 1; i <= pheap->currentsize; ++i)
 	  {
-	    //anaState* state = (anaState*)pheap->heap[i].heapstate;
+		//anaState* state = (anaState*)pheap->heap[i].heapstate;
 
 		// CHANGED - cast removed
 

@@ -72,7 +72,7 @@ class VIPlanner : public SBPLPlanner
 public:
 	/** \brief replan a path within the allocated time, return the policy in the solution vector
     */
-	int replan(double allocated_time_secs, vector<int>* solution_stateIDs_V);
+	virtual int replan(double allocated_time_secs, vector<int>* solution_stateIDs_V);
 
 	/** \brief constructors
     */
@@ -86,37 +86,37 @@ public:
       */
     ~VIPlanner();
 
-private:
+protected:
 	
 	//member variables
 	MDPConfig*  MDPCfg_;
 	VIPLANNER_T viPlanner;
 
 
-	void Initialize_vidata(CMDPSTATE* state);
+	virtual void Initialize_vidata(CMDPSTATE* state);
 
-	CMDPSTATE* CreateState(int stateID);
+	virtual CMDPSTATE* CreateState(int stateID);
 
-	CMDPSTATE* GetState(int stateID);
-
-
-	void PrintVIData();
-
-	void PrintStatHeader(FILE* fOut);
-
-	void PrintStat(FILE* fOut, clock_t starttime);
+	virtual CMDPSTATE* GetState(int stateID);
 
 
-	void PrintPolicy(FILE* fPolicy);
+	virtual void PrintVIData();
+
+	virtual void PrintStatHeader(FILE* fOut);
+
+	virtual void PrintStat(FILE* fOut, clock_t starttime);
 
 
-	void backup(CMDPSTATE* state);
+	virtual void PrintPolicy(FILE* fPolicy);
 
-	void perform_iteration_backward();
 
-	void perform_iteration_forward();
+	virtual void backup(CMDPSTATE* state);
 
-	void InitializePlanner();
+	virtual void perform_iteration_backward();
+
+	virtual void perform_iteration_forward();
+
+	virtual void InitializePlanner();
 
 
 

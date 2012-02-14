@@ -401,7 +401,7 @@ bool SBPL2DGridSearch::search_withheap(unsigned char** Grid2D, unsigned char obs
 		numofExpands, (int)(((clock()-starttime)/(double)CLOCKS_PER_SEC)*1000), searchStates2D_[goalx_c][goaly_c].g, largestcomputedoptf_,
 			startx_c, starty_c, goalx_c, goaly_c);
 
-	return false;
+	return true;
 }
 
 
@@ -657,9 +657,9 @@ bool SBPL2DGridSearch::search_withslidingbuckets(unsigned char** Grid2D, unsigne
 
 #if DEBUG
 #ifndef ROS
-  const char* 2dgriddebug = "2dgriddebug.txt";
+  const char* f2dgriddebug = "2dgriddebug.txt";
 #endif
-	FILE* f2Dsearch = SBPL_FOPEN(2dgriddebug, "w");
+	FILE* f2Dsearch = SBPL_FOPEN(f2dgriddebug, "w");
 #endif
 	
 	//closed = 0
@@ -827,7 +827,7 @@ bool SBPL2DGridSearch::search_withslidingbuckets(unsigned char** Grid2D, unsigne
 #if DEBUG
   SBPL_FCLOSE(f2Dsearch);
 #endif
-	return false;
+	return true;
 }
 //-----------------------------------------------------------------------------------------------------------------------
 

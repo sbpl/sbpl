@@ -339,9 +339,9 @@ void EnvironmentNAV2D::Computedxy()
 
 		if(EnvNAV2DCfg.dx_[dind] != 0 && EnvNAV2DCfg.dy_[dind] != 0){
             if(dind <= 7)
-                EnvNAV2DCfg.dxy_distance_mm_[dind] = (int)(ENVNAV2D_COSTMULT*1.414);	//the cost of a diagonal move in millimeters
+                EnvNAV2DCfg.dxy_distance_mm_[dind] = (int)ceil(ENVNAV2D_COSTMULT*1.414);	//the cost of a diagonal move in millimeters
             else
-                EnvNAV2DCfg.dxy_distance_mm_[dind] = (int)(ENVNAV2D_COSTMULT*2.236);	//the cost of a move to 1,2 or 2,1 or so on in millimeters
+                EnvNAV2DCfg.dxy_distance_mm_[dind] = (int)ceil(ENVNAV2D_COSTMULT*2.236);	//the cost of a move to 1,2 or 2,1 or so on in millimeters
 		}
 		else
 			EnvNAV2DCfg.dxy_distance_mm_[dind] = ENVNAV2D_COSTMULT;	//the cost of a horizontal move in millimeters
@@ -360,10 +360,10 @@ EnvNAV2DHashEntry_t* EnvironmentNAV2D::GetHashEntry(int X, int Y)
 	int binid = GETHASHBIN(X, Y);
 	
 #if DEBUG
-	if ((int)EnvNAV2D.Coord2StateIDHashTable[binid].size() > 500)
+	if((int)EnvNAV2D.Coord2StateIDHashTable[binid].size() > 500)
 	{
-		SBPL_PRINTF("WARNING: Hash table has a bin %d (X=%d Y=%d) of size %d\n", 
-			binid, X, Y, EnvNAV2D.Coord2StateIDHashTable[binid].size());
+		SBPL_PRINTF("WARNING: Hash table has a bin %d (X=%d Y=%d) of size %u\n",
+			binid, X, Y, (unsigned)EnvNAV2D.Coord2StateIDHashTable[binid].size());
 		
 		PrintHashTableHist();		
 	}
@@ -630,21 +630,19 @@ void EnvironmentNAV2D::ComputeHeuristicValues()
 //-----------interface with outside functions-----------------------------------
 bool EnvironmentNAV2D::InitializeEnv(const char* sEnvFile)
 {
+    FILE* fCfg = fopen(sEnvFile, "r");
+    if(fCfg == NULL)
+    {
+        SBPL_ERROR("ERROR: unable to open %s\n", sEnvFile);
+        throw new SBPL_Exception();
+    }
+    ReadConfiguration(fCfg);
+    fclose(fCfg);
 
-	FILE* fCfg = fopen(sEnvFile, "r");
-	if(fCfg == NULL)
-	{
-		SBPL_ERROR("ERROR: unable to open %s\n", sEnvFile);
-		throw new SBPL_Exception();
-	}
-	ReadConfiguration(fCfg);
-  fclose(fCfg);
+    InitGeneral();
 
-	InitGeneral();
-
-	return true;
+    return true;
 }
-
 
 bool EnvironmentNAV2D::InitializeEnv(int width, int height,
 				     const unsigned char* mapdata,
@@ -1313,7 +1311,7 @@ void EnvironmentNAV2D::GetRandomSuccsatDistance(int SourceStateID, std::vector<i
 	//number of random neighbors
 	int nNumofNeighs = 10;
 	//distance at which the neighbors are generated
-	int nDist_c = 100; 
+	int nDist_c = 100;
 
 
 #if DEBUG
@@ -1340,7 +1338,7 @@ void EnvironmentNAV2D::GetRandomPredsatDistance(int TargetStateID, std::vector<i
 	//number of random neighbors
 	int nNumofNeighs = 10;
 	//distance at which the neighbors are generated
-	int nDist_c = 5; //TODO-was100
+	int nDist_c = 5; //TODO-was100;
 
 
 #if DEBUG

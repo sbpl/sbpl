@@ -1,3 +1,6 @@
+#This CMakeLists file is for building under ROS. 
+#If you want to build without ROS, using the CMakeLists under cmake_build.
+
 cmake_minimum_required(VERSION 2.4.6)
 set(ROS_BUILD_TYPE Release)
 include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
@@ -7,24 +10,24 @@ include_directories(${PROJECT_SOURCE_DIR}/code)
 # Add a ROS C++ macro to tell SBPL to use ROS print statements
 add_definitions(-DROS)
 
-rosbuild_add_library(sbpl 
-                         src/discrete_space_information/nav2d/environment_nav2D.cpp
-                         src/discrete_space_information/navxythetalat/environment_navxythetalat.cpp
-                         src/discrete_space_information/navxythetalat/environment_navxythetamlevlat.cpp
-                         src/discrete_space_information/nav2d_uu/environment_nav2Duu.cpp
-                         src/discrete_space_information/template/environment_XXX.cpp
-                         src/discrete_space_information/robarm/environment_robarm.cpp
-                         src/planners/ARAStar/araplanner.cpp
-                         src/planners/ADStar/adplanner.cpp
-                         src/planners/VI/viplanner.cpp
-                         src/planners/PPCP/ppcpplanner.cpp
-						 src/planners/RStar/rstarplanner.cpp
-                         src/planners/ANA/ANAplanner.cpp
-                         src/utils/heap.cpp
-                         src/utils/mdp.cpp
-                         src/utils/utils.cpp
-			 src/utils/2Dgridsearch.cpp	
-			 )
+rosbuild_add_library(sbpl
+                     src/discrete_space_information/nav2d/environment_nav2D.cpp
+                     src/discrete_space_information/navxythetalat/environment_navxythetalat.cpp
+                     src/discrete_space_information/navxythetalat/environment_navxythetamlevlat.cpp
+                     src/discrete_space_information/nav2d_uu/environment_nav2Duu.cpp
+                     src/discrete_space_information/template/environment_XXX.cpp
+                     src/discrete_space_information/robarm/environment_robarm.cpp
+                     src/planners/ARAStar/araplanner.cpp
+                     src/planners/ADStar/adplanner.cpp
+                     src/planners/VI/viplanner.cpp
+                     src/planners/PPCP/ppcpplanner.cpp
+                     src/planners/ANA/ANAplanner.cpp
+                     src/planners/RStar/rstarplanner.cpp
+                     src/utils/heap.cpp
+                     src/utils/mdp.cpp
+                     src/utils/utils.cpp
+                     src/utils/2Dgridsearch.cpp)
+
 # Build executables in the bin directory
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 

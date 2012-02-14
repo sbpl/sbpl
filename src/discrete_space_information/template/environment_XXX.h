@@ -85,48 +85,48 @@ class EnvironmentXXX : public DiscreteSpaceInformation
 public:
 	/** \brief see comments on the same function in the parent class
     */
-	bool InitializeEnv(const char* sEnvFile);
+	virtual bool InitializeEnv(const char* sEnvFile);
 
 
 	/** \brief see comments on the same function in the parent class
     */
-	bool InitializeMDPCfg(MDPConfig *MDPCfg);
+	virtual bool InitializeMDPCfg(MDPConfig *MDPCfg);
 	/** \brief see comments on the same function in the parent class
     */
-	int  GetFromToHeuristic(int FromStateID, int ToStateID);
+	virtual int  GetFromToHeuristic(int FromStateID, int ToStateID);
 	/** \brief see comments on the same function in the parent class
     */
-	int  GetGoalHeuristic(int stateID);
+	virtual int  GetGoalHeuristic(int stateID);
 	/** \brief see comments on the same function in the parent class
     */
-	int  GetStartHeuristic(int stateID);
+	virtual int  GetStartHeuristic(int stateID);
 	/** \brief see comments on the same function in the parent class
     */
-	void SetAllActionsandAllOutcomes(CMDPSTATE* state);
+	virtual void SetAllActionsandAllOutcomes(CMDPSTATE* state);
 	/** \brief see comments on the same function in the parent class
     */
-	void SetAllPreds(CMDPSTATE* state);
+	virtual void SetAllPreds(CMDPSTATE* state);
 	/** \brief see comments on the same function in the parent class
     */
-	void GetSuccs(int SourceStateID, vector<int>* SuccIDV, vector<int>* CostV);
+	virtual void GetSuccs(int SourceStateID, vector<int>* SuccIDV, vector<int>* CostV);
 	/** \brief see comments on the same function in the parent class
     */
-	void GetPreds(int TargetStateID, vector<int>* PredIDV, vector<int>* CostV);
+	virtual void GetPreds(int TargetStateID, vector<int>* PredIDV, vector<int>* CostV);
 
 	/** \brief see comments on the same function in the parent class
     */
-	int	 SizeofCreatedEnv();
+	virtual int	 SizeofCreatedEnv();
 	/** \brief see comments on the same function in the parent class
     */
-	void PrintState(int stateID, bool bVerbose, FILE* fOut=NULL);
+	virtual void PrintState(int stateID, bool bVerbose, FILE* fOut=NULL);
 	/** \brief see comments on the same function in the parent class
     */
-	void PrintEnv_Config(FILE* fOut);
+	virtual void PrintEnv_Config(FILE* fOut);
 
 
     ~EnvironmentXXX(){};
 
-private:
+protected:
 
 	//member variables
 	EnvXXXConfig_t EnvXXXCfg;
@@ -134,33 +134,33 @@ private:
 
 
 	
-	void ReadConfiguration(FILE* fCfg);
+	virtual void ReadConfiguration(FILE* fCfg);
 
-	void InitializeEnvConfig();
+	virtual void InitializeEnvConfig();
 
-	unsigned int GETHASHBIN(unsigned int X1, unsigned int X2, 
+	virtual unsigned int GETHASHBIN(unsigned int X1, unsigned int X2, 
 						unsigned int X3, unsigned int X4);
 
-	void PrintHashTableHist();
+	virtual void PrintHashTableHist();
 
 
-	EnvXXXHashEntry_t* GetHashEntry(unsigned int X1, unsigned int X2, 
+	virtual EnvXXXHashEntry_t* GetHashEntry(unsigned int X1, unsigned int X2, 
 										unsigned int X3, unsigned int X4);
 
 
-	EnvXXXHashEntry_t* CreateNewHashEntry(unsigned int X1, unsigned int X2, 
+	virtual EnvXXXHashEntry_t* CreateNewHashEntry(unsigned int X1, unsigned int X2, 
 													unsigned int X3, unsigned int X4);
 
 
-	void CreateStartandGoalStates();
+	virtual void CreateStartandGoalStates();
 
-	void InitializeEnvironment();
+	virtual void InitializeEnvironment();
 
 
-	void AddAllOutcomes(unsigned int SourceX1, unsigned int SourceX2, unsigned int SourceX3,
+	virtual void AddAllOutcomes(unsigned int SourceX1, unsigned int SourceX2, unsigned int SourceX3,
 						unsigned int SourceX4, CMDPACTION* action, int cost);
 
-	void ComputeHeuristicValues();
+	virtual void ComputeHeuristicValues();
 
 
 };

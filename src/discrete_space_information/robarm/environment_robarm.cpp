@@ -127,7 +127,7 @@ EnvROBARMHashEntry_t* EnvironmentROBARM::GetHashEntry(short unsigned int* coord,
 	if ((int)EnvROBARM.Coord2StateIDHashTable[binid].size() > 500)
 	{
 		SBPL_PRINTF("WARNING: Hash table has a bin %d (coord0=%d) of size %d\n", 
-			binid, coord[0], EnvROBARM.Coord2StateIDHashTable[binid].size());
+			binid, coord[0], (int)EnvROBARM.Coord2StateIDHashTable[binid].size());
 		
 		PrintHashTableHist();		
 	}

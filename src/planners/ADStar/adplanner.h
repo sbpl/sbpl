@@ -75,9 +75,13 @@ public:
 	/** \brief AD* relevant data
     */
 	short unsigned int callnumberaccessed;
+
+#if DEBUG
 	/** \brief AD* relevant data
     */
 	short unsigned int numofexpands;
+#endif
+
 	/** \brief best predecessor and the action from it, used only in forward searches
     */
 	CMDPSTATE *bestpredstate;
@@ -127,42 +131,53 @@ class ADPlanner : public SBPLPlanner
 public:
 	/** \brief replan a path within the allocated time, return the solution in the vector
     */
-	int replan(double allocated_time_secs, vector<int>* solution_stateIDs_V);
+	virtual int replan(double allocated_time_secs, vector<int>* solution_stateIDs_V);
 	/** \brief replan a path within the allocated time, return the solution in the vector, also returns solution cost
     */
-	int replan(double allocated_time_secs, vector<int>* solution_stateIDs_V, int* solcost);
+	virtual int replan(double allocated_time_secs, vector<int>* solution_stateIDs_V, int* solcost);
+  /** \brief works same as replan function with time and solution states, but it let's you fill out all the parameters for the search
+   */
+  virtual int replan(std::vector<int>* solution_stateIDs_V, ReplanParams params);
+
+  /** \brief works same as replan function with time, solution states, and cost, but it let's you fill out all the parameters for the search
+   */
+  virtual int replan(std::vector<int>* solution_stateIDs_V, ReplanParams params, int* solcost);
 
 	/** \brief set the goal state
     */
-    int set_goal(int goal_stateID);
+    virtual int set_goal(int goal_stateID);
 
 	/** \brief set the start state
     */
-    int set_start(int start_stateID);
+    virtual int set_start(int start_stateID);
 
-	/** \brief set a flag to get rid of the previous search efforts, release the memory and re-initialize the search, when the next replan is called
+	/** \brief set a flag to get rid of the previous search efforts, and re-initialize the search, when the next replan is called
     */
-    int force_planning_from_scratch(); 
+    virtual int force_planning_from_scratch(); 
+
+   	/** \brief Gets rid of the previous search efforts, release the memory and re-initialize the search. 
+      */
+  virtual int force_planning_from_scratch_and_free_memory();
 	
 	/** \brief you can either search forwards or backwards
     */
-	int set_search_mode(bool bSearchUntilFirstSolution);
+	virtual int set_search_mode(bool bSearchUntilFirstSolution);
 
 	/** \brief inform the search about the new edge costs
     */
-	void costs_changed(StateChangeQuery const & stateChange);
+	virtual void costs_changed(StateChangeQuery const & stateChange);
 
 	/** \brief direct form of informing the search about the new edge costs 
 	    \param succsIDV array of successors of changed edges
       \note this is used when the search is run forwards
   */
-	void update_succs_of_changededges(vector<int>* succsIDV);
+	virtual void update_succs_of_changededges(vector<int>* succsIDV);
 
 	/** \brief direct form of informing the search about the new edge costs 
 	    \param predsIDV array of predecessors of changed edges
       \note this is used when the search is run backwards
   */
-	void update_preds_of_changededges(vector<int>* predsIDV);
+	virtual void update_preds_of_changededges(vector<int>* predsIDV);
 
 	/** \brief returns the suboptimality bound on the currently found solution
     */
@@ -174,28 +189,31 @@ public:
 
 	/** \brief returns the initial epsilon
     */
-  double get_initial_eps(){return finitial_eps;};
+  virtual double get_initial_eps(){return finitial_eps;};
 
 	/** \brief returns the time taken to find the first solution
     */
-  double get_initial_eps_planning_time(){return finitial_eps_planning_time;}
+  virtual double get_initial_eps_planning_time(){return finitial_eps_planning_time;}
 
 	/** \brief returns the time taken to get the final solution
     */
-  double get_final_eps_planning_time(){return final_eps_planning_time;};
+  virtual double get_final_eps_planning_time(){return final_eps_planning_time;};
 
 	/** \brief returns the number of expands to find the first solution
     */
-  int get_n_expands_init_solution(){return num_of_expands_initial_solution;};
+  virtual int get_n_expands_init_solution(){return num_of_expands_initial_solution;};
 
 	/** \brief returns the final epsilon achieved during the search
     */
-  double get_final_epsilon(){return final_eps;};
+  virtual double get_final_epsilon(){return final_eps;};
 
 	/** \brief returns the value of the initial epsilon (suboptimality bound) used
     */
 	virtual void set_initialsolution_eps(double initialsolution_eps) {finitial_eps = initialsolution_eps;};
 
+	/** \brief fills out a vector of stats from the search
+    */
+  virtual void get_search_stats(vector<PlannerStats>* s);
 
 	/** \brief constructor
     */
@@ -206,12 +224,16 @@ public:
 
 
 
-private:
+protected:
 
 	//member variables
-	double finitial_eps, finitial_eps_planning_time, final_eps_planning_time, final_eps;
+	double finitial_eps, finitial_eps_planning_time, final_eps_planning_time, final_eps, dec_eps, final_epsilon;
+  double repair_time;
+  bool use_repair_time;
 	int num_of_expands_initial_solution;
 	MDPConfig* MDPCfg_;
+
+  vector<PlannerStats> stats;
 
 	bool bforwardsearch;
 	bool bsearchuntilfirstsolution; //if true, then search until first solution (see planner.h for search modes)
@@ -225,85 +247,85 @@ private:
 
 
 	//member functions
-	void Initialize_searchinfo(CMDPSTATE* state, ADSearchStateSpace_t* pSearchStateSpace);
+	virtual void Initialize_searchinfo(CMDPSTATE* state, ADSearchStateSpace_t* pSearchStateSpace);
 
-	CMDPSTATE* CreateState(int stateID, ADSearchStateSpace_t* pSearchStateSpace);
+	virtual CMDPSTATE* CreateState(int stateID, ADSearchStateSpace_t* pSearchStateSpace);
 
-	CMDPSTATE* GetState(int stateID, ADSearchStateSpace_t* pSearchStateSpace);
+	virtual CMDPSTATE* GetState(int stateID, ADSearchStateSpace_t* pSearchStateSpace);
 
-	int ComputeHeuristic(CMDPSTATE* MDPstate, ADSearchStateSpace_t* pSearchStateSpace);
+	virtual int ComputeHeuristic(CMDPSTATE* MDPstate, ADSearchStateSpace_t* pSearchStateSpace);
 
 	//initialization of a state
-	void InitializeSearchStateInfo(ADState* state, ADSearchStateSpace_t* pSearchStateSpace);
+	virtual void InitializeSearchStateInfo(ADState* state, ADSearchStateSpace_t* pSearchStateSpace);
 
 	//re-initialization of a state
-	void ReInitializeSearchStateInfo(ADState* state, ADSearchStateSpace_t* pSearchStateSpace);
+	virtual void ReInitializeSearchStateInfo(ADState* state, ADSearchStateSpace_t* pSearchStateSpace);
 
-	void DeleteSearchStateData(ADState* state);
+	virtual void DeleteSearchStateData(ADState* state);
 
 
 	//used for backward search
-	void UpdatePredsofOverconsState(ADState* state, ADSearchStateSpace_t* pSearchStateSpace);
-	void UpdatePredsofUnderconsState(ADState* state, ADSearchStateSpace_t* pSearchStateSpace);
+	virtual void UpdatePredsofOverconsState(ADState* state, ADSearchStateSpace_t* pSearchStateSpace);
+	virtual void UpdatePredsofUnderconsState(ADState* state, ADSearchStateSpace_t* pSearchStateSpace);
 
 	//used for forward search
-	void UpdateSuccsofOverconsState(ADState* state, ADSearchStateSpace_t* pSearchStateSpace);
-	void UpdateSuccsofUnderconsState(ADState* state, ADSearchStateSpace_t* pSearchStateSpace);
+	virtual void UpdateSuccsofOverconsState(ADState* state, ADSearchStateSpace_t* pSearchStateSpace);
+	virtual void UpdateSuccsofUnderconsState(ADState* state, ADSearchStateSpace_t* pSearchStateSpace);
 	
-	void UpdateSetMembership(ADState* state);
-	void Recomputegval(ADState* state);
+	virtual void UpdateSetMembership(ADState* state);
+	virtual void Recomputegval(ADState* state);
 
 
-	int GetGVal(int StateID, ADSearchStateSpace_t* pSearchStateSpace);
+	virtual int GetGVal(int StateID, ADSearchStateSpace_t* pSearchStateSpace);
 
 	//returns 1 if the solution is found, 0 if the solution does not exist and 2 if it ran out of time
-	int ComputePath(ADSearchStateSpace_t* pSearchStateSpace, double MaxNumofSecs);
+	virtual int ComputePath(ADSearchStateSpace_t* pSearchStateSpace, double MaxNumofSecs);
 
-	void BuildNewOPENList(ADSearchStateSpace_t* pSearchStateSpace);
+	virtual void BuildNewOPENList(ADSearchStateSpace_t* pSearchStateSpace);
 
-	void Reevaluatefvals(ADSearchStateSpace_t* pSearchStateSpace);
+	virtual void Reevaluatefvals(ADSearchStateSpace_t* pSearchStateSpace);
 
 	//creates (allocates memory) search state space
 	//does not initialize search statespace
-	int CreateSearchStateSpace(ADSearchStateSpace_t* pSearchStateSpace);
+	virtual int CreateSearchStateSpace(ADSearchStateSpace_t* pSearchStateSpace);
 
 	//deallocates memory used by SearchStateSpace
-	void DeleteSearchStateSpace(ADSearchStateSpace_t* pSearchStateSpace);
+	virtual void DeleteSearchStateSpace(ADSearchStateSpace_t* pSearchStateSpace);
 
 
 	//reset properly search state space
 	//needs to be done before deleting states
-	int ResetSearchStateSpace(ADSearchStateSpace_t* pSearchStateSpace);
+	virtual int ResetSearchStateSpace(ADSearchStateSpace_t* pSearchStateSpace);
 
 	//initialization before each search
-	void ReInitializeSearchStateSpace(ADSearchStateSpace_t* pSearchStateSpace);
+	virtual void ReInitializeSearchStateSpace(ADSearchStateSpace_t* pSearchStateSpace);
 
 	//very first initialization
-	int InitializeSearchStateSpace(ADSearchStateSpace_t* pSearchStateSpace);
+	virtual int InitializeSearchStateSpace(ADSearchStateSpace_t* pSearchStateSpace);
 
-	int SetSearchGoalState(int SearchGoalStateID, ADSearchStateSpace_t* pSearchStateSpace);
+	virtual int SetSearchGoalState(int SearchGoalStateID, ADSearchStateSpace_t* pSearchStateSpace);
 
 
-	int SetSearchStartState(int SearchStartStateID, ADSearchStateSpace_t* pSearchStateSpace);
+	virtual int SetSearchStartState(int SearchStartStateID, ADSearchStateSpace_t* pSearchStateSpace);
 
 	//reconstruct path functions are only relevant for forward search
-	int ReconstructPath(ADSearchStateSpace_t* pSearchStateSpace);
+	virtual int ReconstructPath(ADSearchStateSpace_t* pSearchStateSpace);
 
 
-	void PrintSearchState(ADState* searchstateinfo, FILE* fOut);
-	void PrintSearchPath(ADSearchStateSpace_t* pSearchStateSpace, FILE* fOut);
+	virtual void PrintSearchState(ADState* searchstateinfo, FILE* fOut);
+	virtual void PrintSearchPath(ADSearchStateSpace_t* pSearchStateSpace, FILE* fOut);
 
-	int getHeurValue(ADSearchStateSpace_t* pSearchStateSpace, int StateID);
+	virtual int getHeurValue(ADSearchStateSpace_t* pSearchStateSpace, int StateID);
 
 	//get path 
-	vector<int> GetSearchPath(ADSearchStateSpace_t* pSearchStateSpace, int& solcost);
+	virtual vector<int> GetSearchPath(ADSearchStateSpace_t* pSearchStateSpace, int& solcost);
 
 
-	bool Search(ADSearchStateSpace_t* pSearchStateSpace, vector<int>& pathIds, int & PathCost, bool bFirstSolution, bool bOptimalSolution, double MaxNumofSecs);
+	virtual bool Search(ADSearchStateSpace_t* pSearchStateSpace, vector<int>& pathIds, int & PathCost, bool bFirstSolution, bool bOptimalSolution, double MaxNumofSecs);
 
-	CKey ComputeKey(ADState* state);
+	virtual CKey ComputeKey(ADState* state);
 
-	void Update_SearchSuccs_of_ChangedEdges(vector<int> const * statesIDV);
+	virtual void Update_SearchSuccs_of_ChangedEdges(vector<int> const * statesIDV);
 
 
 };

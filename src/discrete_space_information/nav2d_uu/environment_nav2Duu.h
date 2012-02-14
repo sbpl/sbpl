@@ -100,7 +100,7 @@ public:
 
 	/** \brief see comments on the same function in the parent class
     */
-	bool InitializeEnv(const char* sEnvFile);
+	virtual bool InitializeEnv(const char* sEnvFile);
 
 	/** \brief initialize environment. Gridworld is defined as matrix A of size width by height. 
 	So, internally, it is accessed as A[x][y] with x ranging from 0 to width-1 and and y from 0 to height-1
@@ -113,38 +113,38 @@ public:
 	uncertaintymapdata is set up in the same way as mapdata in terms of the order
 	in terms of the values, uncertaintymapdata specifies probabilities of being obstructed
   */
-	bool InitializeEnv(int width, int height,
+	virtual bool InitializeEnv(int width, int height,
 					const unsigned char* mapdata, const float* uncertaintymapdata, unsigned char obsthresh);
 	/** \brief set start location
     */
-    int SetStart(int x, int y);
+    virtual int SetStart(int x, int y);
     /** \brief set goal location
       */
-	int SetGoal(int x, int y);
+	virtual int SetGoal(int x, int y);
 	/** \brief update the traversability of a cell<x,y>
     */
-	bool UpdateCost(int x, int y, unsigned char newcost);
+	virtual bool UpdateCost(int x, int y, unsigned char newcost);
 	
 
 	/** \brief see comments on the same function in the parent class
     */
-	bool InitializeMDPCfg(MDPConfig *MDPCfg);
+	virtual bool InitializeMDPCfg(MDPConfig *MDPCfg);
 	/** \brief see comments on the same function in the parent class
     */
-	int  GetFromToHeuristic(int FromStateID, int ToStateID);
+	virtual int  GetFromToHeuristic(int FromStateID, int ToStateID);
 	/** \brief see comments on the same function in the parent class
     */
-	int  GetGoalHeuristic(int stateID);
+	virtual int  GetGoalHeuristic(int stateID);
 	/** \brief see comments on the same function in the parent class
     */
-	int  GetStartHeuristic(int stateID);
+	virtual int  GetStartHeuristic(int stateID);
 
 	/** \brief see comments on the same function in the parent class
     */
-	void PrintState(int stateID, bool bVerbose, FILE* fOut=NULL);
+	virtual void PrintState(int stateID, bool bVerbose, FILE* fOut=NULL);
 	/** \brief see comments on the same function in the parent class
   */
-	void PrintEnv_Config(FILE* fOut);
+	virtual void PrintEnv_Config(FILE* fOut);
 
 
 	EnvironmentNAV2DUU();
@@ -152,45 +152,45 @@ public:
 
 	/** \brief not fully implemented yet
     */
-	void GetPreds(int stateID, const vector<sbpl_BinaryHiddenVar_t>* updatedhvaluesV, vector<CMDPACTION>* IncomingDetActionV,
+	virtual void GetPreds(int stateID, const vector<sbpl_BinaryHiddenVar_t>* updatedhvaluesV, vector<CMDPACTION>* IncomingDetActionV,
 								  vector<CMDPACTION>* IncomingStochActionV, vector<sbpl_BinaryHiddenVar_t>* StochActionNonpreferredOutcomeV);
 
 
 	/** \brief not fully implemented yet
     */
-	void SetAllActionsandAllOutcomes(CMDPSTATE* state){
+	virtual void SetAllActionsandAllOutcomes(CMDPSTATE* state){
 		SBPL_ERROR("ERROR: SetAllActionsandAllOutcomes not supported in NAV2D UNDER UNCERTAINTY\n");
 		throw new SBPL_Exception();
 	};
 	/** \brief not fully implemented yet
     */
-	void SetAllPreds(CMDPSTATE* state){
+	virtual void SetAllPreds(CMDPSTATE* state){
 		SBPL_ERROR("ERROR: SetAllPreds not supported in NAV2D UNDER UNCERTAINTY\n");
 		throw new SBPL_Exception();
 	};
 	/** \brief not fully implemented yet
   */
-	void GetSuccs(int SourceStateID, vector<int>* SuccIDV, vector<int>* CostV){
+	virtual void GetSuccs(int SourceStateID, vector<int>* SuccIDV, vector<int>* CostV){
 		SBPL_ERROR("ERROR: GetSuccs not supported in NAV2D UNDER UNCERTAINTY\n");
 		throw new SBPL_Exception();
 	};
 	/** \brief not fully implemented yet
     */
-	void GetPreds(int TargetStateID, vector<int>* PredIDV, vector<int>* CostV){
+	virtual void GetPreds(int TargetStateID, vector<int>* PredIDV, vector<int>* CostV){
 		SBPL_ERROR("ERROR: GetPreds not supported in NAV2D UNDER UNCERTAINTY\n");
 		throw new SBPL_Exception();
 	};
 	
 	/** \brief not fully implemented yet
     */
-	int	 SizeofCreatedEnv();
+	virtual int	 SizeofCreatedEnv();
 	/** \brief not fully implemented yet
     */
-	int  SizeofH();
+	virtual int  SizeofH();
 
 
 
-private:
+protected:
 
 	//member variables
 	EnvNAV2DUUConfig_t EnvNAV2DUUCfg;
@@ -198,18 +198,18 @@ private:
 
 
 	//mapdata and uncertaintymapdata is assumed to be organized into a linear array with y being major: map[x+y*width]
-	void SetConfiguration(int width, int height, const unsigned char* mapdata, const float* uncertaintymapdata);
+	virtual void SetConfiguration(int width, int height, const unsigned char* mapdata, const float* uncertaintymapdata);
 	
-	void ReadConfiguration(FILE* fCfg);
-	void InitializeEnvConfig();
-	void InitializeEnvironment();
-	void ComputeHeuristicValues();
-	bool InitGeneral();
+	virtual void ReadConfiguration(FILE* fCfg);
+	virtual void InitializeEnvConfig();
+	virtual void InitializeEnvironment();
+	virtual void ComputeHeuristicValues();
+	virtual bool InitGeneral();
 
-	bool IsValidRobotPosition(int X, int Y);
-	bool IsWithinMapCell(int X, int Y);
+	virtual bool IsValidRobotPosition(int X, int Y);
+	virtual bool IsWithinMapCell(int X, int Y);
 
-	void Computedxy();
+	virtual void Computedxy();
 
 
 };

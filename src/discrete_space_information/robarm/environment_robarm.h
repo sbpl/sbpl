@@ -123,51 +123,48 @@ public:
 
 	/** \brief initialize environment from a file (see .cfg files in robotarm directory for example)
     */
-	bool InitializeEnv(const char* sEnvFile);
+	virtual bool InitializeEnv(const char* sEnvFile);
 
 	/** \brief initialize MDP config with IDs of start/goal
     */
-	bool InitializeMDPCfg(MDPConfig *MDPCfg);
+	virtual bool InitializeMDPCfg(MDPConfig *MDPCfg);
 
 	/** \brief see comments on the same function in the parent class
     */
-	int  GetFromToHeuristic(int FromStateID, int ToStateID);
+	virtual int  GetFromToHeuristic(int FromStateID, int ToStateID);
 	/** \brief see comments on the same function in the parent class
     */
-	int  GetGoalHeuristic(int stateID);
+	virtual int  GetGoalHeuristic(int stateID);
 	/** \brief see comments on the same function in the parent class
     */
-	int  GetStartHeuristic(int stateID);
+	virtual int  GetStartHeuristic(int stateID);
 	/** \brief see comments on the same function in the parent class
     */
-	void SetAllActionsandAllOutcomes(CMDPSTATE* state);
+	virtual void SetAllActionsandAllOutcomes(CMDPSTATE* state);
 	/** \brief see comments on the same function in the parent class
     */
-	void SetAllPreds(CMDPSTATE* state);
+	virtual void SetAllPreds(CMDPSTATE* state);
 	/** \brief see comments on the same function in the parent class
     */
-	void GetSuccs(int SourceStateID, vector<int>* SuccIDV, vector<int>* CostV);
+	virtual void GetSuccs(int SourceStateID, vector<int>* SuccIDV, vector<int>* CostV);
 	/** \brief see comments on the same function in the parent class
     */
-	void GetPreds(int TargetStateID, vector<int>* PredIDV, vector<int>* CostV);
+	virtual void GetPreds(int TargetStateID, vector<int>* PredIDV, vector<int>* CostV);
 
 	/** \brief see comments on the same function in the parent class
     */
-	int	 SizeofCreatedEnv();
+	virtual int	 SizeofCreatedEnv();
 	/** \brief see comments on the same function in the parent class
     */
-	void PrintState(int stateID, bool bVerbose, FILE* fOut=NULL);
+	virtual void PrintState(int stateID, bool bVerbose, FILE* fOut=NULL);
 	/** \brief see comments on the same function in the parent class
     */
-	void PrintEnv_Config(FILE* fOut);
+	virtual void PrintEnv_Config(FILE* fOut);
 
 
     ~EnvironmentROBARM(){};
-	/** \brief prints out some runtime statistics
-    */
-    void PrintTimeStat(FILE* fOut);
 	
- private:
+ protected:
 
 	//member data
 	EnvROBARMConfig_t EnvROBARMCfg;
@@ -175,60 +172,54 @@ public:
 
 
 
-	void ComputeContAngles(short unsigned int coord[NUMOFLINKS], double angle[NUMOFLINKS]);
-	void ComputeCoord(double angle[NUMOFLINKS], short unsigned int coord[NUMOFLINKS]);
-	int ComputeEndEffectorPos(double angles[NUMOFLINKS], short unsigned int*  pX, short unsigned int* pY);
-	int IsValidCoord(short unsigned int coord[NUMOFLINKS], char** Grid2D=NULL, vector<CELLV>* pTestedCells=NULL);
-	int distanceincoord(unsigned short* statecoord1, unsigned short* statecoord2);
-	void ReInitializeState2D(State2D* state);
-	void InitializeState2D(State2D* state, short unsigned int x, short unsigned int y);
-	void Search2DwithQueue(State2D** statespace, int* HeurGrid, int searchstartx, int searchstarty);
-	void Create2DStateSpace(State2D*** statespace2D);
-	void Delete2DStateSpace(State2D*** statespace2D);
-	void printangles(FILE* fOut, short unsigned int* coord, bool bGoal, bool bVerbose, bool bLocal);
-	void DiscretizeAngles();
-	void Cell2ContXY(int x, int y, double *pX, double *pY);
-	void ContXY2Cell(double x, double y, short unsigned int* pX, short unsigned int *pY);
-	int IsValidLineSegment(double x0, double y0, double x1, double y1, char **Grid2D,
+	virtual void ComputeContAngles(short unsigned int coord[NUMOFLINKS], double angle[NUMOFLINKS]);
+	virtual void ComputeCoord(double angle[NUMOFLINKS], short unsigned int coord[NUMOFLINKS]);
+	virtual int ComputeEndEffectorPos(double angles[NUMOFLINKS], short unsigned int*  pX, short unsigned int* pY);
+	virtual int IsValidCoord(short unsigned int coord[NUMOFLINKS], char** Grid2D=NULL, vector<CELLV>* pTestedCells=NULL);
+	virtual int distanceincoord(unsigned short* statecoord1, unsigned short* statecoord2);
+	virtual void ReInitializeState2D(State2D* state);
+	virtual void InitializeState2D(State2D* state, short unsigned int x, short unsigned int y);
+	virtual void Search2DwithQueue(State2D** statespace, int* HeurGrid, int searchstartx, int searchstarty);
+	virtual void Create2DStateSpace(State2D*** statespace2D);
+	virtual void Delete2DStateSpace(State2D*** statespace2D);
+	virtual void printangles(FILE* fOut, short unsigned int* coord, bool bGoal, bool bVerbose, bool bLocal);
+	virtual void DiscretizeAngles();
+	virtual void Cell2ContXY(int x, int y, double *pX, double *pY);
+	virtual void ContXY2Cell(double x, double y, short unsigned int* pX, short unsigned int *pY);
+	virtual int IsValidLineSegment(double x0, double y0, double x1, double y1, char **Grid2D,
 					   		vector<CELLV>* pTestedCells);
-	void GetRandomSuccsatDistance(int SourceStateID, std::vector<int>* SuccIDV, std::vector<int>* CLowV);
-	unsigned int GetHeurBasedonCoord(short unsigned int coord[NUMOFLINKS]);
-	void PrintHeader(FILE* fOut);
-	int cost(short unsigned int state1coord[], short unsigned int state2coord[]);
+	virtual void GetRandomSuccsatDistance(int SourceStateID, std::vector<int>* SuccIDV, std::vector<int>* CLowV);
+	virtual unsigned int GetHeurBasedonCoord(short unsigned int coord[NUMOFLINKS]);
+	virtual void PrintHeader(FILE* fOut);
+	virtual int cost(short unsigned int state1coord[], short unsigned int state2coord[]);
 
 	
 
 
-	void ReadConfiguration(FILE* fCfg);
+	virtual void ReadConfiguration(FILE* fCfg);
 
-	void InitializeEnvConfig();
+	virtual void InitializeEnvConfig();
 
-	unsigned int GETHASHBIN(short unsigned int* coord, int numofcoord);
+	virtual unsigned int GETHASHBIN(short unsigned int* coord, int numofcoord);
 
-	void PrintHashTableHist();
-
-
-	EnvROBARMHashEntry_t* GetHashEntry(short unsigned int* coord, int numofcoord, bool bIsGoal);
-
-	EnvROBARMHashEntry_t* CreateNewHashEntry(short unsigned int* coord, int numofcoord,  short unsigned int endeffx, short unsigned int endeffy);
+	virtual void PrintHashTableHist();
 
 
-	void CreateStartandGoalStates();
+	virtual EnvROBARMHashEntry_t* GetHashEntry(short unsigned int* coord, int numofcoord, bool bIsGoal);
 
-	bool InitializeEnvironment();
-
-	void ComputeHeuristicValues();
-
-	bool IsValidCell(int X, int Y);
-
-	bool IsWithinMapCell(int X, int Y);
+	virtual EnvROBARMHashEntry_t* CreateNewHashEntry(short unsigned int* coord, int numofcoord,  short unsigned int endeffx, short unsigned int endeffy);
 
 
-	int GetEdgeCost(int FromStateID, int ToStateID);
-	int GetRandomState();
-	bool AreEquivalent(int State1ID, int State2ID);
+	virtual bool InitializeEnvironment();
 
-	void PrintSuccGoal(int SourceStateID, int costtogoal, bool bVerbose, bool bLocal /*=false*/, FILE* fOut /*=NULL*/);
+	virtual void ComputeHeuristicValues();
+
+
+	virtual int GetEdgeCost(int FromStateID, int ToStateID);
+	virtual int GetRandomState();
+	virtual bool AreEquivalent(int State1ID, int State2ID);
+
+	virtual void PrintSuccGoal(int SourceStateID, int costtogoal, bool bVerbose, bool bLocal /*=false*/, FILE* fOut /*=NULL*/);
 
 
 };

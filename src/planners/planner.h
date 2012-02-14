@@ -51,6 +51,56 @@ enum STATEID2IND {	STATEID2IND_SLOT0 = 0,
 //#define YYYPLANNER_STATEID2IND STATEID2IND_SLOT0
 //#define YYYPLANNER_STATEID2IND STATEID2IND_SLOT1
 
+/** \brief a parameter class for planners
+ */
+class ReplanParams
+{
+  public: 
+    /** \brief constructor which sets some default values for the parameters
+     *  \param time The maximum planning time
+     */
+    ReplanParams(double time){
+    	max_time = time;
+      initial_eps = 5.0;
+      final_eps = 1.0;
+      dec_eps = 0.2;
+      return_first_solution = false;
+      repair_time = -1;
+    }
+    /** \brief the initial epsilon. (for anytime planners) the default value is 5.0
+     */
+    double initial_eps;
+    /** \brief the final epsilon. (for anytime planners) the default value is 1.0 (optimal solution)
+     */
+    double final_eps;
+    /** \brief the amount epsilon decreases by between searches. (for anytime planners) By default this is 0.2
+     */
+    double dec_eps;
+
+    /** \brief should the planner return after the finding first solution? (this will cause the planner to ignore all time limits) By default this is false.
+     */
+    bool return_first_solution;
+    
+    /** \brief The planner will use all of this time planning unless it reaches a solution for final_eps before the time is up
+     */
+    double max_time;
+
+    /** \brief If this time out is not positive, it is ignored (this is the default). If the planner finds a first solution (in under maxTime of course) 
+     *         the time out for the planner becomes the minimum of maxTime and repairTime (clearly repairTime is useless if it is larger than maxTime). 
+     *         This second timer is useful because you often want a solution in a short amount of time (repairTime) where you are willing to let the planner
+     *         improve the solution, but you are willing to wait a longer amount of time (maxTime) to get the first solution. 
+     */
+    double repair_time;
+};
+
+class PlannerStats
+{
+  public:
+    double eps;
+    int cost;
+    double time;
+    int expands;
+};
 
 typedef enum 
 	{	//different state types if you have more than one type inside a single planner
@@ -113,6 +163,20 @@ public:
     */
   virtual int replan(double allocated_time_sec, std::vector<int>* solution_stateIDs_V, int* solcost) = 0;
 
+  /** \brief works same as replan function with time and solution states, but it let's you fill out all the parameters for the search
+    */
+  virtual int replan(std::vector<int>* solution_stateIDs_V, ReplanParams params){
+    SBPL_ERROR("replan using ReplanParams is unimplemented for this planner\n");
+    return 0;
+  };
+
+  /** \brief works same as replan function with time, solution states, and cost, but it let's you fill out all the parameters for the search
+    */
+  virtual int replan(std::vector<int>* solution_stateIDs_V, ReplanParams params, int* solcost){
+    SBPL_ERROR("replan using ReplanParams is unimplemented for this planner\n");
+    return 0;
+  };
+
     /** \brief sets the goal of search (planner will automatically decide whether it needs to replan from scratch)
       */
     virtual int set_goal(int goal_stateID) = 0;
@@ -124,6 +188,13 @@ public:
     /** \brief forgets previous planning efforts and starts planning from scratch next time replan is called
       */
     virtual int force_planning_from_scratch() = 0; 
+
+    /** \brief forgets previous planning efforts and starts planning from scratch next time replan is called
+      */
+    virtual int force_planning_from_scratch_and_free_memory(){
+      SBPL_ERROR("planning from scratch and free memory is unimplemented for this planner\n");
+      return 0;
+    }
 
 	/** \brief sets the mode for searching
 
@@ -169,6 +240,9 @@ public:
     */
   virtual double get_final_epsilon(){SBPL_ERROR("get_final_epsilon is unimplemented for this planner\n"); return -1;};
 
+	/** \brief fills out a vector of stats from the search
+    */
+  virtual void get_search_stats(vector<PlannerStats>* s){SBPL_ERROR("get_search_stats is unimplemented for this planner\n");}
 
 	/** \brief setting initial solution eps 
        This parameter is ignored in planners that don't have a notion of eps

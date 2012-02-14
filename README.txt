@@ -16,7 +16,7 @@ b) Under unix/linux, you can either
  
 c) For those using SBPL as part of ROS:
 
-You can download the whole ROS package (see http://www.ros.org/wiki/ROS/Installation) and 
+You can download the whole ROS package (see https://www.ros.org/wiki/ROS/Installation) and
     just do "rosmake sbpl" within sbpl directory. The binaries will appear in sbpl\bin directory
 
 
@@ -32,7 +32,7 @@ motion primitives according to which the robot can move in x,y,theta. Motion pri
 
 Finally, few visualization scripts can be found in sbpl/matlab/visualization. In particular, plot_3Dpath.m function can be used to visualize the path found by xytheta lattice planner. This functions takes in .cfg file that specified environment and sol.txt file that was generated within main.cpp by xythetalattice planners.
 
-Note: When running a test_sbpl executable compiled using rosmake option, all the normal output is disabled. If you want to run sbpl in standalone mode (as opposed as calling from ROS node), then you should compile without ROS (either in cmake_build for linux or in win32_build for windows). Then, when you run test_sbpl executable, it will print out standard messages and generate solution file in sol.txt as well as debug.txt with some debug info.
+Note: when running a test_sbpl executable compiled using rosmake option, all the normal output is disabled. If you want to run sbpl in standalone mode (as opposed as calling from ROS node), then you should compile ROS (either in cmake_build for linux or win32_build for windows). Then, when you run test_sbpl executable, it will print out standard messages and generate solution file in sol.txt as well as debug.txt with some debug info.
 
 Links:
 For more information and documentation on SBPL visit:

@@ -44,6 +44,10 @@ ARAPlanner::ARAPlanner(DiscreteSpaceInformation* environment, bool bSearchForwar
     
 	bsearchuntilfirstsolution = false;
     finitial_eps = ARA_DEFAULT_INITIAL_EPS;
+    final_epsilon = ARA_FINAL_EPS;
+    dec_eps = ARA_DECREASE_EPS;
+    use_repair_time = false;
+    repair_time = INFINITECOST;
     searchexpands = 0;
     MaxMemoryCounter = 0;
     
@@ -199,7 +203,9 @@ void ARAPlanner::InitializeSearchStateInfo(ARAState* state, ARASearchStateSpace_
 	state->costtobestnextstate = INFINITECOST;
 	state->heapindex = 0;
 	state->listelem[ARA_INCONS_LIST_ID] = 0;
+#if DEBUG
 	state->numofexpands = 0;
+#endif
 
 	state->bestpredstate = NULL;
 
@@ -229,7 +235,9 @@ void ARAPlanner::ReInitializeSearchStateInfo(ARAState* state, ARASearchStateSpac
 	state->costtobestnextstate = INFINITECOST;
 	state->heapindex = 0;
 	state->listelem[ARA_INCONS_LIST_ID] = 0;
+#if DEBUG
 	state->numofexpands = 0;
+#endif
 
 	state->bestpredstate = NULL;
 
@@ -396,7 +404,8 @@ int ARAPlanner::ImprovePath(ARASearchStateSpace_t* pSearchStateSpace, double Max
 	minkey = pSearchStateSpace->heap->getminkeyheap();
 	CKey oldkey = minkey;
 	while(!pSearchStateSpace->heap->emptyheap() && minkey.key[0] < INFINITECOST && goalkey > minkey &&
-		(clock()-TimeStarted) < MaxNumofSecs*(double)CLOCKS_PER_SEC) 
+		(clock()-TimeStarted) < MaxNumofSecs*(double)CLOCKS_PER_SEC &&
+    (pSearchStateSpace->eps_satisfied == INFINITECOST || (clock()- TimeStarted) < repair_time*(double)CLOCKS_PER_SEC))
     {
 
 		//get the state		
@@ -404,11 +413,11 @@ int ARAPlanner::ImprovePath(ARASearchStateSpace_t* pSearchStateSpace, double Max
 
 
 #if DEBUG
-		//SBPL_FPRINTF(fDeb, "expanding state(%d): h=%d g=%u key=%u v=%u iterc=%d callnuma=%d expands=%d (g(goal)=%u)\n",
-		//	state->MDPstate->StateID, state->h, state->g, state->g+(int)(pSearchStateSpace->eps*state->h), state->v, 
-		//	state->iterationclosed, state->callnumberaccessed, state->numofexpands, searchgoalstate->g);
-		//SBPL_FPRINTF(fDeb, "expanding: ");
-		//PrintSearchState(state, fDeb);
+		SBPL_FPRINTF(fDeb, "expanding state(%d): h=%d g=%u key=%u v=%u iterc=%d callnuma=%d expands=%d (g(goal)=%u)\n",
+			state->MDPstate->StateID, state->h, state->g, state->g+(int)(pSearchStateSpace->eps*state->h), state->v,
+			state->iterationclosed, state->callnumberaccessed, state->numofexpands, searchgoalstate->g);
+		SBPL_FPRINTF(fDeb, "expanding: ");
+		PrintSearchState(state, fDeb);
 		if(state->listelem[ARA_INCONS_LIST_ID]  != NULL)
 		{
 			SBPL_FPRINTF(fDeb, "ERROR: expanding a state from inconslist\n");
@@ -442,7 +451,9 @@ int ARAPlanner::ImprovePath(ARASearchStateSpace_t* pSearchStateSpace, double Max
 
 		//new expand      
 		expands++;
+#if DEBUG
 		state->numofexpands++;
+#endif
 
 
 		if(bforwardsearch == false)
@@ -868,9 +879,15 @@ void ARAPlanner::PrintSearchPath(ARASearchStateSpace_t* pSearchStateSpace, FILE*
 
 void ARAPlanner::PrintSearchState(ARAState* state, FILE* fOut)
 {
+#if DEBUG
 	SBPL_FPRINTF(fOut, "state %d: h=%d g=%u v=%u iterc=%d callnuma=%d expands=%d heapind=%d inconslist=%d\n",
 		state->MDPstate->StateID, state->h, state->g, state->v, 
 		state->iterationclosed, state->callnumberaccessed, state->numofexpands, state->heapindex, state->listelem[ARA_INCONS_LIST_ID]?1:0);
+#else
+	SBPL_FPRINTF(fOut, "state %d: h=%d g=%u v=%u iterc=%d callnuma=%d heapind=%d inconslist=%d\n",
+		state->MDPstate->StateID, state->h, state->g, state->v, 
+		state->iterationclosed, state->callnumberaccessed, state->heapindex, state->listelem[ARA_INCONS_LIST_ID]?1:0);
+#endif
 	environment_->PrintState(state->MDPstate->StateID, true, fOut);
 
 }
@@ -990,44 +1007,51 @@ bool ARAPlanner::Search(ARASearchStateSpace_t* pSearchStateSpace, vector<int>& p
 {
 	CKey key;
 	TimeStarted = clock();
-    searchexpands = 0;
+	searchexpands = 0;
+	double old_repair_time = repair_time;
+	if(!use_repair_time)
+		repair_time = MaxNumofSecs;
 
 #if DEBUG
 	SBPL_FPRINTF(fDeb, "new search call (call number=%d)\n", pSearchStateSpace->callnumber);
 #endif
 
-    if(pSearchStateSpace->bReinitializeSearchStateSpace == true){
-        //re-initialize state space 
-        ReInitializeSearchStateSpace(pSearchStateSpace);
-    }
+	if(pSearchStateSpace->bReinitializeSearchStateSpace == true){
+		//re-initialize state space 
+		ReInitializeSearchStateSpace(pSearchStateSpace);
+	}
 
 
 	if(bOptimalSolution)
 	{
 		pSearchStateSpace->eps = 1;
 		MaxNumofSecs = INFINITECOST;
+		repair_time = INFINITECOST;
 	}
 	else if(bFirstSolution)
 	{
 		MaxNumofSecs = INFINITECOST;
+		repair_time = INFINITECOST;
 	}
 
 	//ensure heuristics are up-to-date
 	environment_->EnsureHeuristicsUpdated((bforwardsearch==true));
 
 	//the main loop of ARA*
+	stats.clear();
 	int prevexpands = 0;
 	clock_t loop_time;
-	while(pSearchStateSpace->eps_satisfied > ARA_FINAL_EPS && 
-		(clock()- TimeStarted) < MaxNumofSecs*(double)CLOCKS_PER_SEC)
+	while(pSearchStateSpace->eps_satisfied > final_epsilon && 
+		(clock()- TimeStarted) < MaxNumofSecs*(double)CLOCKS_PER_SEC &&
+		(pSearchStateSpace->eps_satisfied == INFINITECOST || (clock()- TimeStarted) < repair_time*(double)CLOCKS_PER_SEC))
 	{
-        loop_time = clock();
+		loop_time = clock();
 		//decrease eps for all subsequent iterations
 		if(fabs(pSearchStateSpace->eps_satisfied - pSearchStateSpace->eps) < ERR_EPS && !bFirstSolution)
 		{
-			pSearchStateSpace->eps = pSearchStateSpace->eps - ARA_DECREASE_EPS;
-			if(pSearchStateSpace->eps < ARA_FINAL_EPS)
-				pSearchStateSpace->eps = ARA_FINAL_EPS;
+			pSearchStateSpace->eps = pSearchStateSpace->eps - dec_eps;
+			if(pSearchStateSpace->eps < final_epsilon)
+				pSearchStateSpace->eps = final_epsilon;
 
 			//the priorities need to be updated
 			pSearchStateSpace->bReevaluatefvals = true; 
@@ -1052,22 +1076,31 @@ bool ARAPlanner::Search(ARASearchStateSpace_t* pSearchStateSpace, vector<int>& p
 
 		//improve or compute path
 		if(ImprovePath(pSearchStateSpace, MaxNumofSecs) == 1){
-            pSearchStateSpace->eps_satisfied = pSearchStateSpace->eps;
-        }
+			pSearchStateSpace->eps_satisfied = pSearchStateSpace->eps;
+		}
 
 		//print the solution cost and eps bound
 		SBPL_PRINTF("eps=%f expands=%d g(searchgoal)=%d time=%.3f\n", pSearchStateSpace->eps_satisfied, searchexpands - prevexpands,
-							((ARAState*)pSearchStateSpace->searchgoalstate->PlannerSpecificData)->g,double(clock()-loop_time)/CLOCKS_PER_SEC);
+			((ARAState*)pSearchStateSpace->searchgoalstate->PlannerSpecificData)->g,double(clock()-loop_time)/CLOCKS_PER_SEC);
 
-                if(pSearchStateSpace->eps_satisfied == finitial_eps && pSearchStateSpace->eps == finitial_eps)
-                {
-                  finitial_eps_planning_time = double(clock()-loop_time)/CLOCKS_PER_SEC;
-                  num_of_expands_initial_solution = searchexpands - prevexpands;
-                }
+		if(pSearchStateSpace->eps_satisfied == finitial_eps && pSearchStateSpace->eps == finitial_eps)
+		{
+			finitial_eps_planning_time = double(clock()-loop_time)/CLOCKS_PER_SEC;
+			num_of_expands_initial_solution = searchexpands - prevexpands;
+		}
+
+		if(stats.empty() || pSearchStateSpace->eps_satisfied != stats.back().eps){
+			PlannerStats tempStat;
+			tempStat.eps = pSearchStateSpace->eps_satisfied;
+			tempStat.expands = searchexpands-prevexpands;
+			tempStat.time = double(clock()-loop_time)/CLOCKS_PER_SEC;
+			tempStat.cost = ((ARAState*)pSearchStateSpace->searchgoalstate->PlannerSpecificData)->g;
+			stats.push_back(tempStat);
+		}
 
 #if DEBUG
-        SBPL_FPRINTF(fDeb, "eps=%f expands=%d g(searchgoal)=%d time=%.3f\n", pSearchStateSpace->eps_satisfied, searchexpands - prevexpands,
-							((ARAState*)pSearchStateSpace->searchgoalstate->PlannerSpecificData)->g,double(clock()-loop_time)/CLOCKS_PER_SEC);
+		SBPL_FPRINTF(fDeb, "eps=%f expands=%d g(searchgoal)=%d time=%.3f\n", pSearchStateSpace->eps_satisfied, searchexpands - prevexpands,
+			((ARAState*)pSearchStateSpace->searchgoalstate->PlannerSpecificData)->g,double(clock()-loop_time)/CLOCKS_PER_SEC);
 		PrintSearchState((ARAState*)pSearchStateSpace->searchgoalstate->PlannerSpecificData, fDeb);
 #endif
 		prevexpands = searchexpands;
@@ -1082,6 +1115,7 @@ bool ARAPlanner::Search(ARASearchStateSpace_t* pSearchStateSpace, vector<int>& p
 			break;
 
 	}
+	repair_time = old_repair_time;
 
 
 #if DEBUG
@@ -1090,7 +1124,7 @@ bool ARAPlanner::Search(ARASearchStateSpace_t* pSearchStateSpace, vector<int>& p
 
 	PathCost = ((ARAState*)pSearchStateSpace->searchgoalstate->PlannerSpecificData)->g;
 	MaxMemoryCounter += environment_->StateID2IndexMapping.size()*sizeof(int);
-	
+
 	SBPL_PRINTF("MaxMemoryCounter = %d\n", MaxMemoryCounter);
 
 	int solcost = INFINITECOST;
@@ -1103,15 +1137,15 @@ bool ARAPlanner::Search(ARASearchStateSpace_t* pSearchStateSpace, vector<int>& p
 	else
 	{
 		SBPL_PRINTF("solution is found\n");      
-    	pathIds = GetSearchPath(pSearchStateSpace, solcost);
-        ret = true;
+		pathIds = GetSearchPath(pSearchStateSpace, solcost);
+		ret = true;
 	}
 
 	SBPL_PRINTF("total expands this call = %d, planning time = %.3f secs, solution cost=%d\n", 
-           searchexpands, (clock()-TimeStarted)/((double)CLOCKS_PER_SEC), solcost);
-        final_eps_planning_time = (clock()-TimeStarted)/((double)CLOCKS_PER_SEC);
-        final_eps = pSearchStateSpace->eps_satisfied;
-    //SBPL_FPRINTF(fStat, "%d %d\n", searchexpands, solcost);
+		searchexpands, (clock()-TimeStarted)/((double)CLOCKS_PER_SEC), solcost);
+	final_eps_planning_time = (clock()-TimeStarted)/((double)CLOCKS_PER_SEC);
+	final_eps = pSearchStateSpace->eps_satisfied;
+	//SBPL_FPRINTF(fStat, "%d %d\n", searchexpands, solcost);
 
 	return ret;
 
@@ -1119,6 +1153,21 @@ bool ARAPlanner::Search(ARASearchStateSpace_t* pSearchStateSpace, vector<int>& p
 
 
 //-----------------------------Interface function-----------------------------------------------------
+
+int ARAPlanner::replan(vector<int>* solution_stateIDs_V, ReplanParams params){
+  int solcost;
+  return replan(solution_stateIDs_V, params, &solcost);
+}
+int ARAPlanner::replan(vector<int>* solution_stateIDs_V, ReplanParams params, int* solcost){
+  finitial_eps = params.initial_eps;
+  final_epsilon = params.final_eps;
+  dec_eps = params.dec_eps;
+	bsearchuntilfirstsolution = params.return_first_solution;
+  use_repair_time = params.repair_time > 0;
+  repair_time = params.repair_time;
+  return replan(params.max_time, solution_stateIDs_V, solcost);
+}
+
 //returns 1 if found a solution, and 0 otherwise
 int ARAPlanner::replan(double allocated_time_secs, vector<int>* solution_stateIDs_V)
 {
@@ -1239,6 +1288,36 @@ int ARAPlanner::force_planning_from_scratch()
     return 1;
 }
 
+int ARAPlanner::force_planning_from_scratch_and_free_memory()
+{
+	SBPL_PRINTF("planner: forceplanfromscratch set\n");
+  int start_id = -1;
+  int goal_id = -1;
+  if(pSearchStateSpace_->searchstartstate)
+    start_id = pSearchStateSpace_->searchstartstate->StateID;
+  if(pSearchStateSpace_->searchgoalstate)
+    goal_id = pSearchStateSpace_->searchgoalstate->StateID;
+
+	if(!bforwardsearch){
+    int temp = start_id;
+    start_id = goal_id;
+    goal_id = temp;
+  }
+
+  DeleteSearchStateSpace(pSearchStateSpace_);
+  CreateSearchStateSpace(pSearchStateSpace_);
+  InitializeSearchStateSpace(pSearchStateSpace_);
+  for(unsigned int i=0; i<environment_->StateID2IndexMapping.size(); i++)
+    for(int j=0; j<NUMOFINDICES_STATEID2IND; j++)
+      environment_->StateID2IndexMapping[i][j] = -1;
+
+  if(start_id>=0)
+    set_start(start_id);
+  if(goal_id>=0)
+    set_goal(goal_id);
+  return 1;
+}
+
 
 int ARAPlanner::set_search_mode(bool bSearchUntilFirstSolution)
 {
@@ -1258,4 +1337,13 @@ void ARAPlanner::print_searchpath(FILE* fOut)
 
 
 //---------------------------------------------------------------------------------------------------------
+
+
+void ARAPlanner::get_search_stats(vector<PlannerStats>* s){
+  s->clear();
+  s->reserve(stats.size());
+  for(unsigned int i=0; i<stats.size(); i++){
+    s->push_back(stats[i]);
+  }
+}
 

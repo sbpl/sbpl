@@ -44,6 +44,10 @@ ADPlanner::ADPlanner(DiscreteSpaceInformation* environment, bool bForwardSearch)
 
 	bsearchuntilfirstsolution = false;
     finitial_eps = AD_DEFAULT_INITIAL_EPS;
+    final_epsilon = AD_FINAL_EPS;
+    dec_eps = AD_DECREASE_EPS;
+    use_repair_time = false;
+    repair_time = INFINITECOST;
     searchexpands = 0;
     MaxMemoryCounter = 0;
     
@@ -218,7 +222,9 @@ void ADPlanner::InitializeSearchStateInfo(ADState* state, ADSearchStateSpace_t* 
 	state->costtobestnextstate = INFINITECOST;
 	state->heapindex = 0;
 	state->listelem[AD_INCONS_LIST_ID] = NULL;
+#if DEBUG
 	state->numofexpands = 0;
+#endif
 	state->bestpredstate = NULL;
 
 	//compute heuristics
@@ -247,7 +253,9 @@ void ADPlanner::ReInitializeSearchStateInfo(ADState* state, ADSearchStateSpace_t
 	state->costtobestnextstate = INFINITECOST;
 	state->heapindex = 0;
 	state->listelem[AD_INCONS_LIST_ID] = NULL;
+#if DEBUG
 	state->numofexpands = 0;
+#endif
 	state->bestpredstate = NULL;
 
 	//compute heuristics
@@ -553,7 +561,8 @@ int ADPlanner::ComputePath(ADSearchStateSpace_t* pSearchStateSpace, double MaxNu
 	minkey = pSearchStateSpace->heap->getminkeyheap();
 	CKey oldkey = minkey;
 	while(!pSearchStateSpace->heap->emptyheap() && minkey.key[0] < INFINITECOST && (goalkey > minkey || searchgoalstate->g > searchgoalstate->v) &&
-		(clock()-TimeStarted) < MaxNumofSecs*(double)CLOCKS_PER_SEC) 
+		(clock()-TimeStarted) < MaxNumofSecs*(double)CLOCKS_PER_SEC &&
+    (pSearchStateSpace->eps_satisfied == INFINITECOST || (clock()- TimeStarted) < repair_time*(double)CLOCKS_PER_SEC))
     {
 
 		//get the state		
@@ -598,7 +607,9 @@ int ADPlanner::ComputePath(ADSearchStateSpace_t* pSearchStateSpace, double MaxNu
 
 		//new expand      
 		expands++;
+#if DEBUG
 		state->numofexpands++;
+#endif
 
 		if(state->v > state->g)
 		{
@@ -797,7 +808,6 @@ void ADPlanner::DeleteSearchStateSpace(ADSearchStateSpace_t* pSearchStateSpace)
 		state->PlannerSpecificData = NULL;
 	}
 	pSearchStateSpace->searchMDP.Delete();
-	environment_->StateID2IndexMapping.clear();
 }
 
 
@@ -1003,10 +1013,17 @@ void ADPlanner::PrintSearchState(ADState* searchstateinfo, FILE* fOut)
 {
 
 	CKey key = ComputeKey(searchstateinfo);
+#if DEBUG
 	SBPL_FPRINTF(fOut, "g=%d v=%d h = %d heapindex=%d inconslist=%d key=[%d %d] iterc=%d callnuma=%d expands=%d (current callnum=%d iter=%d)", 
 			searchstateinfo->g, searchstateinfo->v, searchstateinfo->h, searchstateinfo->heapindex, (searchstateinfo->listelem[AD_INCONS_LIST_ID] != NULL),
 			(int)key[0], (int)key[1], searchstateinfo->iterationclosed, searchstateinfo->callnumberaccessed, searchstateinfo->numofexpands,
 				this->pSearchStateSpace_->callnumber, this->pSearchStateSpace_->searchiteration);
+#else
+	SBPL_FPRINTF(fOut, "g=%d v=%d h = %d heapindex=%d inconslist=%d key=[%d %d] iterc=%d callnuma=%d (current callnum=%d iter=%d)", 
+			searchstateinfo->g, searchstateinfo->v, searchstateinfo->h, searchstateinfo->heapindex, (searchstateinfo->listelem[AD_INCONS_LIST_ID] != NULL),
+			(int)key[0], (int)key[1], searchstateinfo->iterationclosed, searchstateinfo->callnumberaccessed,
+				this->pSearchStateSpace_->callnumber, this->pSearchStateSpace_->searchiteration);
+#endif
 
 }
 
@@ -1227,6 +1244,9 @@ bool ADPlanner::Search(ADSearchStateSpace_t* pSearchStateSpace, vector<int>& pat
 	CKey key;
 	TimeStarted = clock();
     searchexpands = 0;
+  double old_repair_time = repair_time;
+    if(!use_repair_time)
+      repair_time = MaxNumofSecs;
 
 #if DEBUG
 	SBPL_FPRINTF(fDeb, "new search call (call number=%d)\n", pSearchStateSpace->callnumber);
@@ -1242,20 +1262,24 @@ bool ADPlanner::Search(ADSearchStateSpace_t* pSearchStateSpace, vector<int>& pat
 	{
 		pSearchStateSpace->eps = 1;
 		MaxNumofSecs = INFINITECOST;
+    repair_time = INFINITECOST;
 	}
 	else if(bFirstSolution)
 	{
 		MaxNumofSecs = INFINITECOST;
+    repair_time = INFINITECOST;
 	}
 
 	//ensure heuristics are up-to-date
 	environment_->EnsureHeuristicsUpdated((bforwardsearch==true));
 
 	//the main loop of AD*
+  stats.clear();
 	int prevexpands = 0;
   clock_t loop_time;
-	while(pSearchStateSpace->eps_satisfied > AD_FINAL_EPS && 
-		(clock()- TimeStarted) < MaxNumofSecs*(double)CLOCKS_PER_SEC)
+	while(pSearchStateSpace->eps_satisfied > final_epsilon && 
+		(clock()- TimeStarted) < MaxNumofSecs*(double)CLOCKS_PER_SEC &&
+    (pSearchStateSpace->eps_satisfied == INFINITECOST || (clock()- TimeStarted) < repair_time*(double)CLOCKS_PER_SEC))
 	{
     loop_time = clock();
 		//it will be a new search iteration
@@ -1264,9 +1288,9 @@ bool ADPlanner::Search(ADSearchStateSpace_t* pSearchStateSpace, vector<int>& pat
 		//decrease eps for all subsequent iterations
 		if(fabs(pSearchStateSpace->eps_satisfied - pSearchStateSpace->eps) < ERR_EPS && !bFirstSolution)
 		{
-			pSearchStateSpace->eps = pSearchStateSpace->eps - AD_DECREASE_EPS;
-			if(pSearchStateSpace->eps < AD_FINAL_EPS)
-				pSearchStateSpace->eps = AD_FINAL_EPS;
+			pSearchStateSpace->eps = pSearchStateSpace->eps - dec_eps;
+			if(pSearchStateSpace->eps < final_epsilon)
+				pSearchStateSpace->eps = final_epsilon;
 
 
 			pSearchStateSpace->bReevaluatefvals = true;
@@ -1299,6 +1323,15 @@ bool ADPlanner::Search(ADSearchStateSpace_t* pSearchStateSpace, vector<int>& pat
       num_of_expands_initial_solution = searchexpands - prevexpands;
     }
 
+    if(stats.empty() || pSearchStateSpace->eps_satisfied != stats.back().eps){
+      PlannerStats  tempStat;
+      tempStat.eps = pSearchStateSpace->eps_satisfied;
+      tempStat.expands = searchexpands-prevexpands;
+      tempStat.time = double(clock()-loop_time)/CLOCKS_PER_SEC;
+      tempStat.cost = ((ARAState*)pSearchStateSpace->searchgoalstate->PlannerSpecificData)->g;
+      stats.push_back(tempStat);
+    }
+
 #if DEBUG
         SBPL_FPRINTF(fDeb, "eps=%f eps_sat=%f expands=%d g(sstart)=%d\n", pSearchStateSpace->eps, pSearchStateSpace->eps_satisfied, searchexpands - prevexpands,
 							((ADState*)pSearchStateSpace->searchgoalstate->PlannerSpecificData)->g);
@@ -1315,6 +1348,7 @@ bool ADPlanner::Search(ADSearchStateSpace_t* pSearchStateSpace, vector<int>& pat
 			break;
 
 	}
+  repair_time = old_repair_time;
 
 
 #if DEBUG
@@ -1425,6 +1459,21 @@ void ADPlanner::Update_SearchSuccs_of_ChangedEdges(vector<int> const * statesIDV
 
 
 //-----------------------------Interface function-----------------------------------------------------
+
+int ADPlanner::replan(vector<int>* solution_stateIDs_V, ReplanParams params){
+  int solcost;
+  return replan(solution_stateIDs_V, params, &solcost);
+}
+int ADPlanner::replan(vector<int>* solution_stateIDs_V, ReplanParams params, int* solcost){
+  finitial_eps = params.initial_eps;
+  final_epsilon = params.final_eps;
+  dec_eps = params.dec_eps;
+  bsearchuntilfirstsolution = params.return_first_solution;
+  use_repair_time = params.repair_time > 0;
+  repair_time = params.repair_time;
+  return replan(params.max_time, solution_stateIDs_V, solcost);
+}
+
 //returns 1 if found a solution, and 0 otherwise
 int ADPlanner::replan(double allocated_time_secs, vector<int>* solution_stateIDs_V)
 {
@@ -1434,31 +1483,28 @@ int ADPlanner::replan(double allocated_time_secs, vector<int>* solution_stateIDs
 	
 }
 
-
-
 //returns 1 if found a solution, and 0 otherwise
 int ADPlanner::replan(double allocated_time_secs, vector<int>* solution_stateIDs_V, int* psolcost)
 {
-    vector<int> pathIds; 
-    int PathCost = 0;
-    bool bFound = false;
+	vector<int> pathIds; 
+	int PathCost = 0;
+	bool bFound = false;
 	*psolcost = 0;
 	bool bOptimalSolution = false;
 
 	SBPL_PRINTF("planner: replan called (bFirstSol=%d, bOptSol=%d)\n", bsearchuntilfirstsolution, bOptimalSolution);
 
-    //plan for the first solution only
-    if((bFound = Search(pSearchStateSpace_, pathIds, PathCost, bsearchuntilfirstsolution, bOptimalSolution, allocated_time_secs)) == false) 
-    {
-        SBPL_PRINTF("failed to find a solution\n");
-    }
+	//plan for the first solution only
+	if((bFound = Search(pSearchStateSpace_, pathIds, PathCost, bsearchuntilfirstsolution, bOptimalSolution, allocated_time_secs)) == false) 
+	{
+		SBPL_PRINTF("failed to find a solution\n");
+	}
 
-    //copy the solution
-    *solution_stateIDs_V = pathIds;
+	//copy the solution
+	*solution_stateIDs_V = pathIds;
 	*psolcost = PathCost;
 
 	return (int)bFound;
-
 }
 
 int ADPlanner::set_goal(int goal_stateID)
@@ -1549,6 +1595,34 @@ int ADPlanner::force_planning_from_scratch()
     return 1;
 }
 
+int ADPlanner::force_planning_from_scratch_and_free_memory(){
+	SBPL_PRINTF("planner: forceplanfromscratch set\n");
+  int start_id = -1;
+  int goal_id = -1;
+  if(pSearchStateSpace_->searchstartstate)
+    start_id = pSearchStateSpace_->searchstartstate->StateID;
+  if(pSearchStateSpace_->searchgoalstate)
+    goal_id = pSearchStateSpace_->searchgoalstate->StateID;
+
+	if(!bforwardsearch){
+    int temp = start_id;
+    start_id = goal_id;
+    goal_id = temp;
+  }
+
+  DeleteSearchStateSpace(pSearchStateSpace_);
+  CreateSearchStateSpace(pSearchStateSpace_);
+  InitializeSearchStateSpace(pSearchStateSpace_);
+  for(unsigned int i=0; i<environment_->StateID2IndexMapping.size(); i++)
+    for(int j=0; j<NUMOFINDICES_STATEID2IND; j++)
+      environment_->StateID2IndexMapping[i][j] = -1;
+
+  if(start_id>=0)
+    set_start(start_id);
+  if(goal_id>=0)
+    set_goal(goal_id);
+  return 1;
+}
 
 int ADPlanner::set_search_mode(bool bSearchUntilFirstSolution)
 {
@@ -1573,4 +1647,12 @@ void ADPlanner::costs_changed(StateChangeQuery const & stateChange)
 
 
 //---------------------------------------------------------------------------------------------------------
+
+void ADPlanner::get_search_stats(vector<PlannerStats>* s){
+  s->clear();
+  s->reserve(stats.size());
+  for(unsigned int i=0; i<stats.size(); i++){
+    s->push_back(stats[i]);
+  }
+}
 

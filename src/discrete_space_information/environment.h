@@ -1,31 +1,31 @@
 /*
- * Copyright (c) 2008, Maxim Likhachev
- * All rights reserved.
- * 
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *     * Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimer in the
- *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the University of Pennsylvania nor the names of its
- *       contributors may be used to endorse or promote products derived from
- *       this software without specific prior written permission.
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- */
+* Copyright (c) 2008, Maxim Likhachev
+* All rights reserved.
+* 
+* Redistribution and use in source and binary forms, with or without
+* modification, are permitted provided that the following conditions are met:
+* 
+*     * Redistributions of source code must retain the above copyright
+*       notice, this list of conditions and the following disclaimer.
+*     * Redistributions in binary form must reproduce the above copyright
+*       notice, this list of conditions and the following disclaimer in the
+*       documentation and/or other materials provided with the distribution.
+*     * Neither the name of the University of Pennsylvania nor the names of its
+*       contributors may be used to endorse or promote products derived from
+*       this software without specific prior written permission.
+* 
+* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+* AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+* IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+* ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+* LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+* CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+* SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+* INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+* CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+* ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+* POSSIBILITY OF SUCH DAMAGE.
+*/
 #ifndef __ENVIRONMENT_H_
 #define __ENVIRONMENT_H_
 
@@ -44,59 +44,59 @@ public:
 	to an array of state indices used in searches. If a single search is done, then it is a single entry. 
 	So StateID2IndexMapping[100][0] = 5 means that hashentry with stateID 100 is mapped onto search index = 5 in search 0
 	The value of -1 means that no search state has been created yet for this hashentry
-  */
+	*/
 	std::vector<int*> StateID2IndexMapping;
-	
+
 	/** \brief debugging file
-    */
+	*/
 	FILE* fDeb;
 
 	/** \brief initialization environment from file (see .cfg files for examples)
-    */
+	*/
 	virtual bool InitializeEnv(const char* sEnvFile) = 0;
 
 	/** \brief initialization of MDP data structure
-    */
+	*/
 	virtual bool InitializeMDPCfg(MDPConfig *MDPCfg) = 0;
 
 	/** \brief heuristic estimate from state FromStateID to state ToStateID
-    */
+	*/
 	virtual int  GetFromToHeuristic(int FromStateID, int ToStateID) = 0;
 	/** \brief heuristic estimate from state with stateID to goal state
-    */
+	*/
 	virtual int  GetGoalHeuristic(int stateID) = 0;
 	/** \brief heuristic estimate from start state to state with stateID
-    */
+	*/
 	virtual int  GetStartHeuristic(int stateID) = 0;
 
 	/** \brief depending on the search used, it may call GetSuccs function (for forward search) or GetPreds function (for backward search)
 	or both (for incremental search). At least one of this functions should be implemented (otherwise, there will be no search to run)
 	Some searches may also use SetAllActionsandAllOutcomes or SetAllPreds functions if they keep the pointers to successors (predecessors) but
 	most searches do not require this, so it is not necessary to support this
-  */
+	*/
 	virtual void GetSuccs(int SourceStateID, std::vector<int>* SuccIDV, std::vector<int>* CostV) = 0;
 	/** \brief see comments for GetSuccs functon
-    */
+	*/
 	virtual void GetPreds(int TargetStateID, std::vector<int>* PredIDV, std::vector<int>* CostV) = 0;
 	/** \brief see comments for GetSuccs functon
-    */
+	*/
 	virtual void SetAllActionsandAllOutcomes(CMDPSTATE* state) = 0;
 	/** \brief see comments for GetSuccs functon
-    */
+	*/
 	virtual void SetAllPreds(CMDPSTATE* state) = 0;
 
 	/** \brief returns the number of states (hashentries) created 
-    */
+	*/
 	virtual int	 SizeofCreatedEnv() = 0;
 	/** \brief prints the state variables for a state with stateID
-    */
+	*/
 	virtual void PrintState(int stateID, bool bVerbose, FILE* fOut=NULL) = 0;
 	/** \brief prints environment config file 
-    */
+	*/
 	virtual void PrintEnv_Config(FILE* fOut) = 0;
 
 	/** \brief sets a parameter to a value. The set of supported parameters depends on the particular environment
-    */
+	*/
 	virtual bool SetEnvParameter(const char* parameter, int value)
 	{
 		SBPL_ERROR("ERROR: Environment has no parameters that can be set via SetEnvParameter function\n");
@@ -115,7 +115,7 @@ public:
 	brief this is used in some planners to figure out if two states are the same in some lower-dimensional manifold
 	for example, in robotarm planning, two states could be equivalent if their end effectors are at the same position
 	unless overwritten in a child class, this function is not implemented
-  */
+	*/
 	virtual bool AreEquivalent(int StateID1, int StateID2){
 		SBPL_ERROR("ERROR: environment does not support calls to AreEquivalent function\n");
 		throw new SBPL_Exception();
@@ -125,23 +125,23 @@ public:
 	to the environment. NOTE: they MUST generate goal state as a succ/pred if it is within the distance from the state
 	CLowV is the corresponding vector of lower bounds on the costs from the state to the successor states (or vice versa for preds function)
 	unless overwritten in a child class, this function is not implemented
-  */
+	*/
 	virtual void GetRandomSuccsatDistance(int SourceStateID, std::vector<int>* SuccIDV, std::vector<int>* CLowV)
 	{
 		SBPL_ERROR("ERROR: environment does not support calls to GetRandomSuccsatDistance function\n");
 		throw new SBPL_Exception();
 	}
 	/** \brief see comments for GetRandomSuccsatDistance
-    */
+	*/
 	virtual void GetRandomPredsatDistance(int TargetStateID, std::vector<int>* PredIDV, std::vector<int>* CLowV)
 	{
 		SBPL_ERROR("ERROR: environment does not support calls to GetRandomPredsatDistance function\n");
 		throw new SBPL_Exception();
 	};
 
-    
+
 	/** \brief checks the heuristics for consistency (some environments do not support this debugging call)
-    */
+	*/
 	virtual void EnsureHeuristicsUpdated(bool bGoalHeuristics)
 	{
 		//by default the heuristics are up-to-date, but in some cases, the heuristics are computed only when really needed. For example,
@@ -152,30 +152,30 @@ public:
 	};
 
 	/** \brief destructor
-    */
+	*/
 	virtual ~DiscreteSpaceInformation(){
-    SBPL_PRINTF("destroying discretespaceinformation\n");
-    for(unsigned int i = 0; i < StateID2IndexMapping.size(); ++i){
-      if(StateID2IndexMapping[i] != NULL)
-        delete[] StateID2IndexMapping[i];
-    }
-    SBPL_FCLOSE(fDeb);
-  }
+		SBPL_PRINTF("destroying discretespaceinformation\n");
+		for(unsigned int i = 0; i < StateID2IndexMapping.size(); ++i){
+			if(StateID2IndexMapping[i] != NULL)
+				delete[] StateID2IndexMapping[i];
+		}
+		SBPL_FCLOSE(fDeb);
+	}
 
 
 	/** \brief constructor
-    */
+	*/
 	DiscreteSpaceInformation()
 	{
 
 #ifndef ROS
-    const char* envdebug = "envdebug.txt";
+		const char* envdebug = "envdebug.txt";
 #endif
-	  if((fDeb = SBPL_FOPEN(envdebug, "w")) == NULL)
-	    {
-	      SBPL_ERROR("ERROR: failed to open debug file for environment\n");
-	      throw new SBPL_Exception();
-	    }
+		if((fDeb = SBPL_FOPEN(envdebug, "w")) == NULL)
+		{
+			SBPL_ERROR("ERROR: failed to open debug file for environment\n");
+			throw new SBPL_Exception();
+		}
 
 	}
 };

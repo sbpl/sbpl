@@ -29,6 +29,8 @@
 #ifndef __UTILS_H_
 #define __UTILS_H_
 
+class PlannerStats;
+
 #ifndef WIN32
 #define __max(x,y) (x>y?x:y)
 #define __min(x,y) (x>y?y:x)
@@ -58,16 +60,52 @@ typedef struct {
 } bresenham_param_t;
 
 
-typedef struct {
-	int x;
-	int y;
-} sbpl_2Dcell_t;
+class sbpl_2Dcell_t{
+  public:
+    sbpl_2Dcell_t(){x=0; y=0;}
+    sbpl_2Dcell_t(int x_,int y_){x=x_; y=y_;}
+    bool operator == (const sbpl_2Dcell_t cell) const {return x==cell.x && y==cell.y;}
+    bool operator < (const sbpl_2Dcell_t cell) const {return x<cell.x || (x==cell.x && y<cell.y);}
+
+    int x;
+    int y;
+};
 
 
-typedef struct {
-	double x;
-	double y;
-} sbpl_2Dpt_t;
+class sbpl_2Dpt_t{
+  public:
+    sbpl_2Dpt_t(){x=0; y=0;}
+    sbpl_2Dpt_t(double x_, double y_){x=x_; y=y_;}
+    bool operator == (const sbpl_2Dpt_t p) const {return x==p.x && y==p.y;}
+    bool operator < (const sbpl_2Dpt_t p) const {return x<p.x || (x==p.x && y<p.y);}
+
+    double x;
+    double y;
+};
+
+class sbpl_xy_theta_cell_t{
+  public:
+    sbpl_xy_theta_cell_t(){x=0; y=0; theta=0;}
+    sbpl_xy_theta_cell_t(int x_, int y_, int theta_){x=x_; y=y_; theta=theta_;}
+    bool operator == (const sbpl_xy_theta_cell_t cell) const {return x==cell.x && y==cell.y && theta==cell.theta;}
+    bool operator < (const sbpl_xy_theta_cell_t cell) const {return x<cell.x || (x==cell.x && (y<cell.y || (y==cell.y && theta<cell.theta)));}
+
+    int x;
+    int y;
+    int theta;
+};
+
+class sbpl_xy_theta_pt_t{
+  public:
+    sbpl_xy_theta_pt_t(){x=0; y=0; theta=0;}
+    sbpl_xy_theta_pt_t(double x_, double y_, double theta_){x=x_; y=y_; theta=theta_;}
+    bool operator == (const sbpl_xy_theta_pt_t p) const {return x==p.x && y==p.y && theta==p.theta;}
+    bool operator < (const sbpl_xy_theta_pt_t p) const {return x<p.x || (x==p.x && (y<p.y || (y==p.y && theta<p.theta)));}
+
+    double x;
+    double y;
+    double theta;
+};
 
 typedef struct BINARYHIDDENVARIABLE
 {
@@ -151,9 +189,17 @@ void computeDistancestoNonfreeAreas(unsigned char** Grid2D, int width_x, int hei
 									float** disttoNonfree_incells);
 
 
+void get_2d_motion_cells(vector<sbpl_2Dpt_t> polygon, vector<sbpl_xy_theta_pt_t> poses, vector<sbpl_2Dcell_t>* cells, double res);
+
+void get_2d_footprint_cells(vector<sbpl_2Dpt_t> polygon, vector<sbpl_2Dcell_t>* cells, sbpl_xy_theta_pt_t pose, double res);
+void get_2d_footprint_cells(vector<sbpl_2Dpt_t> polygon, set<sbpl_2Dcell_t>* cells, sbpl_xy_theta_pt_t pose, double res);
+
+void writePlannerStats(vector<PlannerStats> s, FILE* fout);
+
 #if 0
 void CheckSearchMDP(CMDP* mdp, int ExcludeSuccStateID = -1);
 void CheckSearchPredSucc(CMDPSTATE* state, int ExcludeSuccStateID = -1);
 #endif
+
 
 #endif

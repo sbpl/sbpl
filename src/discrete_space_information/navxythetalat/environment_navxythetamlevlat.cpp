@@ -63,7 +63,7 @@ EnvironmentNAVXYTHETAMLEVLAT::~EnvironmentNAVXYTHETAMLEVLAT()
 
 	if(AdditionalInfoinActionsV != NULL)
 	{
-		for(int tind = 0; tind < NAVXYTHETALAT_THETADIRS; tind++)
+		for(int tind = 0; tind < EnvNAVXYTHETALATCfg.NumThetaDirs; tind++)
 		{
 			for (int aind = 0; aind < EnvNAVXYTHETALATCfg.actionwidth; aind++)
 			{
@@ -211,19 +211,19 @@ bool EnvironmentNAVXYTHETAMLEVLAT::IsValidConfiguration(int X, int Y, int Theta)
 
 	//check the remaining levels now
 	vector<sbpl_2Dcell_t> footprint;
-	EnvNAVXYTHETALAT3Dpt_t pose;
+	sbpl_xy_theta_pt_t pose;
 
 	//compute continuous pose
 	pose.x = DISCXY2CONT(X, EnvNAVXYTHETALATCfg.cellsize_m);
 	pose.y = DISCXY2CONT(Y, EnvNAVXYTHETALATCfg.cellsize_m);
-	pose.theta = DiscTheta2Cont(Theta, NAVXYTHETALAT_THETADIRS);
+	pose.theta = DiscTheta2Cont(Theta, EnvNAVXYTHETALATCfg.NumThetaDirs);
 
 	//iterate over additional levels
 	for (int levind=0; levind < numofadditionalzlevs; levind++)
 	{
 
 		//compute footprint cells
-		CalculateFootprintForPose(pose, &footprint, AddLevelFootprintPolygonV[levind]);
+    get_2d_footprint_cells(AddLevelFootprintPolygonV[levind], &footprint, pose, EnvNAVXYTHETALATCfg.cellsize_m);
 
 		//iterate over all footprint cells
 		for(int find = 0; find < (int)footprint.size(); find++)
@@ -263,7 +263,7 @@ int EnvironmentNAVXYTHETAMLEVLAT::GetActionCost(int SourceX, int SourceY, int So
 int EnvironmentNAVXYTHETAMLEVLAT::GetActionCostacrossAddLevels(int SourceX, int SourceY, int SourceTheta, EnvNAVXYTHETALATAction_t* action)
 {
 	sbpl_2Dcell_t cell;
-	EnvNAVXYTHETALAT3Dcell_t interm3Dcell;
+	sbpl_xy_theta_cell_t interm3Dcell;
 	int i, levelind=-1;
 
 	if(!IsValidCell(SourceX, SourceY))
@@ -376,111 +376,96 @@ int EnvironmentNAVXYTHETAMLEVLAT::GetActionCostacrossAddLevels(int SourceX, int 
  /*
  initialization of additional levels. 0 is the original one. All additional ones will start with index 1
  */
-bool EnvironmentNAVXYTHETAMLEVLAT::InitializeAdditionalLevels(int numofadditionalzlevs_in, 
-															  const vector<sbpl_2Dpt_t>* perimeterptsV,
-								unsigned char* cost_inscribed_thresh_in,
-								unsigned char* cost_possibly_circumscribed_thresh_in)
- {
-	int levelind = -1, xind=-1, yind=-1;
-	EnvNAVXYTHETALAT3Dpt_t temppose;
-	temppose.x = 0.0;
-	temppose.y = 0.0;
-	temppose.theta = 0.0;
-	vector<sbpl_2Dcell_t> footprint;
+bool EnvironmentNAVXYTHETAMLEVLAT::InitializeAdditionalLevels(
+	int numofadditionalzlevs_in,
+	const vector<sbpl_2Dpt_t>* perimeterptsV,
+	unsigned char* cost_inscribed_thresh_in,
+	unsigned char* cost_possibly_circumscribed_thresh_in)
+{
+    int levelind = -1, xind=-1, yind=-1;
+    sbpl_xy_theta_pt_t temppose;
+    temppose.x = 0.0;
+    temppose.y = 0.0;
+    temppose.theta = 0.0;
+    vector<sbpl_2Dcell_t> footprint;
+
+    numofadditionalzlevs = numofadditionalzlevs_in;
+    SBPL_PRINTF("Planning with additional z levels. Number of additional z levels = %d\n", numofadditionalzlevs);
+
+    //allocate memory and set FootprintPolygons for additional levels
+    AddLevelFootprintPolygonV = new vector<sbpl_2Dpt_t> [numofadditionalzlevs];
+    for (levelind=0; levelind < numofadditionalzlevs; levelind++)
+    {
+        AddLevelFootprintPolygonV[levelind] = perimeterptsV[levelind];
+    }
 
 
-	numofadditionalzlevs = numofadditionalzlevs_in;
-	SBPL_PRINTF("Planning with additional z levels. Number of additional z levels = %d\n", numofadditionalzlevs);
+    //print out the size of a footprint for each additional level
+    for(levelind = 0; levelind < numofadditionalzlevs; levelind++)
+    {
+        get_2d_footprint_cells(AddLevelFootprintPolygonV[levelind], &footprint, temppose, EnvNAVXYTHETALATCfg.cellsize_m);
+        SBPL_PRINTF("number of cells in footprint for additional level %d = %d\n", levelind, (unsigned int)footprint.size());
+    }
 
-	//allocate memory and set FootprintPolygons for additional levels
-	AddLevelFootprintPolygonV = new vector<sbpl_2Dpt_t> [numofadditionalzlevs];
-	for (levelind=0; levelind < numofadditionalzlevs; levelind++)
-	{
-		AddLevelFootprintPolygonV[levelind] = perimeterptsV[levelind];
-	}
+    //compute additional levels action info
+    SBPL_PRINTF("pre-computing action data for additional levels:\n");
+    AdditionalInfoinActionsV = new EnvNAVXYTHETAMLEVLATAddInfoAction_t*[EnvNAVXYTHETALATCfg.NumThetaDirs]; 
+    for(int tind = 0; tind < EnvNAVXYTHETALATCfg.NumThetaDirs; tind++)
+    {
+        SBPL_PRINTF("pre-computing for angle %d out of %d angles\n", tind, EnvNAVXYTHETALATCfg.NumThetaDirs);
 
+        //compute sourcepose
+        sbpl_xy_theta_pt_t sourcepose;
+        sourcepose.x = DISCXY2CONT(0, EnvNAVXYTHETALATCfg.cellsize_m);
+        sourcepose.y = DISCXY2CONT(0, EnvNAVXYTHETALATCfg.cellsize_m);
+        sourcepose.theta = DiscTheta2Cont(tind, EnvNAVXYTHETALATCfg.NumThetaDirs);
 
-	//print out the size of a footprint for each additional level
-	for(levelind = 0; levelind < numofadditionalzlevs; levelind++)
-	{
-		CalculateFootprintForPose(temppose, &footprint, AddLevelFootprintPolygonV[levelind]);
-		SBPL_PRINTF("number of cells in footprint for additional level %d = %d\n", levelind, (unsigned int)footprint.size());
-	}
+        AdditionalInfoinActionsV[tind] = new EnvNAVXYTHETAMLEVLATAddInfoAction_t[EnvNAVXYTHETALATCfg.actionwidth]; 
 
-	//compute additional levels action info
-	SBPL_PRINTF("pre-computing action data for additional levels:\n");
-	AdditionalInfoinActionsV = new EnvNAVXYTHETAMLEVLATAddInfoAction_t*[NAVXYTHETALAT_THETADIRS]; 
-	for(int tind = 0; tind < NAVXYTHETALAT_THETADIRS; tind++)
-	{
-		SBPL_PRINTF("pre-computing for angle %d out of %d angles\n", tind, NAVXYTHETALAT_THETADIRS);
+        //iterate over actions for each angle
+        for (int aind = 0; aind < EnvNAVXYTHETALATCfg.actionwidth; aind++)
+        {
+            EnvNAVXYTHETALATAction_t* nav3daction = &EnvNAVXYTHETALATCfg.ActionsV[tind][aind];
 
-		//compute sourcepose
-		EnvNAVXYTHETALAT3Dpt_t sourcepose;
-		sourcepose.x = DISCXY2CONT(0, EnvNAVXYTHETALATCfg.cellsize_m);
-		sourcepose.y = DISCXY2CONT(0, EnvNAVXYTHETALATCfg.cellsize_m);
-		sourcepose.theta = DiscTheta2Cont(tind, NAVXYTHETALAT_THETADIRS);
+            //initialize delta variables
+            AdditionalInfoinActionsV[tind][aind].dX = nav3daction->dX;
+            AdditionalInfoinActionsV[tind][aind].dY = nav3daction->dY;
+            AdditionalInfoinActionsV[tind][aind].starttheta = tind;
+            AdditionalInfoinActionsV[tind][aind].endtheta = nav3daction->endtheta;
 
-		AdditionalInfoinActionsV[tind] = new EnvNAVXYTHETAMLEVLATAddInfoAction_t[EnvNAVXYTHETALATCfg.actionwidth]; 
+            //finally, create the footprint for the action for each level
+            AdditionalInfoinActionsV[tind][aind].intersectingcellsV = new vector<sbpl_2Dcell_t>[numofadditionalzlevs];
+            for(levelind = 0; levelind < numofadditionalzlevs; levelind++)
+            {
+                get_2d_motion_cells(AddLevelFootprintPolygonV[levelind], EnvNAVXYTHETALATCfg.ActionsV[tind][aind].intermptV, &AdditionalInfoinActionsV[tind][aind].intersectingcellsV[levelind], EnvNAVXYTHETALATCfg.cellsize_m);
+            }
+        }
+    }
 
-		//iterate over actions for each angle
-		for (int aind = 0; aind < EnvNAVXYTHETALATCfg.actionwidth; aind++)
-		{
-			EnvNAVXYTHETALATAction_t* nav3daction = &EnvNAVXYTHETALATCfg.ActionsV[tind][aind];
-			
-			//initialize delta variables
-			AdditionalInfoinActionsV[tind][aind].dX = nav3daction->dX;
-			AdditionalInfoinActionsV[tind][aind].dY = nav3daction->dY;
-			AdditionalInfoinActionsV[tind][aind].starttheta = tind;
-			AdditionalInfoinActionsV[tind][aind].endtheta = nav3daction->endtheta;
+    //create maps for additional levels and initialize to zeros (freespace)
+    AddLevelGrid2D = new unsigned char** [numofadditionalzlevs];
+    for(levelind = 0; levelind < numofadditionalzlevs; levelind++)
+    {
+        AddLevelGrid2D[levelind] = new unsigned char* [EnvNAVXYTHETALATCfg.EnvWidth_c];
+        for (xind = 0; xind < EnvNAVXYTHETALATCfg.EnvWidth_c; xind++) {
+            AddLevelGrid2D[levelind][xind] = new unsigned char [EnvNAVXYTHETALATCfg.EnvHeight_c];
+            for(yind = 0; yind < EnvNAVXYTHETALATCfg.EnvHeight_c; yind++) {
+                AddLevelGrid2D[levelind][xind][yind] = 0;
+            }
+        }
+    }
 
-			//finally, create the footprint for the action for each level
-			AdditionalInfoinActionsV[tind][aind].intersectingcellsV = new vector<sbpl_2Dcell_t>[numofadditionalzlevs];
-			for(levelind = 0; levelind < numofadditionalzlevs; levelind++)
-			{
-				//iterate over the trajectory of the robot executing the action
-				for (int pind = 0; pind < (int)EnvNAVXYTHETALATCfg.ActionsV[tind][aind].intermptV.size(); pind++)
-				{
-				
-					//now compute the intersecting cells (for this pose has to be translated by sourcepose.x,sourcepose.y)
-					EnvNAVXYTHETALAT3Dpt_t pose;
-					pose = EnvNAVXYTHETALATCfg.ActionsV[tind][aind].intermptV[pind];
-					pose.x += sourcepose.x;
-					pose.y += sourcepose.y;
-					CalculateFootprintForPose(pose, &AdditionalInfoinActionsV[tind][aind].intersectingcellsV[levelind], AddLevelFootprintPolygonV[levelind]);
+    //create inscribed and circumscribed cost thresholds
+    AddLevel_cost_possibly_circumscribed_thresh = new unsigned char [numofadditionalzlevs];
+    AddLevel_cost_inscribed_thresh = new unsigned char [numofadditionalzlevs];
+    for(levelind = 0; levelind < numofadditionalzlevs; levelind++)
+    {
+        AddLevel_cost_possibly_circumscribed_thresh[levelind] = cost_possibly_circumscribed_thresh_in[levelind];
+        AddLevel_cost_inscribed_thresh[levelind] = cost_inscribed_thresh_in[levelind];
+    }
 
-				}
-
-				//remove the source footprint
-				RemoveSourceFootprint(sourcepose, &AdditionalInfoinActionsV[tind][aind].intersectingcellsV[levelind], AddLevelFootprintPolygonV[levelind]);
-
-			}
-		}
-	}
-
-	//create maps for additional levels and initialize to zeros (freespace)
-	AddLevelGrid2D = new unsigned char** [numofadditionalzlevs];
-	for(levelind = 0; levelind < numofadditionalzlevs; levelind++)
-	{
-		AddLevelGrid2D[levelind] = new unsigned char* [EnvNAVXYTHETALATCfg.EnvWidth_c];
-		for (xind = 0; xind < EnvNAVXYTHETALATCfg.EnvWidth_c; xind++) {
-			AddLevelGrid2D[levelind][xind] = new unsigned char [EnvNAVXYTHETALATCfg.EnvHeight_c];
-			for(yind = 0; yind < EnvNAVXYTHETALATCfg.EnvHeight_c; yind++) {
-				AddLevelGrid2D[levelind][xind][yind] = 0;
-			}
-		}
-	}
-
-	//create inscribed and circumscribed cost thresholds
-	AddLevel_cost_possibly_circumscribed_thresh = new unsigned char [numofadditionalzlevs];
-	AddLevel_cost_inscribed_thresh = new unsigned char [numofadditionalzlevs];
-	for(levelind = 0; levelind < numofadditionalzlevs; levelind++)
-	{
-		AddLevel_cost_possibly_circumscribed_thresh[levelind] = cost_possibly_circumscribed_thresh_in[levelind];
-		AddLevel_cost_inscribed_thresh[levelind] = cost_inscribed_thresh_in[levelind];
-	}
-
-	return true;
- }
+    return true;
+}
 
 //set 2D map for the additional level levind
 bool EnvironmentNAVXYTHETAMLEVLAT::Set2DMapforAddLev(const unsigned char* mapdata, int levind)
@@ -532,8 +517,7 @@ bool EnvironmentNAVXYTHETAMLEVLAT::UpdateCostinAddLev(int x, int y, unsigned cha
   {
 
 #if DEBUG
-	//SBPL_FPRINTF(fDeb, "Cost updated for cell %d %d at level %d from old cost=%d to new cost=%d\n", 
-	  x,y,zlev,   AddLevelGrid2D[zlev][x][y], newcost);
+	//SBPL_FPRINTF(fDeb, "Cost updated for cell %d %d at level %d from old cost=%d to new cost=%d\n", x, y, zlev, AddLevelGrid2D[zlev][x][y], newcost);
 #endif
 
 	AddLevelGrid2D[zlev][x][y] = newcost;

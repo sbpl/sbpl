@@ -1,0 +1,13 @@
+cmake_install.cmake
+CMakeCache.txt
+
+envdebug.txt
+debug.txt
+sol.txt
+
+bin/*
+lib/*
+CMakeFiles/*
+
+.project
+.cproject

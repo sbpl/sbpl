@@ -72,12 +72,7 @@ typedef struct ENVHASHENTRY
 	int Y;
 } EnvNAV2DHashEntry_t;
 
-
-typedef struct NAV2D_CELL
-{
-	int x;
-	int y;
-}nav2dcell_t;
+#define nav2dcell_t sbpl_2Dcell_t
 
 //variables that dynamically change (e.g., array of states, ...)
 typedef struct
@@ -109,41 +104,41 @@ public:
 
 	/** \brief see comments on the same function in the parent class
     */
-	bool InitializeEnv(const char* sEnvFile);
+	virtual bool InitializeEnv(const char* sEnvFile);
 	/** \brief see comments on the same function in the parent class
     */
-	bool InitializeMDPCfg(MDPConfig *MDPCfg);
+	virtual bool InitializeMDPCfg(MDPConfig *MDPCfg);
 	/** \brief see comments on the same function in the parent class
     */
-	int  GetFromToHeuristic(int FromStateID, int ToStateID);
+	virtual int  GetFromToHeuristic(int FromStateID, int ToStateID);
 	/** \brief see comments on the same function in the parent class
     */
-	int  GetGoalHeuristic(int stateID);
+	virtual int  GetGoalHeuristic(int stateID);
 	/** \brief see comments on the same function in the parent class
     */
-	int  GetStartHeuristic(int stateID);
+	virtual int  GetStartHeuristic(int stateID);
 	/** \brief see comments on the same function in the parent class
     */
-	void SetAllActionsandAllOutcomes(CMDPSTATE* state);
+	virtual void SetAllActionsandAllOutcomes(CMDPSTATE* state);
 	/** \brief see comments on the same function in the parent class
     */
-	void SetAllPreds(CMDPSTATE* state);
+	virtual void SetAllPreds(CMDPSTATE* state);
 	/** \brief see comments on the same function in the parent class
     */
-	void GetSuccs(int SourceStateID, vector<int>* SuccIDV, vector<int>* CostV);
+	virtual void GetSuccs(int SourceStateID, vector<int>* SuccIDV, vector<int>* CostV);
 	/** \brief see comments on the same function in the parent class
     */
-	void GetPreds(int TargetStateID, vector<int>* PredIDV, vector<int>* CostV);
+	virtual void GetPreds(int TargetStateID, vector<int>* PredIDV, vector<int>* CostV);
 
 	/** \brief see comments on the same function in the parent class
     */
-	int	 SizeofCreatedEnv();
+	virtual int	 SizeofCreatedEnv();
 	/** \brief see comments on the same function in the parent class
     */
-	void PrintState(int stateID, bool bVerbose, FILE* fOut=NULL);
+	virtual void PrintState(int stateID, bool bVerbose, FILE* fOut=NULL);
 	/** \brief see comments on the same function in the parent class
     */
-	void PrintEnv_Config(FILE* fOut);
+	virtual void PrintEnv_Config(FILE* fOut);
     
 	/** \brief initialize environment. Gridworld is defined as matrix A of size width by height. 
 	So, internally, it is accessed as A[x][y] with x ranging from 0 to width-1 and and y from 0 to height-1
@@ -154,37 +149,37 @@ public:
 	start/goal are given by startx, starty, goalx,goaly. If they are not known yet, just set them to 0. Later setgoal/setstart can be executed
 	finally obsthresh defined obstacle threshold, as mentioned above
   */
-    bool InitializeEnv(int width, int height,
+    virtual bool InitializeEnv(int width, int height,
 		       /** if mapdata is NULL the grid is initialized to all freespace */
                        const unsigned char* mapdata,
                        int startx, int starty,
                        int goalx, int goaly, unsigned char obsthresh);
 	/** \brief a short version of environment initialization. Here start and goal coordinates will be set to 0s
     */
-    bool InitializeEnv(int width, int height,
+    virtual bool InitializeEnv(int width, int height,
 		       /** if mapdata is NULL the grid is initialized to all freespace */
                        const unsigned char* mapdata, unsigned char obsthresh);
 	/** \brief set start location
     */
-    int SetStart(int x, int y);
+    virtual int SetStart(int x, int y);
 	/** \brief set goal location
     */
-    int SetGoal(int x, int y);
+    virtual int SetGoal(int x, int y);
 	/** \brief currently, this is not used
     */
-    void SetGoalTolerance(double tol_x, double tol_y, double tol_theta); /**< not used yet */
+    virtual void SetGoalTolerance(double tol_x, double tol_y, double tol_theta); /**< not used yet */
 	/** \brief update the traversability of a cell<x,y>
     */
-    bool UpdateCost(int x, int y, unsigned char newcost);
+    virtual bool UpdateCost(int x, int y, unsigned char newcost);
 
 	/** \brief this function fill in Predecessor/Successor states of edges whose costs changed
 	It takes in an array of cells whose traversability changed, and returns (in vector preds_of_changededgesIDV) 
 	the IDs of all states that have outgoing edges that go through the changed cells
   */
-	void GetPredsofChangedEdges(vector<nav2dcell_t> const * changedcellsV, vector<int> *preds_of_changededgesIDV);
+	virtual void GetPredsofChangedEdges(vector<nav2dcell_t> const * changedcellsV, vector<int> *preds_of_changededgesIDV);
 	/** \brief same as GetPredsofChangedEdges, but returns successor states. Both functions need to be present for incremental search
     */
-	void GetSuccsofChangedEdges(vector<nav2dcell_t> const * changedcellsV, vector<int> *succs_of_changededgesIDV);
+	virtual void GetSuccsofChangedEdges(vector<nav2dcell_t> const * changedcellsV, vector<int> *succs_of_changededgesIDV);
 
 	/** \brief returns true if two states meet the same condition - see environment.h for more info
     */
@@ -207,7 +202,7 @@ public:
 	/** \brief a direct way to set the configuration of environment - see InitializeEnv function for details about the parameters
 	it is not a full way to initialize environment. To fully initialize, one needs to executed InitGeneral in addition.
   */
-	void SetConfiguration(int width, int height,
+	virtual void SetConfiguration(int width, int height,
 			      /** if mapdata is NULL the grid is initialized to all freespace */
 			      const unsigned char* mapdata,
 			      int startx, int starty,
@@ -216,79 +211,77 @@ public:
 	/** \brief performs initialization of environments. It is usually called in from InitializeEnv. 
 	But if SetConfiguration is used, then one should call InitGeneral by himself
   */
-	bool InitGeneral();
+	virtual bool InitGeneral();
 
 	/** \brief returns the actual <x,y> associated with state of stateID 
     */
-	void GetCoordFromState(int stateID, int& x, int& y) const;
+	virtual void GetCoordFromState(int stateID, int& x, int& y) const;
 
 	/** \brief returns a stateID associated with coordinates <x,y>
   */
-	int GetStateFromCoord(int x, int y);
+	virtual int GetStateFromCoord(int x, int y);
 
 	/** \brief returns true if <x,y> is obstacle (used by the value of this cell and obsthresh)
     */
-	bool IsObstacle(int x, int y);
+	virtual bool IsObstacle(int x, int y);
 
 	/** \brief returns the cost associated with <x,y> cell, i.e., A[x][y]
   */
-	unsigned char GetMapCost(int x, int y);
+	virtual unsigned char GetMapCost(int x, int y);
 
 	/** \brief returns the parameters associated with the current environment. This is useful for setting up a copy of an environment (i.e., second planning problem)
     */
-	void GetEnvParms(int *size_x, int *size_y, int* startx, int* starty, int* goalx, int* goaly, unsigned char* obsthresh);
+	virtual void GetEnvParms(int *size_x, int *size_y, int* startx, int* starty, int* goalx, int* goaly, unsigned char* obsthresh);
 
 	/** \brief way to set up various parameters. For a list of parameters, see the body of the function - it is pretty straightforward
     */
-	bool SetEnvParameter(const char* parameter, int value);
+	virtual bool SetEnvParameter(const char* parameter, int value);
 
 	/** \brief access to internal configuration data structure
     */
-	const EnvNAV2DConfig_t* GetEnvNavConfig();
+	virtual const EnvNAV2DConfig_t* GetEnvNavConfig();
 
 	EnvironmentNAV2D();
     ~EnvironmentNAV2D();
 
 	/** \brief print some time statistics
     */
-    void PrintTimeStat(FILE* fOut);
+    virtual void PrintTimeStat(FILE* fOut);
 	 
 	/** \brief checks X,Y against map boundaries
     */
-	bool IsWithinMapCell(int X, int Y);
+	virtual bool IsWithinMapCell(int X, int Y);
 
 
 
-private:
+protected:
 
 	//member data
 	EnvNAV2DConfig_t EnvNAV2DCfg;
 	EnvironmentNAV2D_t EnvNAV2D;
 
 
-	void ReadConfiguration(FILE* fCfg);
+	virtual void ReadConfiguration(FILE* fCfg);
 
-	void InitializeEnvConfig();
+	virtual void InitializeEnvConfig();
 
-	unsigned int GETHASHBIN(unsigned int X, unsigned int Y);
+	virtual unsigned int GETHASHBIN(unsigned int X, unsigned int Y);
 
-	void PrintHashTableHist();
-
-
-	EnvNAV2DHashEntry_t* GetHashEntry(int X, int Y);
-
-	EnvNAV2DHashEntry_t* CreateNewHashEntry(int X, int Y);
+	virtual void PrintHashTableHist();
 
 
-	void CreateStartandGoalStates();
+	virtual EnvNAV2DHashEntry_t* GetHashEntry(int X, int Y);
 
-	void InitializeEnvironment();
+	virtual EnvNAV2DHashEntry_t* CreateNewHashEntry(int X, int Y);
 
-	void ComputeHeuristicValues();
 
-	bool IsValidCell(int X, int Y);
+	virtual void InitializeEnvironment();
 
-	void Computedxy();
+	virtual void ComputeHeuristicValues();
+
+	virtual bool IsValidCell(int X, int Y);
+
+	virtual void Computedxy();
 
 
 };

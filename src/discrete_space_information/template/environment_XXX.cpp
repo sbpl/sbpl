@@ -119,7 +119,7 @@ EnvXXXHashEntry_t* EnvironmentXXX::GetHashEntry(unsigned int X1, unsigned int X2
 	if ((int)EnvXXX.Coord2StateIDHashTable[binid].size() > 500)
 	{
 		SBPL_PRINTF("WARNING: Hash table has a bin %d (X1=%d X2=%d X3=%d X4=%d) of size %d\n", 
-			binid, X1, X2, X3, X4, EnvXXX.Coord2StateIDHashTable[binid].size());
+			binid, X1, X2, X3, X4, (int)EnvXXX.Coord2StateIDHashTable[binid].size());
 		
 		PrintHashTableHist();		
 	}
