@@ -52,30 +52,30 @@
 #include <crtdbg.h>
 #endif
 
-#include "../utils/key.h"
-#include "../utils/mdpconfig.h"
-#include "../utils/mdp.h"
-#include "../utils/utils.h"
-#include "../utils/sbpl_fifo.h"
-#include "../utils/sbpl_bfs_2d.h"
-#include "../utils/sbpl_bfs_3d.h"
-#include "../planners/planner.h"
-#include "../discrete_space_information/environment.h"
-#include "../discrete_space_information/template/environment_XXX.h"
-#include "../discrete_space_information/nav2d/environment_nav2D.h"
-#include "../discrete_space_information/navxythetalat/environment_navxythetalat.h"
-#include "../discrete_space_information/navxythetalat/environment_navxythetamlevlat.h"
-#include "../discrete_space_information/robarm/environment_robarm.h"
-#include "../discrete_space_information/nav2d_uu/environment_nav2Duu.h"
-#include "../utils/list.h"
-#include "../utils/heap.h"
-#include "../planners/VI/viplanner.h"
-#include "../planners/ARAStar/araplanner.h"
-#include "../planners/ADStar/adplanner.h"
-#include "../utils/2Dgridsearch.h"
-#include "../planners/PPCP/ppcpplanner.h"
-#include "../planners/RStar/rstarplanner.h"
-#include "../planners/ANA/ANAplanner.h"
+#include <sbpl/utils/key.h>
+#include <sbpl/utils/mdpconfig.h>
+#include <sbpl/utils/mdp.h>
+#include <sbpl/utils/utils.h>
+#include <sbpl/utils/sbpl_fifo.h>
+#include <sbpl/utils/sbpl_bfs_2d.h>
+#include <sbpl/utils/sbpl_bfs_3d.h>
+#include <sbpl/planners/planner.h>
+#include <sbpl/discrete_space_information/environment.h>
+#include <sbpl/discrete_space_information/environment_XXX.h>
+#include <sbpl/discrete_space_information/environment_nav2D.h>
+#include <sbpl/discrete_space_information/environment_navxythetalat.h>
+#include <sbpl/discrete_space_information/environment_navxythetamlevlat.h>
+#include <sbpl/discrete_space_information/environment_robarm.h>
+#include <sbpl/discrete_space_information/environment_nav2Duu.h>
+#include <sbpl/utils/list.h>
+#include <sbpl/utils/heap.h>
+#include <sbpl/planners/viplanner.h>
+#include <sbpl/planners/araplanner.h>
+#include <sbpl/planners/adplanner.h>
+#include <sbpl/utils/2Dgridsearch.h>
+#include <sbpl/planners/ppcpplanner.h>
+#include <sbpl/planners/rstarplanner.h>
+#include <sbpl/planners/ANAplanner.h>
 
 
 #endif

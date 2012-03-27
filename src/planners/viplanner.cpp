@@ -29,7 +29,7 @@
 #include <iostream>
 using namespace std;
 
-#include "../../sbpl/headers.h"
+#include <sbpl/headers.h>
 
 static unsigned int g_backups;
 static clock_t g_runtime = 0;

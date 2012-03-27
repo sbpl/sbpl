@@ -2,7 +2,7 @@
 
 using namespace std;
 
-#include "../discrete_space_information/precomputed_adjacency_list/environment_precomputed_adjacency_list.h"
+#include <sbpl/discrete_space_information/environment_precomputed_adjacency_list.h>
 
 
 // 2d Points

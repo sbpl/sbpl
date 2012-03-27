@@ -29,7 +29,7 @@
 #include <iostream>
 using namespace std;
 
-#include "../../sbpl/headers.h"
+#include <sbpl/headers.h>
 
 
 //TODO - define RSTAR_DEBUG_PRINTLOWLEVELEXP and RSTAR_DEBUG_PRINTHIGHLEVELEXP. Make them dependent on DEBUG
