@@ -33,12 +33,12 @@
 //---configuration----
 
 //control of EPS
-#define RSTAR_DEFAULT_INITIAL_EPS	    5.0
+#define RSTAR_DEFAULT_INITIAL_EPS	    3.0
 #define RSTAR_DECREASE_EPS				0.2
 #define RSTAR_FINAL_EPS					1.0
 
 //the number of states to expand for local search in RSTAR before it declares a hard case and postpones its processing
-#define RSTAR_EXPTHRESH  150         //100 //200 TODO - make it a parameter
+#define RSTAR_EXPTHRESH  1000         //150 TODO-DEBUGMAX//200 TODO - make it a paramete
 
 
 //---------------------
@@ -239,31 +239,31 @@ class RSTARPlanner : public SBPLPlanner
 public:
 	/** \brief replan a path within the allocated time, return the solution in the vector
     */
-	virtual int replan(double allocated_time_secs, vector<int>* solution_stateIDs_V);
+	int replan(double allocated_time_secs, vector<int>* solution_stateIDs_V);
 	/** \brief replan a path within the allocated time, return the solution in the vector, also returns solution cost
     */
-	virtual int replan(double allocated_time_sec, vector<int>* solution_stateIDs_V, int* solcost);
+	int replan(double allocated_time_sec, vector<int>* solution_stateIDs_V, int* solcost);
 
 	/** \brief set the goal state
     */
-    virtual int set_goal(int goal_stateID);
+    int set_goal(int goal_stateID);
 	/** \brief set the start state
     */
-    virtual int set_start(int start_stateID);
+    int set_start(int start_stateID);
 	/** \brief inform the search about the new edge costs
     */
-    virtual void costs_changed(StateChangeQuery const & stateChange);
+    void costs_changed(StateChangeQuery const & stateChange);
 	/** \brief inform the search about the new edge costs - 
 	    \note since R* is non-incremental, it is sufficient (and more efficient) to just inform R* of the fact that some costs changed
   */
-    virtual void costs_changed();
+    void costs_changed();
    	/** \brief set a flag to get rid of the previous search efforts, release the memory and re-initialize the search, when the next replan is called
       */
-    virtual int force_planning_from_scratch();
+    int force_planning_from_scratch();
 
 	/** \brief you can either search forwards or backwards
     */
-	virtual int set_search_mode(bool bSearchUntilFirstSolution);
+	int set_search_mode(bool bSearchUntilFirstSolution);
 
 
 	/** \brief obtain probabilistic eps suboptimality bound
@@ -279,9 +279,24 @@ public:
     */
 	virtual void set_initialsolution_eps(double initialsolution_eps) {finitial_eps = initialsolution_eps;};
 
+    
+	/** \brief returns the initial epsilon used by the search
+    */
+	double get_initial_eps(){return finitial_eps;};
+
+	/** \brief returns the final epsilon achieved during the search
+    */
+    double get_final_epsilon(){
+			if(pSearchStateSpace != NULL)
+				return pSearchStateSpace->eps_satisfied;
+			else
+				return INFINITECOST;};
+
+
+
 	/** \brief print out search path 
     */
-	virtual void print_searchpath(FILE* fOut);
+	void print_searchpath(FILE* fOut);
 
 
 	/** \brief constructor 
@@ -293,7 +308,7 @@ public:
 
 
 
-protected:
+private:
 
 	//member variables
 	double finitial_eps;
@@ -313,77 +328,77 @@ protected:
 
 
 	//member functions
-	virtual void Initialize_searchinfo(CMDPSTATE* state);
-	virtual CMDPSTATE* CreateState(int stateID);
-	virtual CMDPSTATE* GetState(int stateID);
+	void Initialize_searchinfo(CMDPSTATE* state);
+	CMDPSTATE* CreateState(int stateID);
+	CMDPSTATE* GetState(int stateID);
 
-	virtual int ComputeHeuristic(CMDPSTATE* MDPstate);
+	int ComputeHeuristic(CMDPSTATE* MDPstate);
 
 	//initialization of a state
-	virtual void InitializeSearchStateInfo(RSTARState* state);
+	void InitializeSearchStateInfo(RSTARState* state);
 
 	//re-initialization of a state
-	virtual void ReInitializeSearchStateInfo(RSTARState* state);
+	void ReInitializeSearchStateInfo(RSTARState* state);
 
-	virtual void DeleteSearchStateData(RSTARState* state);
-	virtual void DeleteSearchActionData(RSTARACTIONDATA* actiondata);
+	void DeleteSearchStateData(RSTARState* state);
+	void DeleteSearchActionData(RSTARACTIONDATA* actiondata);
 
-	virtual int GetGVal(int StateID);
+	int GetGVal(int StateID);
 
 	//returns 1 if the solution is found, 0 if the solution does not exist and 2 if it ran out of time
-	virtual int ImprovePath(double MaxNumofSecs);
+	int ImprovePath(double MaxNumofSecs);
 
 	//note this does NOT re-compute heuristics, only re-orders OPEN list based on current eps and h-vals
-	virtual void Reevaluatefvals();
+	void Reevaluatefvals();
 
 	//creates (allocates memory) search state space
 	//does not initialize search statespace
-	virtual int CreateSearchStateSpace();
+	int CreateSearchStateSpace();
 
 	//deallocates memory used by SearchStateSpace
-	virtual void DeleteSearchStateSpace();
+	void DeleteSearchStateSpace();
 
 	//debugging 
-	virtual void PrintSearchState(RSTARState* state, FILE* fOut);
+	void PrintSearchState(RSTARState* state, FILE* fOut);
 
 
 	//reset properly search state space
 	//needs to be done before deleting states
-	virtual int ResetSearchStateSpace();
+	int ResetSearchStateSpace();
 
 	//initialization before each search
-	virtual void ReInitializeSearchStateSpace();
+	void ReInitializeSearchStateSpace();
 
 	//very first initialization
-	virtual int InitializeSearchStateSpace();
+	int InitializeSearchStateSpace();
 
 	//setting start/goal
-	virtual int SetSearchGoalState(int SearchGoalStateID);
-	virtual int SetSearchStartState(int SearchStartStateID);
+	int SetSearchGoalState(int SearchGoalStateID);
+	int SetSearchStartState(int SearchStartStateID);
 
 
-	virtual int getHeurValue(int StateID);
+	int getHeurValue(int StateID);
 
 	//get path 
-	virtual vector<int> GetSearchPath(int& solcost);
-	virtual void PrintSearchPath(FILE* fOut);
+	vector<int> GetSearchPath(int& solcost);
+	void PrintSearchPath(FILE* fOut);
 	
 	//the actual search
-	virtual bool Search(vector<int>& pathIds, int & PathCost, bool bFirstSolution, bool bOptimalSolution, double MaxNumofSecs);
+	bool Search(vector<int>& pathIds, int & PathCost, bool bFirstSolution, bool bOptimalSolution, double MaxNumofSecs);
 	//local search
-	virtual bool ComputeLocalPath(int StartStateID, int GoalStateID, int maxc, int maxe, 
+	bool ComputeLocalPath(int StartStateID, int GoalStateID, int maxc, int maxe, 
 		int *pCost, int *pCostLow, int *pExp, vector<int>* pPathIDs, int* pNewGoalStateID, double maxnumofsecs);
 
 	//global search functions
-	virtual void  SetBestPredecessor(RSTARState* rstarState, RSTARState* rstarPredState, CMDPACTION* action);
-	virtual CKey ComputeKey(RSTARState* rstarState);
+	void  SetBestPredecessor(RSTARState* rstarState, RSTARState* rstarPredState, CMDPACTION* action);
+	CKey ComputeKey(RSTARState* rstarState);
 
 	//local search functions
-	virtual void Initialize_rstarlsearchdata(CMDPSTATE* state);
-	virtual CMDPSTATE* CreateLSearchState(int stateID);
-	virtual CMDPSTATE* GetLSearchState(int stateID);
-	virtual bool DestroyLocalSearchMemory();
-	virtual CKey LocalSearchComputeKey(RSTARLSearchState* rstarlsearchState);
+	void Initialize_rstarlsearchdata(CMDPSTATE* state);
+	CMDPSTATE* CreateLSearchState(int stateID);
+	CMDPSTATE* GetLSearchState(int stateID);
+	bool DestroyLocalSearchMemory();
+	CKey LocalSearchComputeKey(RSTARLSearchState* rstarlsearchState);
 
 
 
