@@ -1,17 +1,14 @@
-cmake_minimum_required(VERSION 2.4.6)
+cmake_minimum_required(VERSION 2.8)
 PROJECT( sbpl )
-find_package(catkin)
 
-catkin_stack()
-catkin_project(sbpl
-  LIBRARIES sbpl
-  INCLUDE_DIRS sbpl
-  )	
-
-if(WITH_ROS)
+if(NOT OUTSIDE_ROS)
   # Add a ROS C++ macro to tell SBPL to use ROS print statements
+  find_package(PkgConfig REQUIRED)
+  pkg_check_modules(ROSCONSOLE REQUIRED rosconsole)
+  include_directories(${ROSCONSOLE_INCLUDE_DIRS})
+  link_directories(${ROSCONSOLE_LIBRARY_DIRS})
   add_definitions(-DROS)  
-endif(WITH_ROS)
+endif(NOT OUTSIDE_ROS)
 
 include_directories(src/include)
 
@@ -34,12 +31,21 @@ add_library(sbpl SHARED
   src/utils/2Dgridsearch.cpp	
   )
 
+if(NOT OUTSIDE_ROS)
+  target_link_libraries(sbpl ${ROSCONSOLE_LIBRARIES})
+endif(NOT OUTSIDE_ROS)
+
+set(PKG_NAME "sbpl")
+set(PKG_DESC "The Search Based Planning Library")
+set(PKG_SBPL_LIBS "-lsbpl")
+set(pkg_conf_file "${CMAKE_CURRENT_SOURCE_DIR}/sbpl.pc")
+configure_file("${pkg_conf_file}.in" "${pkg_conf_file}" @ONLY)
+install(FILES ${pkg_conf_file} DESTINATION lib/pkgconfig/ COMPONENT pkgconfig)
+
 install(DIRECTORY src/include/sbpl DESTINATION include
 	FILES_MATCHING PATTERN "*.h")
 install(TARGETS sbpl
 	LIBRARY DESTINATION lib)
-install(FILES manifest.xml
-	DESTINATION share/sbpl)
 
 add_executable(test_sbpl src/test/main.cpp)
 target_link_libraries(test_sbpl sbpl)
