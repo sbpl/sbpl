@@ -1,15 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 PROJECT( sbpl )
 
-if(NOT OUTSIDE_ROS)
-  # Add a ROS C++ macro to tell SBPL to use ROS print statements
-  find_package(PkgConfig REQUIRED)
-  pkg_check_modules(ROSCONSOLE REQUIRED rosconsole)
-  include_directories(${ROSCONSOLE_INCLUDE_DIRS})
-  link_directories(${ROSCONSOLE_LIBRARY_DIRS})
-  add_definitions(-DROS)  
-endif(NOT OUTSIDE_ROS)
-
 include_directories(src/include)
 
 add_library(sbpl SHARED
@@ -30,10 +21,6 @@ add_library(sbpl SHARED
   src/utils/utils.cpp
   src/utils/2Dgridsearch.cpp	
   )
-
-if(NOT OUTSIDE_ROS)
-  target_link_libraries(sbpl ${ROSCONSOLE_LIBRARIES})
-endif(NOT OUTSIDE_ROS)
 
 set(PKG_NAME "sbpl")
 set(PKG_DESC "The Search Based Planning Library")
