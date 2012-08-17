@@ -29,7 +29,7 @@
 #include <iostream>
 using namespace std;
 
-#include "../../sbpl/headers.h"
+#include <sbpl/headers.h>
 
 #if TIME_DEBUG
 static clock_t time3_addallout = 0;

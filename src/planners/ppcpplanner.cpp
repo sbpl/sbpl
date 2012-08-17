@@ -29,7 +29,7 @@
 #include <iostream>
 using namespace std;
 
-#include "../../sbpl/headers.h"
+#include <sbpl/headers.h>
 
 
 //-----------------------------------------------------------------------------------------------------
