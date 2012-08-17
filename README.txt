@@ -19,7 +19,6 @@ c) For those using SBPL as part of ROS:
 You can download the whole ROS package (see https://www.ros.org/wiki/ROS/Installation) and
     just do "rosmake sbpl" within sbpl directory. The binaries will appear in sbpl\bin directory
 
-
 Usage:
 
 Examples for how to use SBPL is in src/test/main.cpp. 
