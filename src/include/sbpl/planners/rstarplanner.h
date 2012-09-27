@@ -38,7 +38,7 @@
 #define RSTAR_FINAL_EPS					1.0
 
 //the number of states to expand for local search in RSTAR before it declares a hard case and postpones its processing
-#define RSTAR_EXPTHRESH  1000         //150 TODO-DEBUGMAX//200 TODO - make it a paramete
+#define RSTAR_EXPTHRESH  1000 
 
 
 //---------------------
@@ -278,7 +278,13 @@ public:
 	/** \brief set initial solution epsilon that R* will try to satisfy (probabilistically)
     */
 	virtual void set_initialsolution_eps(double initialsolution_eps) {finitial_eps = initialsolution_eps;};
-
+  /** \brief sets the value to decrease from eps at each iteration
+   */
+  virtual void set_eps_step(double eps) {dec_eps = eps;};
+  /** \brief sets the number of states to expand for local search in RSTAR before 
+   * it declares a hard case and postpones its processing.
+   */
+  virtual void set_local_expand_thres(unsigned thres) {local_expand_thres = thres;};
     
 	/** \brief returns the initial epsilon used by the search
     */
@@ -312,6 +318,9 @@ private:
 
 	//member variables
 	double finitial_eps;
+  double dec_eps;
+  double final_epsilon;
+  double local_expand_thres;
 
 	bool bforwardsearch; //if true, then search proceeds forward, otherwise backward
 

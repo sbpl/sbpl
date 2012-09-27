@@ -45,6 +45,9 @@ RSTARPlanner::RSTARPlanner(DiscreteSpaceInformation* environment, bool bSearchFo
     
 	bsearchuntilfirstsolution = false;
     finitial_eps = RSTAR_DEFAULT_INITIAL_EPS;
+    dec_eps = RSTAR_DECREASE_EPS;
+    final_epsilon = RSTAR_FINAL_EPS;
+    local_expand_thres = RSTAR_EXPTHRESH;
     highlevel_searchexpands = 0;
     lowlevel_searchexpands = 0;
     MaxMemoryCounter = 0;
@@ -596,7 +599,7 @@ CKey RSTARPlanner::ComputeKey(RSTARState* rstarState)
 	//compute the 1st element
     if(rstarState->g > pSearchStateSpace->eps*starttostateh || 
         (rstarState->bestpredaction != NULL && ((RSTARACTIONDATA*)rstarState->bestpredaction->PlannerSpecificData)->pathIDs.size() == 0 &&
-         ((RSTARACTIONDATA*)rstarState->bestpredaction->PlannerSpecificData)->exp >= RSTAR_EXPTHRESH))
+        ((RSTARACTIONDATA*)rstarState->bestpredaction->PlannerSpecificData)->exp >= local_expand_thres))
         retkey.key[0] = 1; 
     else
         retkey.key[0] = 0;
@@ -680,9 +683,9 @@ int RSTARPlanner::ImprovePath(double MaxNumofSecs)
             RSTARACTIONDATA* computedactiondata = (RSTARACTIONDATA*)computedaction->PlannerSpecificData;
 
             
-            if(computedactiondata->exp < RSTAR_EXPTHRESH)
+            if(computedactiondata->exp < local_expand_thres)
             {
-                maxe = RSTAR_EXPTHRESH;
+              maxe = local_expand_thres;
             }
             else
             {
@@ -877,7 +880,7 @@ int RSTARPlanner::ImprovePath(double MaxNumofSecs)
 					rstarstate->g + CLowV[i] < rstarSuccState->g)
 					/* 
 					(rstarstate->bestpredaction != NULL && ((RSTARACTIONDATA*)rstarstate->bestpredaction->PlannerSpecificData)->pathIDs.size() == 0 &&
-					((RSTARACTIONDATA*)rstarstate->bestpredaction->PlannerSpecificData)->exp >= RSTAR_EXPTHRESH) */
+					((RSTARACTIONDATA*)rstarstate->bestpredaction->PlannerSpecificData)->exp >= local_expand_thres) */
                 {
                     SetBestPredecessor(rstarSuccState, rstarstate, action);
                     SBPL_FPRINTF(fDeb, "bestpred was set for the succ (clow=%d)\n", CLowV[i]);
@@ -1337,7 +1340,7 @@ bool RSTARPlanner::Search(vector<int>& pathIds, int & PathCost, bool bFirstSolut
 	int prevexpands = 0;
 	clock_t loop_time;
 	//TODO - change FINAL_EPS and DECREASE_EPS onto a parameter
-	while(pSearchStateSpace->eps_satisfied > RSTAR_FINAL_EPS && 
+	while(pSearchStateSpace->eps_satisfied > final_epsilon && 
 		(clock()- TimeStarted) < MaxNumofSecs*(double)CLOCKS_PER_SEC)
 	{
         loop_time = clock();
@@ -1345,9 +1348,9 @@ bool RSTARPlanner::Search(vector<int>& pathIds, int & PathCost, bool bFirstSolut
 		//decrease eps for all subsequent iterations
 		if(fabs(pSearchStateSpace->eps_satisfied - pSearchStateSpace->eps) < ERR_EPS && !bFirstSolution)
 		{
-			pSearchStateSpace->eps = pSearchStateSpace->eps - RSTAR_DECREASE_EPS;
-			if(pSearchStateSpace->eps < RSTAR_FINAL_EPS)
-				pSearchStateSpace->eps = RSTAR_FINAL_EPS;
+			pSearchStateSpace->eps = pSearchStateSpace->eps - dec_eps;
+			if(pSearchStateSpace->eps < final_epsilon)
+				pSearchStateSpace->eps = final_epsilon;
 
 			//the priorities need to be updated
 			pSearchStateSpace->bReevaluatefvals = true; 

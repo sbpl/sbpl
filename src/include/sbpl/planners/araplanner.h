@@ -185,6 +185,10 @@ public:
 	/** \brief sets the value of the initial epsilon (suboptimality bound) used
     */
 	virtual void set_initialsolution_eps(double initialsolution_eps) {finitial_eps = initialsolution_eps;};
+  
+	/** \brief sets the value to decrease from eps at each iteration
+    */
+	virtual void set_eps_step(double eps) {dec_eps = eps;};
 
 	/** \brief prints out the search path into a file
     */
