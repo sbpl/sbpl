@@ -789,7 +789,8 @@ int RSTARPlanner::ImprovePath(double MaxNumofSecs)
                         utosaction = predaction;
                     }
                 }
-				SBPL_FPRINTF(fDeb, "best pred stateid: %d\n", stateu->MDPstate->StateID);
+                  if (stateu)
+                    SBPL_FPRINTF(fDeb, "best pred stateid: %d\n", stateu->MDPstate->StateID);
 
                 //set the predecessor
 				if(minQ < INFINITECOST)
