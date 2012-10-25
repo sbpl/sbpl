@@ -7,35 +7,36 @@ from os.path import join, exists, abspath
 
 # This script should only be run from sbpl/test/
 sbpl_root = abspath(pardir)
+sbpl_exec_path = sbpl_root
 
 def generate_makefile(dir=''):
-    """
-    Generates a Makefile for SBPL if one doesn't exist
+    """Generate a Makefile for SBPL if one doesn't exist
 
     Looks in a directory relative to the current directory for a Makefile. A new one is generated
     using CMake if one isn't already there. CMakeLists.txt must exist in that directory for this to
     work.
 
     @return Whether or not a Makefile was generated
+    
     """
     # try to generate Makefile if one doesn't exist
     cwd = join(getcwd(), dir)
     print 'Looking for Makefile in', cwd
     if not exists(join(cwd, 'Makefile')):
         if not exists(join(cwd, 'CMakeLists.txt')):
+            print 'Did not find CMakeLists.txt in', cwd
             return False
         else:
             print 'No Makefile found for SBPL, running cmake'
             call(['cmake', '.'])
-        return exists(join(cwd, 'Makefile'))
-#end generate_makefile
+    return exists(join(cwd, 'Makefile'))
 
 def run_sbpl_test(env_type, planner_type, test_env, mprim, is_forward_search, navigating=False):
-    """
-    @brief run the sbpl test executable
-    """
-    sbpl_exe = join(sbpl_root, 'bin/test_sbpl')
-
+    """Run the sbpl test executable"""
+    #sbpl_exe = join(sbpl_root, 'bin/test_sbpl')
+    global sbpl_exec_path
+    sbpl_exe = join(sbpl_exec_path, 'test_sbpl')
+    
     devnull_fd = open(devnull) # for surpressing output
 
     test_env_path = join(sbpl_root, test_env)
@@ -78,11 +79,10 @@ def run_sbpl_test(env_type, planner_type, test_env, mprim, is_forward_search, na
     devnull_fd.close()
 
     return sbpl_res
-#end run_sbpl_test
 
 if __name__ == '__main__':
     print "SBPL is located at", sbpl_root
-
+    
     chdir(sbpl_root)
 
     makefile_exists = generate_makefile()
@@ -98,9 +98,14 @@ if __name__ == '__main__':
     if make_result != 0:
         print 'Errors building SBPL. Checking for older version of SBPL...'
 
-
-    sbpl_exists = exists(join(sbpl_root, 'bin/test_sbpl')) and \
-                  exists(join(sbpl_root, 'lib/libsbpl.so'))
+    # TODO: take path to executable as an argument and not rely on the sbpl root 
+    sbpl_exists = False
+    if (exists(join(sbpl_root, 'bin/test_sbpl')) and exists(join(sbpl_root, 'lib/libsbpl.so'))):
+        sbpl_exec_path = join(sbpl_root, 'bin')
+        sbpl_exists = True
+    elif (exists(join(sbpl_root, 'test_sbpl')) and exists(join(sbpl_root, 'libsbpl.so'))):
+        sbpl_exec_path = sbpl_root
+        sbpl_exists = True
 
     if not sbpl_exists:
         print 'Could not build SBPL and SBPL is not already pre-built. Aborting tests'
@@ -113,34 +118,34 @@ if __name__ == '__main__':
     ### PLANNING FOR 2D ENVIRONMENTS ###
 
     # all planners on 2d environment (12 tests) env1
-    if run_sbpl_test('2d', 'arastar', 'env_examples/nav2d/env1.cfg', 'matlab/mprim/pr2.mprim', True) == 0:
-        num_2d_test_successes = num_2d_test_successes + 1
-    if run_sbpl_test('2d', 'adstar', 'env_examples/nav2d/env1.cfg', 'matlab/mprim/pr2.mprim', True) == 0:
-        num_2d_test_successes = num_2d_test_successes + 1
-    if run_sbpl_test('2d', 'anastar', 'env_examples/nav2d/env1.cfg', 'matlab/mprim/pr2.mprim', True) == 0:
-        num_2d_test_successes = num_2d_test_successes + 1
-    if run_sbpl_test('2d', 'rstar', 'env_examples/nav2d/env1.cfg', 'matlab/mprim/pr2.mprim', True) == 0:
-        num_2d_test_successes = num_2d_test_successes + 1
+    #if run_sbpl_test('2d', 'arastar', 'env_examples/nav2d/env1.cfg', 'matlab/mprim/pr2.mprim', True) == 0:
+        #num_2d_test_successes = num_2d_test_successes + 1
+    #if run_sbpl_test('2d', 'adstar', 'env_examples/nav2d/env1.cfg', 'matlab/mprim/pr2.mprim', True) == 0:
+        #num_2d_test_successes = num_2d_test_successes + 1
+    #if run_sbpl_test('2d', 'anastar', 'env_examples/nav2d/env1.cfg', 'matlab/mprim/pr2.mprim', True) == 0:
+        #num_2d_test_successes = num_2d_test_successes + 1
+    #if run_sbpl_test('2d', 'rstar', 'env_examples/nav2d/env1.cfg', 'matlab/mprim/pr2.mprim', True) == 0:
+        #num_2d_test_successes = num_2d_test_successes + 1
 
     # all planners navigating on 2d env1
-    if run_sbpl_test('2d', 'arastar', 'env_examples/nav2d/env1.cfg', 'matlab/mprim/pr2.mprim', True, True) == 0:
-        num_2d_test_successes = num_2d_test_successes + 1
-    if run_sbpl_test('2d', 'adstar', 'env_examples/nav2d/env1.cfg', 'matlab/mprim/pr2.mprim', True, True) == 0:
-        num_2d_test_successes = num_2d_test_successes + 1
-    if run_sbpl_test('2d', 'anastar', 'env_examples/nav2d/env1.cfg', 'matlab/mprim/pr2.mprim', True, True) == 0:
-        num_2d_test_successes = num_2d_test_successes + 1
-    if run_sbpl_test('2d', 'rstar', 'env_examples/nav2d/env1.cfg', 'matlab/mprim/pr2.mprim', True, True) == 0:
-        num_2d_test_successes = num_2d_test_successes + 1
+    #if run_sbpl_test('2d', 'arastar', 'env_examples/nav2d/env1.cfg', 'matlab/mprim/pr2.mprim', True, True) == 0:
+        #num_2d_test_successes = num_2d_test_successes + 1
+    #if run_sbpl_test('2d', 'adstar', 'env_examples/nav2d/env1.cfg', 'matlab/mprim/pr2.mprim', True, True) == 0:
+        #num_2d_test_successes = num_2d_test_successes + 1
+    #if run_sbpl_test('2d', 'anastar', 'env_examples/nav2d/env1.cfg', 'matlab/mprim/pr2.mprim', True, True) == 0:
+        #num_2d_test_successes = num_2d_test_successes + 1
+    #if run_sbpl_test('2d', 'rstar', 'env_examples/nav2d/env1.cfg', 'matlab/mprim/pr2.mprim', True, True) == 0:
+        #num_2d_test_successes = num_2d_test_successes + 1
 
     # all planners on 2d env2
-    if run_sbpl_test('2d', 'arastar', 'env_examples/nav2d/env2.cfg', 'matlab/mprim/pr2.mprim', True) == 0:
-        num_2d_test_successes = num_2d_test_successes + 1
-    if run_sbpl_test('2d', 'adstar', 'env_examples/nav2d/env2.cfg', 'matlab/mprim/pr2.mprim', True) == 0:
-        num_2d_test_successes = num_2d_test_successes + 1
-    if run_sbpl_test('2d', 'anastar', 'env_examples/nav2d/env2.cfg', 'matlab/mprim/pr2.mprim', True) == 0:
-        num_2d_test_successes = num_2d_test_successes + 1
-    if run_sbpl_test('2d', 'rstar', 'env_examples/nav2d/env2.cfg', 'matlab/mprim/pr2.mprim', True) == 0:
-        num_2d_test_successes = num_2d_test_successes + 1
+    #if run_sbpl_test('2d', 'arastar', 'env_examples/nav2d/env2.cfg', 'matlab/mprim/pr2.mprim', True) == 0:
+        #num_2d_test_successes = num_2d_test_successes + 1
+    #if run_sbpl_test('2d', 'adstar', 'env_examples/nav2d/env2.cfg', 'matlab/mprim/pr2.mprim', True) == 0:
+        #num_2d_test_successes = num_2d_test_successes + 1
+    #if run_sbpl_test('2d', 'anastar', 'env_examples/nav2d/env2.cfg', 'matlab/mprim/pr2.mprim', True) == 0:
+        #num_2d_test_successes = num_2d_test_successes + 1
+    #if run_sbpl_test('2d', 'rstar', 'env_examples/nav2d/env2.cfg', 'matlab/mprim/pr2.mprim', True) == 0:
+        #num_2d_test_successes = num_2d_test_successes + 1
 
     # all planners navigating on 2d env2 (no thanks, I want my tests to finish)
     #run_sbpl_test('2d', 'arastar', 'env_examples/nav2d/env2.cfg', 'matlab/mprim/pr2.mprim', True)
@@ -161,12 +166,12 @@ if __name__ == '__main__':
         num_xytheta_test_successes = num_xytheta_test_successes + 1
 
     # all planners navigating on xytheta env1
-    if run_sbpl_test('xytheta', 'arastar', 'env_examples/nav3d/env1.cfg', 'matlab/mprim/pr2.mprim', True, True) == 0:
-        num_xytheta_test_successes = num_xytheta_test_successes + 1
-    if run_sbpl_test('xytheta', 'adstar', 'env_examples/nav3d/env1.cfg', 'matlab/mprim/pr2.mprim', True, True) == 0:
-        num_xytheta_test_successes = num_xytheta_test_successes + 1
-    if run_sbpl_test('xytheta', 'anastar', 'env_examples/nav3d/env1.cfg', 'matlab/mprim/pr2.mprim', True, True) == 0:
-        num_xytheta_test_successes = num_xytheta_test_successes + 1
+    #if run_sbpl_test('xytheta', 'arastar', 'env_examples/nav3d/env1.cfg', 'matlab/mprim/pr2.mprim', True, True) == 0:
+        #num_xytheta_test_successes = num_xytheta_test_successes + 1
+    #if run_sbpl_test('xytheta', 'adstar', 'env_examples/nav3d/env1.cfg', 'matlab/mprim/pr2.mprim', True, True) == 0:
+        #num_xytheta_test_successes = num_xytheta_test_successes + 1
+    #if run_sbpl_test('xytheta', 'anastar', 'env_examples/nav3d/env1.cfg', 'matlab/mprim/pr2.mprim', True, True) == 0:
+        #num_xytheta_test_successes = num_xytheta_test_successes + 1
 
     # all planners on xytheta env2
     if run_sbpl_test('xytheta', 'arastar', 'env_examples/nav3d/env2.cfg', 'matlab/mprim/pr2_10cm.mprim', True) == 0:
@@ -186,54 +191,54 @@ if __name__ == '__main__':
     num_xythetamlev_test_successes = 0
 
     # all planners on xythetamlev env1
-    if run_sbpl_test('xythetamlev', 'arastar', 'env_examples/nav3d/env1.cfg', 'matlab/mprim/pr2.mprim', True) == 0:
-        num_xythetamlev_test_successes = num_xythetamlev_test_successes + 1
-    if run_sbpl_test('xythetamlev', 'adstar', 'env_examples/nav3d/env1.cfg', 'matlab/mprim/pr2.mprim', True) == 0:
-        num_xythetamlev_test_successes = num_xythetamlev_test_successes + 1
-    if run_sbpl_test('xythetamlev', 'anastar', 'env_examples/nav3d/env1.cfg', 'matlab/mprim/pr2.mprim', True) == 0:
-        num_xythetamlev_test_successes = num_xythetamlev_test_successes + 1
+    #if run_sbpl_test('xythetamlev', 'arastar', 'env_examples/nav3d/env1.cfg', 'matlab/mprim/pr2.mprim', True) == 0:
+        #num_xythetamlev_test_successes = num_xythetamlev_test_successes + 1
+    #if run_sbpl_test('xythetamlev', 'adstar', 'env_examples/nav3d/env1.cfg', 'matlab/mprim/pr2.mprim', True) == 0:
+        #num_xythetamlev_test_successes = num_xythetamlev_test_successes + 1
+    #if run_sbpl_test('xythetamlev', 'anastar', 'env_examples/nav3d/env1.cfg', 'matlab/mprim/pr2.mprim', True) == 0:
+        #num_xythetamlev_test_successes = num_xythetamlev_test_successes + 1
 
     # all planners on xythetamlev env2
-    if run_sbpl_test('xythetamlev', 'arastar', 'env_examples/nav3d/env2.cfg', 'matlab/mprim/pr2_10cm.mprim', True) == 0:
-        num_xythetamlev_test_successes = num_xythetamlev_test_successes + 1
-    if run_sbpl_test('xythetamlev', 'adstar', 'env_examples/nav3d/env2.cfg', 'matlab/mprim/pr2_10cm.mprim', True) == 0:
-        num_xythetamlev_test_successes = num_xythetamlev_test_successes + 1
-    if run_sbpl_test('xythetamlev', 'anastar', 'env_examples/nav3d/env2.cfg', 'matlab/mprim/pr2_10cm.mprim', True) == 0:
-        num_xythetamlev_test_successes = num_xythetamlev_test_successes + 1
+    #if run_sbpl_test('xythetamlev', 'arastar', 'env_examples/nav3d/env2.cfg', 'matlab/mprim/pr2_10cm.mprim', True) == 0:
+        #num_xythetamlev_test_successes = num_xythetamlev_test_successes + 1
+    #if run_sbpl_test('xythetamlev', 'adstar', 'env_examples/nav3d/env2.cfg', 'matlab/mprim/pr2_10cm.mprim', True) == 0:
+        #num_xythetamlev_test_successes = num_xythetamlev_test_successes + 1
+    #if run_sbpl_test('xythetamlev', 'anastar', 'env_examples/nav3d/env2.cfg', 'matlab/mprim/pr2_10cm.mprim', True) == 0:
+        #num_xythetamlev_test_successes = num_xythetamlev_test_successes + 1
 
     ### PLANNING FOR ROBARM ENVIRONMENTS (12 tests) ###
 
     num_robarm_test_successes = 0
 
     # all planners on robarm env1
-    if run_sbpl_test('robarm', 'arastar', 'env_examples/robarm/env1_6d.cfg', '', True) == 0:
-        num_robarm_test_successes = num_robarm_test_successes + 1
-    if run_sbpl_test('robarm', 'adstar', 'env_examples/robarm/env1_6d.cfg', '', True) == 0:
-        num_robarm_test_successes = num_robarm_test_successes + 1
-    if run_sbpl_test('robarm', 'anastar', 'env_examples/robarm/env1_6d.cfg', '', True) == 0:
-        num_robarm_test_successes = num_robarm_test_successes + 1
-    if run_sbpl_test('robarm', 'rstar', 'env_examples/robarm/env1_6d.cfg', '', True) == 0:
-        num_robarm_test_successes = num_robarm_test_successes + 1
+    #if run_sbpl_test('robarm', 'arastar', 'env_examples/robarm/env1_6d.cfg', '', True) == 0:
+        #num_robarm_test_successes = num_robarm_test_successes + 1
+    #if run_sbpl_test('robarm', 'adstar', 'env_examples/robarm/env1_6d.cfg', '', True) == 0:
+        #num_robarm_test_successes = num_robarm_test_successes + 1
+    #if run_sbpl_test('robarm', 'anastar', 'env_examples/robarm/env1_6d.cfg', '', True) == 0:
+        #num_robarm_test_successes = num_robarm_test_successes + 1
+    #if run_sbpl_test('robarm', 'rstar', 'env_examples/robarm/env1_6d.cfg', '', True) == 0:
+        #num_robarm_test_successes = num_robarm_test_successes + 1
     
     # all planners on robarm env2
-    if run_sbpl_test('robarm', 'arastar', 'env_examples/robarm/env2_6d.cfg', '', True) == 0:
-        num_robarm_test_successes = num_robarm_test_successes + 1
-    if run_sbpl_test('robarm', 'adstar', 'env_examples/robarm/env2_6d.cfg', '', True) == 0:
-        num_robarm_test_successes = num_robarm_test_successes + 1
-    if run_sbpl_test('robarm', 'anastar', 'env_examples/robarm/env2_6d.cfg', '', True) == 0:
-        num_robarm_test_successes = num_robarm_test_successes + 1
-    if run_sbpl_test('robarm', 'rstar', 'env_examples/robarm/env2_6d.cfg', '', True) == 0:
-        num_robarm_test_successes = num_robarm_test_successes + 1
+    #if run_sbpl_test('robarm', 'arastar', 'env_examples/robarm/env2_6d.cfg', '', True) == 0:
+        #num_robarm_test_successes = num_robarm_test_successes + 1
+    #if run_sbpl_test('robarm', 'adstar', 'env_examples/robarm/env2_6d.cfg', '', True) == 0:
+        #num_robarm_test_successes = num_robarm_test_successes + 1
+    #if run_sbpl_test('robarm', 'anastar', 'env_examples/robarm/env2_6d.cfg', '', True) == 0:
+        #num_robarm_test_successes = num_robarm_test_successes + 1
+    #if run_sbpl_test('robarm', 'rstar', 'env_examples/robarm/env2_6d.cfg', '', True) == 0:
+        #num_robarm_test_successes = num_robarm_test_successes + 1
 
     # all planners on robarm env3
-    if run_sbpl_test('robarm', 'arastar', 'env_examples/robarm/env3_6d.cfg', '', True) == 0:
-        num_robarm_test_successes = num_robarm_test_successes + 1
-    if run_sbpl_test('robarm', 'adstar', 'env_examples/robarm/env3_6d.cfg', '', True) == 0:
-        num_robarm_test_successes = num_robarm_test_successes + 1
-    if run_sbpl_test('robarm', 'anastar', 'env_examples/robarm/env3_6d.cfg', '', True) == 0:
-        num_robarm_test_successes = num_robarm_test_successes + 1
-    if run_sbpl_test('robarm', 'rstar', 'env_examples/robarm/env3_6d.cfg', '', True) == 0:
-        num_robarm_test_successes = num_robarm_test_successes + 1
+    #if run_sbpl_test('robarm', 'arastar', 'env_examples/robarm/env3_6d.cfg', '', True) == 0:
+        #num_robarm_test_successes = num_robarm_test_successes + 1
+    #if run_sbpl_test('robarm', 'adstar', 'env_examples/robarm/env3_6d.cfg', '', True) == 0:
+        #num_robarm_test_successes = num_robarm_test_successes + 1
+    #if run_sbpl_test('robarm', 'anastar', 'env_examples/robarm/env3_6d.cfg', '', True) == 0:
+        #num_robarm_test_successes = num_robarm_test_successes + 1
+    #if run_sbpl_test('robarm', 'rstar', 'env_examples/robarm/env3_6d.cfg', '', True) == 0:
+        #num_robarm_test_successes = num_robarm_test_successes + 1
 
 
     ###### RUN ALL TESTS WITH BACKWARD SEARCH NOW ######
@@ -243,34 +248,34 @@ if __name__ == '__main__':
     num_b_2d_test_successes = 0
 
     # all planners on 2d environment (12 tests) env1
-    if run_sbpl_test('2d', 'arastar', 'env_examples/nav2d/env1.cfg', 'matlab/mprim/pr2.mprim', False) == 0:
-        num_b_2d_test_successes = num_b_2d_test_successes + 1
-    if run_sbpl_test('2d', 'adstar', 'env_examples/nav2d/env1.cfg', 'matlab/mprim/pr2.mprim', False) == 0:
-        num_b_2d_test_successes = num_b_2d_test_successes + 1
-    if run_sbpl_test('2d', 'anastar', 'env_examples/nav2d/env1.cfg', 'matlab/mprim/pr2.mprim', False) == 0:
-        num_b_2d_test_successes = num_b_2d_test_successes + 1
-    if run_sbpl_test('2d', 'rstar', 'env_examples/nav2d/env1.cfg', 'matlab/mprim/pr2.mprim', False) == 0:
-        num_b_2d_test_successes = num_b_2d_test_successes + 1
+    #if run_sbpl_test('2d', 'arastar', 'env_examples/nav2d/env1.cfg', 'matlab/mprim/pr2.mprim', False) == 0:
+        #num_b_2d_test_successes = num_b_2d_test_successes + 1
+    #if run_sbpl_test('2d', 'adstar', 'env_examples/nav2d/env1.cfg', 'matlab/mprim/pr2.mprim', False) == 0:
+        #num_b_2d_test_successes = num_b_2d_test_successes + 1
+    #if run_sbpl_test('2d', 'anastar', 'env_examples/nav2d/env1.cfg', 'matlab/mprim/pr2.mprim', False) == 0:
+        #num_b_2d_test_successes = num_b_2d_test_successes + 1
+    #if run_sbpl_test('2d', 'rstar', 'env_examples/nav2d/env1.cfg', 'matlab/mprim/pr2.mprim', False) == 0:
+        #num_b_2d_test_successes = num_b_2d_test_successes + 1
 
     # all planners navigating on 2d env1
-    if run_sbpl_test('2d', 'arastar', 'env_examples/nav2d/env1.cfg', 'matlab/mprim/pr2.mprim', False, True) == 0:
-        num_b_2d_test_successes = num_b_2d_test_successes + 1
-    if run_sbpl_test('2d', 'adstar', 'env_examples/nav2d/env1.cfg', 'matlab/mprim/pr2.mprim', False, True) == 0:
-        num_b_2d_test_successes = num_b_2d_test_successes + 1
-    if run_sbpl_test('2d', 'anastar', 'env_examples/nav2d/env1.cfg', 'matlab/mprim/pr2.mprim', False, True) == 0:
-        num_b_2d_test_successes = num_b_2d_test_successes + 1
-    if run_sbpl_test('2d', 'rstar', 'env_examples/nav2d/env1.cfg', 'matlab/mprim/pr2.mprim', False, True) == 0:
-        num_b_2d_test_successes = num_b_2d_test_successes + 1
+    #if run_sbpl_test('2d', 'arastar', 'env_examples/nav2d/env1.cfg', 'matlab/mprim/pr2.mprim', False, True) == 0:
+        #num_b_2d_test_successes = num_b_2d_test_successes + 1
+    #if run_sbpl_test('2d', 'adstar', 'env_examples/nav2d/env1.cfg', 'matlab/mprim/pr2.mprim', False, True) == 0:
+        #num_b_2d_test_successes = num_b_2d_test_successes + 1
+    #if run_sbpl_test('2d', 'anastar', 'env_examples/nav2d/env1.cfg', 'matlab/mprim/pr2.mprim', False, True) == 0:
+        #num_b_2d_test_successes = num_b_2d_test_successes + 1
+    #if run_sbpl_test('2d', 'rstar', 'env_examples/nav2d/env1.cfg', 'matlab/mprim/pr2.mprim', False, True) == 0:
+        #num_b_2d_test_successes = num_b_2d_test_successes + 1
 
     # all planners on 2d env2
-    if run_sbpl_test('2d', 'arastar', 'env_examples/nav2d/env2.cfg', 'matlab/mprim/pr2.mprim', False) == 0:
-        num_b_2d_test_successes = num_b_2d_test_successes + 1
-    if run_sbpl_test('2d', 'adstar', 'env_examples/nav2d/env2.cfg', 'matlab/mprim/pr2.mprim', False) == 0:
-        num_b_2d_test_successes = num_b_2d_test_successes + 1
-    if run_sbpl_test('2d', 'anastar', 'env_examples/nav2d/env2.cfg', 'matlab/mprim/pr2.mprim', False) == 0:
-        num_b_2d_test_successes = num_b_2d_test_successes + 1
-    if run_sbpl_test('2d', 'rstar', 'env_examples/nav2d/env2.cfg', 'matlab/mprim/pr2.mprim', False) == 0:
-        num_b_2d_test_successes = num_b_2d_test_successes + 1
+    #if run_sbpl_test('2d', 'arastar', 'env_examples/nav2d/env2.cfg', 'matlab/mprim/pr2.mprim', False) == 0:
+        #num_b_2d_test_successes = num_b_2d_test_successes + 1
+    #if run_sbpl_test('2d', 'adstar', 'env_examples/nav2d/env2.cfg', 'matlab/mprim/pr2.mprim', False) == 0:
+        #num_b_2d_test_successes = num_b_2d_test_successes + 1
+    #if run_sbpl_test('2d', 'anastar', 'env_examples/nav2d/env2.cfg', 'matlab/mprim/pr2.mprim', False) == 0:
+        #num_b_2d_test_successes = num_b_2d_test_successes + 1
+    #if run_sbpl_test('2d', 'rstar', 'env_examples/nav2d/env2.cfg', 'matlab/mprim/pr2.mprim', False) == 0:
+        #num_b_2d_test_successes = num_b_2d_test_successes + 1
 
     # all planners navigating on 2d env2 (no thanks, I want my tests to finish)
     #run_sbpl_test('2d', 'arastar', 'env_examples/nav2d/env2.cfg', 'matlab/mprim/pr2.mprim', False)
@@ -283,28 +288,28 @@ if __name__ == '__main__':
     num_b_xytheta_test_successes = 0
 
     # all planners on xytheta env1
-    if run_sbpl_test('xytheta', 'arastar', 'env_examples/nav3d/env1.cfg', 'matlab/mprim/pr2.mprim', False) == 0:
-        num_b_xytheta_test_successes = num_b_xytheta_test_successes + 1
-    if run_sbpl_test('xytheta', 'adstar', 'env_examples/nav3d/env1.cfg', 'matlab/mprim/pr2.mprim', False) == 0:
-        num_b_xytheta_test_successes = num_b_xytheta_test_successes + 1
-    if run_sbpl_test('xytheta', 'anastar', 'env_examples/nav3d/env1.cfg', 'matlab/mprim/pr2.mprim', False) == 0:
-        num_b_xytheta_test_successes = num_b_xytheta_test_successes + 1
+    #if run_sbpl_test('xytheta', 'arastar', 'env_examples/nav3d/env1.cfg', 'matlab/mprim/pr2.mprim', False) == 0:
+        #num_b_xytheta_test_successes = num_b_xytheta_test_successes + 1
+    #if run_sbpl_test('xytheta', 'adstar', 'env_examples/nav3d/env1.cfg', 'matlab/mprim/pr2.mprim', False) == 0:
+        #num_b_xytheta_test_successes = num_b_xytheta_test_successes + 1
+    #if run_sbpl_test('xytheta', 'anastar', 'env_examples/nav3d/env1.cfg', 'matlab/mprim/pr2.mprim', False) == 0:
+        #num_b_xytheta_test_successes = num_b_xytheta_test_successes + 1
 
     # all planners navigating on xytheta env1
-    if run_sbpl_test('xytheta', 'arastar', 'env_examples/nav3d/env1.cfg', 'matlab/mprim/pr2.mprim', False, False) == 0:
-        num_b_xytheta_test_successes = num_b_xytheta_test_successes + 1
-    if run_sbpl_test('xytheta', 'adstar', 'env_examples/nav3d/env1.cfg', 'matlab/mprim/pr2.mprim', False, False) == 0:
-        num_b_xytheta_test_successes = num_b_xytheta_test_successes + 1
-    if run_sbpl_test('xytheta', 'anastar', 'env_examples/nav3d/env1.cfg', 'matlab/mprim/pr2.mprim', False, False) == 0:
-        num_b_xytheta_test_successes = num_b_xytheta_test_successes + 1
+    #if run_sbpl_test('xytheta', 'arastar', 'env_examples/nav3d/env1.cfg', 'matlab/mprim/pr2.mprim', False, False) == 0:
+        #num_b_xytheta_test_successes = num_b_xytheta_test_successes + 1
+    #if run_sbpl_test('xytheta', 'adstar', 'env_examples/nav3d/env1.cfg', 'matlab/mprim/pr2.mprim', False, False) == 0:
+        #num_b_xytheta_test_successes = num_b_xytheta_test_successes + 1
+    #if run_sbpl_test('xytheta', 'anastar', 'env_examples/nav3d/env1.cfg', 'matlab/mprim/pr2.mprim', False, False) == 0:
+        #num_b_xytheta_test_successes = num_b_xytheta_test_successes + 1
 
     # all planners on xytheta env2
-    if run_sbpl_test('xytheta', 'arastar', 'env_examples/nav3d/env2.cfg', 'matlab/mprim/pr2_10cm.mprim', False) == 0:
-        num_b_xytheta_test_successes = num_b_xytheta_test_successes + 1
-    if run_sbpl_test('xytheta', 'adstar', 'env_examples/nav3d/env2.cfg', 'matlab/mprim/pr2_10cm.mprim', False) == 0:
-        num_b_xytheta_test_successes = num_b_xytheta_test_successes + 1
-    if run_sbpl_test('xytheta', 'anastar', 'env_examples/nav3d/env2.cfg', 'matlab/mprim/pr2_10cm.mprim', False) == 0:
-        num_b_xytheta_test_successes = num_b_xytheta_test_successes + 1
+    #if run_sbpl_test('xytheta', 'arastar', 'env_examples/nav3d/env2.cfg', 'matlab/mprim/pr2_10cm.mprim', False) == 0:
+        #num_b_xytheta_test_successes = num_b_xytheta_test_successes + 1
+    #if run_sbpl_test('xytheta', 'adstar', 'env_examples/nav3d/env2.cfg', 'matlab/mprim/pr2_10cm.mprim', False) == 0:
+        #num_b_xytheta_test_successes = num_b_xytheta_test_successes + 1
+    #if run_sbpl_test('xytheta', 'anastar', 'env_examples/nav3d/env2.cfg', 'matlab/mprim/pr2_10cm.mprim', False) == 0:
+        #num_b_xytheta_test_successes = num_b_xytheta_test_successes + 1
 
     # all planners navigating on xytheta env2 (no thanks, i want my tests to finish)
     #run_sbpl_test('xytheta', 'arastar', 'env_examples/nav3d/env2.cfg', 'matlab/mprim/pr2_10cm.mprim', False)
@@ -316,20 +321,20 @@ if __name__ == '__main__':
     num_b_xythetamlev_test_successes = 0
 
     # all planners on xythetamlev env1
-    if run_sbpl_test('xythetamlev', 'arastar', 'env_examples/nav3d/env1.cfg', 'matlab/mprim/pr2.mprim', False) == 0:
-        num_b_xythetamlev_test_successes = num_b_xythetamlev_test_successes + 1
-    if run_sbpl_test('xythetamlev', 'adstar', 'env_examples/nav3d/env1.cfg', 'matlab/mprim/pr2.mprim', False) == 0:
-        num_b_xythetamlev_test_successes = num_b_xythetamlev_test_successes + 1
-    if run_sbpl_test('xythetamlev', 'anastar', 'env_examples/nav3d/env1.cfg', 'matlab/mprim/pr2.mprim', False) == 0:
-        num_b_xythetamlev_test_successes = num_b_xythetamlev_test_successes + 1
+    #if run_sbpl_test('xythetamlev', 'arastar', 'env_examples/nav3d/env1.cfg', 'matlab/mprim/pr2.mprim', False) == 0:
+        #num_b_xythetamlev_test_successes = num_b_xythetamlev_test_successes + 1
+    #if run_sbpl_test('xythetamlev', 'adstar', 'env_examples/nav3d/env1.cfg', 'matlab/mprim/pr2.mprim', False) == 0:
+        #num_b_xythetamlev_test_successes = num_b_xythetamlev_test_successes + 1
+    #if run_sbpl_test('xythetamlev', 'anastar', 'env_examples/nav3d/env1.cfg', 'matlab/mprim/pr2.mprim', False) == 0:
+        #num_b_xythetamlev_test_successes = num_b_xythetamlev_test_successes + 1
 
     # all planners on xythetamlev env2
-    if run_sbpl_test('xythetamlev', 'arastar', 'env_examples/nav3d/env2.cfg', 'matlab/mprim/pr2_10cm.mprim', False) == 0:
-        num_b_xythetamlev_test_successes = num_b_xythetamlev_test_successes + 1
-    if run_sbpl_test('xythetamlev', 'adstar', 'env_examples/nav3d/env2.cfg', 'matlab/mprim/pr2_10cm.mprim', False) == 0:
-        num_b_xythetamlev_test_successes = num_b_xythetamlev_test_successes + 1
-    if run_sbpl_test('xythetamlev', 'anastar', 'env_examples/nav3d/env2.cfg', 'matlab/mprim/pr2_10cm.mprim', False) == 0:
-        num_b_xythetamlev_test_successes = num_b_xythetamlev_test_successes + 1
+    #if run_sbpl_test('xythetamlev', 'arastar', 'env_examples/nav3d/env2.cfg', 'matlab/mprim/pr2_10cm.mprim', False) == 0:
+        #num_b_xythetamlev_test_successes = num_b_xythetamlev_test_successes + 1
+    #if run_sbpl_test('xythetamlev', 'adstar', 'env_examples/nav3d/env2.cfg', 'matlab/mprim/pr2_10cm.mprim', False) == 0:
+        #num_b_xythetamlev_test_successes = num_b_xythetamlev_test_successes + 1
+    #if run_sbpl_test('xythetamlev', 'anastar', 'env_examples/nav3d/env2.cfg', 'matlab/mprim/pr2_10cm.mprim', False) == 0:
+        #num_b_xythetamlev_test_successes = num_b_xythetamlev_test_successes + 1
 
     print '\033[96;1m', 'Forward search results', '\033[0m'
     print '\033[96;1m', '----------------------', '\033[0m'

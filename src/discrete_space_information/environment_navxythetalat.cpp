@@ -205,7 +205,7 @@ void EnvironmentNAVXYTHETALATTICE::ReadConfiguration(FILE* fCfg)
     char sTemp[1024], sTemp1[1024];
     int dTemp;
     int x, y;
-
+    
     //discretization(cells)
     if(fscanf(fCfg, "%s", sTemp) != 1)
     {
@@ -231,7 +231,7 @@ void EnvironmentNAVXYTHETALATTICE::ReadConfiguration(FILE* fCfg)
         throw new SBPL_Exception();
     }
     EnvNAVXYTHETALATCfg.EnvHeight_c = atoi(sTemp);
-
+    
     // Scan for optional NumThetaDirs parameter. Check for following obsthresh.
     if(fscanf(fCfg, "%s", sTemp) != 1){
         SBPL_ERROR("ERROR: ran out of env file early\n");
@@ -261,7 +261,7 @@ void EnvironmentNAVXYTHETALATTICE::ReadConfiguration(FILE* fCfg)
             throw new SBPL_Exception();
         }
         EnvNAVXYTHETALATCfg.NumThetaDirs = atoi(sTemp);
-
+        
         //obsthresh: 
         if(fscanf(fCfg, "%s", sTemp) != 1){
             SBPL_ERROR("ERROR: ran out of env file early (obsthresh)\n");
@@ -276,7 +276,7 @@ void EnvironmentNAVXYTHETALATTICE::ReadConfiguration(FILE* fCfg)
             throw new SBPL_Exception();
         }
     }
-
+    
     // obsthresh
     if(fscanf(fCfg, "%s", sTemp) != 1)
     {
@@ -285,7 +285,7 @@ void EnvironmentNAVXYTHETALATTICE::ReadConfiguration(FILE* fCfg)
     }
     EnvNAVXYTHETALATCfg.obsthresh = atoi(sTemp);
     SBPL_PRINTF("obsthresh = %d\n", EnvNAVXYTHETALATCfg.obsthresh);
-
+    
     //cost_inscribed_thresh: 
     if(fscanf(fCfg, "%s", sTemp) != 1)
     {
@@ -295,10 +295,10 @@ void EnvironmentNAVXYTHETALATTICE::ReadConfiguration(FILE* fCfg)
     strcpy(sTemp1, "cost_inscribed_thresh:");
     if(strcmp(sTemp1, sTemp) != 0)
     {
-    	SBPL_ERROR("ERROR: configuration file has incorrect format\n");
-    	SBPL_PRINTF("Expected %s got %s\n", sTemp1, sTemp);
-	SBPL_PRINTF("see existing examples of env files for the right format of heading\n");
-	throw new SBPL_Exception();
+        SBPL_ERROR("ERROR: configuration file has incorrect format\n");
+        SBPL_PRINTF("Expected %s got %s\n", sTemp1, sTemp);
+        SBPL_PRINTF("see existing examples of env files for the right format of heading\n");
+        throw new SBPL_Exception();
     }
     if(fscanf(fCfg, "%s", sTemp) != 1)
     {
@@ -307,7 +307,7 @@ void EnvironmentNAVXYTHETALATTICE::ReadConfiguration(FILE* fCfg)
     }
     EnvNAVXYTHETALATCfg.cost_inscribed_thresh = atoi(sTemp);
     SBPL_PRINTF("cost_inscribed_thresh = %d\n", EnvNAVXYTHETALATCfg.cost_inscribed_thresh);
-
+    
     //cost_possibly_circumscribed_thresh: 
     if(fscanf(fCfg, "%s", sTemp) != 1)
     {
@@ -317,170 +317,203 @@ void EnvironmentNAVXYTHETALATTICE::ReadConfiguration(FILE* fCfg)
     strcpy(sTemp1, "cost_possibly_circumscribed_thresh:");
     if(strcmp(sTemp1, sTemp) != 0)
     {
-    	SBPL_ERROR("ERROR: configuration file has incorrect format\n");
-    	SBPL_PRINTF("Expected %s got %s\n", sTemp1, sTemp);
-    	SBPL_PRINTF("see existing examples of env files for the right format of heading\n");
-    	throw new SBPL_Exception();
+        SBPL_ERROR("ERROR: configuration file has incorrect format\n");
+        SBPL_PRINTF("Expected %s got %s\n", sTemp1, sTemp);
+        SBPL_PRINTF("see existing examples of env files for the right format of heading\n");
+        throw new SBPL_Exception();
     }
     if(fscanf(fCfg, "%s", sTemp) != 1)
     {
         SBPL_ERROR("ERROR: ran out of env file early\n");
         throw new SBPL_Exception();
     }
-	EnvNAVXYTHETALATCfg.cost_possibly_circumscribed_thresh = atoi(sTemp);
-	SBPL_PRINTF("cost_possibly_circumscribed_thresh = %d\n", EnvNAVXYTHETALATCfg.cost_possibly_circumscribed_thresh);
-
-	
-	//cellsize
-  if(fscanf(fCfg, "%s", sTemp) != 1){
-    SBPL_ERROR("ERROR: ran out of env file early\n");
-    throw new SBPL_Exception();
-  }
-	strcpy(sTemp1, "cellsize(meters):");
-	if(strcmp(sTemp1, sTemp) != 0)
-	{
-		SBPL_ERROR("ERROR: configuration file has incorrect format\n");
-		SBPL_PRINTF("Expected %s got %s\n", sTemp1, sTemp);
-		throw new SBPL_Exception();
-	}
-  if(fscanf(fCfg, "%s", sTemp) != 1){
-    SBPL_ERROR("ERROR: ran out of env file early\n");
-    throw new SBPL_Exception();
-  }
-	EnvNAVXYTHETALATCfg.cellsize_m = atof(sTemp);
-	
-	//speeds
-  if(fscanf(fCfg, "%s", sTemp) != 1){
-    SBPL_ERROR("ERROR: ran out of env file early\n");
-    throw new SBPL_Exception();
-  }
-	strcpy(sTemp1, "nominalvel(mpersecs):");
-	if(strcmp(sTemp1, sTemp) != 0)
-	{
-		SBPL_ERROR("ERROR: configuration file has incorrect format\n");
-		SBPL_PRINTF("Expected %s got %s\n", sTemp1, sTemp);
-		throw new SBPL_Exception();
-	}
-  if(fscanf(fCfg, "%s", sTemp) != 1){
-    SBPL_ERROR("ERROR: ran out of env file early\n");
-    throw new SBPL_Exception();
-  }
-	EnvNAVXYTHETALATCfg.nominalvel_mpersecs = atof(sTemp);
-  if(fscanf(fCfg, "%s", sTemp) != 1){
-    SBPL_ERROR("ERROR: ran out of env file early\n");
-    throw new SBPL_Exception();
-  }
-	strcpy(sTemp1, "timetoturn45degsinplace(secs):");
-	if(strcmp(sTemp1, sTemp) != 0)
-	{
-		SBPL_ERROR("ERROR: configuration file has incorrect format\n");
-		SBPL_PRINTF("Expected %s got %s\n", sTemp1, sTemp);
-		throw new SBPL_Exception();
-	}
-  if(fscanf(fCfg, "%s", sTemp) != 1){
-    SBPL_ERROR("ERROR: ran out of env file early\n");
-    throw new SBPL_Exception();
-  }
-	EnvNAVXYTHETALATCfg.timetoturn45degsinplace_secs = atof(sTemp);
-
-
-	//start(meters,rads): 
-  if(fscanf(fCfg, "%s", sTemp) != 1){
-    SBPL_ERROR("ERROR: ran out of env file early\n");
-    throw new SBPL_Exception();
-  }
-  if(fscanf(fCfg, "%s", sTemp) != 1){
-    SBPL_ERROR("ERROR: ran out of env file early\n");
-    throw new SBPL_Exception();
-  }
-	EnvNAVXYTHETALATCfg.StartX_c = CONTXY2DISC(atof(sTemp),EnvNAVXYTHETALATCfg.cellsize_m);
-  if(fscanf(fCfg, "%s", sTemp) != 1){
-    SBPL_ERROR("ERROR: ran out of env file early\n");
-    throw new SBPL_Exception();
-  }
-	EnvNAVXYTHETALATCfg.StartY_c = CONTXY2DISC(atof(sTemp),EnvNAVXYTHETALATCfg.cellsize_m);
-  if(fscanf(fCfg, "%s", sTemp) != 1){
-    SBPL_ERROR("ERROR: ran out of env file early\n");
-    throw new SBPL_Exception();
-  }
-	EnvNAVXYTHETALATCfg.StartTheta = ContTheta2Disc(atof(sTemp), EnvNAVXYTHETALATCfg.NumThetaDirs);
-
-
-	if(EnvNAVXYTHETALATCfg.StartX_c < 0 || EnvNAVXYTHETALATCfg.StartX_c >= EnvNAVXYTHETALATCfg.EnvWidth_c)
-	{
-		SBPL_ERROR("ERROR: illegal start coordinates\n");
-		throw new SBPL_Exception();
-	}
-	if(EnvNAVXYTHETALATCfg.StartY_c < 0 || EnvNAVXYTHETALATCfg.StartY_c >= EnvNAVXYTHETALATCfg.EnvHeight_c)
-	{
-		SBPL_ERROR("ERROR: illegal start coordinates\n");
-		throw new SBPL_Exception();
-	}
-	if(EnvNAVXYTHETALATCfg.StartTheta < 0 || EnvNAVXYTHETALATCfg.StartTheta >= EnvNAVXYTHETALATCfg.NumThetaDirs) {
-		SBPL_ERROR("ERROR: illegal start coordinates for theta\n");
-		throw new SBPL_Exception();
-	}
-
-	//end(meters,rads): 
-  if(fscanf(fCfg, "%s", sTemp) != 1){
-    SBPL_ERROR("ERROR: ran out of env file early\n");
-    throw new SBPL_Exception();
-  }
-  if(fscanf(fCfg, "%s", sTemp) != 1){
-    SBPL_ERROR("ERROR: ran out of env file early\n");
-    throw new SBPL_Exception();
-  }
-	EnvNAVXYTHETALATCfg.EndX_c = CONTXY2DISC(atof(sTemp),EnvNAVXYTHETALATCfg.cellsize_m);
-  if(fscanf(fCfg, "%s", sTemp) != 1){
-    SBPL_ERROR("ERROR: ran out of env file early\n");
-    throw new SBPL_Exception();
-  }
-	EnvNAVXYTHETALATCfg.EndY_c = CONTXY2DISC(atof(sTemp),EnvNAVXYTHETALATCfg.cellsize_m);
-  if(fscanf(fCfg, "%s", sTemp) != 1){
-    SBPL_ERROR("ERROR: ran out of env file early\n");
-    throw new SBPL_Exception();
-  }
-	EnvNAVXYTHETALATCfg.EndTheta = ContTheta2Disc(atof(sTemp), EnvNAVXYTHETALATCfg.NumThetaDirs);;
-
-	if(EnvNAVXYTHETALATCfg.EndX_c < 0 || EnvNAVXYTHETALATCfg.EndX_c >= EnvNAVXYTHETALATCfg.EnvWidth_c)
-	{
-		SBPL_ERROR("ERROR: illegal end coordinates\n");
-		throw new SBPL_Exception();
-	}
-	if(EnvNAVXYTHETALATCfg.EndY_c < 0 || EnvNAVXYTHETALATCfg.EndY_c >= EnvNAVXYTHETALATCfg.EnvHeight_c)
-	{
-		SBPL_ERROR("ERROR: illegal end coordinates\n");
-		throw new SBPL_Exception();
-	}
-	if(EnvNAVXYTHETALATCfg.EndTheta < 0 || EnvNAVXYTHETALATCfg.EndTheta >= EnvNAVXYTHETALATCfg.NumThetaDirs) {
-		SBPL_ERROR("ERROR: illegal goal coordinates for theta\n");
-		throw new SBPL_Exception();
-	}
-
-
-	//allocate the 2D environment
-	EnvNAVXYTHETALATCfg.Grid2D = new unsigned char* [EnvNAVXYTHETALATCfg.EnvWidth_c];
-	for (x = 0; x < EnvNAVXYTHETALATCfg.EnvWidth_c; x++)
-	{
-		EnvNAVXYTHETALATCfg.Grid2D[x] = new unsigned char [EnvNAVXYTHETALATCfg.EnvHeight_c];
-	}
-
-	//environment:
-  if(fscanf(fCfg, "%s", sTemp) != 1){
-    SBPL_ERROR("ERROR: ran out of env file early\n");
-    throw new SBPL_Exception();
-  }
-	for (y = 0; y < EnvNAVXYTHETALATCfg.EnvHeight_c; y++)
-		for (x = 0; x < EnvNAVXYTHETALATCfg.EnvWidth_c; x++)
-		{
-			if(fscanf(fCfg, "%d", &dTemp) != 1)
-			{
-				SBPL_ERROR("ERROR: incorrect format of config file\n");
-				throw new SBPL_Exception();
-			}
-			EnvNAVXYTHETALATCfg.Grid2D[x][y] = dTemp;
-		}
-
+    EnvNAVXYTHETALATCfg.cost_possibly_circumscribed_thresh = atoi(sTemp);
+    SBPL_PRINTF("cost_possibly_circumscribed_thresh = %d\n", EnvNAVXYTHETALATCfg.cost_possibly_circumscribed_thresh);
+    
+    
+    //cellsize
+    if(fscanf(fCfg, "%s", sTemp) != 1){
+        SBPL_ERROR("ERROR: ran out of env file early\n");
+        throw new SBPL_Exception();
+    }
+    strcpy(sTemp1, "cellsize(meters):");
+    if(strcmp(sTemp1, sTemp) != 0)
+    {
+        SBPL_ERROR("ERROR: configuration file has incorrect format\n");
+        SBPL_PRINTF("Expected %s got %s\n", sTemp1, sTemp);
+        throw new SBPL_Exception();
+    }
+    if(fscanf(fCfg, "%s", sTemp) != 1){
+        SBPL_ERROR("ERROR: ran out of env file early\n");
+        throw new SBPL_Exception();
+    }
+    EnvNAVXYTHETALATCfg.cellsize_m = atof(sTemp);
+    
+    //speeds
+    if(fscanf(fCfg, "%s", sTemp) != 1){
+        SBPL_ERROR("ERROR: ran out of env file early\n");
+        throw new SBPL_Exception();
+    }
+    strcpy(sTemp1, "nominalvel(mpersecs):");
+    if(strcmp(sTemp1, sTemp) != 0)
+    {
+        SBPL_ERROR("ERROR: configuration file has incorrect format\n");
+        SBPL_PRINTF("Expected %s got %s\n", sTemp1, sTemp);
+        throw new SBPL_Exception();
+    }
+    if(fscanf(fCfg, "%s", sTemp) != 1){
+        SBPL_ERROR("ERROR: ran out of env file early\n");
+        throw new SBPL_Exception();
+    }
+    EnvNAVXYTHETALATCfg.nominalvel_mpersecs = atof(sTemp);
+    if(fscanf(fCfg, "%s", sTemp) != 1){
+        SBPL_ERROR("ERROR: ran out of env file early\n");
+        throw new SBPL_Exception();
+    }
+    strcpy(sTemp1, "timetoturn45degsinplace(secs):");
+    if(strcmp(sTemp1, sTemp) != 0)
+    {
+        SBPL_ERROR("ERROR: configuration file has incorrect format\n");
+        SBPL_PRINTF("Expected %s got %s\n", sTemp1, sTemp);
+        throw new SBPL_Exception();
+    }
+    if(fscanf(fCfg, "%s", sTemp) != 1){
+        SBPL_ERROR("ERROR: ran out of env file early\n");
+        throw new SBPL_Exception();
+    }
+    EnvNAVXYTHETALATCfg.timetoturn45degsinplace_secs = atof(sTemp);
+    
+    
+    //start(meters,rads): 
+    if(fscanf(fCfg, "%s", sTemp) != 1){
+        SBPL_ERROR("ERROR: ran out of env file early\n");
+        throw new SBPL_Exception();
+    }
+    if(fscanf(fCfg, "%s", sTemp) != 1){
+        SBPL_ERROR("ERROR: ran out of env file early\n");
+        throw new SBPL_Exception();
+    }
+    EnvNAVXYTHETALATCfg.StartX_c = CONTXY2DISC(atof(sTemp),EnvNAVXYTHETALATCfg.cellsize_m);
+    if(fscanf(fCfg, "%s", sTemp) != 1){
+        SBPL_ERROR("ERROR: ran out of env file early\n");
+        throw new SBPL_Exception();
+    }
+    EnvNAVXYTHETALATCfg.StartY_c = CONTXY2DISC(atof(sTemp),EnvNAVXYTHETALATCfg.cellsize_m);
+    if(fscanf(fCfg, "%s", sTemp) != 1){
+        SBPL_ERROR("ERROR: ran out of env file early\n");
+        throw new SBPL_Exception();
+    }
+    EnvNAVXYTHETALATCfg.StartTheta = ContTheta2Disc(atof(sTemp), EnvNAVXYTHETALATCfg.NumThetaDirs);
+    
+    
+    if(EnvNAVXYTHETALATCfg.StartX_c < 0 || EnvNAVXYTHETALATCfg.StartX_c >= EnvNAVXYTHETALATCfg.EnvWidth_c)
+    {
+        SBPL_ERROR("ERROR: illegal start coordinates\n");
+        throw new SBPL_Exception();
+    }
+    if(EnvNAVXYTHETALATCfg.StartY_c < 0 || EnvNAVXYTHETALATCfg.StartY_c >= EnvNAVXYTHETALATCfg.EnvHeight_c)
+    {
+        SBPL_ERROR("ERROR: illegal start coordinates\n");
+        throw new SBPL_Exception();
+    }
+    if(EnvNAVXYTHETALATCfg.StartTheta < 0 || EnvNAVXYTHETALATCfg.StartTheta >= EnvNAVXYTHETALATCfg.NumThetaDirs) {
+        SBPL_ERROR("ERROR: illegal start coordinates for theta\n");
+        throw new SBPL_Exception();
+    }
+    
+    //end(meters,rads): 
+    if(fscanf(fCfg, "%s", sTemp) != 1){
+        SBPL_ERROR("ERROR: ran out of env file early\n");
+        throw new SBPL_Exception();
+    }
+    if(fscanf(fCfg, "%s", sTemp) != 1){
+        SBPL_ERROR("ERROR: ran out of env file early\n");
+        throw new SBPL_Exception();
+    }
+    EnvNAVXYTHETALATCfg.EndX_c = CONTXY2DISC(atof(sTemp),EnvNAVXYTHETALATCfg.cellsize_m);
+    if(fscanf(fCfg, "%s", sTemp) != 1){
+        SBPL_ERROR("ERROR: ran out of env file early\n");
+        throw new SBPL_Exception();
+    }
+    EnvNAVXYTHETALATCfg.EndY_c = CONTXY2DISC(atof(sTemp),EnvNAVXYTHETALATCfg.cellsize_m);
+    if(fscanf(fCfg, "%s", sTemp) != 1){
+        SBPL_ERROR("ERROR: ran out of env file early\n");
+        throw new SBPL_Exception();
+    }
+    EnvNAVXYTHETALATCfg.EndTheta = ContTheta2Disc(atof(sTemp), EnvNAVXYTHETALATCfg.NumThetaDirs);;
+    
+    if(EnvNAVXYTHETALATCfg.EndX_c < 0 || EnvNAVXYTHETALATCfg.EndX_c >= EnvNAVXYTHETALATCfg.EnvWidth_c)
+    {
+        SBPL_ERROR("ERROR: illegal end coordinates\n");
+        throw new SBPL_Exception();
+    }
+    if(EnvNAVXYTHETALATCfg.EndY_c < 0 || EnvNAVXYTHETALATCfg.EndY_c >= EnvNAVXYTHETALATCfg.EnvHeight_c)
+    {
+        SBPL_ERROR("ERROR: illegal end coordinates\n");
+        throw new SBPL_Exception();
+    }
+    if(EnvNAVXYTHETALATCfg.EndTheta < 0 || EnvNAVXYTHETALATCfg.EndTheta >= EnvNAVXYTHETALATCfg.NumThetaDirs) {
+        SBPL_ERROR("ERROR: illegal goal coordinates for theta\n");
+        throw new SBPL_Exception();
+    }
+    
+    // look for optional tolerance(meters,rads): section
+    if (fscanf(fCfg, "%s", sTemp) != 1) {
+        SBPL_ERROR("ERROR: ran out of env file early\n");
+        throw new SBPL_Exception();
+    }
+    bool foundTolerance = (strcmp(sTemp, "tolerance(meters,rads):") == 0);
+    if (foundTolerance) {
+        // read in x tolerance
+        if (fscanf(fCfg, "%s", sTemp) != 1) {
+            SBPL_ERROR("ERROR: ran out of env file early\n");
+            throw new SBPL_Exception();
+        }
+        EnvNAVXYTHETALATCfg.GoalTolX_m = atof(sTemp);
+        
+        // read in y tolerance
+        if (fscanf(fCfg, "%s", sTemp) != 1) {
+            SBPL_ERROR("ERROR: ran out of env file early\n");
+            throw new SBPL_Exception();
+        }
+        EnvNAVXYTHETALATCfg.GoalTolY_m = atof(sTemp);
+        
+        // read in theta tolerance
+        if (fscanf(fCfg, "%s", sTemp) != 1) {
+            SBPL_ERROR("ERROR: ran out of env file early\n");
+            throw new SBPL_Exception();
+        }
+        EnvNAVXYTHETALATCfg.GoalTolTheta_rad = atof(sTemp);
+    }
+    else {
+        EnvNAVXYTHETALATCfg.GoalTolX_m = 0.0;
+        EnvNAVXYTHETALATCfg.GoalTolY_m = 0.0;
+        EnvNAVXYTHETALATCfg.GoalTolTheta_rad = 0.0;
+    }
+    
+    //allocate the 2D environment
+    EnvNAVXYTHETALATCfg.Grid2D = new unsigned char* [EnvNAVXYTHETALATCfg.EnvWidth_c];
+    for (x = 0; x < EnvNAVXYTHETALATCfg.EnvWidth_c; x++)
+    {
+        EnvNAVXYTHETALATCfg.Grid2D[x] = new unsigned char [EnvNAVXYTHETALATCfg.EnvHeight_c];
+    }
+    
+    //environment:
+    if(foundTolerance && fscanf(fCfg, "%s", sTemp) != 1){
+        SBPL_ERROR("ERROR: ran out of env file early\n");
+        throw new SBPL_Exception();
+    }
+    for (y = 0; y < EnvNAVXYTHETALATCfg.EnvHeight_c; y++) {
+        for (x = 0; x < EnvNAVXYTHETALATCfg.EnvWidth_c; x++)
+        {
+            if(fscanf(fCfg, "%d", &dTemp) != 1)
+            {
+                SBPL_ERROR("ERROR: incorrect format of config file\n");
+                throw new SBPL_Exception();
+            }
+            EnvNAVXYTHETALATCfg.Grid2D[x][y] = dTemp;
+        }
+    }
 }
 
 bool EnvironmentNAVXYTHETALATTICE::ReadinCell(sbpl_xy_theta_cell_t* cell, FILE* fIn)
@@ -1727,7 +1760,9 @@ bool EnvironmentNAVXYTHETALATTICE::InitializeEnv(int width, int height,
 
 	EnvNAVXYTHETALATCfg.obsthresh = obsthresh;
 
-	//TODO - need to set the tolerance as well
+    EnvNAVXYTHETALATCfg.GoalTolX_m = goaltol_x;
+    EnvNAVXYTHETALATCfg.GoalTolY_m = goaltol_y;
+    EnvNAVXYTHETALATCfg.GoalTolTheta_rad = goaltol_theta;
 
 	SetConfiguration(width, height,
 					mapdata,
@@ -2052,7 +2087,20 @@ int EnvironmentNAVXYTHETALATTICE::GetEnvParameter(const char* parameter)
 		SBPL_ERROR("ERROR: invalid parameter %s\n", parameter);
 		throw new SBPL_Exception();
 	}
+}
 
+bool EnvironmentNAVXYTHETALATTICE::withinGoalTolerance(int x, int y, int theta)
+{
+    // check if the state (x, y, theta) is within the tolerance distance to the goal state
+    double dx = EnvNAVXYTHETALATCfg.cellsize_m * (x - EnvNAVXYTHETALATCfg.EndX_c);
+    double dy = EnvNAVXYTHETALATCfg.cellsize_m * (y - EnvNAVXYTHETALATCfg.EndY_c);
+    double theta_rad = DiscTheta2Cont(theta, EnvNAVXYTHETALATCfg.NumThetaDirs);
+    double goalTheta_rad = DiscTheta2Cont(EnvNAVXYTHETALATCfg.EndTheta, EnvNAVXYTHETALATCfg.NumThetaDirs);
+    double dtheta = computeMinUnsignedAngleDiff(theta_rad, goalTheta_rad);
+    
+    return fabs(dx) <= EnvNAVXYTHETALATCfg.GoalTolX_m &&
+           fabs(dy) <= EnvNAVXYTHETALATCfg.GoalTolY_m &&
+           fabs(dtheta) <= EnvNAVXYTHETALATCfg.GoalTolTheta_rad;
 }
 
 //------------------------------------------------------------------------------
@@ -2251,6 +2299,12 @@ int EnvironmentNAVXYTHETALAT::SetGoal(double x_m, double y_m, double theta_rad){
 
 }
 
+void EnvironmentNAVXYTHETALAT::SetGoalTolerance(double tol_x, double tol_y, double tol_theta)
+{
+    EnvNAVXYTHETALATCfg.GoalTolX_m = tol_x;
+    EnvNAVXYTHETALATCfg.GoalTolY_m = tol_y;
+    EnvNAVXYTHETALATCfg.GoalTolTheta_rad = tol_theta;
+}
 
 //returns the stateid if success, and -1 otherwise
 int EnvironmentNAVXYTHETALAT::SetStart(double x_m, double y_m, double theta_rad){
@@ -2391,7 +2445,15 @@ EnvNAVXYTHETALATHashEntry_t* EnvironmentNAVXYTHETALAT::CreateNewHashEntry_lookup
 	HashEntry->Theta = Theta;
 	HashEntry->iteration = 0;
 
-	HashEntry->stateID = StateID2CoordTable.size();
+    bool withinTolerance = withinGoalTolerance(X, Y, Theta);
+    bool newGoalToleranceState = EnvNAVXYTHETALAT.bInitialized && withinTolerance;
+    if (newGoalToleranceState) {
+        // all goal states have the same state id
+        HashEntry->stateID = EnvNAVXYTHETALAT.goalstateid;
+    }
+    else {
+        HashEntry->stateID = StateID2CoordTable.size();
+    }
 
 	//insert into the tables
 	StateID2CoordTable.push_back(HashEntry);
@@ -2406,21 +2468,28 @@ EnvNAVXYTHETALATHashEntry_t* EnvironmentNAVXYTHETALAT::CreateNewHashEntry_lookup
 	}
 #endif
 
-	Coord2StateIDHashTable_lookup[index] = 	HashEntry;
+	Coord2StateIDHashTable_lookup[index] = HashEntry;
 
-	//insert into and initialize the mappings
-	int* entry = new int [NUMOFINDICES_STATEID2IND]; 
-	StateID2IndexMapping.push_back(entry);
-	for(i = 0; i < NUMOFINDICES_STATEID2IND; i++)
-	{
-		StateID2IndexMapping[HashEntry->stateID][i] = -1;
-	}
-
-	if(HashEntry->stateID != (int)StateID2IndexMapping.size()-1)
-	{
-		SBPL_ERROR("ERROR in Env... function: last state has incorrect stateID\n");
-		throw new SBPL_Exception();	
-	}
+    //insert into and initialize the mappings
+    int* entry = new int [NUMOFINDICES_STATEID2IND]; 
+    StateID2IndexMapping.push_back(entry);
+    for(i = 0; i < NUMOFINDICES_STATEID2IND; i++)
+    {
+        if (newGoalToleranceState) {
+            StateID2IndexMapping[StateID2CoordTable.size() - 1][i] =
+                    StateID2IndexMapping[EnvNAVXYTHETALAT.goalstateid][i];
+        }
+        else {
+            StateID2IndexMapping[HashEntry->stateID][i] = -1;
+        }
+    }
+    
+    if(!newGoalToleranceState && HashEntry->stateID != (int)StateID2IndexMapping.size() - 1)
+    {
+        SBPL_ERROR("ERROR in Env... function: last state has incorrect stateID\n");
+        throw new SBPL_Exception();	
+    }
+    
 
 #if TIME_DEBUG
 	time_createhash += clock()-currenttime;
@@ -2546,10 +2615,24 @@ void EnvironmentNAVXYTHETALAT::GetSuccs(int SourceStateID, vector<int>* SuccIDV,
 
 void EnvironmentNAVXYTHETALAT::GetPreds(int TargetStateID, vector<int>* PredIDV, vector<int>* CostV)
 {
-
-	//TODO- to support tolerance, need: a) generate preds for goal state based on all possible goal state variable settings,
-	//b) change goal check condition in gethashentry c) change getpredsofchangedcells and getsuccsofchangedcells functions
-
+    //TODO - to support tolerance, need:
+    // a) generate preds for goal state based on all possible goal state variable settings,
+    // b) change goal check condition in gethashentry
+    // c) change getpredsofchangedcells and getsuccsofchangedcells functions
+    static bool reported = false;
+    if (!reported) {
+        if (EnvNAVXYTHETALATCfg.GoalTolX_m != 0.0 ||
+            EnvNAVXYTHETALATCfg.GoalTolY_m != 0.0 ||
+            EnvNAVXYTHETALATCfg.GoalTolTheta_rad != 0.0)
+        {
+            SBPL_WARN("\033[91;1m"
+                      "Goal tolerance is not supported for backwards search; disabling goal tolerance.\n"
+                      "\033[0m");
+            reported = true;
+            SetGoalTolerance(0.0, 0.0, 0.0);
+        }
+    }
+	
     int aind;
 
 #if TIME_DEBUG
@@ -2821,7 +2904,7 @@ void EnvironmentNAVXYTHETALAT::PrintHashTableHist(FILE* fOut)
 		else if((int)Coord2StateIDHashTable[j].size() < 25)
 			s50++;
 		else if((int)Coord2StateIDHashTable[j].size() < 50)
-			s100++;
+        	s100++;
 		else if((int)Coord2StateIDHashTable[j].size() < 100)
 			s200++;
 		else if((int)Coord2StateIDHashTable[j].size() < 400)
@@ -2917,4 +3000,5 @@ int EnvironmentNAVXYTHETALAT::SizeofCreatedEnv()
 	return (int)StateID2CoordTable.size();
 	
 }
+
 //------------------------------------------------------------------------------

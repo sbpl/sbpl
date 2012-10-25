@@ -106,16 +106,19 @@ typedef struct
 //configuration parameters
 typedef struct ENV_NAVXYTHETALAT_CONFIG
 {
-	int EnvWidth_c;
-	int EnvHeight_c;
-  int NumThetaDirs;
-	int StartX_c;
-	int StartY_c;
-	int StartTheta;
-	int EndX_c;
-	int EndY_c;
-	int EndTheta;
-	unsigned char** Grid2D;
+    int EnvWidth_c;
+    int EnvHeight_c;
+    int NumThetaDirs;
+    int StartX_c;
+    int StartY_c;
+    int StartTheta;
+    int EndX_c;
+    int EndY_c;
+    int EndTheta;
+    double GoalTolX_m;
+    double GoalTolY_m;
+    double GoalTolTheta_rad;
+    unsigned char** Grid2D;
 
 	//the value at which and above which cells are obstacles in the maps sent from outside
 	//the default is defined above
@@ -437,6 +440,7 @@ public:
 
 	virtual void PrintHeuristicValues();
 
+    virtual bool withinGoalTolerance(int x, int y, int theta);
 };
 
 
@@ -461,7 +465,8 @@ class EnvironmentNAVXYTHETALAT : public EnvironmentNAVXYTHETALATTICE
   virtual int SetGoal(double x, double y, double theta);
   /** \brief sets goal tolerance. (Note goal tolerance is ignored currently)
     */
-  virtual void SetGoalTolerance(double tol_x, double tol_y, double tol_theta) { /**< not used yet */ }
+  virtual void SetGoalTolerance(double tol_x, double tol_y, double tol_theta);
+  
   /** \brief returns state coordinates of state with ID=stateID
     */
   virtual void GetCoordFromState(int stateID, int& x, int& y, int& theta) const;
@@ -539,8 +544,6 @@ class EnvironmentNAVXYTHETALAT : public EnvironmentNAVXYTHETALATTICE
   virtual void InitializeEnvironment();
 
   virtual void PrintHashTableHist(FILE* fOut);
-
-
 };
 
 

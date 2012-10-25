@@ -563,16 +563,6 @@ int planxythetalat(PlannerType plannerType, char* envCfgFilename, char* motPrimF
 		throw new SBPL_Exception();
 	}
 
-	// write the discrete solution to file
-//	for (size_t i = 0; i < solution_stateIDs_V.size(); i++) {
-//		int x;
-//		int y;
-//		int theta;
-//		environment_navxythetalat.GetCoordFromState(solution_stateIDs_V[i], x, y, theta);
-//
-//		fprintf(fSol, "%d %d %d\t\t%.3f %.3f %.3f\n", x, y, theta, DISCXY2CONT(x, 0.1), DISCXY2CONT(y, 0.1), DiscTheta2Cont(theta, 16));
-//	}
-
 	// write the continuous solution to file
 	vector<sbpl_xy_theta_pt_t> xythetaPath;
 	environment_navxythetalat.ConvertStateIDPathintoXYThetaPath(&solution_stateIDs_V, &xythetaPath);
@@ -580,6 +570,59 @@ int planxythetalat(PlannerType plannerType, char* envCfgFilename, char* motPrimF
 	for (unsigned int i = 0; i < xythetaPath.size(); i++) {
 		fprintf(fSol, "%.3f %.3f %.3f\n", xythetaPath.at(i).x, xythetaPath.at(i).y, xythetaPath.at(i).theta);
 	}
+	
+	// write the discrete solution to file
+	fprintf(fSol, "-----------------\n");
+    fprintf(fSol, "Discrete Solution\n");
+    fprintf(fSol, "-----------------\n");
+	int lastX, lastY, lastTheta;
+	if (!xythetaPath.empty()) {
+        const EnvNAVXYTHETALATConfig_t* config = environment_navxythetalat.GetEnvNavConfig();
+        double cellsize_m = config->cellsize_m;
+        double numThetaDirs = config->NumThetaDirs;
+        lastX = CONTXY2DISC(xythetaPath.front().x, cellsize_m);
+        lastY = CONTXY2DISC(xythetaPath.front().y, cellsize_m);
+        lastTheta = ContTheta2Disc(xythetaPath.front().theta, numThetaDirs);
+        fprintf(fSol, "(%d, %d, %d)\n", lastX, lastY, lastTheta);
+        for (int i = 1; i < (int)xythetaPath.size(); i++) {
+            int x = CONTXY2DISC(xythetaPath[i].x, cellsize_m);
+            int y = CONTXY2DISC(xythetaPath[i].y, cellsize_m);
+            int theta = ContTheta2Disc(xythetaPath[i].theta, numThetaDirs);
+            if (lastX != x || lastY != y || lastTheta != theta) {
+                fprintf(fSol, "(%d, %d, %d)\n", x, y, theta);
+                lastX = x; lastY = y; lastTheta = theta;
+            }
+        }
+	}
+	
+	///////////////////////////////////////////////////////////
+	// try another planning query with goal tolerance enabled
+	///////////////////////////////////////////////////////////
+	environment_navxythetalat.SetStart(0.11, 0.13, 0.0);
+    environment_navxythetalat.SetGoal(0.35, 0.25, 0.0);
+    if (!environment_navxythetalat.InitializeMDPCfg(&MDPCfg)) {
+        printf("ERROR: InitializeMDPCfg failed\n");
+        throw new SBPL_Exception();
+    }
+	// set planner properties
+    if (planner->set_start(MDPCfg.startstateid) == 0) {
+        printf("ERROR: failed to set start state\n");
+        throw new SBPL_Exception();
+    }
+    if (planner->set_goal(MDPCfg.goalstateid) == 0) {
+        printf("ERROR: failed to set goal state\n");
+        throw new SBPL_Exception();
+    }
+    bRet = planner->replan(allocated_time_secs, &solution_stateIDs_V);
+    environment_navxythetalat.ConvertStateIDPathintoXYThetaPath(&solution_stateIDs_V, &xythetaPath);
+    printf("solution size=%d\n", (unsigned int)xythetaPath.size());
+    fprintf(fSol, "--------------------\n");
+    fprintf(fSol, "Second Plan Solution\n");
+    fprintf(fSol, "--------------------\n");
+    for (unsigned int i = 0; i < xythetaPath.size(); i++) {
+        fprintf(fSol, "%.3f %.3f %.3f\n", xythetaPath.at(i).x, xythetaPath.at(i).y, xythetaPath.at(i).theta);
+    }
+    
 	fclose(fSol);
 
 	environment_navxythetalat.PrintTimeStat(stdout);

@@ -666,7 +666,7 @@ int RSTARPlanner::ImprovePath(double MaxNumofSecs)
         rstarstate = (RSTARState*)pSearchStateSpace->OPEN->deleteminheap();
 
         SBPL_FPRINTF(fDeb, "ComputePath:  selected state %d g=%d (AVOID=%d)\n", 
-			rstarstate->MDPstate->StateID, rstarstate->g, minkey.key[0]);
+			rstarstate->MDPstate->StateID, rstarstate->g, (int)minkey.key[0]);
         environment_->PrintState(rstarstate->MDPstate->StateID, true, fDeb);
         
         if (rstarstate->MDPstate != pSearchStateSpace->searchstartstate &&
