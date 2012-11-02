@@ -26,138 +26,111 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+
 #include <iostream>
 using namespace std;
 
 #include <sbpl/headers.h>
 
-
 //-----------------------------------------------------------------------------------------------------
 
 PPCPPlanner::PPCPPlanner(DiscreteSpaceInformation* environment, int sizeofS, int sizeofH)
 {
-
     environment_ = environment;
-    
-    
+
 #ifndef ROS
     const char* debug = "debug.txt";
 #endif
     fDeb = SBPL_FOPEN(debug, "w");
-    if(fDeb == NULL){
-      SBPL_ERROR("ERROR: could not open planner debug file\n");
-      throw new SBPL_Exception();
+    if (fDeb == NULL) {
+        SBPL_ERROR("ERROR: could not open planner debug file\n");
+        throw new SBPL_Exception();
     }
-    
+
     pStateSpace = new PPCPStateSpace_t;
 
     //TODO - create and initialize the state-space
-
 }
 
 PPCPPlanner::~PPCPPlanner()
 {
-  if(pStateSpace != NULL){
-    //delete the statespace
-    DeleteStateSpace(pStateSpace);
-    delete pStateSpace;
-	pStateSpace = NULL;
-  }
-  SBPL_FCLOSE(fDeb);
+    if (pStateSpace != NULL) {
+        //delete the statespace
+        DeleteStateSpace( pStateSpace);
+        delete pStateSpace;
+        pStateSpace = NULL;
+    }
+    SBPL_FCLOSE( fDeb);
 }
-
 
 //deallocates memory used by StateSpace
 void PPCPPlanner::DeleteStateSpace(PPCPStateSpace_t* pStateSpace)
 {
-	//TODO - fill in
-
-
-
+    //TODO - fill in
 }
 
 //creates (allocates memory) search state space
 //does not initialize search statespace
 int PPCPPlanner::CreateSearchStateSpace(PPCPStateSpace_t* pStateSpace)
 {
+    //create a heap
+    pStateSpace->bReinitializeSearchStateSpace = true;
+    pStateSpace->currentpolicyconfidence = 0;
+    pStateSpace->GoalState = NULL;
+    pStateSpace->StartState = NULL;
+    pStateSpace->iteration = 0;
+    pStateSpace->searchiteration = 0;
 
-	//create a heap
-	pStateSpace->bReinitializeSearchStateSpace = true;
-	pStateSpace->currentpolicyconfidence = 0;
-	pStateSpace->GoalState = NULL;
-	pStateSpace->StartState = NULL;
-	pStateSpace->iteration = 0;
-	pStateSpace->searchiteration = 0;
-	
-
-	return 1;
+    return 1;
 }
-
-
 
 //--------------------------------------------------------------------------------------------------
 
-
 //-------------------------------------------------------------------------------------------------
+
 //setting start state in S
 int PPCPPlanner::set_goal(int goal_stateID)
 {
-	//TODO
-
-
-	return 1;
-
+    //TODO
+    return 1;
 }
 
 //setting goal state in S
 int PPCPPlanner::set_start(int start_stateID)
 {
-
-	//TODO
-
-
-	return 1;
+    //TODO
+    return 1;
 }
-
-
 
 void PPCPPlanner::costs_changed(StateChangeQuery const & stateChange)
 {
-	SBPL_PRINTF("planner: costs_changed, state-space reset\n");
+    SBPL_PRINTF("planner: costs_changed, state-space reset\n");
 
     pStateSpace->bReinitializeSearchStateSpace = true;
-
-
 }
 
 void PPCPPlanner::costs_changed()
 {
-	SBPL_PRINTF("planner: costs_changed, state-space reset\n");
+    SBPL_PRINTF("planner: costs_changed, state-space reset\n");
 
     pStateSpace->bReinitializeSearchStateSpace = true;
-
 }
-
-
 
 int PPCPPlanner::force_planning_from_scratch()
 {
-	SBPL_PRINTF("planner: forceplanfromscratch set, state-space reset\n");
+    SBPL_PRINTF("planner: forceplanfromscratch set, state-space reset\n");
 
     pStateSpace->bReinitializeSearchStateSpace = true;
 
     return 1;
 }
 
-
-int PPCPPlanner::replan(double allocated_time_secs, vector<sbpl_PolicyStatewithBinaryh_t>* SolutionPolicy, float* ExpectedCost, float* ProbofReachGoal)
+int PPCPPlanner::replan(double allocated_time_secs, vector<sbpl_PolicyStatewithBinaryh_t>* SolutionPolicy,
+                        float* ExpectedCost, float* ProbofReachGoal)
 {
-	//TODO
-
-
-	return 0;
+    //TODO
+    return 0;
 }
-
 
 //-------------------------------------------------------------------------------------------------
 
