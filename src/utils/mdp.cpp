@@ -26,331 +26,300 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+
 //MDP.cpp - contains all the functions for MDP classes
 #include <iostream>
 using namespace std;
 
 #include <sbpl/headers.h>
 
-
 //-------------------------MDPACTION class functions----------
+
 bool CMDPACTION::Delete()
 {
-	SuccsID.clear();
-	Costs.clear();
-	SuccsProb.clear();
-	return true;
-};
-
+    SuccsID.clear();
+    Costs.clear();
+    SuccsProb.clear();
+    return true;
+}
 
 bool CMDPACTION::DeleteAllOutcomes()
 {
-	SuccsID.clear();
-	Costs.clear();
-	SuccsProb.clear();
-	return true;
-};
+    SuccsID.clear();
+    Costs.clear();
+    SuccsProb.clear();
+    return true;
+}
 
 bool CMDPACTION::IsValid()
 {
-	float Prob = 0;
-	for(int i = 0; i < (int)SuccsProb.size(); i++)
-	{
-		Prob += SuccsProb[i];
-	}
-	
-	return (fabs(Prob-1.0) < EPS_ERROR); 
-};
+    float Prob = 0;
+    for (int i = 0; i < (int)SuccsProb.size(); i++) {
+        Prob += SuccsProb[i];
+    }
+
+    return (fabs(Prob - 1.0) < EPS_ERROR);
+}
 
 void CMDPACTION::AddOutcome(int OutcomeStateID, int OutcomeCost, float OutcomeProb)
 {
-
 #if MEM_CHECK
-	DisableMemCheck();
+    DisableMemCheck();
 #endif
 
-	SuccsID.push_back(OutcomeStateID);
-	Costs.push_back(OutcomeCost);
-	SuccsProb.push_back(OutcomeProb);
+    SuccsID.push_back(OutcomeStateID);
+    Costs.push_back(OutcomeCost);
+    SuccsProb.push_back(OutcomeProb);
 
 #if MEM_CHECK
-	EnableMemCheck();
+    EnableMemCheck();
 #endif
 
-};
+}
 
-void CMDPACTION::operator = (const CMDPACTION& rhsaction)
+void CMDPACTION::operator =(const CMDPACTION& rhsaction)
 {
-	this->ActionID = rhsaction.ActionID;
+    this->ActionID = rhsaction.ActionID;
 }
 
 int CMDPACTION::GetIndofMostLikelyOutcome()
 {
-	double HighestProb = 0;
-	int mlind = -1;
+    double HighestProb = 0;
+    int mlind = -1;
 
-	for(int oind = 0; oind < (int)this->SuccsID.size(); oind++)
-	{
-		if(this->SuccsProb[oind] >= HighestProb)
-		{
-			mlind = oind;
-			HighestProb = this->SuccsProb[oind];
-		}
-	}
+    for (int oind = 0; oind < (int)this->SuccsID.size(); oind++) {
+        if (this->SuccsProb[oind] >= HighestProb) {
+            mlind = oind;
+            HighestProb = this->SuccsProb[oind];
+        }
+    }
 
-	return mlind;
-
-
+    return mlind;
 }
 
 int CMDPACTION::GetIndofOutcome(int OutcomeID)
 {
+    for (int oind = 0; oind < (int)this->SuccsID.size(); oind++) {
+        if (this->SuccsID[oind] == OutcomeID) {
+            return oind;
+        }
+    }
 
-	for(int oind = 0; oind < (int)this->SuccsID.size(); oind++)
-	{
-		if(this->SuccsID[oind] == OutcomeID)
-		{
-			return oind;
-		}
-	}
-
-	return -1;
-
-
+    return -1;
 }
 
 //----------------------------------------------------------------------
 
 //----------------------------MDPSTATE class functions---------------
+
 bool CMDPSTATE::Delete()
 {
-	CMDPACTION* action;
+    CMDPACTION* action;
 
-	if(this->PlannerSpecificData != NULL)
-	{
-		SBPL_ERROR("ERROR deleting state: planner specific data is not deleted\n");
-		throw new SBPL_Exception();
-	}
-	
-	//delete predecessors array
-	PredsID.clear();
+    if (this->PlannerSpecificData != NULL) {
+        SBPL_ERROR("ERROR deleting state: planner specific data is not deleted\n");
+        throw new SBPL_Exception();
+    }
 
-	//delete actions array
-	while((int)Actions.size() > 0)
-	{
-		action = Actions[Actions.size()-1];
-		Actions.pop_back();
+    //delete predecessors array
+    PredsID.clear();
 
-		action->Delete();
-		delete action;
-	}
-	
-	return true;
-};
+    //delete actions array
+    while ((int)Actions.size() > 0) {
+        action = Actions[Actions.size() - 1];
+        Actions.pop_back();
+
+        action->Delete();
+        delete action;
+    }
+
+    return true;
+}
 
 CMDPACTION* CMDPSTATE::AddAction(int ID)
 {
-	CMDPACTION* action = new CMDPACTION(ID, this->StateID);
+    CMDPACTION* action = new CMDPACTION(ID, this->StateID);
 
 #if MEM_CHECK
-	DisableMemCheck();
+    DisableMemCheck();
 #endif
 
-	Actions.push_back(action);
+    Actions.push_back(action);
 
 #if MEM_CHECK
-	EnableMemCheck();
+    EnableMemCheck();
 #endif
 
-
-	return action;
-};
-
+    return action;
+}
 
 bool CMDPSTATE::AddPred(int stateID)
 {
-	//add the predecessor
-	if(!ContainsPred(stateID))
-	{
+    //add the predecessor
+    if (!ContainsPred(stateID)) {
 #if MEM_CHECK
-	DisableMemCheck();
+        DisableMemCheck();
 #endif
 
-    PredsID.push_back(stateID);
+        PredsID.push_back(stateID);
 #if MEM_CHECK
-	EnableMemCheck();
+        EnableMemCheck();
 #endif
-	}
+    }
 
-	return true;
+    return true;
 }
 
 bool CMDPSTATE::RemovePred(int stateID)
 {
-	for(int i = 0; i < (int)this->PredsID.size(); i++)
-	{
-		if(this->PredsID.at(i) == stateID)
-		{
-			this->PredsID.at(i) = this->PredsID.at(this->PredsID.size()-1);
-			this->PredsID.pop_back();
-			return true;
-		}
-	}
+    for (int i = 0; i < (int)this->PredsID.size(); i++) {
+        if (this->PredsID.at(i) == stateID) {
+            this->PredsID.at(i) = this->PredsID.at(this->PredsID.size() - 1);
+            this->PredsID.pop_back();
+            return true;
+        }
+    }
 
-	//can happen when a state is twice a successor
-	//SBPL_ERROR("ERROR in RemovePred: no Pred is found\n");
-	//throw new SBPL_Exception();
+    //can happen when a state is twice a successor
+    //SBPL_ERROR("ERROR in RemovePred: no Pred is found\n");
+    //throw new SBPL_Exception();
 
-	return false;
+    return false;
 }
-
 
 //requires the deletion of Preds elsewhere
 bool CMDPSTATE::RemoveAllActions()
 {
-	CMDPACTION* action;
+    CMDPACTION* action;
 
-	//delete actions array
-	while((int)Actions.size() > 0)
-	{
-		action = Actions[Actions.size()-1];
-		Actions.pop_back();
+    //delete actions array
+    while ((int)Actions.size() > 0) {
+        action = Actions[Actions.size() - 1];
+        Actions.pop_back();
 
-		action->Delete();
-		delete action;
-	}
-	
-	return true;
+        action->Delete();
+        delete action;
+    }
+
+    return true;
 }
 
 bool CMDPSTATE::ContainsPred(int stateID)
 {
-	for(int i = 0; i < (int)PredsID.size(); i++)
-	{
-		if(PredsID[i] == stateID)
-			return true;
-	}
-	return false;
-};
+    for (int i = 0; i < (int)PredsID.size(); i++) {
+        if (PredsID[i] == stateID) return true;
+    }
+    return false;
+}
 
-void CMDPSTATE::operator = (const CMDPSTATE& rhsstate)
+void CMDPSTATE::operator =(const CMDPSTATE& rhsstate)
 {
-	this->StateID = rhsstate.StateID;
-
+    this->StateID = rhsstate.StateID;
 }
 
 CMDPACTION* CMDPSTATE::GetAction(int actionID)
 {
+    for (int i = 0; i < (int)Actions.size(); i++) {
+        if (Actions[i]->ActionID == actionID) return Actions[i];
+    }
 
-	for(int i = 0; i < (int)Actions.size(); i++)
-	{
-		if(Actions[i]->ActionID == actionID)
-			return Actions[i];
-	}
-	
-	return NULL;
+    return NULL;
 }
-
 
 //-------------------------------------------------------------------------
 
-
 //-------------MDP class functions--------------------------------
+
 bool CMDP::empty()
-{	return ((int)StateArray.size() == 0);};
+{
+    return ((int)StateArray.size() == 0);
+}
 
 bool CMDP::full()
-{	return ((int)StateArray.size() >= MAXSTATESPACESIZE);};
+{
+    return ((int)StateArray.size() >= MAXSTATESPACESIZE);
+}
 
 //creates numofstates states. Their ids must be initialized elsewhere
 bool CMDP::Create(int numofstates)
 {
-	CMDPSTATE* state;
+    CMDPSTATE* state;
 
-	if(numofstates > MAXSTATESPACESIZE)
-	{
-		SBPL_ERROR("ERROR in Create: maximum MDP size is reached\n");
-		throw new SBPL_Exception();
-	}
+    if (numofstates > MAXSTATESPACESIZE) {
+        SBPL_ERROR("ERROR in Create: maximum MDP size is reached\n");
+        throw new SBPL_Exception();
+    }
 
-	for(int i = 0; i < numofstates; i++)
-	{
-		state = new CMDPSTATE(-1);
+    for (int i = 0; i < numofstates; i++) {
+        state = new CMDPSTATE(-1);
 
 #if MEM_CHECK
-	DisableMemCheck();
+        DisableMemCheck();
 #endif
-		StateArray.push_back(state);
+        StateArray.push_back(state);
 #if MEM_CHECK
-	EnableMemCheck();
+        EnableMemCheck();
 #endif
 
-	}
+    }
 
-	return true;
-};
+    return true;
+}
 
 //Adds a new state The id must be initialized elsewhere
 CMDPSTATE* CMDP::AddState(int StateID)
 {
-	CMDPSTATE* state;
+    CMDPSTATE* state;
 
-	if((int)StateArray.size()+1 > MAXSTATESPACESIZE)
-	{
-		SBPL_ERROR("ERROR: maximum of states is reached in MDP\n");
-		throw new SBPL_Exception();
-	}
+    if ((int)StateArray.size() + 1 > MAXSTATESPACESIZE) {
+        SBPL_ERROR("ERROR: maximum of states is reached in MDP\n");
+        throw new SBPL_Exception();
+    }
 
-	state = new CMDPSTATE(StateID);
+    state = new CMDPSTATE(StateID);
 
 #if MEM_CHECK
-	DisableMemCheck();
+    DisableMemCheck();
 #endif
-	StateArray.push_back(state);
+    StateArray.push_back(state);
 #if MEM_CHECK
-	EnableMemCheck();
+    EnableMemCheck();
 #endif
 
-
-	return state;
-};
-
+    return state;
+}
 
 bool CMDP::Delete()
 {
-	CMDPSTATE* state;
+    CMDPSTATE* state;
 
-	while((int)StateArray.size() > 0)
-	{
-		state = StateArray[StateArray.size()-1];
-		StateArray.pop_back();
+    while ((int)StateArray.size() > 0) {
+        state = StateArray[StateArray.size() - 1];
+        StateArray.pop_back();
 
-		state->Delete();
-		delete state;
-	}
+        state->Delete();
+        delete state;
+    }
 
-	return true;
-};
+    return true;
+}
 
 void CMDP::Print(FILE* fOut)
 {
-	SBPL_FPRINTF(fOut, "MDP statespace size=%d\n", (unsigned int)StateArray.size());
-	for(int i = 0; i < (int)StateArray.size(); i++)
-	{
-		SBPL_FPRINTF(fOut, "%d: ", StateArray[i]->StateID);
-		for( int j = 0; j < (int)StateArray[i]->Actions.size(); j++)
-		{
-			CMDPACTION* action = StateArray[i]->Actions[j];
-			SBPL_FPRINTF(fOut, "[%d", action->ActionID);
-			for( int outind = 0; outind < (int)action->SuccsID.size(); outind++)
-			{
-				SBPL_FPRINTF(fOut, " %d %d %f", action->SuccsID[outind], action->Costs[outind],
-					action->SuccsProb[outind]);
-			}
-			SBPL_FPRINTF(fOut, "] ");
-		}
-		SBPL_FPRINTF(fOut, "\n");
-	}
+    SBPL_FPRINTF(fOut, "MDP statespace size=%d\n", (unsigned int)StateArray.size());
+    for (int i = 0; i < (int)StateArray.size(); i++) {
+        SBPL_FPRINTF(fOut, "%d: ", StateArray[i]->StateID);
+        for (int j = 0; j < (int)StateArray[i]->Actions.size(); j++) {
+            CMDPACTION* action = StateArray[i]->Actions[j];
+            SBPL_FPRINTF(fOut, "[%d", action->ActionID);
+            for (int outind = 0; outind < (int)action->SuccsID.size(); outind++) {
+                SBPL_FPRINTF(fOut, " %d %d %f", action->SuccsID[outind], action->Costs[outind],
+                             action->SuccsProb[outind]);
+            }
+            SBPL_FPRINTF(fOut, "] ");
+        }
+        SBPL_FPRINTF(fOut, "\n");
+    }
 }
 
 //--------------------------------------------------------

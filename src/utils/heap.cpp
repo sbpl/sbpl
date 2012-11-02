@@ -26,219 +26,194 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+
 #include <iostream>
 using namespace std;
 
 #include <sbpl/headers.h>
 
-
 void heaperror(const char* ErrorString)
 {
-  //need to send a message from here somehow
-	SBPL_PRINTF("%s\n", ErrorString);
-	throw new SBPL_Exception();
+    //need to send a message from here somehow
+    SBPL_PRINTF("%s\n", ErrorString);
+    throw new SBPL_Exception();
 }
-
 
 //returns an infinite key
 CKey InfiniteKey()
 {
-	CKey key;
-	key.SetKeytoInfinity();
-	return key;
-
+    CKey key;
+    key.SetKeytoInfinity();
+    return key;
 }
 
-//---------------------------------normal (multi-priority) CHeap class---------------------------------------------------
+//---------------------------------normal (multi-priority) CHeap class--------------------------------------------------
+
 //constructors and destructors
 CHeap::CHeap()
 {
-  percolates = 0;
-  currentsize = 0;
-  allocated = HEAPSIZE_INIT;
+    percolates = 0;
+    currentsize = 0;
+    allocated = HEAPSIZE_INIT;
 
-  heap = new heapelement[allocated];
+    heap = new heapelement[allocated];
 
 }
 
 CHeap::~CHeap()
 {
-  int i;
-  for (i=1; i<=currentsize; ++i)
-    heap[i].heapstate->heapindex = 0;
+    int i;
+    for (i = 1; i <= currentsize; ++i)
+        heap[i].heapstate->heapindex = 0;
 
-  delete [] heap;
+    delete[] heap;
 }
-
 
 void CHeap::percolatedown(int hole, heapelement tmp)
 {
-  int child;
+    int child;
 
-  if (currentsize != 0)
-  {
+    if (currentsize != 0) {
+        for (; 2 * hole <= currentsize; hole = child) {
+            child = 2 * hole;
 
-    for (; 2*hole <= currentsize; hole = child)
-	{
-	  child = 2*hole;
-
-	  if (child != currentsize && heap[child+1].key < heap[child].key)
-	    ++child;
-	  if (heap[child].key < tmp.key)
-	    {
-	      percolates += 1;
-	      heap[hole] = heap[child];
-	      heap[hole].heapstate->heapindex = hole;
-	    }
-	  else
-	    break;
-	}
-      heap[hole] = tmp;
-      heap[hole].heapstate->heapindex = hole;
-   }
+            if (child != currentsize && heap[child + 1].key < heap[child].key) ++child;
+            if (heap[child].key < tmp.key) {
+                percolates += 1;
+                heap[hole] = heap[child];
+                heap[hole].heapstate->heapindex = hole;
+            }
+            else
+                break;
+        }
+        heap[hole] = tmp;
+        heap[hole].heapstate->heapindex = hole;
+    }
 }
 
 void CHeap::percolateup(int hole, heapelement tmp)
 {
-  if (currentsize != 0)
-    {
-      for (; hole > 1 && tmp.key < heap[hole/2].key; hole /= 2)
-	  {
-		percolates += 1;
-		heap[hole] = heap[hole/2];
-		heap[hole].heapstate->heapindex = hole;
-	  }  
-      heap[hole] = tmp;
-      heap[hole].heapstate->heapindex = hole;
+    if (currentsize != 0) {
+        for (; hole > 1 && tmp.key < heap[hole / 2].key; hole /= 2) {
+            percolates += 1;
+            heap[hole] = heap[hole / 2];
+            heap[hole].heapstate->heapindex = hole;
+        }
+        heap[hole] = tmp;
+        heap[hole].heapstate->heapindex = hole;
     }
 }
 
 void CHeap::percolateupordown(int hole, heapelement tmp)
 {
-  if (currentsize != 0)
-    {
-      if (hole > 1 && heap[hole/2].key > tmp.key)
-		percolateup(hole, tmp);
-      else
-		percolatedown(hole, tmp);
+    if (currentsize != 0) {
+        if (hole > 1 && heap[hole / 2].key > tmp.key)
+            percolateup(hole, tmp);
+        else
+            percolatedown(hole, tmp);
     }
 }
 
 bool CHeap::emptyheap()
 {
-  return currentsize == 0;
+    return currentsize == 0;
 }
-
 
 bool CHeap::fullheap()
 {
-  return currentsize == HEAPSIZE-1;
+    return currentsize == HEAPSIZE - 1;
 }
 
 bool CHeap::inheap(AbstractSearchState *AbstractSearchState)
 {
-  return (AbstractSearchState->heapindex != 0);
+    return (AbstractSearchState->heapindex != 0);
 }
-
 
 CKey CHeap::getkeyheap(AbstractSearchState *AbstractSearchState)
 {
-  if (AbstractSearchState->heapindex == 0)
-    heaperror("GetKey: AbstractSearchState is not in heap");
+    if (AbstractSearchState->heapindex == 0) heaperror("GetKey: AbstractSearchState is not in heap");
 
-  return heap[AbstractSearchState->heapindex].key;
+    return heap[AbstractSearchState->heapindex].key;
 }
 
 void CHeap::makeemptyheap()
 {
-  int i;
+    int i;
 
-  for (i=1; i<=currentsize; ++i)
-    heap[i].heapstate->heapindex = 0;
-  currentsize = 0;
+    for (i = 1; i <= currentsize; ++i)
+        heap[i].heapstate->heapindex = 0;
+    currentsize = 0;
 }
 
 void CHeap::makeheap()
 {
-  int i;
+    int i;
 
-  for (i = currentsize / 2; i > 0; i--)
-    {
-      percolatedown(i, heap[i]);
+    for (i = currentsize / 2; i > 0; i--) {
+        percolatedown(i, heap[i]);
     }
 }
 
 void CHeap::growheap()
 {
-  heapelement* newheap;
-  int i;
+    heapelement* newheap;
+    int i;
 
-  SBPL_PRINTF("growing heap size from %d ", allocated);
+    SBPL_PRINTF("growing heap size from %d ", allocated);
 
-  allocated = 2*allocated;
-  if(allocated > HEAPSIZE)
-	  allocated = HEAPSIZE;
+    allocated = 2 * allocated;
+    if (allocated > HEAPSIZE) allocated = HEAPSIZE;
 
-  SBPL_PRINTF("to %d\n", allocated);
+    SBPL_PRINTF("to %d\n", allocated);
 
-  newheap = new heapelement[allocated];
+    newheap = new heapelement[allocated];
 
-  for (i=0; i<=currentsize; ++i)
-    newheap[i] = heap[i];
+    for (i = 0; i <= currentsize; ++i)
+        newheap[i] = heap[i];
 
-  delete [] heap;
+    delete[] heap;
 
-  heap = newheap;
+    heap = newheap;
 }
-
 
 void CHeap::sizecheck()
 {
-
-  if (fullheap())
-    heaperror("insertheap: heap is full");
-  else if(currentsize == allocated-1)
-  {
-	growheap();
-  }
+    if (fullheap())
+        heaperror("insertheap: heap is full");
+    else if (currentsize == allocated - 1) {
+        growheap();
+    }
 }
-
-
 
 void CHeap::insertheap(AbstractSearchState *AbstractSearchState, CKey key)
 {
-  heapelement tmp;
-  char strTemp[100];
+    heapelement tmp;
+    char strTemp[100];
 
+    sizecheck();
 
-  sizecheck();
-
-  if (AbstractSearchState->heapindex != 0)
-    {
-      sprintf(strTemp, "insertheap: AbstractSearchState is already in heap");
-      heaperror(strTemp);
+    if (AbstractSearchState->heapindex != 0) {
+        sprintf(strTemp, "insertheap: AbstractSearchState is already in heap");
+        heaperror(strTemp);
     }
-  tmp.heapstate = AbstractSearchState;
-  tmp.key = key;
-  percolateup(++currentsize, tmp); 
+    tmp.heapstate = AbstractSearchState;
+    tmp.key = key;
+    percolateup(++currentsize, tmp);
 }
 
 void CHeap::deleteheap(AbstractSearchState *AbstractSearchState)
 {
-  if (AbstractSearchState->heapindex == 0)
-    heaperror("deleteheap: AbstractSearchState is not in heap");
-  percolateupordown(AbstractSearchState->heapindex, heap[currentsize--]);
-  AbstractSearchState->heapindex = 0;
+    if (AbstractSearchState->heapindex == 0) heaperror("deleteheap: AbstractSearchState is not in heap");
+    percolateupordown(AbstractSearchState->heapindex, heap[currentsize--]);
+    AbstractSearchState->heapindex = 0;
 }
 
 void CHeap::updateheap(AbstractSearchState *AbstractSearchState, CKey NewKey)
 {
-  if (AbstractSearchState->heapindex == 0)
-    heaperror("Updateheap: AbstractSearchState is not in heap");
-  if (heap[AbstractSearchState->heapindex].key != NewKey)
-    {
-      heap[AbstractSearchState->heapindex].key = NewKey;
-      percolateupordown(AbstractSearchState->heapindex, heap[AbstractSearchState->heapindex]);
+    if (AbstractSearchState->heapindex == 0) heaperror("Updateheap: AbstractSearchState is not in heap");
+    if (heap[AbstractSearchState->heapindex].key != NewKey) {
+        heap[AbstractSearchState->heapindex].key = NewKey;
+        percolateupordown(AbstractSearchState->heapindex, heap[AbstractSearchState->heapindex]);
     }
 }
 
@@ -246,16 +221,16 @@ void CHeap::insert_unsafe(AbstractSearchState* AbstractSearchState, CKey key)
 {
     heapelement tmp;
     char strTemp[100];
-    
+
     sizecheck();
-    
+
     if (AbstractSearchState->heapindex != 0) {
         sprintf(strTemp, "insertheap: AbstractSearchState is already in heap");
         heaperror(strTemp);
     }
     tmp.heapstate = AbstractSearchState;
     tmp.key = key;
-    
+
     ++currentsize;
     heap[currentsize] = tmp;
     heap[currentsize].heapstate->heapindex = currentsize;
@@ -266,10 +241,10 @@ void CHeap::deleteheap_unsafe(AbstractSearchState* AbstractSearchState)
     if (AbstractSearchState->heapindex == 0) {
         heaperror("deleteheap: AbstractSearchState is not in heap");
     }
-    
+
     heap[AbstractSearchState->heapindex] = heap[currentsize];
     --currentsize;
-    
+
     heap[AbstractSearchState->heapindex].heapstate->heapindex = AbstractSearchState->heapindex;
     AbstractSearchState->heapindex = 0;
 }
@@ -286,288 +261,255 @@ void CHeap::updateheap_unsafe(AbstractSearchState* AbstractSearchState, CKey New
 
 AbstractSearchState* CHeap::getminheap()
 {
-  if (currentsize == 0)
-    heaperror("GetMinheap: heap is empty");
-  return heap[1].heapstate;
+    if (currentsize == 0) heaperror("GetMinheap: heap is empty");
+    return heap[1].heapstate;
 }
 
 AbstractSearchState* CHeap::getminheap(CKey& ReturnKey)
 {
-  if (currentsize == 0)
-    {
-      heaperror("GetMinheap: heap is empty");
-      ReturnKey = InfiniteKey();
+    if (currentsize == 0) {
+        heaperror("GetMinheap: heap is empty");
+        ReturnKey = InfiniteKey();
     }
-  ReturnKey = heap[1].key;
-  return heap[1].heapstate;
+    ReturnKey = heap[1].key;
+    return heap[1].heapstate;
 }
 
 CKey CHeap::getminkeyheap()
-{  
-  CKey ReturnKey;
-  if (currentsize == 0)
-    return InfiniteKey();
-  ReturnKey = heap[1].key;
-  return ReturnKey;
+{
+    CKey ReturnKey;
+    if (currentsize == 0) return InfiniteKey();
+    ReturnKey = heap[1].key;
+    return ReturnKey;
 }
 
 AbstractSearchState* CHeap::deleteminheap()
 {
-  AbstractSearchState *AbstractSearchState;
+    AbstractSearchState *AbstractSearchState;
 
-  if (currentsize == 0)
-    heaperror("DeleteMin: heap is empty");
+    if (currentsize == 0) heaperror("DeleteMin: heap is empty");
 
-  AbstractSearchState = heap[1].heapstate;
-  AbstractSearchState->heapindex = 0;
-  percolatedown(1, heap[currentsize--]);
-  return AbstractSearchState;
+    AbstractSearchState = heap[1].heapstate;
+    AbstractSearchState->heapindex = 0;
+    percolatedown(1, heap[currentsize--]);
+    return AbstractSearchState;
 }
-//---------------------------------end of normal (multi-priority) CHeap class---------------------------------------------------
 
+//---------------------------------end of normal (multi-priority) CHeap class-------------------------------------------
 
 //---------------------------------single-priority CIntHeap class---------------------------------------------------
+
 //constructors and destructors
 CIntHeap::CIntHeap()
 {
-  percolates = 0;
-  currentsize = 0;
-  allocated = HEAPSIZE_INIT;
+    percolates = 0;
+    currentsize = 0;
+    allocated = HEAPSIZE_INIT;
 
-  heap = new heapintelement[allocated];
-
+    heap = new heapintelement[allocated];
 }
 
 CIntHeap::CIntHeap(int initial_size)
 {
-  percolates = 0;
-  currentsize = 0;
-  allocated = initial_size;
+    percolates = 0;
+    currentsize = 0;
+    allocated = initial_size;
 
-  heap = new heapintelement[allocated];
-
+    heap = new heapintelement[allocated];
 }
-
-
 
 CIntHeap::~CIntHeap()
 {
-  int i;
-  for (i=1; i<=currentsize; ++i)
-    heap[i].heapstate->heapindex = 0;
+    int i;
+    for (i = 1; i <= currentsize; ++i)
+        heap[i].heapstate->heapindex = 0;
 
-  delete [] heap;
+    delete[] heap;
 }
-
 
 void CIntHeap::percolatedown(int hole, heapintelement tmp)
 {
-  int child;
+    int child;
 
-  if (currentsize != 0)
-  {
+    if (currentsize != 0) {
+        for (; 2 * hole <= currentsize; hole = child) {
+            child = 2 * hole;
 
-    for (; 2*hole <= currentsize; hole = child)
-	{
-	  child = 2*hole;
-
-	  if (child != currentsize && heap[child+1].key < heap[child].key)
-	    ++child;
-	  if (heap[child].key < tmp.key)
-	    {
-	      percolates += 1;
-	      heap[hole] = heap[child];
-	      heap[hole].heapstate->heapindex = hole;
-	    }
-	  else
-	    break;
-	}
-      heap[hole] = tmp;
-      heap[hole].heapstate->heapindex = hole;
-   }
+            if (child != currentsize && heap[child + 1].key < heap[child].key) ++child;
+            if (heap[child].key < tmp.key) {
+                percolates += 1;
+                heap[hole] = heap[child];
+                heap[hole].heapstate->heapindex = hole;
+            }
+            else
+                break;
+        }
+        heap[hole] = tmp;
+        heap[hole].heapstate->heapindex = hole;
+    }
 }
 
 void CIntHeap::percolateup(int hole, heapintelement tmp)
 {
-  if (currentsize != 0)
-    {
-      for (; hole > 1 && tmp.key < heap[hole/2].key; hole /= 2)
-	  {
-		percolates += 1;
-		heap[hole] = heap[hole/2];
-		heap[hole].heapstate->heapindex = hole;
-	  }  
-      heap[hole] = tmp;
-      heap[hole].heapstate->heapindex = hole;
+    if (currentsize != 0) {
+        for (; hole > 1 && tmp.key < heap[hole / 2].key; hole /= 2) {
+            percolates += 1;
+            heap[hole] = heap[hole / 2];
+            heap[hole].heapstate->heapindex = hole;
+        }
+        heap[hole] = tmp;
+        heap[hole].heapstate->heapindex = hole;
     }
 }
 
 void CIntHeap::percolateupordown(int hole, heapintelement tmp)
 {
-  if (currentsize != 0)
-    {
-      if (hole > 1 && heap[hole/2].key > tmp.key)
-		percolateup(hole, tmp);
-      else
-		percolatedown(hole, tmp);
+    if (currentsize != 0) {
+        if (hole > 1 && heap[hole / 2].key > tmp.key)
+            percolateup(hole, tmp);
+        else
+            percolatedown(hole, tmp);
     }
 }
 
 bool CIntHeap::emptyheap()
 {
-  return currentsize == 0;
+    return currentsize == 0;
 }
-
 
 bool CIntHeap::fullheap()
 {
-  return currentsize == HEAPSIZE-1;
+    return currentsize == HEAPSIZE - 1;
 }
 
 bool CIntHeap::inheap(AbstractSearchState *AbstractSearchState)
 {
-  return (AbstractSearchState->heapindex != 0);
+    return (AbstractSearchState->heapindex != 0);
 }
-
 
 int CIntHeap::getkeyheap(AbstractSearchState *AbstractSearchState)
 {
-  if (AbstractSearchState->heapindex == 0)
-    heaperror("GetKey: AbstractSearchState is not in heap");
+    if (AbstractSearchState->heapindex == 0) heaperror("GetKey: AbstractSearchState is not in heap");
 
-  return heap[AbstractSearchState->heapindex].key;
+    return heap[AbstractSearchState->heapindex].key;
 }
 
 void CIntHeap::makeemptyheap()
 {
-  int i;
+    int i;
 
-  for (i=1; i<=currentsize; ++i)
-    heap[i].heapstate->heapindex = 0;
-  currentsize = 0;
+    for (i = 1; i <= currentsize; ++i)
+        heap[i].heapstate->heapindex = 0;
+    currentsize = 0;
 }
 
 void CIntHeap::makeheap()
 {
-  int i;
+    int i;
 
-  for (i = currentsize / 2; i > 0; i--)
-    {
-      percolatedown(i, heap[i]);
+    for (i = currentsize / 2; i > 0; i--) {
+        percolatedown(i, heap[i]);
     }
 }
 
 void CIntHeap::growheap()
 {
-  heapintelement* newheap;
-  int i;
+    heapintelement* newheap;
+    int i;
 
-  SBPL_PRINTF("growing heap size from %d ", allocated);
+    SBPL_PRINTF("growing heap size from %d ", allocated);
 
-  allocated = 2*allocated;
-  if(allocated > HEAPSIZE)
-	  allocated = HEAPSIZE;
+    allocated = 2 * allocated;
+    if (allocated > HEAPSIZE) allocated = HEAPSIZE;
 
-  SBPL_PRINTF("to %d\n", allocated);
+    SBPL_PRINTF("to %d\n", allocated);
 
-  newheap = new heapintelement[allocated];
+    newheap = new heapintelement[allocated];
 
-  for (i=0; i<=currentsize; ++i)
-    newheap[i] = heap[i];
+    for (i = 0; i <= currentsize; ++i)
+        newheap[i] = heap[i];
 
-  delete [] heap;
+    delete[] heap;
 
-  heap = newheap;
+    heap = newheap;
 }
-
 
 void CIntHeap::sizecheck()
 {
-
-  if (fullheap())
-    heaperror("insertheap: heap is full");
-  else if(currentsize == allocated-1)
-  {
-	growheap();
-  }
+    if (fullheap())
+        heaperror("insertheap: heap is full");
+    else if (currentsize == allocated - 1) {
+        growheap();
+    }
 }
-
-
 
 void CIntHeap::insertheap(AbstractSearchState *AbstractSearchState, int key)
 {
-  heapintelement tmp;
-  char strTemp[100];
+    heapintelement tmp;
+    char strTemp[100];
 
-  sizecheck();
+    sizecheck();
 
-  if (AbstractSearchState->heapindex != 0)
-    {
-      sprintf(strTemp, "insertheap: AbstractSearchState is already in heap");
-      heaperror(strTemp);
+    if (AbstractSearchState->heapindex != 0) {
+        sprintf(strTemp, "insertheap: AbstractSearchState is already in heap");
+        heaperror(strTemp);
     }
-  tmp.heapstate = AbstractSearchState;
-  tmp.key = key;
-  percolateup(++currentsize, tmp); 
+    tmp.heapstate = AbstractSearchState;
+    tmp.key = key;
+    percolateup(++currentsize, tmp);
 }
 
 void CIntHeap::deleteheap(AbstractSearchState *AbstractSearchState)
 {
-  if (AbstractSearchState->heapindex == 0)
-    heaperror("deleteheap: AbstractSearchState is not in heap");
-  percolateupordown(AbstractSearchState->heapindex, heap[currentsize--]);
-  AbstractSearchState->heapindex = 0;
+    if (AbstractSearchState->heapindex == 0) heaperror("deleteheap: AbstractSearchState is not in heap");
+    percolateupordown(AbstractSearchState->heapindex, heap[currentsize--]);
+    AbstractSearchState->heapindex = 0;
 }
 
 void CIntHeap::updateheap(AbstractSearchState *AbstractSearchState, int NewKey)
 {
-  if (AbstractSearchState->heapindex == 0)
-    heaperror("Updateheap: AbstractSearchState is not in heap");
-  if (heap[AbstractSearchState->heapindex].key != NewKey)
-    {
-      heap[AbstractSearchState->heapindex].key = NewKey;
-      percolateupordown(AbstractSearchState->heapindex, heap[AbstractSearchState->heapindex]);
+    if (AbstractSearchState->heapindex == 0) heaperror("Updateheap: AbstractSearchState is not in heap");
+    if (heap[AbstractSearchState->heapindex].key != NewKey) {
+        heap[AbstractSearchState->heapindex].key = NewKey;
+        percolateupordown(AbstractSearchState->heapindex, heap[AbstractSearchState->heapindex]);
     }
 }
 
 AbstractSearchState* CIntHeap::getminheap()
 {
-  if (currentsize == 0)
-    heaperror("GetMinheap: heap is empty");
-  return heap[1].heapstate;
+    if (currentsize == 0) heaperror("GetMinheap: heap is empty");
+    return heap[1].heapstate;
 }
 
 AbstractSearchState* CIntHeap::getminheap(int& ReturnKey)
 {
-  if (currentsize == 0)
-    {
-      heaperror("GetMinheap: heap is empty");
+    if (currentsize == 0) {
+        heaperror("GetMinheap: heap is empty");
     }
-  ReturnKey = heap[1].key;
-  return heap[1].heapstate;
+    ReturnKey = heap[1].key;
+    return heap[1].heapstate;
 }
 
 int CIntHeap::getminkeyheap()
-{  
-  int ReturnKey;
-  if (currentsize == 0)
-    return INFINITECOST;
-  ReturnKey = heap[1].key;
-  return ReturnKey;
+{
+    int ReturnKey;
+    if (currentsize == 0) return INFINITECOST;
+    ReturnKey = heap[1].key;
+    return ReturnKey;
 }
 
 AbstractSearchState* CIntHeap::deleteminheap()
 {
-  AbstractSearchState *AbstractSearchState;
+    AbstractSearchState *AbstractSearchState;
 
-  if (currentsize == 0)
-    heaperror("DeleteMin: heap is empty");
+    if (currentsize == 0) heaperror("DeleteMin: heap is empty");
 
-  AbstractSearchState = heap[1].heapstate;
-  AbstractSearchState->heapindex = 0;
-  percolatedown(1, heap[currentsize--]);
-  return AbstractSearchState;
+    AbstractSearchState = heap[1].heapstate;
+    AbstractSearchState->heapindex = 0;
+    percolatedown(1, heap[currentsize--]);
+    return AbstractSearchState;
 }
-//---------------------------------end of single-priority CIntHeap class---------------------------------------------------
+
+//---------------------------------end of single-priority CIntHeap class------------------------------------------------
 
 
