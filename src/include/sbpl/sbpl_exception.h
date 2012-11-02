@@ -26,16 +26,19 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+
 #ifndef SBPL_EXCEPTION_H
 #define SBPL_EXCEPTION_H
 
 #include <exception>
 using namespace std;
 
-class SBPL_Exception: public exception{
-  virtual const char* what() const throw(){
-    return "SBPL has encountered a fatal error!";
-  }
+class SBPL_Exception : public exception
+{
+    virtual const char* what() const throw()
+    {
+        return "SBPL has encountered a fatal error!";
+    }
 };
 
 #endif

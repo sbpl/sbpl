@@ -26,6 +26,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+
 #ifndef __VIPLANNER_H_
 #define __VIPLANNER_H_
 
@@ -33,97 +34,90 @@
 
 struct VIPLANNER_T
 {
-	CMDP MDP;
-	CMDPSTATE* StartState;
-	CMDPSTATE* GoalState;
-	int iteration;
+    CMDP MDP;
+    CMDPSTATE* StartState;
+    CMDPSTATE* GoalState;
+    int iteration;
 };
 
-/** \brief Value Iteration state
-  */
+/**
+ * \brief Value Iteration state
+ */
 typedef class VIPLANNERSTATEDATA : public AbstractSearchState
 {
 public:
-	/** \brief the MDP state itself
-    */
-	CMDPSTATE* MDPstate; 
-	/** \brief planner relevant data
-    */
-	float v;
-	float Pc;
-	unsigned int iteration;
+    /**
+     * \brief the MDP state itself
+     */
+    CMDPSTATE* MDPstate;
+    /**
+     * \brief planner relevant data
+     */
+    float v;
+    float Pc;
+    unsigned int iteration;
 
-	/** \brief best action
-    */
-	CMDPACTION *bestnextaction; 
+    /**
+     * \brief best action
+     */
+    CMDPACTION *bestnextaction;
 
-	
 public:
-	VIPLANNERSTATEDATA() {};	
-	~VIPLANNERSTATEDATA() {};
+    VIPLANNERSTATEDATA() { }
+    ~VIPLANNERSTATEDATA() { }
 } VIState;
 
-
-/** \brief value iteration planner
-  */
+/**
+ * \brief value iteration planner
+ */
 class VIPlanner : public SBPLPlanner
 {
-
 public:
-	/** \brief replan a path within the allocated time, return the policy in the solution vector
-    */
-	virtual int replan(double allocated_time_secs, vector<int>* solution_stateIDs_V);
+    /**
+     * \brief replan a path within the allocated time, return the policy in the solution vector
+     */
+    virtual int replan(double allocated_time_secs, vector<int>* solution_stateIDs_V);
 
-	/** \brief constructors
-    */
-	VIPlanner(DiscreteSpaceInformation* environment, MDPConfig* MDP_cfg)
-	{
-		environment_ = environment;
-		MDPCfg_ = MDP_cfg;
-	};
+    /**
+     * \brief constructors
+     */
+    VIPlanner(DiscreteSpaceInformation* environment, MDPConfig* MDP_cfg)
+    {
+        environment_ = environment;
+        MDPCfg_ = MDP_cfg;
+    }
 
-    /** \brief destructor
-      */
+    /**
+     * \brief destructor
+     */
     ~VIPlanner();
 
 protected:
-	
-	//member variables
-	MDPConfig*  MDPCfg_;
-	VIPLANNER_T viPlanner;
+    //member variables
+    MDPConfig* MDPCfg_;
+    VIPLANNER_T viPlanner;
 
+    virtual void Initialize_vidata(CMDPSTATE* state);
 
-	virtual void Initialize_vidata(CMDPSTATE* state);
+    virtual CMDPSTATE* CreateState(int stateID);
 
-	virtual CMDPSTATE* CreateState(int stateID);
+    virtual CMDPSTATE* GetState(int stateID);
 
-	virtual CMDPSTATE* GetState(int stateID);
+    virtual void PrintVIData();
 
+    virtual void PrintStatHeader(FILE* fOut);
 
-	virtual void PrintVIData();
+    virtual void PrintStat(FILE* fOut, clock_t starttime);
 
-	virtual void PrintStatHeader(FILE* fOut);
+    virtual void PrintPolicy(FILE* fPolicy);
 
-	virtual void PrintStat(FILE* fOut, clock_t starttime);
+    virtual void backup(CMDPSTATE* state);
 
+    virtual void perform_iteration_backward();
 
-	virtual void PrintPolicy(FILE* fPolicy);
+    virtual void perform_iteration_forward();
 
-
-	virtual void backup(CMDPSTATE* state);
-
-	virtual void perform_iteration_backward();
-
-	virtual void perform_iteration_forward();
-
-	virtual void InitializePlanner();
-
-
-
-
+    virtual void InitializePlanner();
 };
-
-
-
 
 #endif

@@ -26,59 +26,64 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+
 #ifndef __CONFIG_H_
 #define __CONFIG_H_
 
-
-/** \brief if set, then heuristic is used if available
-  */
+/**
+ * \brief if set, then heuristic is used if available
+ */
 #define USE_HEUR 1 
 
-/** \brief memory debugging
-  */
+/**
+ * \brief memory debugging
+ */
 #define MEM_CHECK 0
 
-/** \brief regular debugging
-  */
+/**
+ * \brief regular debugging
+ */
 #define DEBUG 0
 
-/** \brief timing debugging
-  */
+/**
+ * \brief timing debugging
+ */
 #define TIME_DEBUG 0
 
-/** \brief small epsilon for various floating error checking
-  */
+/**
+ * \brief small epsilon for various floating error checking
+ */
 #define ERR_EPS 0.0000001
 
 //Macros for compiling with an without ROS
 #ifdef ROS
-  #include <ros/ros.h>
+#include <ros/ros.h>
 
-  #define SBPL_DEBUG          ROS_DEBUG
-  #define SBPL_DEBUG_NAMED(a,...) ROS_DEBUG_NAMED("SBPL_" #a,__VA_ARGS__) 
-  #define SBPL_INFO           ROS_INFO
-  #define SBPL_WARN           ROS_WARN
-  #define SBPL_ERROR          ROS_ERROR
-  #define SBPL_FATAL          ROS_FATAL
-  
-  #define SBPL_FOPEN(...)     (FILE*)1
-  #define SBPL_FCLOSE(...)    
-  #define SBPL_PRINTF         ROS_DEBUG
-  #define SBPL_FPRINTF(a,...) ROS_DEBUG_NAMED("SBPL_" #a,__VA_ARGS__)
-  #define SBPL_FFLUSH(...)    
+#define SBPL_DEBUG          ROS_DEBUG
+#define SBPL_DEBUG_NAMED(a,...) ROS_DEBUG_NAMED("SBPL_" #a,__VA_ARGS__)
+#define SBPL_INFO           ROS_INFO
+#define SBPL_WARN           ROS_WARN
+#define SBPL_ERROR          ROS_ERROR
+#define SBPL_FATAL          ROS_FATAL
+
+#define SBPL_FOPEN(...)     (FILE*)1
+#define SBPL_FCLOSE(...)
+#define SBPL_PRINTF         ROS_DEBUG
+#define SBPL_FPRINTF(a,...) ROS_DEBUG_NAMED("SBPL_" #a,__VA_ARGS__)
+#define SBPL_FFLUSH(...)
 #else
-  #define SBPL_DEBUG          printf
-  #define SBPL_DEBUG_NAMED    fprintf
-  #define SBPL_INFO           printf
-  #define SBPL_WARN           printf
-  #define SBPL_ERROR          printf
-  #define SBPL_FATAL          printf
-  
-  #define SBPL_FOPEN          fopen
-  #define SBPL_FCLOSE         fclose
-  #define SBPL_PRINTF         printf
-  #define SBPL_FPRINTF        fprintf
-  #define SBPL_FFLUSH         fflush
+#define SBPL_DEBUG          printf
+#define SBPL_DEBUG_NAMED    fprintf
+#define SBPL_INFO           printf
+#define SBPL_WARN           printf
+#define SBPL_ERROR          printf
+#define SBPL_FATAL          printf
+
+#define SBPL_FOPEN          fopen
+#define SBPL_FCLOSE         fclose
+#define SBPL_PRINTF         printf
+#define SBPL_FPRINTF        fprintf
+#define SBPL_FFLUSH         fflush
 #endif
 
 #endif

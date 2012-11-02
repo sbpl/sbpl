@@ -26,6 +26,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+
 #ifndef __HEADERS_H_
 #define __HEADERS_H_
 
@@ -40,14 +41,12 @@
 #include "sbpl_exception.h"
 #include "config.h"
 
-
 #if MEM_CHECK == 1
 #define _CRTDBG_MAP_ALLOC 
 #define CRTDBG_MAP_ALLOC
 #endif
 
 #include <stdlib.h> //have to go after the defines above
-
 #if MEM_CHECK == 1
 #include <crtdbg.h>
 #endif
@@ -76,7 +75,6 @@
 #include <sbpl/planners/ppcpplanner.h>
 #include <sbpl/planners/rstarplanner.h>
 #include <sbpl/planners/ANAplanner.h>
-
 
 #endif
 

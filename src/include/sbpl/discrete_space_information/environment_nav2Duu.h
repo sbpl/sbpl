@@ -26,6 +26,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+
 #ifndef __ENVIRONMENT_NAV2DUU_H_
 #define __ENVIRONMENT_NAV2DUU_H_
 
@@ -37,39 +38,38 @@
 
 typedef struct ENV_NAV2DUU_CONFIG
 {
-	//parameters that are read from the configuration file
-	int EnvWidth_c;
-	int EnvHeight_c;
-	int StartX_c;
-	int StartY_c;
-	int EndX_c;
-	int EndY_c;
-	//cost matrix
-	unsigned char** Grid2D;
-	//the value at which and above which cells are obstacles in the maps sent from outside
-	//the default is defined above
-	unsigned char obsthresh; 
-	//uncertainty matrix (0 defines P(obstacle) = 0, and 1.0 defines P(obstacle) = 1)
-	float** UncertaintyGrid2D;
-	//matrix of hidden variable IDs
-	int** HiddenVariableXY2ID;
+    //parameters that are read from the configuration file
+    int EnvWidth_c;
+    int EnvHeight_c;
+    int StartX_c;
+    int StartY_c;
+    int EndX_c;
+    int EndY_c;
+    //cost matrix
+    unsigned char** Grid2D;
+    //the value at which and above which cells are obstacles in the maps sent from outside
+    //the default is defined above
+    unsigned char obsthresh;
+    //uncertainty matrix (0 defines P(obstacle) = 0, and 1.0 defines P(obstacle) = 1)
+    float** UncertaintyGrid2D;
+    //matrix of hidden variable IDs
+    int** HiddenVariableXY2ID;
 
-	//derived and initialized elsewhere parameters
+    //derived and initialized elsewhere parameters
 
-	//possible transitions
-	int dx_[ENVNAV2DUU_MAXDIRS];
-	int dy_[ENVNAV2DUU_MAXDIRS];
-	//distances of transitions
-	int dxy_distance_mm_[ENVNAV2DUU_MAXDIRS];
+    //possible transitions
+    int dx_[ENVNAV2DUU_MAXDIRS];
+    int dy_[ENVNAV2DUU_MAXDIRS];
+    //distances of transitions
+    int dxy_distance_mm_[ENVNAV2DUU_MAXDIRS];
     //the intermediate cells through which the actions go 
     int dxintersects_[ENVNAV2D_MAXDIRS][2];
     int dyintersects_[ENVNAV2D_MAXDIRS][2];
-	int numofdirs; //for now can only be 8
+    int numofdirs; //for now can only be 8
 
-	//size of environment, number of hidden variables
-	int sizeofS;
-	int sizeofH;
-
+    //size of environment, number of hidden variables
+    int sizeofS;
+    int sizeofH;
 } EnvNAV2DUUConfig_t;
 
 #define NAVNAV2DUU_MAXWIDTHHEIGH 1024
@@ -77,143 +77,170 @@ typedef struct ENV_NAV2DUU_CONFIG
 #define ENVNAV2DUU_STATEIDTOX(stateID) (stateID/NAVNAV2DUU_MAXWIDTHHEIGH)
 #define ENVNAV2DUU_XYTOSTATEID(X, Y) (X*NAVNAV2DUU_MAXWIDTHHEIGH + Y)
 
-
 typedef struct
 {
+    int startstateid;
+    int goalstateid;
 
-	int startstateid;
-	int goalstateid;
+    //any additional variables
+    bool bInitialized;
+} EnvironmentNAV2DUU_t;
 
-
-	//any additional variables
-	bool bInitialized;
-
-}EnvironmentNAV2DUU_t;
-
-
-/** \brief this class is NOT fully yet implemented, please do not use it!
-  */
+/**
+ * \brief this class is NOT fully yet implemented, please do not use it!
+ */
 class EnvironmentNAV2DUU : public DiscreteSpaceInformation
 {
-
 public:
+    /**
+     * \brief see comments on the same function in the parent class
+     */
+    virtual bool InitializeEnv(const char* sEnvFile);
 
-	/** \brief see comments on the same function in the parent class
-    */
-	virtual bool InitializeEnv(const char* sEnvFile);
+    /**
+     * \brief initialize environment. Gridworld is defined as matrix A of
+     *        size width by height.
+     *        So, internally, it is accessed as A[x][y] with x ranging from 0 to
+     *        width-1 and and y from 0 to height-1. Each element in A[x][y] is unsigned
+     *        char. A[x][y] = 0 corresponds to fully traversable and cost is just
+     *        Euclidean distance. The cost of transition between two neighboring cells
+     *        is EuclideanDistance*(max(A[sourcex][sourcey],A[targetx][targety])+1). If
+     *        A[x][y] >= obsthresh, then in the above equation it is assumed to be
+     *        infinite. mapdata is a pointer to the values of A. If it is null, then A
+     *        is initialized to all zeros. Mapping is: A[x][y] = mapdata[x+y*width]
+     *        start/goal are given by startx, starty, goalx,goaly. If they are not
+     *        known yet, just set them to 0. Later setgoal/setstart can be executed
+     *        finally obsthresh defined obstacle threshold, as mentioned above
+     *        uncertaintymapdata is set up in the same way as mapdata in terms of the
+     *        order in terms of the values, uncertaintymapdata specifies probabilities
+     *        of being obstructed
+     */
+    virtual bool InitializeEnv(int width, int height, const unsigned char* mapdata, const float* uncertaintymapdata,
+                               unsigned char obsthresh);
 
-	/** \brief initialize environment. Gridworld is defined as matrix A of size width by height. 
-	So, internally, it is accessed as A[x][y] with x ranging from 0 to width-1 and and y from 0 to height-1
-	Each element in A[x][y] is unsigned char. A[x][y] = 0 corresponds to fully traversable and cost is just Euclidean distance
-	The cost of transition between two neighboring cells is EuclideanDistance*(max(A[sourcex][sourcey],A[targetx][targety])+1)
-	If A[x][y] >= obsthresh, then in the above equation it is assumed to be infinite.
-	mapdata is a pointer to the values of A. If it is null, then A is initialized to all zeros. Mapping is: A[x][y] = mapdata[x+y*width]
-	start/goal are given by startx, starty, goalx,goaly. If they are not known yet, just set them to 0. Later setgoal/setstart can be executed
-	finally obsthresh defined obstacle threshold, as mentioned above
-	uncertaintymapdata is set up in the same way as mapdata in terms of the order
-	in terms of the values, uncertaintymapdata specifies probabilities of being obstructed
-  */
-	virtual bool InitializeEnv(int width, int height,
-					const unsigned char* mapdata, const float* uncertaintymapdata, unsigned char obsthresh);
-	/** \brief set start location
-    */
+    /**
+     * \brief set start location
+     */
     virtual int SetStart(int x, int y);
-    /** \brief set goal location
-      */
-	virtual int SetGoal(int x, int y);
-	/** \brief update the traversability of a cell<x,y>
-    */
-	virtual bool UpdateCost(int x, int y, unsigned char newcost);
-	
 
-	/** \brief see comments on the same function in the parent class
-    */
-	virtual bool InitializeMDPCfg(MDPConfig *MDPCfg);
-	/** \brief see comments on the same function in the parent class
-    */
-	virtual int  GetFromToHeuristic(int FromStateID, int ToStateID);
-	/** \brief see comments on the same function in the parent class
-    */
-	virtual int  GetGoalHeuristic(int stateID);
-	/** \brief see comments on the same function in the parent class
-    */
-	virtual int  GetStartHeuristic(int stateID);
+    /**
+     * \brief set goal location
+     */
+    virtual int SetGoal(int x, int y);
 
-	/** \brief see comments on the same function in the parent class
-    */
-	virtual void PrintState(int stateID, bool bVerbose, FILE* fOut=NULL);
-	/** \brief see comments on the same function in the parent class
-  */
-	virtual void PrintEnv_Config(FILE* fOut);
+    /**
+     * \brief update the traversability of a cell<x,y>
+     */
+    virtual bool UpdateCost(int x, int y, unsigned char newcost);
 
+    /**
+     * \brief see comments on the same function in the parent class
+     */
+    virtual bool InitializeMDPCfg(MDPConfig *MDPCfg);
 
-	EnvironmentNAV2DUU();
-    ~EnvironmentNAV2DUU(){};
+    /**
+     * \brief see comments on the same function in the parent class
+     */
+    virtual int GetFromToHeuristic(int FromStateID, int ToStateID);
 
-	/** \brief not fully implemented yet
-    */
-	virtual void GetPreds(int stateID, const vector<sbpl_BinaryHiddenVar_t>* updatedhvaluesV, vector<CMDPACTION>* IncomingDetActionV,
-								  vector<CMDPACTION>* IncomingStochActionV, vector<sbpl_BinaryHiddenVar_t>* StochActionNonpreferredOutcomeV);
+    /**
+     * \brief see comments on the same function in the parent class
+     */
+    virtual int GetGoalHeuristic(int stateID);
 
+    /**
+     * \brief see comments on the same function in the parent class
+     */
+    virtual int GetStartHeuristic(int stateID);
 
-	/** \brief not fully implemented yet
-    */
-	virtual void SetAllActionsandAllOutcomes(CMDPSTATE* state){
-		SBPL_ERROR("ERROR: SetAllActionsandAllOutcomes not supported in NAV2D UNDER UNCERTAINTY\n");
-		throw new SBPL_Exception();
-	};
-	/** \brief not fully implemented yet
-    */
-	virtual void SetAllPreds(CMDPSTATE* state){
-		SBPL_ERROR("ERROR: SetAllPreds not supported in NAV2D UNDER UNCERTAINTY\n");
-		throw new SBPL_Exception();
-	};
-	/** \brief not fully implemented yet
-  */
-	virtual void GetSuccs(int SourceStateID, vector<int>* SuccIDV, vector<int>* CostV){
-		SBPL_ERROR("ERROR: GetSuccs not supported in NAV2D UNDER UNCERTAINTY\n");
-		throw new SBPL_Exception();
-	};
-	/** \brief not fully implemented yet
-    */
-	virtual void GetPreds(int TargetStateID, vector<int>* PredIDV, vector<int>* CostV){
-		SBPL_ERROR("ERROR: GetPreds not supported in NAV2D UNDER UNCERTAINTY\n");
-		throw new SBPL_Exception();
-	};
-	
-	/** \brief not fully implemented yet
-    */
-	virtual int	 SizeofCreatedEnv();
-	/** \brief not fully implemented yet
-    */
-	virtual int  SizeofH();
+    /**
+     * \brief see comments on the same function in the parent class
+     */
+    virtual void PrintState(int stateID, bool bVerbose, FILE* fOut = NULL);
 
+    /**
+     * \brief see comments on the same function in the parent class
+     */
+    virtual void PrintEnv_Config(FILE* fOut);
 
+    EnvironmentNAV2DUU();
+
+    ~EnvironmentNAV2DUU()
+    {
+    }
+
+    /**
+     * \brief not fully implemented yet
+     */
+    virtual void GetPreds(int stateID, const vector<sbpl_BinaryHiddenVar_t>* updatedhvaluesV,
+                          vector<CMDPACTION>* IncomingDetActionV, vector<CMDPACTION>* IncomingStochActionV,
+                          vector<sbpl_BinaryHiddenVar_t>* StochActionNonpreferredOutcomeV);
+
+    /**
+     * \brief not fully implemented yet
+     */
+    virtual void SetAllActionsandAllOutcomes(CMDPSTATE* state)
+    {
+        SBPL_ERROR("ERROR: SetAllActionsandAllOutcomes not supported in NAV2D UNDER UNCERTAINTY\n");
+        throw new SBPL_Exception();
+    }
+
+    /**
+     * \brief not fully implemented yet
+     */
+    virtual void SetAllPreds(CMDPSTATE* state)
+    {
+        SBPL_ERROR("ERROR: SetAllPreds not supported in NAV2D UNDER UNCERTAINTY\n");
+        throw new SBPL_Exception();
+    }
+
+    /**
+     * \brief not fully implemented yet
+     */
+    virtual void GetSuccs(int SourceStateID, vector<int>* SuccIDV, vector<int>* CostV)
+    {
+        SBPL_ERROR("ERROR: GetSuccs not supported in NAV2D UNDER UNCERTAINTY\n");
+        throw new SBPL_Exception();
+    }
+
+    /**
+     * \brief not fully implemented yet
+     */
+    virtual void GetPreds(int TargetStateID, vector<int>* PredIDV, vector<int>* CostV)
+    {
+        SBPL_ERROR("ERROR: GetPreds not supported in NAV2D UNDER UNCERTAINTY\n");
+        throw new SBPL_Exception();
+    }
+
+    /**
+     * \brief not fully implemented yet
+     */
+    virtual int SizeofCreatedEnv();
+
+    /**
+     * \brief not fully implemented yet
+     */
+    virtual int SizeofH();
 
 protected:
+    //member variables
+    EnvNAV2DUUConfig_t EnvNAV2DUUCfg;
+    EnvironmentNAV2DUU_t EnvNAV2DUU;
 
-	//member variables
-	EnvNAV2DUUConfig_t EnvNAV2DUUCfg;
-	EnvironmentNAV2DUU_t EnvNAV2DUU;
+    //mapdata and uncertaintymapdata is assumed to be organized into a linear array with y being major: map[x+y*width]
+    virtual void SetConfiguration(int width, int height, const unsigned char* mapdata, const float* uncertaintymapdata);
 
+    virtual void ReadConfiguration(FILE* fCfg);
+    virtual void InitializeEnvConfig();
+    virtual void InitializeEnvironment();
+    virtual void ComputeHeuristicValues();
+    virtual bool InitGeneral();
 
-	//mapdata and uncertaintymapdata is assumed to be organized into a linear array with y being major: map[x+y*width]
-	virtual void SetConfiguration(int width, int height, const unsigned char* mapdata, const float* uncertaintymapdata);
-	
-	virtual void ReadConfiguration(FILE* fCfg);
-	virtual void InitializeEnvConfig();
-	virtual void InitializeEnvironment();
-	virtual void ComputeHeuristicValues();
-	virtual bool InitGeneral();
+    virtual bool IsValidRobotPosition(int X, int Y);
+    virtual bool IsWithinMapCell(int X, int Y);
 
-	virtual bool IsValidRobotPosition(int X, int Y);
-	virtual bool IsWithinMapCell(int X, int Y);
-
-	virtual void Computedxy();
-
-
+    virtual void Computedxy();
 };
-
 
 #endif
 

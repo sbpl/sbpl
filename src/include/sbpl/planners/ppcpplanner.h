@@ -26,162 +26,164 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+
 #ifndef __PPCPPLANNER_H_
 #define __PPCPPLANNER_H_
 
-
-
-/** \brief a state for PPCP
-  */
+/**
+ * \brief a state for PPCP
+ */
 typedef class PPCPPLANNERSTATEDATA : public AbstractSearchState
 {
 public:
+    /**
+     * \brief the MDP state itself
+     */
+    CMDPSTATE* MDPstate;
+    /**
+     * \brief planner relevant data
+     */
+    int v;
+    /**
+     * \brief planner relevant data
+     */
+    unsigned int iteration;
 
-	/** \brief the MDP state itself
-    */
-	CMDPSTATE* MDPstate; 
-	/** \brief planner relevant data
-    */
-	int v;
-	/** \brief planner relevant data
-    */
-	unsigned int iteration;
-
-	/** \brief best action
-    */
-	CMDPACTION *bestnextaction; 
+    /**
+     * \brief best action
+     */
+    CMDPACTION *bestnextaction;
 
 private:
-	//probability of reaching this state (intermediate variable used by the algorithm)
-	float Pc; 
+    //probability of reaching this state (intermediate variable used by the algorithm)
+    float Pc;
 
-	
 public:
-	PPCPPLANNERSTATEDATA() {};	
-	~PPCPPLANNERSTATEDATA() {};
+    PPCPPLANNERSTATEDATA() { }
+    ~PPCPPLANNERSTATEDATA() { }
 } PPCPState;
 
-
-
-
-
-
-
-/** \brief PPCP statespace
-  */
+/**
+ * \brief PPCP statespace
+ */
 typedef struct PPCPSTATESPACE
 {
-	/** \brief MDP
-    */
-	CMDP MDP;
-	/** \brief pointer to start state
-  */
-	CMDPSTATE* StartState;
-	/** \brief pointer to goal state
-  */
-	CMDPSTATE* GoalState;
+    /**
+     * \brief MDP
+     */
+    CMDP MDP;
+    /**
+     * \brief pointer to start state
+     */
+    CMDPSTATE* StartState;
+    /**
+     * \brief pointer to goal state
+     */
+    CMDPSTATE* GoalState;
 
-	int iteration;
-	int searchiteration;
+    int iteration;
+    int searchiteration;
 
     //TODO - vector<PolicyFullState_t*> CurrentPolicy; //current policy
     double currentpolicyconfidence;
 
-	/** \brief set when it is necessary to reset the planner
-  */
-	bool bReinitializeSearchStateSpace;
+    /**
+     * \brief set when it is necessary to reset the planner
+     */
+    bool bReinitializeSearchStateSpace;
+} PPCPStateSpace_t;
 
-}PPCPStateSpace_t;
-
-
-
-
-
-
-
-
-
-/** \brief PPCP planner
-in explanations, S signifies a fully observable part of the state space
-H signifies hidden variables
-*/
+/**
+ * \brief PPCP planner
+ *        in explanations, S signifies a fully observable part of the state space H
+ *        signifies hidden variables
+ */
 class PPCPPlanner : public SBPLPlanner
 {
-
 public:
+    /**
+     * \brief planning (replanning) function. Takes in time available for
+     *        planning
+     *
+     * returns policy, expected cost of the solution policy, and probability of
+     * successfully reaching the goal (it is < 1, whenever PPCP ran out of time
+     * before full convergence
+     */
+    int replan(double allocated_time_secs, vector<sbpl_PolicyStatewithBinaryh_t>* SolutionPolicy, float* ExpectedCost,
+               float* ProbofReachGoal);
 
-	/** \brief planning (replanning) function. Takes in time available for planning
-	 returns policy, expected cost of the solution policy, and probability of successfully reaching the goal (it is < 1, whenever 
-	PPCP ran out of time before full convergence
-  */
-	int replan(double allocated_time_secs, vector<sbpl_PolicyStatewithBinaryh_t>* SolutionPolicy, float* ExpectedCost, float* ProbofReachGoal);
+    /**
+     * \brief constructors
+     */
+    PPCPPlanner(DiscreteSpaceInformation* environment, int sizeofS, int sizeofH);
 
-	/** \brief constructors
-    */
-	PPCPPlanner(DiscreteSpaceInformation* environment, int sizeofS, int sizeofH); 
-    /** \brief destructor
-      */
+    /**
+     * \brief destructor
+     */
     ~PPCPPlanner();
 
-	/** \brief setting goal state in S
-    */
+    /**
+     * \brief setting goal state in S
+     */
     int set_goal(int goal_stateID);
-	/** \brief setting start state in S
-    */
+
+    /**
+     * \brief setting start state in S
+     */
     int set_start(int start_stateID);
 
-	/** \brief not supported version of replan
-    */
-	int replan(double allocated_time_sec, vector<int>* solution_stateIDs_V){
-		SBPL_ERROR("ERROR: this version of replan not supported in PPCP planner\n");
-		throw new SBPL_Exception();
-	};
+    /**
+     * \brief not supported version of replan
+     */
+    int replan(double allocated_time_sec, vector<int>* solution_stateIDs_V)
+    {
+        SBPL_ERROR("ERROR: this version of replan not supported in PPCP planner\n");
+        throw new SBPL_Exception();
+    }
 
-	/** \brief not supported version of replan
-    */
-	int replan(double allocated_time_sec, vector<int>* solution_stateIDs_V, int* solcost){
-		SBPL_ERROR("ERROR: this version of replan not supported in PPCP planner\n");
-		throw new SBPL_Exception();
-	};
+    /**
+     * \brief not supported version of replan
+     */
+    int replan(double allocated_time_sec, vector<int>* solution_stateIDs_V, int* solcost)
+    {
+        SBPL_ERROR("ERROR: this version of replan not supported in PPCP planner\n");
+        throw new SBPL_Exception();
+    }
 
-    /** \brief forgets previous planning efforts and starts planning from scratch next time replan is called
-      */
-    int force_planning_from_scratch(); 
+    /**
+     * \brief forgets previous planning efforts and starts planning from scratch next time replan is called
+     */
+    int force_planning_from_scratch();
 
-	
-	/** \brief sets how to search - not supported in PPCP
-    */
-	int set_search_mode(bool bSearchUntilFirstSolution){
-		SBPL_ERROR("ERROR: set_search_mode not supported in PPCP planner\n");
-		throw new SBPL_Exception();
-	};
+    /**
+     * \brief sets how to search - not supported in PPCP
+     */
+    int set_search_mode(bool bSearchUntilFirstSolution)
+    {
+        SBPL_ERROR("ERROR: set_search_mode not supported in PPCP planner\n");
+        throw new SBPL_Exception();
+    }
 
+    /**
+     * \brief Notifies the planner that costs have changed. May need to be
+     *        specialized for different subclasses in terms of what to
+     *        do here
+     */
+    void costs_changed(StateChangeQuery const & stateChange);
 
-    /** \brief  Notifies the planner that costs have changed. May need to be specialized for different subclasses in terms of what to
-     do here
-    */
-	void costs_changed(StateChangeQuery const & stateChange);
-	/** \brief notifies the planner that costs have changed
-    */
+    /**
+     * \brief notifies the planner that costs have changed
+     */
     void costs_changed();
 
-
 private:
-	
-	//member variables
-	PPCPStateSpace_t* pStateSpace;
-	FILE* fDeb;
+    //member variables
+    PPCPStateSpace_t* pStateSpace;
+    FILE* fDeb;
 
-
-	//deallocates memory used by SearchStateSpace
-	void DeleteStateSpace(PPCPStateSpace_t* pStateSpace);
-	int  CreateSearchStateSpace(PPCPStateSpace_t* pStateSpace);
-
-
-
+    //deallocates memory used by SearchStateSpace
+    void DeleteStateSpace(PPCPStateSpace_t* pStateSpace);
+    int CreateSearchStateSpace(PPCPStateSpace_t* pStateSpace);
 };
-
-
-
 
 #endif

@@ -26,13 +26,14 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+
 #ifndef __MDPCONFIG_H_
 #define __MDPCONFIG_H_
 
 typedef struct
 {
-	int startstateid;
-	int goalstateid;
-}MDPConfig;
+    int startstateid;
+    int goalstateid;
+} MDPConfig;
 
 #endif

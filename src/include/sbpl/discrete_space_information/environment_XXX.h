@@ -26,145 +26,145 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+
 #ifndef __ENVIRONMENT_XXX_H_
 #define __ENVIRONMENT_XXX_H_
-
 
 #define XXX_MAXACTIONSWIDTH 9		
 
 typedef struct ENV_XXX_CONFIG
 {
-	//parameters that are read from the configuration file
-	unsigned int StartX1;
-	unsigned int StartX2;
-	unsigned int StartX3;
-	unsigned int StartX4;
-	unsigned int GoalX1;
-	unsigned int GoalX2;
-	unsigned int GoalX3;
-	unsigned int GoalX4;
+    //parameters that are read from the configuration file
+    unsigned int StartX1;
+    unsigned int StartX2;
+    unsigned int StartX3;
+    unsigned int StartX4;
+    unsigned int GoalX1;
+    unsigned int GoalX2;
+    unsigned int GoalX3;
+    unsigned int GoalX4;
 
-
-	//derived and initialized elsewhere parameters
-
+    //derived and initialized elsewhere parameters
 } EnvXXXConfig_t;
 
 typedef struct ENVXXXHASHENTRY
 {
-	int stateID;
-	unsigned int X1;
-	unsigned int X2;
-	unsigned int X3;
-	unsigned int X4;
-
+    int stateID;
+    unsigned int X1;
+    unsigned int X2;
+    unsigned int X3;
+    unsigned int X4;
 } EnvXXXHashEntry_t;
 
 typedef struct
 {
+    int startstateid;
+    int goalstateid;
 
-	int startstateid;
-	int goalstateid;
+    //hash table of size x_size*y_size. Maps from coords to stateId
+    int HashTableSize;
+    vector<EnvXXXHashEntry_t*>* Coord2StateIDHashTable;
 
-	//hash table of size x_size*y_size. Maps from coords to stateId	
-	int HashTableSize;
-	vector<EnvXXXHashEntry_t*>* Coord2StateIDHashTable;
+    //vector that maps from stateID to coords
+    vector<EnvXXXHashEntry_t*> StateID2CoordTable;
 
-	//vector that maps from stateID to coords	
-	vector<EnvXXXHashEntry_t*> StateID2CoordTable;
+    //any additional variables
+} EnvironmentXXX_t;
 
-	//any additional variables
-
-}EnvironmentXXX_t;
-
-
-/** \brief this is just an example of environment and can be used (copy and paste) for creating a more complex environment
-  */
+/** \brief this is just an example of environment and can be used (copy and
+ *         paste) for creating a more complex environment
+ */
 class EnvironmentXXX : public DiscreteSpaceInformation
 {
-
 public:
-	/** \brief see comments on the same function in the parent class
-    */
-	virtual bool InitializeEnv(const char* sEnvFile);
+    /**
+     * \brief see comments on the same function in the parent class
+     */
+    virtual bool InitializeEnv(const char* sEnvFile);
 
+    /**
+     * \brief see comments on the same function in the parent class
+     */
+    virtual bool InitializeMDPCfg(MDPConfig *MDPCfg);
 
-	/** \brief see comments on the same function in the parent class
-    */
-	virtual bool InitializeMDPCfg(MDPConfig *MDPCfg);
-	/** \brief see comments on the same function in the parent class
-    */
-	virtual int  GetFromToHeuristic(int FromStateID, int ToStateID);
-	/** \brief see comments on the same function in the parent class
-    */
-	virtual int  GetGoalHeuristic(int stateID);
-	/** \brief see comments on the same function in the parent class
-    */
-	virtual int  GetStartHeuristic(int stateID);
-	/** \brief see comments on the same function in the parent class
-    */
-	virtual void SetAllActionsandAllOutcomes(CMDPSTATE* state);
-	/** \brief see comments on the same function in the parent class
-    */
-	virtual void SetAllPreds(CMDPSTATE* state);
-	/** \brief see comments on the same function in the parent class
-    */
-	virtual void GetSuccs(int SourceStateID, vector<int>* SuccIDV, vector<int>* CostV);
-	/** \brief see comments on the same function in the parent class
-    */
-	virtual void GetPreds(int TargetStateID, vector<int>* PredIDV, vector<int>* CostV);
+    /**
+     * \brief see comments on the same function in the parent class
+     */
+    virtual int GetFromToHeuristic(int FromStateID, int ToStateID);
 
-	/** \brief see comments on the same function in the parent class
-    */
-	virtual int	 SizeofCreatedEnv();
-	/** \brief see comments on the same function in the parent class
-    */
-	virtual void PrintState(int stateID, bool bVerbose, FILE* fOut=NULL);
-	/** \brief see comments on the same function in the parent class
-    */
-	virtual void PrintEnv_Config(FILE* fOut);
+    /**
+     * \brief see comments on the same function in the parent class
+     */
+    virtual int GetGoalHeuristic(int stateID);
 
+    /**
+     * \brief see comments on the same function in the parent class
+     */
+    virtual int GetStartHeuristic(int stateID);
 
-    ~EnvironmentXXX(){};
+    /**
+     * \brief see comments on the same function in the parent class
+     */
+    virtual void SetAllActionsandAllOutcomes(CMDPSTATE* state);
+
+    /**
+     * \brief see comments on the same function in the parent class
+     */
+    virtual void SetAllPreds(CMDPSTATE* state);
+
+    /**
+     * \brief see comments on the same function in the parent class
+     */
+    virtual void GetSuccs(int SourceStateID, vector<int>* SuccIDV, vector<int>* CostV);
+
+    /**
+     * \brief see comments on the same function in the parent class
+     */
+    virtual void GetPreds(int TargetStateID, vector<int>* PredIDV, vector<int>* CostV);
+
+    /**
+     * \brief see comments on the same function in the parent class
+     */
+    virtual int SizeofCreatedEnv();
+
+    /**
+     * \brief see comments on the same function in the parent class
+     */
+    virtual void PrintState(int stateID, bool bVerbose, FILE* fOut = NULL);
+
+    /**
+     * \brief see comments on the same function in the parent class
+     */
+    virtual void PrintEnv_Config(FILE* fOut);
+
+    ~EnvironmentXXX() { }
 
 protected:
+    //member variables
+    EnvXXXConfig_t EnvXXXCfg;
+    EnvironmentXXX_t EnvXXX;
 
-	//member variables
-	EnvXXXConfig_t EnvXXXCfg;
-	EnvironmentXXX_t EnvXXX;
+    virtual void ReadConfiguration(FILE* fCfg);
 
+    virtual void InitializeEnvConfig();
 
-	
-	virtual void ReadConfiguration(FILE* fCfg);
+    virtual unsigned int GETHASHBIN(unsigned int X1, unsigned int X2, unsigned int X3, unsigned int X4);
 
-	virtual void InitializeEnvConfig();
+    virtual void PrintHashTableHist();
 
-	virtual unsigned int GETHASHBIN(unsigned int X1, unsigned int X2, 
-						unsigned int X3, unsigned int X4);
+    virtual EnvXXXHashEntry_t* GetHashEntry(unsigned int X1, unsigned int X2, unsigned int X3, unsigned int X4);
 
-	virtual void PrintHashTableHist();
+    virtual EnvXXXHashEntry_t* CreateNewHashEntry(unsigned int X1, unsigned int X2, unsigned int X3, unsigned int X4);
 
+    virtual void CreateStartandGoalStates();
 
-	virtual EnvXXXHashEntry_t* GetHashEntry(unsigned int X1, unsigned int X2, 
-										unsigned int X3, unsigned int X4);
+    virtual void InitializeEnvironment();
 
+    virtual void AddAllOutcomes(unsigned int SourceX1, unsigned int SourceX2, unsigned int SourceX3,
+                                unsigned int SourceX4, CMDPACTION* action, int cost);
 
-	virtual EnvXXXHashEntry_t* CreateNewHashEntry(unsigned int X1, unsigned int X2, 
-													unsigned int X3, unsigned int X4);
-
-
-	virtual void CreateStartandGoalStates();
-
-	virtual void InitializeEnvironment();
-
-
-	virtual void AddAllOutcomes(unsigned int SourceX1, unsigned int SourceX2, unsigned int SourceX3,
-						unsigned int SourceX4, CMDPACTION* action, int cost);
-
-	virtual void ComputeHeuristicValues();
-
-
+    virtual void ComputeHeuristicValues();
 };
-
 
 #endif
 

@@ -26,6 +26,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+
 #ifndef __HEAP_H_
 #define __HEAP_H_
 
@@ -35,118 +36,101 @@
 
 struct HEAPELEMENT
 {
-  AbstractSearchState *heapstate;
-  CKey key;
+    AbstractSearchState *heapstate;
+    CKey key;
 };
+
 typedef struct HEAPELEMENT heapelement;
 
 class CHeap
 {
-
-//data
+    //data
 public:
-  int percolates;		//for counting purposes
-  heapelement* heap;
-  int currentsize;
-  int allocated;
+    int percolates; //for counting purposes
+    heapelement* heap;
+    int currentsize;
+    int allocated;
 
-//constructors
+    //constructors
 public:
-  CHeap();
-  ~CHeap();
+    CHeap();
+    ~CHeap();
 
-//functions
+    //functions
 public:
-
-  bool emptyheap(); 
-  bool fullheap();
-  bool inheap(AbstractSearchState *AbstractSearchState);
-  CKey getkeyheap(AbstractSearchState *AbstractSearchState);
-  void makeemptyheap();
-  void insertheap(AbstractSearchState *AbstractSearchState, CKey key);
-  void deleteheap(AbstractSearchState *AbstractSearchState);
-  void updateheap(AbstractSearchState *AbstractSearchState, CKey NewKey);
-  AbstractSearchState *getminheap();
-  AbstractSearchState *getminheap(CKey& ReturnKey);
-  CKey getminkeyheap();
-  AbstractSearchState *deleteminheap();
-  void makeheap();
-  void insert_unsafe(AbstractSearchState* state, CKey key);
-  void updateheap_unsafe(AbstractSearchState* AbstractSearchState, CKey NewKey);
-  void deleteheap_unsafe(AbstractSearchState* AbstractSearchState);
+    bool emptyheap();
+    bool fullheap();
+    bool inheap(AbstractSearchState *AbstractSearchState);
+    CKey getkeyheap(AbstractSearchState *AbstractSearchState);
+    void makeemptyheap();
+    void insertheap(AbstractSearchState *AbstractSearchState, CKey key);
+    void deleteheap(AbstractSearchState *AbstractSearchState);
+    void updateheap(AbstractSearchState *AbstractSearchState, CKey NewKey);
+    AbstractSearchState *getminheap();
+    AbstractSearchState *getminheap(CKey& ReturnKey);
+    CKey getminkeyheap();
+    AbstractSearchState *deleteminheap();
+    void makeheap();
+    void insert_unsafe(AbstractSearchState* state, CKey key);
+    void updateheap_unsafe(AbstractSearchState* AbstractSearchState, CKey NewKey);
+    void deleteheap_unsafe(AbstractSearchState* AbstractSearchState);
 
 private:
-  void percolatedown(int hole, heapelement tmp);
-  void percolateup(int hole, heapelement tmp);
-  void percolateupordown(int hole, heapelement tmp);
+    void percolatedown(int hole, heapelement tmp);
+    void percolateup(int hole, heapelement tmp);
+    void percolateupordown(int hole, heapelement tmp);
 
-  void growheap();
-  void sizecheck();
-
-
-//operators
-public:
-
+    void growheap();
+    void sizecheck();
 };
-
 
 struct HEAPINTELEMENT
 {
-  AbstractSearchState *heapstate;
-  int key;
+    AbstractSearchState *heapstate;
+    int key;
 };
-typedef struct HEAPINTELEMENT heapintelement;
 
+typedef struct HEAPINTELEMENT heapintelement;
 
 class CIntHeap
 {
-
-//data
+    //data
 public:
-  int percolates;		//for counting purposes
-  heapintelement* heap;
-  int currentsize;
-  int allocated;
+    int percolates; //for counting purposes
+    heapintelement* heap;
+    int currentsize;
+    int allocated;
 
-//constructors
+    //constructors
 public:
-  CIntHeap();
-  CIntHeap(int initial_size);
-  ~CIntHeap();
+    CIntHeap();
+    CIntHeap(int initial_size);
+    ~CIntHeap();
 
-//functions
+    //functions
 public:
-
-  bool emptyheap(); 
-  bool fullheap();
-  bool inheap(AbstractSearchState *AbstractSearchState);
-  int getkeyheap(AbstractSearchState *AbstractSearchState);
-  void makeemptyheap();
-  void insertheap(AbstractSearchState *AbstractSearchState, int key);
-  void deleteheap(AbstractSearchState *AbstractSearchState);
-  void updateheap(AbstractSearchState *AbstractSearchState, int NewKey);
-  AbstractSearchState *getminheap();
-  AbstractSearchState *getminheap(int& ReturnKey);
-  int getminkeyheap();
-  AbstractSearchState *deleteminheap();
-  void makeheap();
+    bool emptyheap();
+    bool fullheap();
+    bool inheap(AbstractSearchState *AbstractSearchState);
+    int getkeyheap(AbstractSearchState *AbstractSearchState);
+    void makeemptyheap();
+    void insertheap(AbstractSearchState *AbstractSearchState, int key);
+    void deleteheap(AbstractSearchState *AbstractSearchState);
+    void updateheap(AbstractSearchState *AbstractSearchState, int NewKey);
+    AbstractSearchState *getminheap();
+    AbstractSearchState *getminheap(int& ReturnKey);
+    int getminkeyheap();
+    AbstractSearchState *deleteminheap();
+    void makeheap();
 
 private:
-  void percolatedown(int hole, heapintelement tmp);
-  void percolateup(int hole, heapintelement tmp);
-  void percolateupordown(int hole, heapintelement tmp);
+    void percolatedown(int hole, heapintelement tmp);
+    void percolateup(int hole, heapintelement tmp);
+    void percolateupordown(int hole, heapintelement tmp);
 
-  void growheap();
-  void sizecheck();
-
-
-//operators
-public:
-
+    void growheap();
+    void sizecheck();
 };
 
-
 #endif
-
-
 

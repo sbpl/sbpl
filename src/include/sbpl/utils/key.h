@@ -26,6 +26,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+
 #ifndef __KEY_H_
 #define __KEY_H_
 
@@ -35,172 +36,149 @@
 
 class CKey
 {
-//data
-public: 
-	long int key[KEY_SIZE];
-
-//constructors
+    //data
 public:
-	CKey(){
+    long int key[KEY_SIZE];
 
-#if KEY_SIZE == 1
-		key[0] = 0;
-#elif KEY_SIZE == 2
-		key[0] = 0; key[1] = 0;
-#else
-		for(int i = 0; i < KEY_SIZE; i++)
-		{	
-			key[i] = 0;
-		}
-#endif
-	};
-	~CKey(){};
-
-//functions
+    //constructors
 public:
-	void SetKeytoInfinity()
-	{
-		for(int i = 0; i < KEY_SIZE; i++)
-		{	
-			key[i] = INFINITECOST;
-		}
-	};
-	void SetKeytoZero()
-	{
-		for(int i = 0; i < KEY_SIZE; i++)
-		{	
-			key[i] = 0;
-		}
-	};
-	
+    CKey()
+    {
+#if KEY_SIZE == 1
+        key[0] = 0;
+#elif KEY_SIZE == 2
+        key[0] = 0;
+        key[1] = 0;
+#else
+        for(int i = 0; i < KEY_SIZE; i++)
+        {
+            key[i] = 0;
+        }
+#endif
+    }
 
+    ~CKey() { }
 
-//operators
+    //functions
 public:
+    void SetKeytoInfinity()
+    {
+        for (int i = 0; i < KEY_SIZE; i++) {
+            key[i] = INFINITECOST;
+        }
+    }
 
-	void operator = (CKey RHSKey)
-	{
-		//iterate through the keys
-		//the 0ht is the most important key
+    void SetKeytoZero()
+    {
+        for (int i = 0; i < KEY_SIZE; i++) {
+            key[i] = 0;
+        }
+    }
 
+    void operator =(CKey RHSKey)
+    {
+        //iterate through the keys
+        //the 0ht is the most important key
 #if KEY_SIZE == 1
-		key[0] = RHSKey.key[0];
+        key[0] = RHSKey.key[0];
 #elif KEY_SIZE == 2
-		key[0] = RHSKey.key[0]; key[1] = RHSKey.key[1];
+        key[0] = RHSKey.key[0];
+        key[1] = RHSKey.key[1];
 #else
-		for(int i = 0; i < KEY_SIZE; i++)
-			key[i] = RHSKey.key[i];
+        for(int i = 0; i < KEY_SIZE; i++)
+        key[i] = RHSKey.key[i];
 #endif
+    }
 
-	};
+    CKey operator -(const CKey& RHSKey) const
+    {
+        CKey RetKey;
 
-	CKey operator - (const CKey& RHSKey) const
-	{
-		CKey RetKey;
+        //iterate through the keys
+        //the 0ht is the most important key
+        for (int i = 0; i < KEY_SIZE; i++)
+            RetKey.key[i] = key[i] - RHSKey.key[i];
 
-		//iterate through the keys
-		//the 0ht is the most important key
-		for(int i = 0; i < KEY_SIZE; i++)
-			RetKey.key[i] = key[i] - RHSKey.key[i];
+        return RetKey;
+    }
 
-		return RetKey;
-	};
-
-
-	bool operator > (CKey& RHSKey)
-	{
-	  //iterate through the keys
-	  //the 0ht is the most important key
-
+    bool operator >(CKey& RHSKey)
+    {
+        //iterate through the keys
+        //the 0ht is the most important key
 #if KEY_SIZE == 1
-		return (key[0] > RHSKey.key[0]);
+        return (key[0] > RHSKey.key[0]);
 #elif KEY_SIZE == 2
-		return (key[0] > RHSKey.key[0] ||  (key[0] == RHSKey.key[0] && key[1] > RHSKey.key[1]));
+        return (key[0] > RHSKey.key[0] || (key[0] == RHSKey.key[0] && key[1] > RHSKey.key[1]));
 #else
-	  for(int i = 0; i < KEY_SIZE; i++)
-	    {
-	      //compare the current key
-	      if(key[i] > RHSKey.key[i])
-			return true;
-	      else if(key[i] < RHSKey.key[i])
-			return false;
-	    }	  
-	  //all are equal
-	  return false;
+        for(int i = 0; i < KEY_SIZE; i++)
+        {
+            //compare the current key
+            if(key[i] > RHSKey.key[i])
+            return true;
+            else if(key[i] < RHSKey.key[i])
+            return false;
+        }
+        //all are equal
+        return false;
 #endif
+    }
 
-	};
-
-	bool operator == (CKey& RHSKey)
-	{
-	  //iterate through the keys
-	  //the 0ht is the most important key
-
+    bool operator ==(CKey& RHSKey)
+    {
+        //iterate through the keys
+        //the 0ht is the most important key
 #if KEY_SIZE == 1
-		return (key[0] == RHSKey.key[0]);
+        return (key[0] == RHSKey.key[0]);
 #elif KEY_SIZE == 2
-		return (key[0] == RHSKey.key[0] &&  key[1] == RHSKey.key[1]);
+        return (key[0] == RHSKey.key[0] && key[1] == RHSKey.key[1]);
 #else
 
-	  for(int i = 0; i < KEY_SIZE; i++)
-	    {
-	      //compare the current key
-	      if(key[i] != RHSKey.key[i])
-			return false;
-	    }
-	  
-	  //all are equal
-	  return true;
+        for(int i = 0; i < KEY_SIZE; i++)
+        {
+            //compare the current key
+            if(key[i] != RHSKey.key[i])
+            return false;
+        }
+
+        //all are equal
+        return true;
 #endif
+    }
 
-	};
+    bool operator !=(CKey& RHSKey)
+    {
+        return !(*this == RHSKey);
+    }
 
-	bool operator != (CKey& RHSKey)
-	{
-	  return !(*this == RHSKey);
-	};
-
-	bool operator < (CKey& RHSKey)
-	{	
-	  //iterate through the keys
-	  //the 0ht is the most important key
-
+    bool operator <(CKey& RHSKey)
+    {
+        //iterate through the keys
+        //the 0ht is the most important key
 #if KEY_SIZE == 1
-		return (key[0] < RHSKey.key[0]);
+        return (key[0] < RHSKey.key[0]);
 #elif KEY_SIZE == 2
-		return (key[0] < RHSKey.key[0] ||  (key[0] == RHSKey.key[0] && key[1] < RHSKey.key[1]));
+        return (key[0] < RHSKey.key[0] || (key[0] == RHSKey.key[0] && key[1] < RHSKey.key[1]));
 #else
-	  for(int i = 0; i < KEY_SIZE; i++)
-	    {
-	      //compare the current key
-	      if(key[i] < RHSKey.key[i])
-			return true;
-	      else if(key[i] > RHSKey.key[i])
-			return false;
-	    }	  
-	  //all are equal
-	  return false;	
+        for(int i = 0; i < KEY_SIZE; i++)
+        {
+            //compare the current key
+            if(key[i] < RHSKey.key[i])
+            return true;
+            else if(key[i] > RHSKey.key[i])
+            return false;
+        }
+        //all are equal
+        return false;
 #endif
+    }
 
-	};
+    bool operator >=(CKey& RHSKey) { return !(*this < RHSKey); }
 
-	bool operator >= (CKey& RHSKey)
-	{
-	  return !(*this < RHSKey);
-	};
+    bool operator <=(CKey& RHSKey) { return !(*this > RHSKey); }
 
-	bool operator <= (CKey& RHSKey)
-	{
-	  return !(*this > RHSKey);
-	};
-	
-	long int operator [] (int i)
-	{
-		return key[i];
-	};
-
+    long int operator [](int i) { return key[i]; }
 };
 
-
-
 #endif
+

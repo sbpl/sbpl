@@ -26,6 +26,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+
 #ifndef __MDP_H_
 #define __MDP_H_
 
@@ -40,135 +41,98 @@
 class CMDPSTATE;
 class CMDPACTION
 {
-
-//data
 public:
-	int ActionID;
-	int SourceStateID;
-	vector<int> SuccsID;
-	vector<int> Costs;
-	vector<float> SuccsProb;
-	void* PlannerSpecificData;
+    //data
+    int ActionID;
+    int SourceStateID;
+    vector<int> SuccsID;
+    vector<int> Costs;
+    vector<float> SuccsProb;
+    void* PlannerSpecificData;
 
-//constructors
-public:
-	CMDPACTION(int ID, int sourcestateid) 
-	  {
-		ActionID = ID;
-		SourceStateID = sourcestateid;
-		PlannerSpecificData = NULL;
-	  };
-	~CMDPACTION()
-	{
-		if(PlannerSpecificData != NULL)
-		{
-			SBPL_FPRINTF(stderr, "ERROR: state deletion: planner specific data is not deleted\n");
-			throw new SBPL_Exception();
-		}
-	};
+    //constructors
+    CMDPACTION(int ID, int sourcestateid)
+    {
+        ActionID = ID;
+        SourceStateID = sourcestateid;
+        PlannerSpecificData = NULL;
+    }
 
-//functions
-public:
-	bool Delete();
-	bool IsValid();
-	void AddOutcome(int OutcomeStateID, int OutcomeCost, float OutcomeProb);
-	int GetIndofMostLikelyOutcome();
-	int GetIndofOutcome(int OutcomeID);
-	bool DeleteAllOutcomes();
+    ~CMDPACTION()
+    {
+        if (PlannerSpecificData != NULL) {
+            SBPL_FPRINTF(stderr, "ERROR: state deletion: planner specific data is not deleted\n");
+            throw new SBPL_Exception();
+        }
+    }
 
-private:
+    //functions
+    bool Delete();
+    bool IsValid();
+    void AddOutcome(int OutcomeStateID, int OutcomeCost, float OutcomeProb);
+    int GetIndofMostLikelyOutcome();
+    int GetIndofOutcome(int OutcomeID);
+    bool DeleteAllOutcomes();
 
-//operators
-public:
-  void operator = (const CMDPACTION& rhsaction);
-
-
+    //operators
+    void operator =(const CMDPACTION& rhsaction);
 };
-
 
 class CMDPSTATE
 {
-//data
 public:
-	int StateID;
-	vector<CMDPACTION*> Actions;
-	vector<int> PredsID;
-	void* PlannerSpecificData;
+    //data
+    int StateID;
+    vector<CMDPACTION*> Actions;
+    vector<int> PredsID;
+    void* PlannerSpecificData;
 
-//constructors
-public:
-	CMDPSTATE(int ID) 
-	  {
-		StateID = ID;
-		PlannerSpecificData = NULL;
-	  };
-	~CMDPSTATE()
-	{
-		if(PlannerSpecificData != NULL)
-		{
-			SBPL_FPRINTF(stderr, "ERROR: state deletion: planner specific data is not deleted\n");
-			throw new SBPL_Exception();
-		}
-	};
+    //constructors
+    CMDPSTATE(int ID)
+    {
+        StateID = ID;
+        PlannerSpecificData = NULL;
+    }
 
-//functions
-public:
-	bool Delete();
-	CMDPACTION* AddAction(int ID);
-	bool ContainsPred(int stateID);
-	bool AddPred(int stateID);
-	bool RemovePred(int stateID);
-	bool RemoveAllActions();
-	CMDPACTION* GetAction(int actionID);
+    ~CMDPSTATE()
+    {
+        if (PlannerSpecificData != NULL) {
+            SBPL_FPRINTF(stderr, "ERROR: state deletion: planner specific data is not deleted\n");
+            throw new SBPL_Exception();
+        }
+    }
 
-private:
+    //functions
+    bool Delete();
+    CMDPACTION* AddAction(int ID);
+    bool ContainsPred(int stateID);
+    bool AddPred(int stateID);
+    bool RemovePred(int stateID);
+    bool RemoveAllActions();
+    CMDPACTION* GetAction(int actionID);
 
-//operators
-public:
-
-  void operator = (const CMDPSTATE& rhsstate);
-
+    //operators
+    void operator =(const CMDPSTATE& rhsstate);
 };
 
 class CMDP
 {
-
-//data
 public:
-	vector<CMDPSTATE*> StateArray;
+    //data
+    vector<CMDPSTATE*> StateArray;
 
-//constructors
-public:
-	CMDP()
-	  {
-	  };
-	~CMDP()
-	{
-	};
+    //constructors
+    CMDP() { }
+    ~CMDP() { }
 
-//functions
-public:
-  bool empty();
-  bool full();
-  //creates numofstates states. Their ids are their orderings for Original, Thresholded & Search MDPs
-  bool Create(int numofstates);
-  bool Delete();
-  void Print(FILE* fOut);
-  CMDPSTATE* AddState(int StateID);
-
-private:
-
-
-
-
-
-//operators
-public:
-
-
+    //functions
+    bool empty();
+    bool full();
+    //creates numofstates states. Their ids are their orderings for Original, Thresholded & Search MDPs
+    bool Create(int numofstates);
+    bool Delete();
+    void Print(FILE* fOut);
+    CMDPSTATE* AddState(int StateID);
 };
-
-
-
 
 #endif
