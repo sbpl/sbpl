@@ -38,74 +38,69 @@ using namespace std;
 
 static const std::string PATH_PREFIX("src/test/");
 
-void diffTest(const std::string& outputStr){
-  std::string validOutputStr(outputStr + ".valid");
-  std::ifstream validFile(validOutputStr.c_str());
-  // If there is no valid file then generate one.
-  if(!validFile.good()){
-    std::ifstream newOutputFile(outputStr.c_str());
-    std::stringbuf sbuf;
-    newOutputFile >> &sbuf;
-    std::ofstream newValidFile(validOutputStr.c_str());
-    newValidFile << sbuf.str();
-  }
-  else { // Verify output against the valid file.
-    std::stringbuf newStrBuf, validStrBuf;
-    std::ifstream fNew(outputStr.c_str()), fValid(validOutputStr.c_str());
-    fNew >> &newStrBuf;
-    fValid >> &validStrBuf;
-    ASSERT_EQ(newStrBuf.str() == validStrBuf.str(), true);
-  }
+void diffTest(const std::string& outputStr)
+{
+    std::string validOutputStr(outputStr + ".valid");
+    std::ifstream validFile(validOutputStr.c_str());
+    // If there is no valid file then generate one.
+    if (!validFile.good()) {
+        std::ifstream newOutputFile(outputStr.c_str());
+        std::stringbuf sbuf;
+        newOutputFile >> &sbuf;
+        std::ofstream newValidFile(validOutputStr.c_str());
+        newValidFile << sbuf.str();
+    }
+    else { // Verify output against the valid file.
+        std::stringbuf newStrBuf, validStrBuf;
+        std::ifstream fNew(outputStr.c_str()), fValid(validOutputStr.c_str());
+        fNew >> &newStrBuf;
+        fValid >> &validStrBuf;
+        ASSERT_EQ(newStrBuf.str() == validStrBuf.str(), true);
+    }
 }
 
-void runARAPlannerTest(const std::string& problem){
-  try
-    {
-      double allocated_time_secs = 0.5; // in seconds
-      MDPConfig MDPCfg;
-      EnvironmentNAV2D environment_nav2D;
-      std::string problemStr = PATH_PREFIX + problem;
-      ASSERT_EQ(environment_nav2D.InitializeEnv(problemStr.c_str()), true);
-      ASSERT_EQ(environment_nav2D.InitializeMDPCfg(&MDPCfg), true);
+void runARAPlannerTest(const std::string& problem)
+{
+    try {
+        double allocated_time_secs = 0.5; // in seconds
+        MDPConfig MDPCfg;
+        EnvironmentNAV2D environment_nav2D;
+        std::string problemStr = PATH_PREFIX + problem;
+        ASSERT_EQ(environment_nav2D.InitializeEnv(problemStr.c_str()), true);
+        ASSERT_EQ(environment_nav2D.InitializeMDPCfg(&MDPCfg), true);
 
-      // plan a path
-      vector<int> solution_stateIDs_V;
-      ARAPlanner ara_planner(&environment_nav2D, false);
-      ASSERT_EQ(ara_planner.set_start(MDPCfg.startstateid), true);
-      ASSERT_EQ(ara_planner.set_goal(MDPCfg.goalstateid), true);
-      ASSERT_EQ(ara_planner.replan(allocated_time_secs, &solution_stateIDs_V), true);
+        // plan a path
+        vector<int> solution_stateIDs_V;
+        ARAPlanner ara_planner(&environment_nav2D, false);
+        ASSERT_EQ(ara_planner.set_start(MDPCfg.startstateid), true);
+        ASSERT_EQ(ara_planner.set_goal(MDPCfg.goalstateid), true);
+        ASSERT_EQ(ara_planner.replan(allocated_time_secs, &solution_stateIDs_V), true);
 
-      // output the path
-      std::string outputStr = problemStr + ".out";
-      FILE* fSol = SBPL_FOPEN(outputStr.c_str(), "w");
-      for(unsigned int i = 0; i < solution_stateIDs_V.size(); i++) {
-	environment_nav2D.PrintState(solution_stateIDs_V[i], true, fSol);
-      }
+        // output the path
+        std::string outputStr = problemStr + ".out";
+        FILE* fSol = SBPL_FOPEN(outputStr.c_str(), "w");
+        for (unsigned int i = 0; i < solution_stateIDs_V.size(); i++) {
+            environment_nav2D.PrintState(solution_stateIDs_V[i], true, fSol);
+        }
 
-      SBPL_FCLOSE(fSol);
+        SBPL_FCLOSE(fSol);
 
-      // Now apply the file diff test
-      diffTest(outputStr);
+        // Now apply the file diff test
+        diffTest(outputStr);
     }
-  catch(...)
-    {
-      FAIL() << "Uncaught exception : " << "This is OK on OS X";
+    catch (...) {
+        FAIL() << "Uncaught exception : " << "This is OK on OS X";
     }
 }
 
 TEST(araplanner, env1)
 {
-  runARAPlannerTest("env1.cfg");
+    runARAPlannerTest("env1.cfg");
 }
-
 
 int main(int argc, char *argv[])
 {
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+    testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
 }
-
-
-
-
 
