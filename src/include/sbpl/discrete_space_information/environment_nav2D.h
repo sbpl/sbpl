@@ -30,10 +30,18 @@
 #ifndef __ENVIRONMENT_NAV2D_H_
 #define __ENVIRONMENT_NAV2D_H_
 
+#include <cstdio>
+#include <vector>
+#include <sbpl/discrete_space_information/environment.h>
+#include <sbpl/utils/utils.h>
+
 #define ENVNAV2D_COSTMULT 1000
 
 #define ENVNAV2D_DEFAULTOBSTHRESH 1 //253-for willow garage	//see explanation of the value below
 #define ENVNAV2D_MAXDIRS 16 //TODO-debugmax - crashes for 8 in debug mode
+
+class CMDPSTATE;
+class MDPConfig;
 
 //configuration parameters
 typedef struct ENV_NAV2D_CONFIG
@@ -58,7 +66,6 @@ typedef struct ENV_NAV2D_CONFIG
     int dxy_distance_mm_[ENVNAV2D_MAXDIRS];
 
     int numofdirs; //for now either 8 or 16 (default is 8)
-
 } EnvNAV2DConfig_t;
 
 typedef struct ENVHASHENTRY
@@ -67,8 +74,6 @@ typedef struct ENVHASHENTRY
     int X;
     int Y;
 } EnvNAV2DHashEntry_t;
-
-#define nav2dcell_t sbpl_2Dcell_t
 
 //variables that dynamically change (e.g., array of states, ...)
 typedef struct
@@ -80,16 +85,17 @@ typedef struct
 
     //hash table of size x_size*y_size. Maps from coords to stateId
     int HashTableSize;
-    vector<EnvNAV2DHashEntry_t*>* Coord2StateIDHashTable;
+    std::vector<EnvNAV2DHashEntry_t*>* Coord2StateIDHashTable;
 
     //vector that maps from stateID to coords
-    vector<EnvNAV2DHashEntry_t*> StateID2CoordTable;
+    std::vector<EnvNAV2DHashEntry_t*> StateID2CoordTable;
 
     //any additional variables
 } EnvironmentNAV2D_t;
 
-/** \brief 2D (x,y) grid planning problem. For general structure see comments
- *         on parent class DiscreteSpaceInformation
+/**
+ * \brief 2D (x,y) grid planning problem. For general structure see comments
+ *        on parent class DiscreteSpaceInformation
  */
 class EnvironmentNAV2D : public DiscreteSpaceInformation
 {
@@ -132,12 +138,12 @@ public:
     /**
      * \brief see comments on the same function in the parent class
      */
-    virtual void GetSuccs(int SourceStateID, vector<int>* SuccIDV, vector<int>* CostV);
+    virtual void GetSuccs(int SourceStateID, std::vector<int>* SuccIDV, std::vector<int>* CostV);
 
     /**
      * \brief see comments on the same function in the parent class
      */
-    virtual void GetPreds(int TargetStateID, vector<int>* PredIDV, vector<int>* CostV);
+    virtual void GetPreds(int TargetStateID, std::vector<int>* PredIDV, std::vector<int>* CostV);
 
     /**
      * \brief see comments on the same function in the parent class
@@ -208,15 +214,15 @@ public:
      *         (in vector preds_of_changededgesIDV) the IDs of all states that have
      *         outgoing edges that go through the changed cells
      */
-    virtual void GetPredsofChangedEdges(vector<nav2dcell_t> const * changedcellsV,
-                                        vector<int> *preds_of_changededgesIDV);
+    virtual void GetPredsofChangedEdges(std::vector<nav2dcell_t> const * changedcellsV,
+                                        std::vector<int> *preds_of_changededgesIDV);
 
     /**
      * \brief same as GetPredsofChangedEdges, but returns successor states.
      *        Both functions need to be present for incremental search
      */
-    virtual void GetSuccsofChangedEdges(vector<nav2dcell_t> const * changedcellsV,
-                                        vector<int> *succs_of_changededgesIDV);
+    virtual void GetSuccsofChangedEdges(std::vector<nav2dcell_t> const * changedcellsV,
+                                        std::vector<int> *succs_of_changededgesIDV);
 
     /**
      * \brief returns true if two states meet the same condition - see

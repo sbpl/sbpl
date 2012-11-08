@@ -30,10 +30,10 @@
 #ifndef __MDPCONFIG_H_
 #define __MDPCONFIG_H_
 
-typedef struct
+struct MDPConfig
 {
     int startstateid;
     int goalstateid;
-} MDPConfig;
+};
 
 #endif

@@ -31,9 +31,8 @@
 #define SBPL_EXCEPTION_H
 
 #include <exception>
-using namespace std;
 
-class SBPL_Exception : public exception
+class SBPL_Exception : public std::exception
 {
     virtual const char* what() const throw()
     {

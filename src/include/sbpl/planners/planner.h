@@ -30,6 +30,10 @@
 #ifndef __PLANNER_H_
 #define __PLANNER_H_
 
+#include <cstddef>
+#include <vector>
+#include <sbpl/config.h>
+
 #define 	GETSTATEIND(stateid, mapid) StateID2IndexMapping[mapid][stateid]
 
 //indices for the StateID2Index mapping
@@ -50,6 +54,21 @@ enum STATEID2IND
 //for example
 //#define YYYPLANNER_STATEID2IND STATEID2IND_SLOT0
 //#define YYYPLANNER_STATEID2IND STATEID2IND_SLOT1
+
+class DiscreteSpaceInformation;
+/**
+ * Utility for unified notification of cost changes
+ * across all SBPLPlanner subtypes. Ideally we would have a simple
+ * unified interface, such as std::vector<nav2dcell_t>, but the
+ * current separation of planner and environment representation code
+ * would be violated if we just included that here.
+
+ * At the moment, ADPlanner is the only one who really uses the
+ * detailed information provided by ChangedCellsGetter, so we define
+ * that class in sbpl/src/planners/ADStar/adplanner.h (to be moved up
+ * the hierarchy when we generalize).
+ */
+class StateChangeQuery;
 
 /**
  * \brief a parameter class for planners
@@ -155,22 +174,6 @@ public:
     }
     ~AbstractSearchState() { }
 };
-
-class DiscreteSpaceInformation;
-
-/**
- * Utility for unified notification of cost changes
- * across all SBPLPlanner subtypes. Ideally we would have a simple
- * unified interface, such as std::vector<nav2dcell_t>, but the
- * current separation of planner and environment representation code
- * would be violated if we just included that here.
-
- * At the moment, ADPlanner is the only one who really uses the
- * detailed information provided by ChangedCellsGetter, so we define
- * that class in sbpl/src/planners/ADStar/adplanner.h (to be moved up
- * the hierarchy when we generalize).
- */
-class StateChangeQuery;
 
 /**
  * \brief pure virtual base class for a generic planner
@@ -325,7 +328,7 @@ public:
     /**
      * \brief fills out a vector of stats from the search
      */
-    virtual void get_search_stats(vector<PlannerStats>* s)
+    virtual void get_search_stats(std::vector<PlannerStats>* s)
     {
         SBPL_ERROR("get_search_stats is unimplemented for this planner\n");
     }

@@ -27,10 +27,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <iostream>
-using namespace std;
+#include <cstdio>
+#include <sbpl/discrete_space_information/environment_navxythetamlevlat.h>
+#include <sbpl/utils/key.h>
 
-#include <sbpl/headers.h>
+using namespace std;
 
 #if TIME_DEBUG
 static clock_t time3_addallout = 0;

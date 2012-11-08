@@ -27,10 +27,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <iostream>
-using namespace std;
+#include <cmath>
+#include <sbpl/discrete_space_information/environment.h>
+#include <sbpl/planners/rstarplanner.h>
+#include <sbpl/utils/list.h>
 
-#include <sbpl/headers.h>
+using namespace std;
 
 //TODO - define RSTAR_DEBUG_PRINTLOWLEVELEXP and RSTAR_DEBUG_PRINTHIGHLEVELEXP. Make them dependent on DEBUG
 //use them to print expands into two separate file.

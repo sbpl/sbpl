@@ -28,10 +28,10 @@
  */
 
 //MDP.cpp - contains all the functions for MDP classes
-#include <iostream>
-using namespace std;
+#include <cmath>
+#include <sbpl/utils/mdp.h>
 
-#include <sbpl/headers.h>
+using namespace std;
 
 //-------------------------MDPACTION class functions----------
 

@@ -1,5 +1,5 @@
+#include <cmath>
 #include <iostream>
-
 using namespace std;
 
 #include <sbpl/discrete_space_information/environment_precomputed_adjacency_list.h>

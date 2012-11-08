@@ -27,10 +27,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <iostream>
-using namespace std;
+#include <sbpl/sbpl_exception.h>
+#include <sbpl/utils/heap.h>
 
-#include <sbpl/headers.h>
+using namespace std;
 
 void heaperror(const char* ErrorString)
 {

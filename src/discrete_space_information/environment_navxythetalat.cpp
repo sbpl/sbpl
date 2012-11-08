@@ -27,10 +27,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <iostream>
-using namespace std;
+#include <cmath>
+#include <cstring>
+#include <sbpl/discrete_space_information/environment_navxythetalat.h>
+#include <sbpl/utils/2Dgridsearch.h>
+#include <sbpl/utils/key.h>
+#include <sbpl/utils/mdp.h>
+#include <sbpl/utils/mdpconfig.h>
 
-#include <sbpl/headers.h>
+using namespace std;
 
 #if TIME_DEBUG
 static clock_t time3_addallout = 0;

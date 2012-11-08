@@ -27,10 +27,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <iostream>
-using namespace std;
+#include <cstdlib>
+#include <cstring>
+#include <sbpl/discrete_space_information/environment_nav2Duu.h>
+#include <sbpl/utils/mdp.h>
+#include <sbpl/utils/mdpconfig.h>
 
-#include <sbpl/headers.h>
+using namespace std;
 
 //extern clock_t time3_addallout;
 //extern clock_t time_gethash;
@@ -44,7 +47,6 @@ using namespace std;
 EnvironmentNAV2DUU::EnvironmentNAV2DUU()
 {
     EnvNAV2DUU.bInitialized = false;
-
 }
 
 //-----------------------------------------------------

@@ -30,6 +30,15 @@
 #ifndef __PPCPPLANNER_H_
 #define __PPCPPLANNER_H_
 
+#include <cstdio>
+#include <sbpl/sbpl_exception.h>
+#include <sbpl/planners/planner.h>
+#include <sbpl/utils/mdp.h>
+#include <sbpl/utils/utils.h>
+
+class DiscreteSpaceInformation;
+class StateChangeQuery;
+
 /**
  * \brief a state for PPCP
  */
@@ -109,8 +118,8 @@ public:
      * successfully reaching the goal (it is < 1, whenever PPCP ran out of time
      * before full convergence
      */
-    int replan(double allocated_time_secs, vector<sbpl_PolicyStatewithBinaryh_t>* SolutionPolicy, float* ExpectedCost,
-               float* ProbofReachGoal);
+    int replan(double allocated_time_secs, std::vector<sbpl_PolicyStatewithBinaryh_t>* SolutionPolicy,
+               float* ExpectedCost, float* ProbofReachGoal);
 
     /**
      * \brief constructors
@@ -135,7 +144,7 @@ public:
     /**
      * \brief not supported version of replan
      */
-    int replan(double allocated_time_sec, vector<int>* solution_stateIDs_V)
+    int replan(double allocated_time_sec, std::vector<int>* solution_stateIDs_V)
     {
         SBPL_ERROR("ERROR: this version of replan not supported in PPCP planner\n");
         throw new SBPL_Exception();
@@ -144,7 +153,7 @@ public:
     /**
      * \brief not supported version of replan
      */
-    int replan(double allocated_time_sec, vector<int>* solution_stateIDs_V, int* solcost)
+    int replan(double allocated_time_sec, std::vector<int>* solution_stateIDs_V, int* solcost)
     {
         SBPL_ERROR("ERROR: this version of replan not supported in PPCP planner\n");
         throw new SBPL_Exception();

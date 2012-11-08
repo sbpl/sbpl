@@ -28,10 +28,13 @@
  */
 
 #include <cmath>
-#include <iostream>
-using namespace std;
+#include <sbpl/planners/planner.h>
+#include <sbpl/utils/utils.h>
+#include <sbpl/utils/key.h>
+#include <sbpl/utils/mdp.h>
+#include <sbpl/utils/sbpl_bfs_2d.h>
 
-#include <sbpl/headers.h>
+using namespace std;
 
 #if MEM_CHECK == 1
 void DisableMemCheck()

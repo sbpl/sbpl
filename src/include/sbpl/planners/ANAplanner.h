@@ -9,6 +9,11 @@
 #ifndef __anaPLANNER_H_
 #define __anaPLANNER_H_
 
+#include <cstdio>
+#include <ctime>
+#include <sbpl/planners/planner.h>
+#include <sbpl/utils/mdp.h>
+
 //---configuration----
 
 //control of EPS
@@ -23,10 +28,9 @@
 
 #define ana_INCONS_LIST_ID 0
 
-class CMDP;
-class CMDPSTATE;
-class CMDPACTION;
 class CHeap;
+class DiscreteSpaceInformation;
+class StateChangeQuery;
 
 //-------------------------------------------------------------
 
@@ -108,13 +112,13 @@ public:
     /**
      * \brief replan a path within the allocated time, return the solution in the vector
      */
-    int replan(double allocated_time_secs, vector<int>* solution_stateIDs_V);
+    int replan(double allocated_time_secs, std::vector<int>* solution_stateIDs_V);
 
     /**
      * \brief replan a path within the allocated time, return the solution in
      *        the vector, also returns solution cost
      */
-    int replan(double allocated_time_sec, vector<int>* solution_stateIDs_V, int* solcost);
+    int replan(double allocated_time_sec, std::vector<int>* solution_stateIDs_V, int* solcost);
 
     /**
      * \brief set the goal state
@@ -261,9 +265,9 @@ private:
     int getHeurValue(anaSearchStateSpace_t* pSearchStateSpace, int StateID);
 
     //get path
-    vector<int> GetSearchPath(anaSearchStateSpace_t* pSearchStateSpace, int& solcost);
+    std::vector<int> GetSearchPath(anaSearchStateSpace_t* pSearchStateSpace, int& solcost);
 
-    bool Search(anaSearchStateSpace_t* pSearchStateSpace, vector<int>& pathIds, int & PathCost, bool bFirstSolution,
+    bool Search(anaSearchStateSpace_t* pSearchStateSpace, std::vector<int>& pathIds, int & PathCost, bool bFirstSolution,
                 bool bOptimalSolution, double MaxNumofSecs);
 };
 

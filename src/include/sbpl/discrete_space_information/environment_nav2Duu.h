@@ -30,11 +30,22 @@
 #ifndef __ENVIRONMENT_NAV2DUU_H_
 #define __ENVIRONMENT_NAV2DUU_H_
 
+#include <vector>
+#include <cstdio>
+#include <sbpl/discrete_space_information/environment.h>
+#include <sbpl/discrete_space_information/environment_nav2D.h>
+#include <sbpl/sbpl_exception.h>
+#include <sbpl/utils/utils.h>
+
 #define ENVNAV2DUU_COSTMULT 1000
 
 #define NAV2DUU_MAXACTIONSWIDTH 9		
 
 #define ENVNAV2DUU_MAXDIRS 8
+
+class CMDPACTION;
+class CMDPSTATE;
+class MDPConfig;
 
 typedef struct ENV_NAV2DUU_CONFIG
 {
@@ -172,9 +183,9 @@ public:
     /**
      * \brief not fully implemented yet
      */
-    virtual void GetPreds(int stateID, const vector<sbpl_BinaryHiddenVar_t>* updatedhvaluesV,
-                          vector<CMDPACTION>* IncomingDetActionV, vector<CMDPACTION>* IncomingStochActionV,
-                          vector<sbpl_BinaryHiddenVar_t>* StochActionNonpreferredOutcomeV);
+    virtual void GetPreds(int stateID, const std::vector<sbpl_BinaryHiddenVar_t>* updatedhvaluesV,
+                          std::vector<CMDPACTION>* IncomingDetActionV, std::vector<CMDPACTION>* IncomingStochActionV,
+                          std::vector<sbpl_BinaryHiddenVar_t>* StochActionNonpreferredOutcomeV);
 
     /**
      * \brief not fully implemented yet
@@ -197,7 +208,7 @@ public:
     /**
      * \brief not fully implemented yet
      */
-    virtual void GetSuccs(int SourceStateID, vector<int>* SuccIDV, vector<int>* CostV)
+    virtual void GetSuccs(int SourceStateID, std::vector<int>* SuccIDV, std::vector<int>* CostV)
     {
         SBPL_ERROR("ERROR: GetSuccs not supported in NAV2D UNDER UNCERTAINTY\n");
         throw new SBPL_Exception();
@@ -206,7 +217,7 @@ public:
     /**
      * \brief not fully implemented yet
      */
-    virtual void GetPreds(int TargetStateID, vector<int>* PredIDV, vector<int>* CostV)
+    virtual void GetPreds(int TargetStateID, std::vector<int>* PredIDV, std::vector<int>* CostV)
     {
         SBPL_ERROR("ERROR: GetPreds not supported in NAV2D UNDER UNCERTAINTY\n");
         throw new SBPL_Exception();

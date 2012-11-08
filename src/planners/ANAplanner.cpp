@@ -6,10 +6,12 @@
  * 
  */
 
-#include <iostream>
-using namespace std;
+#include <sbpl/discrete_space_information/environment.h>
+#include <sbpl/planners/ANAplanner.h>
+#include <sbpl/utils/heap.h>
+#include <sbpl/utils/list.h>
 
-#include <sbpl/headers.h>
+using namespace std;
 
 //-----------------------------------------------------------------------------------------------------
 

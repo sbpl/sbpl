@@ -3,7 +3,6 @@
 
 #include "sbpl_fifo.h"
 #include <vector>
-using namespace std;
 
 class sbpl_bfs_3d
 {
@@ -105,7 +104,7 @@ public:
         return true;
     }
 
-    bool compute_distance_from_points(int*** grid, vector<int> x, vector<int> y, vector<int> z)
+    bool compute_distance_from_points(int*** grid, std::vector<int> x, std::vector<int> y, std::vector<int> z)
     {
         if (x.size() != y.size() || x.size() != z.size()) {
             printf("ERROR[compute_distance_from_points]: size of x, y, and z coordinates must agree!\n");

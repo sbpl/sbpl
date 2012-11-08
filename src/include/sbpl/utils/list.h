@@ -30,6 +30,10 @@
 #ifndef __LIST_H_
 #define __LIST_H_
 
+#include <cstdlib>
+#include <sbpl/config.h>
+#include <sbpl/sbpl_exception.h>
+
 //the maximum size of the heap
 #define LISTSIZE 5000000
 
@@ -172,8 +176,9 @@ public:
     //buckets are from first_priority to numofbuckets-3. Bucket numofbucket-2
     //contains elements with higher finite priorities (unordered). Last bucket
     //contains infinite priority elements
-    vector<AbstractSearchState *>* bucketV;
-    vector<int> assortedpriorityV; //contains the priorities of elements in the numofbuckets-2 bucket (mixed priorities)
+    std::vector<AbstractSearchState *>* bucketV;
+    //contains the priorities of elements in the numofbuckets-2 bucket (mixed priorities)
+    std::vector<int> assortedpriorityV; 
     int firstpriority;
     int numofbuckets;
     int currentminelement_bucketind;
@@ -234,7 +239,7 @@ public:
         numofbuckets += 2; //one bucket for (max_bucketed_priority; infinity) and one bucket for infinity
 
         //allocate memory
-        bucketV = new vector<AbstractSearchState *> [numofbuckets];
+        bucketV = new std::vector<AbstractSearchState *> [numofbuckets];
 
         //currently all empty
         currentminelement_bucketind = INFINITECOST;

@@ -21,13 +21,19 @@
  * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
  * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
  * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
 #ifndef __ENVIRONMENT_NAVXYTHETAMLEVLAT_H_
 #define __ENVIRONMENT_NAVXYTHETAMLEVLAT_H_
+
+#include <vector>
+#include <sbpl/discrete_space_information/environment_navxythetalat.h>
+#include <sbpl/sbpl_exception.h>
+#include <sbpl/utils/utils.h>
 
 // these structures contain footprints for the additional levels 
 // each of these structures corresponds to one of the EnvNAVXYTHETALATAction_t structures
@@ -37,7 +43,7 @@ typedef struct
     char dX; // should be equal to the corresponding EnvNAVXYTHETALATAction_t structure
     char dY; // should be equal to the corresponding EnvNAVXYTHETALATAction_t structure
     char endtheta; // should be equal to the corresponding EnvNAVXYTHETALATAction_t structure
-    vector<sbpl_2Dcell_t>* intersectingcellsV; // one footprint per additional level
+    std::vector<sbpl_2Dcell_t>* intersectingcellsV; // one footprint per additional level
 } EnvNAVXYTHETAMLEVLATAddInfoAction_t;
 
 /**
@@ -61,7 +67,7 @@ public:
      *        See environment_navxythetalat.h for the explanation of these
      *        parameters.
      */
-    bool InitializeAdditionalLevels(int numofadditionalzlevs, const vector<sbpl_2Dpt_t>* perimeterptsV,
+    bool InitializeAdditionalLevels(int numofadditionalzlevs, const std::vector<sbpl_2Dpt_t>* perimeterptsV,
                                     unsigned char* cost_inscribed_thresh,
                                     unsigned char* cost_possibly_circumscribed_thresh);
 
@@ -87,8 +93,8 @@ public:
     /**
      * \brief incremental planning not supported
      */
-    virtual void GetPredsofChangedEdges(vector<nav2dcell_t> const * changedcellsV,
-                                        vector<int> *preds_of_changededgesIDV)
+    virtual void GetPredsofChangedEdges(std::vector<nav2dcell_t> const * changedcellsV,
+                                        std::vector<int> *preds_of_changededgesIDV)
     {
         SBPL_ERROR("ERROR: GetPredsofChangedEdges function not supported\n");
         throw new SBPL_Exception();
@@ -97,8 +103,8 @@ public:
     /**
      * \brief incremental planning not supported
      */
-    virtual void GetSuccsofChangedEdges(vector<nav2dcell_t> const * changedcellsV,
-                                        vector<int> *succs_of_changededgesIDV)
+    virtual void GetSuccsofChangedEdges(std::vector<nav2dcell_t> const * changedcellsV,
+                                        std::vector<int> *succs_of_changededgesIDV)
     {
         SBPL_ERROR("ERROR: GetSuccsofChangedEdges function not supported\n");
         throw new SBPL_Exception();
@@ -153,7 +159,7 @@ protected:
     /**
      * \brief footprints for the additional levels
      */
-    vector<sbpl_2Dpt_t>* AddLevelFootprintPolygonV;
+    std::vector<sbpl_2Dpt_t>* AddLevelFootprintPolygonV;
 
     /**
      * \brief array of additional info in actions,

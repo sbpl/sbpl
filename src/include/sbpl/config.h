@@ -72,6 +72,8 @@
 #define SBPL_FPRINTF(a,...) ROS_DEBUG_NAMED("SBPL_" #a,__VA_ARGS__)
 #define SBPL_FFLUSH(...)
 #else
+#include <cstdio>
+
 #define SBPL_DEBUG          printf
 #define SBPL_DEBUG_NAMED    fprintf
 #define SBPL_INFO           printf

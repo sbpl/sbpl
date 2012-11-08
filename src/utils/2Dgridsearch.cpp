@@ -27,10 +27,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <iostream>
-using namespace std;
+#include <cstdio>
+#include <ctime>
+#include <sbpl/utils/2Dgridsearch.h>
+#include <sbpl/utils/heap.h>
+#include <sbpl/utils/list.h>
 
-#include <sbpl/headers.h>
+using namespace std;
 
 //---------------------initialization and destruction routines--------------------------------------------------------
 

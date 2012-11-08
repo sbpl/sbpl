@@ -30,12 +30,19 @@
 #ifndef __UTILS_H_
 #define __UTILS_H_
 
-class PlannerStats;
+#include <cstdio>
+#include <set>
+#include <vector>
 
 #ifndef WIN32
 #define __max(x,y) (x>y?x:y)
 #define __min(x,y) (x>y?y:x)
 #endif
+
+#define nav2dcell_t sbpl_2Dcell_t
+#define EnvNAVXYTHETALAT2Dpt_t sbpl_2Dcell_t
+#define EnvNAVXYTHETALAT3Dpt_t sbpl_xy_theta_pt_t
+#define EnvNAVXYTHETALAT3Dcell_t sbpl_xy_theta_cell_t
 
 #define NORMALIZEDISCTHETA(THETA, THETADIRS) (((THETA>=0)?((THETA)%(THETADIRS)):(((THETA)%(THETADIRS)+THETADIRS)%THETADIRS)))
 
@@ -45,6 +52,9 @@ class PlannerStats;
 #define PI_CONST 3.141592653589793238462643383279502884
 
 #define UNKNOWN_COST 1000000
+
+class CMDP;
+class PlannerStats;
 
 typedef struct
 {
@@ -192,7 +202,7 @@ typedef struct BELIEFSTATEWITHBINARYHVALS
 {
     int s_ID; //ID of S part of state-space
     //vector of updated h-values, the rest are the same as at the start state
-    vector<sbpl_BinaryHiddenVar_t> updatedhvaluesV; 
+    std::vector<sbpl_BinaryHiddenVar_t> updatedhvaluesV; 
 } sbpl_BeliefStatewithBinaryh_t;
 
 typedef struct POLICYBELIEFSTATEWITHBINARYHVALS
@@ -201,7 +211,7 @@ typedef struct POLICYBELIEFSTATEWITHBINARYHVALS
 
     int nextpolicyactionID; //ID of the next policy action if exists (otherwise -1)
     //indices of the outcome states of the policy action. If outcome state is not in the policy, then it is -1
-    vector<int> outcomestateIndexV; 
+    std::vector<int> outcomestateIndexV; 
 } sbpl_PolicyStatewithBinaryh_t;
 
 //function prototypes
@@ -265,7 +275,7 @@ double computeMinUnsignedAngleDiff(double angle1, double angle2);
  *        ordered sequence of 2D points (last point is automatically connected to the
  *        first)
  */
-bool IsInsideFootprint(sbpl_2Dpt_t pt, vector<sbpl_2Dpt_t>* bounding_polygon);
+bool IsInsideFootprint(sbpl_2Dpt_t pt, std::vector<sbpl_2Dpt_t>* bounding_polygon);
 
 /**
  * \brief computes 8-connected distances - performs distance transform in two linear passes
@@ -273,15 +283,16 @@ bool IsInsideFootprint(sbpl_2Dpt_t pt, vector<sbpl_2Dpt_t>* bounding_polygon);
 void computeDistancestoNonfreeAreas(unsigned char** Grid2D, int width_x, int height_y, unsigned char obsthresh,
                                     float** disttoObs_incells, float** disttoNonfree_incells);
 
-void get_2d_motion_cells(vector<sbpl_2Dpt_t> polygon, vector<sbpl_xy_theta_pt_t> poses, vector<sbpl_2Dcell_t>* cells,
-                         double res);
+void get_2d_motion_cells(std::vector<sbpl_2Dpt_t> polygon, std::vector<sbpl_xy_theta_pt_t> poses,
+                         std::vector<sbpl_2Dcell_t>* cells, double res);
 
-void get_2d_footprint_cells(vector<sbpl_2Dpt_t> polygon, vector<sbpl_2Dcell_t>* cells, sbpl_xy_theta_pt_t pose,
-                            double res);
+void get_2d_footprint_cells(std::vector<sbpl_2Dpt_t> polygon, std::vector<sbpl_2Dcell_t>* cells,
+                            sbpl_xy_theta_pt_t pose, double res);
 void
-    get_2d_footprint_cells(vector<sbpl_2Dpt_t> polygon, set<sbpl_2Dcell_t>* cells, sbpl_xy_theta_pt_t pose, double res);
+    get_2d_footprint_cells(std::vector<sbpl_2Dpt_t> polygon, std::set<sbpl_2Dcell_t>* cells, sbpl_xy_theta_pt_t pose,
+                           double res);
 
-void writePlannerStats(vector<PlannerStats> s, FILE* fout);
+void writePlannerStats(std::vector<PlannerStats> s, FILE* fout);
 
 #if 0
 void CheckSearchMDP(CMDP* mdp, int ExcludeSuccStateID = -1);

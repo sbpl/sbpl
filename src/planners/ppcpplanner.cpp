@@ -27,10 +27,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <iostream>
-using namespace std;
+#include <sbpl/discrete_space_information/environment.h>
+#include <sbpl/planners/ppcpplanner.h>
 
-#include <sbpl/headers.h>
+using namespace std;
 
 //-----------------------------------------------------------------------------------------------------
 

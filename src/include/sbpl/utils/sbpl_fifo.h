@@ -1,7 +1,7 @@
 #ifndef SBPL_FIFO
 #define SBPL_FIFO
 
-#include <stdio.h>
+#include <cstdio>
 
 template<class T>
 class sbpl_fifo

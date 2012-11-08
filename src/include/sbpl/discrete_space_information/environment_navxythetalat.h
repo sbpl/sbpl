@@ -30,6 +30,11 @@
 #ifndef __ENVIRONMENT_NAVXYTHETALAT_H_
 #define __ENVIRONMENT_NAVXYTHETALAT_H_
 
+#include <cstdio>
+#include <vector>
+#include <sbpl/discrete_space_information/environment.h>
+#include <sbpl/utils/utils.h>
+
 //eight-connected grid
 #define NAVXYTHETALAT_DXYWIDTH 8
 
@@ -47,9 +52,9 @@
 #define NAVXYTHETALAT_DEFAULT_ACTIONWIDTH 5 
 #define NAVXYTHETALAT_COSTMULT_MTOMM 1000
 
-#define EnvNAVXYTHETALAT2Dpt_t sbpl_2Dcell_t
-#define EnvNAVXYTHETALAT3Dpt_t sbpl_xy_theta_pt_t
-#define EnvNAVXYTHETALAT3Dcell_t sbpl_xy_theta_cell_t
+class CMDPSTATE;
+class MDPConfig;
+class SBPL2DGridSearch;
 
 typedef struct
 {
@@ -59,11 +64,11 @@ typedef struct
     char dY;
     char endtheta;
     unsigned int cost;
-    vector<sbpl_2Dcell_t> intersectingcellsV;
+    std::vector<sbpl_2Dcell_t> intersectingcellsV;
     //start at 0,0,starttheta and end at endcell in continuous domain with half-bin less to account for 0,0 start
-    vector<sbpl_xy_theta_pt_t> intermptV;
+    std::vector<sbpl_xy_theta_pt_t> intermptV;
     //start at 0,0,starttheta and end at endcell in discrete domain
-    vector<sbpl_xy_theta_cell_t> interm3DcellsV;
+    std::vector<sbpl_xy_theta_cell_t> interm3DcellsV;
 } EnvNAVXYTHETALATAction_t;
 
 typedef struct
@@ -83,7 +88,7 @@ typedef struct
     sbpl_xy_theta_cell_t endcell;
     //intermptV start at 0,0,starttheta and end at endcell in continuous
     //domain with half-bin less to account for 0,0 start
-    vector<sbpl_xy_theta_pt_t> intermptV;
+    std::vector<sbpl_xy_theta_pt_t> intermptV;
 } SBPL_xytheta_mprimitive;
 
 //variables that dynamically change (e.g., array of states, ...)
@@ -143,12 +148,12 @@ typedef struct ENV_NAVXYTHETALAT_CONFIG
     //array of actions, ActionsV[i][j] - jth action for sourcetheta = i
     EnvNAVXYTHETALATAction_t** ActionsV; 
     //PredActionsV[i] - vector of pointers to the actions that result in a state with theta = i
-    vector<EnvNAVXYTHETALATAction_t*>* PredActionsV; 
+    std::vector<EnvNAVXYTHETALATAction_t*>* PredActionsV; 
 
     int actionwidth; //number of motion primitives
-    vector<SBPL_xytheta_mprimitive> mprimV;
+    std::vector<SBPL_xytheta_mprimitive> mprimV;
 
-    vector<sbpl_2Dpt_t> FootprintPolygon;
+    std::vector<sbpl_2Dpt_t> FootprintPolygon;
 } EnvNAVXYTHETALATConfig_t;
 
 class EnvNAVXYTHETALAT_InitParms
@@ -166,8 +171,6 @@ public:
     double goaltol_y;
     double goaltol_theta;
 };
-
-class SBPL2DGridSearch;
 
 /** \brief 3D (x,y,theta) planning using lattice-based graph problem. For
  *         general structure see comments on parent class DiscreteSpaceInformation
@@ -190,7 +193,7 @@ public:
      *        its actual radius) Motion primitives file defines the motion primitives
      *        available to the robot
      */
-    virtual bool InitializeEnv(const char* sEnvFile, const vector<sbpl_2Dpt_t>& perimeterptsV,
+    virtual bool InitializeEnv(const char* sEnvFile, const std::vector<sbpl_2Dpt_t>& perimeterptsV,
                                const char* sMotPrimFile);
 
     /**
@@ -242,12 +245,12 @@ public:
     /**
      * \brief see comments on the same function in the parent class
      */
-    virtual void GetSuccs(int SourceStateID, vector<int>* SuccIDV, vector<int>* CostV);
+    virtual void GetSuccs(int SourceStateID, std::vector<int>* SuccIDV, std::vector<int>* CostV);
 
     /**
      * \brief see comments on the same function in the parent class
      */
-    virtual void GetPreds(int TargetStateID, vector<int>* PredIDV, vector<int>* CostV) = 0;
+    virtual void GetPreds(int TargetStateID, std::vector<int>* PredIDV, std::vector<int>* CostV) = 0;
 
     /**
      * \brief see comments on the same function in the parent class
@@ -285,7 +288,7 @@ public:
                                double startx, double starty, double starttheta,
                                double goalx, double goaly, double goaltheta,
                                double goaltol_x, double goaltol_y, double goaltol_theta,
-                               const vector<sbpl_2Dpt_t>& perimeterptsV, double cellsize_m,
+                               const std::vector<sbpl_2Dpt_t>& perimeterptsV, double cellsize_m,
                                double nominalvel_mpersecs, double timetoturn45degsinplace_secs,
                                unsigned char obsthresh, const char* sMotPrimFile);
 
@@ -295,7 +298,7 @@ public:
      *        parameters may be given in the params object (including the ability to
      *        specify the number of thetas)
      */
-    virtual bool InitializeEnv(int width, int height, const vector<sbpl_2Dpt_t> & perimeterptsV, double cellsize_m,
+    virtual bool InitializeEnv(int width, int height, const std::vector<sbpl_2Dpt_t> & perimeterptsV, double cellsize_m,
                                double nominalvel_mpersecs, double timetoturn45degsinplace_secs,
                                unsigned char obsthresh, const char* sMotPrimFile, EnvNAVXYTHETALAT_InitParms params);
 
@@ -317,14 +320,14 @@ public:
      *        states that have outgoing edges that go through the changed
      *        cells
      */
-    virtual void GetPredsofChangedEdges(vector<nav2dcell_t> const * changedcellsV,
-                                        vector<int> *preds_of_changededgesIDV) = 0;
+    virtual void GetPredsofChangedEdges(std::vector<nav2dcell_t> const * changedcellsV,
+                                        std::vector<int> *preds_of_changededgesIDV) = 0;
     /**
      * \brief same as GetPredsofChangedEdges, but returns successor states.
      *        Both functions need to be present for incremental search
      */
-    virtual void GetSuccsofChangedEdges(vector<nav2dcell_t> const * changedcellsV,
-                                        vector<int> *succs_of_changededgesIDV) = 0;
+    virtual void GetSuccsofChangedEdges(std::vector<nav2dcell_t> const * changedcellsV,
+                                        std::vector<int> *succs_of_changededgesIDV) = 0;
 
     /**
      * returns true if cell is untraversable
@@ -344,7 +347,7 @@ public:
     virtual void GetEnvParms(int *size_x, int *size_y, double* startx, double* starty, double* starttheta,
                              double* goalx, double* goaly, double* goaltheta, double* cellsize_m,
                              double* nominalvel_mpersecs, double* timetoturn45degsinplace_secs,
-                             unsigned char* obsthresh, vector<SBPL_xytheta_mprimitive>* motionprimitiveV);
+                             unsigned char* obsthresh, std::vector<SBPL_xytheta_mprimitive>* motionprimitiveV);
 
     /**
      * \brief returns environment parameters. Useful for creating a copy environment
@@ -352,7 +355,7 @@ public:
     virtual void GetEnvParms(int *size_x, int *size_y, int* num_thetas, double* startx, double* starty,
                              double* starttheta, double* goalx, double* goaly, double* goaltheta, double* cellsize_m,
                              double* nominalvel_mpersecs, double* timetoturn45degsinplace_secs,
-                             unsigned char* obsthresh, vector<SBPL_xytheta_mprimitive>* motionprimitiveV);
+                             unsigned char* obsthresh, std::vector<SBPL_xytheta_mprimitive>* motionprimitiveV);
 
     /**
      * \brief get internal configuration data structure
@@ -413,8 +416,8 @@ protected:
     //member data
     EnvNAVXYTHETALATConfig_t EnvNAVXYTHETALATCfg;
     EnvironmentNAVXYTHETALAT_t EnvNAVXYTHETALAT;
-    vector<sbpl_xy_theta_cell_t> affectedsuccstatesV; //arrays of states whose outgoing actions cross cell 0,0
-    vector<sbpl_xy_theta_cell_t> affectedpredstatesV; //arrays of states whose incoming actions cross cell 0,0
+    std::vector<sbpl_xy_theta_cell_t> affectedsuccstatesV; //arrays of states whose outgoing actions cross cell 0,0
+    std::vector<sbpl_xy_theta_cell_t> affectedpredstatesV; //arrays of states whose incoming actions cross cell 0,0
     int iteration;
 
     //2D search for heuristic computations
@@ -425,7 +428,7 @@ protected:
 
     virtual void ReadConfiguration(FILE* fCfg);
 
-    virtual void InitializeEnvConfig(vector<SBPL_xytheta_mprimitive>* motionprimitiveV);
+    virtual void InitializeEnvConfig(std::vector<SBPL_xytheta_mprimitive>* motionprimitiveV);
 
     virtual bool CheckQuant(FILE* fOut);
 
@@ -435,11 +438,11 @@ protected:
                                   int startx, int starty, int starttheta,
                                   int goalx, int goaly, int goaltheta,
                                   double cellsize_m, double nominalvel_mpersecs, double timetoturn45degsinplace_secs,
-                                  const vector<sbpl_2Dpt_t> & robot_perimeterV);
+                                  const std::vector<sbpl_2Dpt_t> & robot_perimeterV);
 
-    virtual bool InitGeneral(vector<SBPL_xytheta_mprimitive>* motionprimitiveV);
-    virtual void PrecomputeActionswithBaseMotionPrimitive(vector<SBPL_xytheta_mprimitive>* motionprimitiveV);
-    virtual void PrecomputeActionswithCompleteMotionPrimitive(vector<SBPL_xytheta_mprimitive>* motionprimitiveV);
+    virtual bool InitGeneral(std::vector<SBPL_xytheta_mprimitive>* motionprimitiveV);
+    virtual void PrecomputeActionswithBaseMotionPrimitive(std::vector<SBPL_xytheta_mprimitive>* motionprimitiveV);
+    virtual void PrecomputeActionswithCompleteMotionPrimitive(std::vector<SBPL_xytheta_mprimitive>* motionprimitiveV);
     virtual void DeprecatedPrecomputeActions();
 
     virtual void InitializeEnvironment() = 0;
@@ -448,15 +451,15 @@ protected:
 
     virtual bool IsValidCell(int X, int Y);
 
-    virtual void CalculateFootprintForPose(sbpl_xy_theta_pt_t pose, vector<sbpl_2Dcell_t>* footprint);
-    virtual void CalculateFootprintForPose(sbpl_xy_theta_pt_t pose, vector<sbpl_2Dcell_t>* footprint,
-                                           const vector<sbpl_2Dpt_t>& FootprintPolygon);
-    virtual void RemoveSourceFootprint(sbpl_xy_theta_pt_t sourcepose, vector<sbpl_2Dcell_t>* footprint);
-    virtual void RemoveSourceFootprint(sbpl_xy_theta_pt_t sourcepose, vector<sbpl_2Dcell_t>* footprint,
-                                       const vector<sbpl_2Dpt_t>& FootprintPolygon);
+    virtual void CalculateFootprintForPose(sbpl_xy_theta_pt_t pose, std::vector<sbpl_2Dcell_t>* footprint);
+    virtual void CalculateFootprintForPose(sbpl_xy_theta_pt_t pose, std::vector<sbpl_2Dcell_t>* footprint,
+                                           const std::vector<sbpl_2Dpt_t>& FootprintPolygon);
+    virtual void RemoveSourceFootprint(sbpl_xy_theta_pt_t sourcepose, std::vector<sbpl_2Dcell_t>* footprint);
+    virtual void RemoveSourceFootprint(sbpl_xy_theta_pt_t sourcepose, std::vector<sbpl_2Dcell_t>* footprint,
+                                       const std::vector<sbpl_2Dpt_t>& FootprintPolygon);
 
-    virtual void GetSuccs(int SourceStateID, vector<int>* SuccIDV, vector<int>* CostV,
-                          vector<EnvNAVXYTHETALATAction_t*>* actionindV = NULL) = 0;
+    virtual void GetSuccs(int SourceStateID, std::vector<int>* SuccIDV, std::vector<int>* CostV,
+                          std::vector<EnvNAVXYTHETALATAction_t*>* actionindV = NULL) = 0;
 
     virtual double EuclideanDistance_m(int X1, int Y1, int X2, int Y2);
 
@@ -515,7 +518,8 @@ public:
      *         number of points in the input path. The returned coordinates are in
      *         meters,meters,radians
      */
-    virtual void ConvertStateIDPathintoXYThetaPath(vector<int>* stateIDPath, vector<sbpl_xy_theta_pt_t>* xythetaPath);
+    virtual void ConvertStateIDPathintoXYThetaPath(std::vector<int>* stateIDPath,
+                                                   std::vector<sbpl_xy_theta_pt_t>* xythetaPath);
 
     /**
      * \brief prints state info (coordinates) into file
@@ -525,7 +529,7 @@ public:
     /**
      * \brief returns all predecessors states and corresponding costs of actions
      */
-    virtual void GetPreds(int TargetStateID, vector<int>* PredIDV, vector<int>* CostV);
+    virtual void GetPreds(int TargetStateID, std::vector<int>* PredIDV, std::vector<int>* CostV);
 
     /**
      * \brief returns all successors states, costs of corresponding actions
@@ -533,8 +537,8 @@ public:
      *        primitive
      *        if actionindV is NULL, then pointers to actions are not returned
      */
-    virtual void GetSuccs(int SourceStateID, vector<int>* SuccIDV, vector<int>* CostV,
-                          vector<EnvNAVXYTHETALATAction_t*>* actionindV = NULL);
+    virtual void GetSuccs(int SourceStateID, std::vector<int>* SuccIDV, std::vector<int>* CostV,
+                          std::vector<EnvNAVXYTHETALATAction_t*>* actionindV = NULL);
 
     /** \brief this function fill in Predecessor/Successor states of edges
      *         whose costs changed
@@ -542,15 +546,15 @@ public:
      *         (in vector preds_of_changededgesIDV) the IDs of all states that have
      *         outgoing edges that go through the changed cells
      */
-    virtual void GetPredsofChangedEdges(vector<nav2dcell_t> const * changedcellsV,
-                                        vector<int> *preds_of_changededgesIDV);
+    virtual void GetPredsofChangedEdges(std::vector<nav2dcell_t> const * changedcellsV,
+                                        std::vector<int> *preds_of_changededgesIDV);
 
     /**
      * \brief same as GetPredsofChangedEdges, but returns successor states.
      *        Both functions need to be present for incremental search
      */
-    virtual void GetSuccsofChangedEdges(vector<nav2dcell_t> const * changedcellsV,
-                                        vector<int> *succs_of_changededgesIDV);
+    virtual void GetSuccsofChangedEdges(std::vector<nav2dcell_t> const * changedcellsV,
+                                        std::vector<int> *succs_of_changededgesIDV);
 
     /**
      * \brief see comments on the same function in the parent class
@@ -585,9 +589,9 @@ public:
 protected:
     //hash table of size x_size*y_size. Maps from coords to stateId
     int HashTableSize;
-    vector<EnvNAVXYTHETALATHashEntry_t*>* Coord2StateIDHashTable;
+    std::vector<EnvNAVXYTHETALATHashEntry_t*>* Coord2StateIDHashTable;
     //vector that maps from stateID to coords
-    vector<EnvNAVXYTHETALATHashEntry_t*> StateID2CoordTable;
+    std::vector<EnvNAVXYTHETALATHashEntry_t*> StateID2CoordTable;
 
     EnvNAVXYTHETALATHashEntry_t** Coord2StateIDHashTable_lookup;
 

@@ -30,6 +30,12 @@
 #ifndef __ARAPLANNER_H_
 #define __ARAPLANNER_H_
 
+#include <cstdio>
+#include <ctime>
+#include <vector>
+#include <sbpl/planners/planner.h>
+#include <sbpl/utils/mdp.h>
+
 //---configuration----
 
 //control of EPS
@@ -44,11 +50,11 @@
 
 #define ARA_INCONS_LIST_ID 0
 
-class CMDP;
-class CMDPSTATE;
-class CMDPACTION;
 class CHeap;
 class CList;
+class DiscreteSpaceInformation;
+class MDPConfig;
+class StateChangeQuery;
 
 //-------------------------------------------------------------
 
@@ -132,12 +138,12 @@ public:
     /**
      * \brief replan a path within the allocated time, return the solution in the vector
      */
-    virtual int replan(double allocated_time_secs, vector<int>* solution_stateIDs_V);
+    virtual int replan(double allocated_time_secs, std::vector<int>* solution_stateIDs_V);
 
     /**
      * \brief replan a path within the allocated time, return the solution in the vector, also returns solution cost
      */
-    virtual int replan(double allocated_time_sec, vector<int>* solution_stateIDs_V, int* solcost);
+    virtual int replan(double allocated_time_sec, std::vector<int>* solution_stateIDs_V, int* solcost);
 
     /**
      * \brief works same as replan function with time and solution states, but
@@ -252,7 +258,7 @@ public:
     /**
      * \brief fills out a vector of stats from the search
      */
-    virtual void get_search_stats(vector<PlannerStats>* s);
+    virtual void get_search_stats(std::vector<PlannerStats>* s);
 
 protected:
     //member variables
@@ -260,7 +266,7 @@ protected:
     double repair_time;
     bool use_repair_time;
 
-    vector<PlannerStats> stats;
+    std::vector<PlannerStats> stats;
 
     int num_of_expands_initial_solution;
 
@@ -341,9 +347,9 @@ protected:
     virtual int getHeurValue(ARASearchStateSpace_t* pSearchStateSpace, int StateID);
 
     //get path
-    virtual vector<int> GetSearchPath(ARASearchStateSpace_t* pSearchStateSpace, int& solcost);
+    virtual std::vector<int> GetSearchPath(ARASearchStateSpace_t* pSearchStateSpace, int& solcost);
 
-    virtual bool Search(ARASearchStateSpace_t* pSearchStateSpace, vector<int>& pathIds, int & PathCost,
+    virtual bool Search(ARASearchStateSpace_t* pSearchStateSpace, std::vector<int>& pathIds, int & PathCost,
                         bool bFirstSolution, bool bOptimalSolution, double MaxNumofSecs);
 };
 

@@ -27,10 +27,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <iostream>
-using namespace std;
+#include <cmath>
+#include <sbpl/discrete_space_information/environment.h>
+#include <sbpl/planners/viplanner.h>
+#include <sbpl/utils/key.h>
+#include <sbpl/utils/mdpconfig.h>
+#include <sbpl/utils/utils.h>
 
-#include <sbpl/headers.h>
+using namespace std;
 
 static unsigned int g_backups;
 static clock_t g_runtime = 0;

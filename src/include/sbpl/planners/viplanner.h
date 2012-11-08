@@ -30,7 +30,15 @@
 #ifndef __VIPLANNER_H_
 #define __VIPLANNER_H_
 
-#define MDP_ERRDELTA 0.01 
+#include <ctime>
+#include <cstdio>
+#include <sbpl/planners/planner.h>
+#include <sbpl/utils/mdp.h>
+
+#define MDP_ERRDELTA 0.01
+
+class DiscreteSpaceInformation;
+class MDPConfig;
 
 struct VIPLANNER_T
 {
@@ -76,7 +84,7 @@ public:
     /**
      * \brief replan a path within the allocated time, return the policy in the solution vector
      */
-    virtual int replan(double allocated_time_secs, vector<int>* solution_stateIDs_V);
+    virtual int replan(double allocated_time_secs, std::vector<int>* solution_stateIDs_V);
 
     /**
      * \brief constructors

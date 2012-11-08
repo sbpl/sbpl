@@ -1,9 +1,8 @@
 #ifndef SBPL_BFS_2D
 #define SBPL_BFS_2D
 
-#include "sbpl_fifo.h"
+#include <sbpl/utils/sbpl_fifo.h>
 #include <vector>
-using namespace std;
 
 class sbpl_bfs_2d
 {
@@ -91,7 +90,7 @@ public:
         return true;
     }
 
-    bool compute_distance_from_points(int** grid, vector<int> x, vector<int> y)
+    bool compute_distance_from_points(int** grid, std::vector<int> x, std::vector<int> y)
     {
         if (x.size() != y.size()) {
             printf("ERROR[compute_distance_from_points]: size of x and y coordinates must agree!\n");

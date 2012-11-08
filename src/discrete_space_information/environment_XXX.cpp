@@ -27,10 +27,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <iostream>
-using namespace std;
+#include <sbpl/discrete_space_information/environment_XXX.h>
+#include <sbpl/planners/planner.h>
+#include <sbpl/utils/mdp.h>
+#include <sbpl/utils/mdpconfig.h>
 
-#include <sbpl/headers.h>
+using namespace std;
 
 //extern clock_t time3_addallout;
 //extern clock_t time_gethash;

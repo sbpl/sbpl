@@ -30,6 +30,12 @@
 #ifndef __ADPLANNER_H_
 #define __ADPLANNER_H_
 
+#include <cstdio>
+#include <ctime>
+#include <sbpl/planners/planner.h>
+#include <sbpl/utils/key.h>
+#include <sbpl/utils/mdp.h>
+
 //---configuration----
 
 //control of EPS
@@ -44,11 +50,11 @@
 
 #define AD_INCONS_LIST_ID 0
 
-class CMDP;
-class CMDPSTATE;
-class CMDPACTION;
 class CHeap;
 class CList;
+class DiscreteSpaceInformation;
+class MDPConfig;
+class StateChangeQuery;
 
 //-------------------------------------------------------------
 
@@ -131,13 +137,13 @@ public:
     /**
      * \brief replan a path within the allocated time, return the solution in the vector
      */
-    virtual int replan(double allocated_time_secs, vector<int>* solution_stateIDs_V);
+    virtual int replan(double allocated_time_secs, std::vector<int>* solution_stateIDs_V);
 
     /**
      * \brief replan a path within the allocated time, return the solution in
      *        the vector, also returns solution cost
      */
-    virtual int replan(double allocated_time_secs, vector<int>* solution_stateIDs_V, int* solcost);
+    virtual int replan(double allocated_time_secs, std::vector<int>* solution_stateIDs_V, int* solcost);
 
     /**
      * \brief works same as replan function with time and solution states, but
@@ -189,7 +195,7 @@ public:
      * \param succsIDV array of successors of changed edges
      * \note this is used when the search is run forwards
      */
-    virtual void update_succs_of_changededges(vector<int>* succsIDV);
+    virtual void update_succs_of_changededges(std::vector<int>* succsIDV);
 
     /**
      * \brief direct form of informing the search about the new edge costs
@@ -197,7 +203,7 @@ public:
      * \param predsIDV array of predecessors of changed edges
      * \note this is used when the search is run backwards
      */
-    virtual void update_preds_of_changededges(vector<int>* predsIDV);
+    virtual void update_preds_of_changededges(std::vector<int>* predsIDV);
 
     /**
      * \brief returns the suboptimality bound on the currently found solution
@@ -242,7 +248,7 @@ public:
     /**
      * \brief fills out a vector of stats from the search
      */
-    virtual void get_search_stats(vector<PlannerStats>* s);
+    virtual void get_search_stats(std::vector<PlannerStats>* s);
 
     /**
      * \brief constructor
@@ -262,7 +268,7 @@ protected:
     int num_of_expands_initial_solution;
     MDPConfig* MDPCfg_;
 
-    vector<PlannerStats> stats;
+    std::vector<PlannerStats> stats;
 
     bool bforwardsearch;
     bool bsearchuntilfirstsolution; //if true, then search until first solution (see planner.h for search modes)
@@ -341,14 +347,14 @@ protected:
     virtual int getHeurValue(ADSearchStateSpace_t* pSearchStateSpace, int StateID);
 
     //get path
-    virtual vector<int> GetSearchPath(ADSearchStateSpace_t* pSearchStateSpace, int& solcost);
+    virtual std::vector<int> GetSearchPath(ADSearchStateSpace_t* pSearchStateSpace, int& solcost);
 
-    virtual bool Search(ADSearchStateSpace_t* pSearchStateSpace, vector<int>& pathIds, int & PathCost,
+    virtual bool Search(ADSearchStateSpace_t* pSearchStateSpace, std::vector<int>& pathIds, int & PathCost,
                         bool bFirstSolution, bool bOptimalSolution, double MaxNumofSecs);
 
     virtual CKey ComputeKey(ADState* state);
 
-    virtual void Update_SearchSuccs_of_ChangedEdges(vector<int> const * statesIDV);
+    virtual void Update_SearchSuccs_of_ChangedEdges(std::vector<int> const * statesIDV);
 };
 
 /**

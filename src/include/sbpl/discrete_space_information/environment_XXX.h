@@ -30,7 +30,15 @@
 #ifndef __ENVIRONMENT_XXX_H_
 #define __ENVIRONMENT_XXX_H_
 
+#include <cstdio>
+#include <vector>
+#include <sbpl/discrete_space_information/environment.h>
+
 #define XXX_MAXACTIONSWIDTH 9		
+
+class CMDPACTION;
+class CMDPSTATE;
+class MDPConfig;
 
 typedef struct ENV_XXX_CONFIG
 {
@@ -63,10 +71,10 @@ typedef struct
 
     //hash table of size x_size*y_size. Maps from coords to stateId
     int HashTableSize;
-    vector<EnvXXXHashEntry_t*>* Coord2StateIDHashTable;
+    std::vector<EnvXXXHashEntry_t*>* Coord2StateIDHashTable;
 
     //vector that maps from stateID to coords
-    vector<EnvXXXHashEntry_t*> StateID2CoordTable;
+    std::vector<EnvXXXHashEntry_t*> StateID2CoordTable;
 
     //any additional variables
 } EnvironmentXXX_t;
@@ -115,12 +123,12 @@ public:
     /**
      * \brief see comments on the same function in the parent class
      */
-    virtual void GetSuccs(int SourceStateID, vector<int>* SuccIDV, vector<int>* CostV);
+    virtual void GetSuccs(int SourceStateID, std::vector<int>* SuccIDV, std::vector<int>* CostV);
 
     /**
      * \brief see comments on the same function in the parent class
      */
-    virtual void GetPreds(int TargetStateID, vector<int>* PredIDV, vector<int>* CostV);
+    virtual void GetPreds(int TargetStateID, std::vector<int>* PredIDV, std::vector<int>* CostV);
 
     /**
      * \brief see comments on the same function in the parent class

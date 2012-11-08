@@ -30,6 +30,13 @@
 #ifndef __RSTARPLANNER_H_
 #define __RSTARPLANNER_H_
 
+#include <cstdio>
+#include <ctime>
+#include <sbpl/planners/planner.h>
+#include <sbpl/utils/heap.h>
+#include <sbpl/utils/key.h>
+#include <sbpl/utils/mdp.h>
+
 //---configuration----
 
 //control of EPS
@@ -44,11 +51,8 @@
 
 #define RSTAR_INCONS_LIST_ID 0
 
-class CMDP;
-class CMDPSTATE;
-class CMDPACTION;
-class CHeap;
 class CList;
+class StateChangeQuery;
 
 //-------------------------------------------------------------
 
@@ -91,7 +95,7 @@ public:
     /**
      * \brief set of predecessor actions together with some info
      */
-    vector<CMDPACTION*> predactionV;
+    std::vector<CMDPACTION*> predactionV;
 
     /**
      * \brief RSTAR* relevant data - heuristics
@@ -123,7 +127,7 @@ typedef struct RSTARACTIONDATA_T
      *       (not search tree) so if the search is forward, then the path is from
      *       source to target and otherwise, the path is from target toward source
      */
-    vector<int> pathIDs;
+    std::vector<int> pathIDs;
 } RSTARACTIONDATA;
 
 /**
@@ -278,12 +282,12 @@ public:
     /**
      * \brief replan a path within the allocated time, return the solution in the vector
      */
-    int replan(double allocated_time_secs, vector<int>* solution_stateIDs_V);
+    int replan(double allocated_time_secs, std::vector<int>* solution_stateIDs_V);
 
     /**
      * \brief replan a path within the allocated time, return the solution in the vector, also returns solution cost
      */
-    int replan(double allocated_time_sec, vector<int>* solution_stateIDs_V, int* solcost);
+    int replan(double allocated_time_sec, std::vector<int>* solution_stateIDs_V, int* solcost);
 
     /**
      * \brief set the goal state
@@ -452,14 +456,15 @@ private:
     int getHeurValue(int StateID);
 
     //get path
-    vector<int> GetSearchPath(int& solcost);
+    std::vector<int> GetSearchPath(int& solcost);
     void PrintSearchPath(FILE* fOut);
 
     //the actual search
-    bool Search(vector<int>& pathIds, int & PathCost, bool bFirstSolution, bool bOptimalSolution, double MaxNumofSecs);
+    bool Search(std::vector<int>& pathIds, int & PathCost, bool bFirstSolution, bool bOptimalSolution,
+                double MaxNumofSecs);
     //local search
     bool ComputeLocalPath(int StartStateID, int GoalStateID, int maxc, int maxe, int *pCost, int *pCostLow, int *pExp,
-                          vector<int>* pPathIDs, int* pNewGoalStateID, double maxnumofsecs);
+                          std::vector<int>* pPathIDs, int* pNewGoalStateID, double maxnumofsecs);
 
     //global search functions
     void SetBestPredecessor(RSTARState* rstarState, RSTARState* rstarPredState, CMDPACTION* action);

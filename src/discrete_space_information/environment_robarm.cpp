@@ -27,12 +27,19 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <iostream>
-using namespace std;
-
-#include <sbpl/headers.h>
-
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <queue>
+#include <sbpl/discrete_space_information/environment_robarm.h>
+#include <sbpl/planners/planner.h>
+#include <sbpl/utils/key.h>
+#include <sbpl/utils/mdp.h>
+#include <sbpl/utils/mdpconfig.h>
+#include <sbpl/utils/utils.h>
+
+using namespace std;
 
 #define COSTMULT 1000
 

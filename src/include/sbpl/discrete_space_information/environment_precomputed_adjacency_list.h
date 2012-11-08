@@ -1,25 +1,26 @@
 #ifndef __PRECOMPUTED_ADJACENCY_LIST_H_
 #define __PRECOMPUTED_ADJACENCY_LIST_H_
 
-#include <iostream>
-#include <vector>
+#include <cstdlib>
+#include <assert.h>
 #include <list>
 #include <map>
 #include <utility>
-#include <assert.h>
-#include <stdlib.h>
-
-//using namespace std; 
+#include <vector>
 
 // Necessary because some of the below includes assume it
-#include "../../sbpl/headers.h"
+#include <sbpl/discrete_space_information/environment.h>
+#include <sbpl/planners/araplanner.h>
+#include <sbpl/planners/planner.h>
+#include <sbpl/utils/mdp.h>
+#include <sbpl/utils/mdpconfig.h>
 
 struct Adjacency
 {
     int neighbor;
     int cost;
 };
-typedef list<Adjacency> Adjacencies;
+typedef std::list<Adjacency> Adjacencies;
 typedef Adjacencies::iterator AdjListIterator;
 
 /**
@@ -70,7 +71,7 @@ public:
      * \return Vector of states on the path
      * \post solution_cost will hold the cost of the returned solution
      */
-    vector<Coords> findOptimalPath(int* solution_cost);
+    std::vector<Coords> findOptimalPath(int* solution_cost);
 
     // Inherited DiscreteSpaceInformation ops
     bool InitializeEnv(const char* sEnvFile);
@@ -80,8 +81,8 @@ public:
     int GetStartHeuristic(int stateID);
     void SetAllActionsandAllOutcomes(CMDPSTATE* state);
     void SetAllPreds(CMDPSTATE* state);
-    void GetSuccs(int SourceStateID, vector<int>* SuccIDV, vector<int>* CostV);
-    void GetPreds(int TargetStateID, vector<int>* PredIDV, vector<int>* CostV);
+    void GetSuccs(int SourceStateID, std::vector<int>* SuccIDV, std::vector<int>* CostV);
+    void GetPreds(int TargetStateID, std::vector<int>* PredIDV, std::vector<int>* CostV);
     int SizeofCreatedEnv();
     void PrintState(int stateID, bool bVerbose, FILE* fOut = NULL);
     void PrintEnv_Config(FILE* fOut);
@@ -90,9 +91,9 @@ private:
     void resetStateId2IndexMapping(void);
 
     // Members
-    vector<Coords> points_;
+    std::vector<Coords> points_;
     map<Coords, int> pointIds_;
-    vector<Adjacencies> adjacency_vector_;
+    std::vector<Adjacencies> adjacency_vector_;
     int startStateId_;
     int goalStateId_;
 };
@@ -315,7 +316,7 @@ void AdjacencyListSBPLEnv<Coords>::SetAllPreds(CMDPSTATE* state)
 }
 
 template<class Coords>
-void AdjacencyListSBPLEnv<Coords>::GetSuccs(int SourceStateID, vector<int>* SuccIDV, vector<int>* CostV)
+void AdjacencyListSBPLEnv<Coords>::GetSuccs(int SourceStateID, std::vector<int>* SuccIDV, std::vector<int>* CostV)
 {
     SuccIDV->clear();
     CostV->clear();
@@ -332,24 +333,24 @@ void AdjacencyListSBPLEnv<Coords>::GetSuccs(int SourceStateID, vector<int>* Succ
 }
 
 template<class Coords>
-void AdjacencyListSBPLEnv<Coords>::GetPreds(int TargetStateID, vector<int>* PredIDV, vector<int>* CostV)
+void AdjacencyListSBPLEnv<Coords>::GetPreds(int TargetStateID, std::vector<int>* PredIDV, std::vector<int>* CostV)
 {
     cout << "Error: GetPreds not currently implemented for adjacency list";
     throw new SBPL_Exception();
 }
 
 template<class Coords>
-vector<Coords> AdjacencyListSBPLEnv<Coords>::findOptimalPath(int* solution_cost)
+std::vector<Coords> AdjacencyListSBPLEnv<Coords>::findOptimalPath(int* solution_cost)
 {
     // Initialize ARA planner
     ARAPlanner p(this, true);
     p.set_start(startStateId_);
     p.set_goal(goalStateId_);
     p.set_initialsolution_eps(1.0);
-    vector<int> solution;
+    std::vector<int> solution;
     p.replan(1.0, &solution, solution_cost);
 
-    vector<Coords> solutionPoints;
+    std::vector<Coords> solutionPoints;
     for (unsigned int i = 0; i < solution.size(); i++) {
         solutionPoints.push_back(points_[solution[i]]);
     }

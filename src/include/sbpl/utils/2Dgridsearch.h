@@ -30,9 +30,18 @@
 #ifndef __2DGRIDSEARCH_H_
 #define __2DGRIDSEARCH_H_
 
+#include <cstdlib>
+#include <sbpl/planners/planner.h>
+#include <sbpl/utils/key.h>
+#include <sbpl/utils/utils.h>
+
 #define SBPL_2DGRIDSEARCH_NUMOF2DDIRS 16
 
 #define SBPL_2DSEARCH_OPEN_LIST_ID 0
+
+// Forward declaration needed to allow instance of CIntHeap*
+class CIntHeap;
+class CSlidingBucket;
 
 enum SBPL_2DGRIDSEARCH_TERM_CONDITION
 {
@@ -75,10 +84,6 @@ public:
     SBPL_2DGridSearchState() { iterationaccessed = 0; }
     ~SBPL_2DGridSearchState() { }
 };
-
-// Forward declaration needed to allow instance of CIntHeap*
-class CIntHeap;
-class CSlidingBucket;
 
 /**
  * \brief 2D search itself

@@ -30,6 +30,14 @@
 #ifndef __ENVIRONMENT_H_
 #define __ENVIRONMENT_H_
 
+#include <cstdio>
+#include <vector>
+#include <sbpl/config.h>
+#include <sbpl/sbpl_exception.h>
+
+class CMDPSTATE;
+struct MDPConfig;
+
 /**
  * \brief base class for environments defining planning graphs
  * 

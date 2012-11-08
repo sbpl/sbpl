@@ -30,6 +30,8 @@
 #ifndef __ENVIRONMENT_ROBARM_H_
 #define __ENVIRONMENT_ROBARM_H_
 
+#include <sbpl/discrete_space_information/environment.h>
+
 #define NUMOFLINKS 6
 
 //for R* max. distance in coord to a sample point. It should be exactly this,
@@ -44,6 +46,9 @@
 #define UNIFORM_COST 1	//all the actions have the same costs when set
 
 #define INVALID_NUMBER 999
+
+class CMDPSTATE;
+class MDPConfig;
 
 typedef struct
 {
@@ -96,10 +101,10 @@ typedef struct
 
     //Maps from coords to stateId
     int HashTableSize;
-    vector<EnvROBARMHashEntry_t*>* Coord2StateIDHashTable;
+    std::vector<EnvROBARMHashEntry_t*>* Coord2StateIDHashTable;
 
     //vector that maps from stateID to coords
-    vector<EnvROBARMHashEntry_t*> StateID2CoordTable;
+    std::vector<EnvROBARMHashEntry_t*> StateID2CoordTable;
 
     //any additional variables
     int** Heur; //h[fromx][fromy][tox][toy] = Heur[to][from], where to= tox+toy*width_c, from = fromx+fromy*width_c
@@ -149,12 +154,12 @@ public:
     /**
      * \brief see comments on the same function in the parent class
      */
-    virtual void GetSuccs(int SourceStateID, vector<int>* SuccIDV, vector<int>* CostV);
+    virtual void GetSuccs(int SourceStateID, std::vector<int>* SuccIDV, std::vector<int>* CostV);
 
     /**
      * \brief see comments on the same function in the parent class
      */
-    virtual void GetPreds(int TargetStateID, vector<int>* PredIDV, vector<int>* CostV);
+    virtual void GetPreds(int TargetStateID, std::vector<int>* PredIDV, std::vector<int>* CostV);
 
     /**
      * \brief see comments on the same function in the parent class
@@ -182,7 +187,7 @@ protected:
     virtual void ComputeCoord(double angle[NUMOFLINKS], short unsigned int coord[NUMOFLINKS]);
     virtual int ComputeEndEffectorPos(double angles[NUMOFLINKS], short unsigned int* pX, short unsigned int* pY);
     virtual int IsValidCoord(short unsigned int coord[NUMOFLINKS], char** Grid2D = NULL,
-                             vector<CELLV>* pTestedCells = NULL);
+                             std::vector<CELLV>* pTestedCells = NULL);
     virtual int distanceincoord(unsigned short* statecoord1, unsigned short* statecoord2);
     virtual void ReInitializeState2D(State2D* state);
     virtual void InitializeState2D(State2D* state, short unsigned int x, short unsigned int y);
@@ -194,7 +199,7 @@ protected:
     virtual void Cell2ContXY(int x, int y, double *pX, double *pY);
     virtual void ContXY2Cell(double x, double y, short unsigned int* pX, short unsigned int *pY);
     virtual int IsValidLineSegment(double x0, double y0, double x1, double y1, char **Grid2D,
-                                   vector<CELLV>* pTestedCells);
+                                   std::vector<CELLV>* pTestedCells);
     virtual void GetRandomSuccsatDistance(int SourceStateID, std::vector<int>* SuccIDV, std::vector<int>* CLowV);
     virtual unsigned int GetHeurBasedonCoord(short unsigned int coord[NUMOFLINKS]);
     virtual void PrintHeader(FILE* fOut);

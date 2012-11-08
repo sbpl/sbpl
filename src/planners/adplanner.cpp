@@ -27,10 +27,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <iostream>
-using namespace std;
+#include <cmath>
+#include <sbpl/discrete_space_information/environment.h>
+#include <sbpl/planners/adplanner.h>
+#include <sbpl/planners/araplanner.h>
+#include <sbpl/utils/heap.h>
+#include <sbpl/utils/list.h>
+#include <sbpl/utils/mdpconfig.h>
 
-#include <sbpl/headers.h>
+using namespace std;
 
 //-----------------------------------------------------------------------------------------------------
 

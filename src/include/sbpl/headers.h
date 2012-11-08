@@ -30,16 +30,16 @@
 #ifndef __HEADERS_H_
 #define __HEADERS_H_
 
-#include <stdio.h>
-#include <string.h>
-#include <time.h>
-#include <math.h>
-#include <vector>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
 #include <set>
-#include <stdlib.h>
+#include <vector>
 
-#include "sbpl_exception.h"
-#include "config.h"
+#include <sbpl/sbpl_exception.h>
+#include <sbpl/config.h>
 
 #if MEM_CHECK == 1
 #define _CRTDBG_MAP_ALLOC 
@@ -51,30 +51,30 @@
 #include <crtdbg.h>
 #endif
 
-#include <sbpl/utils/key.h>
-#include <sbpl/utils/mdpconfig.h>
-#include <sbpl/utils/mdp.h>
-#include <sbpl/utils/utils.h>
-#include <sbpl/utils/sbpl_fifo.h>
-#include <sbpl/utils/sbpl_bfs_2d.h>
-#include <sbpl/utils/sbpl_bfs_3d.h>
-#include <sbpl/planners/planner.h>
 #include <sbpl/discrete_space_information/environment.h>
-#include <sbpl/discrete_space_information/environment_XXX.h>
 #include <sbpl/discrete_space_information/environment_nav2D.h>
+#include <sbpl/discrete_space_information/environment_nav2Duu.h>
 #include <sbpl/discrete_space_information/environment_navxythetalat.h>
 #include <sbpl/discrete_space_information/environment_navxythetamlevlat.h>
 #include <sbpl/discrete_space_information/environment_robarm.h>
-#include <sbpl/discrete_space_information/environment_nav2Duu.h>
-#include <sbpl/utils/list.h>
-#include <sbpl/utils/heap.h>
-#include <sbpl/planners/viplanner.h>
-#include <sbpl/planners/araplanner.h>
+#include <sbpl/discrete_space_information/environment_XXX.h>
 #include <sbpl/planners/adplanner.h>
-#include <sbpl/utils/2Dgridsearch.h>
+#include <sbpl/planners/ANAplanner.h>
+#include <sbpl/planners/araplanner.h>
+#include <sbpl/planners/planner.h>
 #include <sbpl/planners/ppcpplanner.h>
 #include <sbpl/planners/rstarplanner.h>
-#include <sbpl/planners/ANAplanner.h>
+#include <sbpl/planners/viplanner.h>
+#include <sbpl/utils/2Dgridsearch.h>
+#include <sbpl/utils/heap.h>
+#include <sbpl/utils/list.h>
+#include <sbpl/utils/key.h>
+#include <sbpl/utils/mdp.h>
+#include <sbpl/utils/mdpconfig.h>
+#include <sbpl/utils/sbpl_fifo.h>
+#include <sbpl/utils/sbpl_bfs_2d.h>
+#include <sbpl/utils/sbpl_bfs_3d.h>
+#include <sbpl/utils/utils.h>
 
 #endif
 

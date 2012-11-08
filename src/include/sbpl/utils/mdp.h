@@ -30,8 +30,10 @@
 #ifndef __MDP_H_
 #define __MDP_H_
 
-#include <cstdlib>
 #include <cstdio>
+#include <vector>
+#include <sbpl/config.h>
+#include <sbpl/sbpl_exception.h>
 
 #define EPS_ERROR 0.000001
 
@@ -45,9 +47,9 @@ public:
     //data
     int ActionID;
     int SourceStateID;
-    vector<int> SuccsID;
-    vector<int> Costs;
-    vector<float> SuccsProb;
+    std::vector<int> SuccsID;
+    std::vector<int> Costs;
+    std::vector<float> SuccsProb;
     void* PlannerSpecificData;
 
     //constructors
@@ -83,8 +85,8 @@ class CMDPSTATE
 public:
     //data
     int StateID;
-    vector<CMDPACTION*> Actions;
-    vector<int> PredsID;
+    std::vector<CMDPACTION*> Actions;
+    std::vector<int> PredsID;
     void* PlannerSpecificData;
 
     //constructors
@@ -119,7 +121,7 @@ class CMDP
 {
 public:
     //data
-    vector<CMDPSTATE*> StateArray;
+    std::vector<CMDPSTATE*> StateArray;
 
     //constructors
     CMDP() { }
