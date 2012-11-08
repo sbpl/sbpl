@@ -34,6 +34,7 @@
 
 class SBPL_Exception : public std::exception
 {
+public:
     virtual const char* what() const throw()
     {
         return "SBPL has encountered a fatal error!";

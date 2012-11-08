@@ -1,8 +1,8 @@
 #ifndef SBPL_BFS_2D
 #define SBPL_BFS_2D
 
-#include <sbpl/utils/sbpl_fifo.h>
 #include <vector>
+#include <sbpl/utils/sbpl_fifo.h>
 
 class sbpl_bfs_2d
 {

@@ -2,14 +2,14 @@
 #define __PRECOMPUTED_ADJACENCY_LIST_H_
 
 #include <cstdlib>
-#include <assert.h>
+#include <cassert>
+#include <iostream>
 #include <list>
 #include <map>
 #include <utility>
 #include <vector>
-
-// Necessary because some of the below includes assume it
 #include <sbpl/discrete_space_information/environment.h>
+#include <sbpl/sbpl_exception.h>
 #include <sbpl/planners/araplanner.h>
 #include <sbpl/planners/planner.h>
 #include <sbpl/utils/mdp.h>
@@ -39,7 +39,7 @@ class AdjacencyListSBPLEnv : public DiscreteSpaceInformation
 {
 public:
     AdjacencyListSBPLEnv();
-    void writeToStream(ostream& str = cout);
+    void writeToStream(std::ostream& str = std::cout);
 
     /**
      * \brief Add point to roadmap.  Does not check for duplicates.
@@ -92,7 +92,7 @@ private:
 
     // Members
     std::vector<Coords> points_;
-    map<Coords, int> pointIds_;
+    std::map<Coords, int> pointIds_;
     std::vector<Adjacencies> adjacency_vector_;
     int startStateId_;
     int goalStateId_;
@@ -105,7 +105,7 @@ AdjacencyListSBPLEnv<Coords>::AdjacencyListSBPLEnv() :
 }
 
 template<class Coords>
-void AdjacencyListSBPLEnv<Coords>::writeToStream(ostream& str)
+void AdjacencyListSBPLEnv<Coords>::writeToStream(std::ostream& str)
 {
     int numStates = points_.size();
     str << "Adjacency list SBPL Env " << endl;
@@ -184,8 +184,8 @@ template<class Coords>
 void AdjacencyListSBPLEnv<Coords>::setCost(const Coords& c1, const Coords& c2, int cost)
 {
     // Figure out indices of the given points
-    typename map<Coords, int>::iterator i1 = pointIds_.find(c1);
-    typename map<Coords, int>::iterator i2 = pointIds_.find(c2);
+    typename std::map<Coords, int>::iterator i1 = pointIds_.find(c1);
+    typename std::map<Coords, int>::iterator i2 = pointIds_.find(c2);
     int index1 = i1->second;
     int index2 = i2->second;
 
@@ -224,7 +224,7 @@ void AdjacencyListSBPLEnv<Coords>::setCost(const Coords& c1, const Coords& c2, i
 template<class Coords>
 void AdjacencyListSBPLEnv<Coords>::setStartState(const Coords& c)
 {
-    typename map<Coords, int>::iterator i = pointIds_.find(c);
+    typename std::map<Coords, int>::iterator i = pointIds_.find(c);
     assert(i != pointIds_.end());
     startStateId_ = i->second;
 }
@@ -232,7 +232,7 @@ void AdjacencyListSBPLEnv<Coords>::setStartState(const Coords& c)
 template<class Coords>
 void AdjacencyListSBPLEnv<Coords>::setGoalState(const Coords& c)
 {
-    typename map<Coords, int>::iterator i = pointIds_.find(c);
+    typename std::map<Coords, int>::iterator i = pointIds_.find(c);
     assert(i != pointIds_.end());
     goalStateId_ = i->second;
 }
@@ -267,14 +267,14 @@ template<class Coords>
 void AdjacencyListSBPLEnv<Coords>::PrintState(int stateID, bool bVerbose, FILE* fOut)
 {
     // Note we're ignoring the fOut argument
-    cout << points_[stateID] << endl;
+    std::cout << points_[stateID] << endl;
 }
 
 template<class Coords>
 void AdjacencyListSBPLEnv<Coords>::PrintEnv_Config(FILE* fOut)
 {
     // Note we're ignoring the fOut argument
-    cout << "Adjacency list env" << endl;
+    std::cout << "Adjacency list env" << endl;
 }
 
 template<class Coords>
@@ -311,7 +311,7 @@ template<class Coords>
 void AdjacencyListSBPLEnv<Coords>::SetAllPreds(CMDPSTATE* state)
 {
     // Apparently this is not always necessary
-    cout << "Error: SetAllPreds not implemented for adjacency list";
+    std::cout << "Error: SetAllPreds not implemented for adjacency list";
     throw new SBPL_Exception();
 }
 
@@ -335,7 +335,7 @@ void AdjacencyListSBPLEnv<Coords>::GetSuccs(int SourceStateID, std::vector<int>*
 template<class Coords>
 void AdjacencyListSBPLEnv<Coords>::GetPreds(int TargetStateID, std::vector<int>* PredIDV, std::vector<int>* CostV)
 {
-    cout << "Error: GetPreds not currently implemented for adjacency list";
+    std::cout << "Error: GetPreds not currently implemented for adjacency list";
     throw new SBPL_Exception();
 }
 

@@ -36,7 +36,6 @@
 #include <sbpl/utils/utils.h>
 
 #define ENVNAV2D_COSTMULT 1000
-
 #define ENVNAV2D_DEFAULTOBSTHRESH 1 //253-for willow garage	//see explanation of the value below
 #define ENVNAV2D_MAXDIRS 16 //TODO-debugmax - crashes for 8 in debug mode
 
@@ -182,11 +181,10 @@ public:
 
     /**
      * \brief a short version of environment initialization. Here start and goal coordinates will be set to 0s
+     * 
+     * if mapdata is NULL the grid is initialized to all freespace
      */
-    virtual bool InitializeEnv(int width, int height,
-
-    /** if mapdata is NULL the grid is initialized to all freespace */
-    const unsigned char* mapdata, unsigned char obsthresh);
+    virtual bool InitializeEnv(int width, int height, const unsigned char* mapdata, unsigned char obsthresh);
 
     /**
      * \brief set start location
@@ -257,11 +255,12 @@ public:
      *        InitializeEnv function for details about the parameters
      *        it is not a full way to initialize environment. To fully initialize, one
      *        needs to executed InitGeneral in addition.
+     *
+     * if mapdata is NULL the grid is initialized to all freespace
      */
-    virtual void SetConfiguration(int width, int height,
-
-    /** if mapdata is NULL the grid is initialized to all freespace */
-    const unsigned char* mapdata, int startx, int starty, int goalx, int goaly);
+    virtual void SetConfiguration(int width, int height, const unsigned char* mapdata,
+                                  int startx, int starty,
+                                  int goalx, int goaly);
 
     /**
      * \brief performs initialization of environments. It is usually called

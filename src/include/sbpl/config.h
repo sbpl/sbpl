@@ -33,12 +33,14 @@
 /**
  * \brief if set, then heuristic is used if available
  */
-#define USE_HEUR 1 
+#define USE_HEUR 1
 
 /**
- * \brief memory debugging
+ * \brief memory debugging (available for vc++)
  */
+#ifdef WIN32
 #define MEM_CHECK 0
+#endif
 
 /**
  * \brief regular debugging

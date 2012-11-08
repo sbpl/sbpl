@@ -28,6 +28,7 @@
  */
 
 #include <cstdio>
+#include <ctime>
 #include <sbpl/discrete_space_information/environment_navxythetamlevlat.h>
 #include <sbpl/utils/key.h>
 

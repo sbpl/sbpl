@@ -15,7 +15,6 @@
 #include <sbpl/utils/mdp.h>
 
 //---configuration----
-
 //control of EPS
 //initial suboptimality bound (cost solution <= cost(eps*cost optimal solution)
 #define ana_DEFAULT_INITIAL_EPS	    100000.0
@@ -23,9 +22,7 @@
 #define ana_DECREASE_EPS    0.2
 //final epsilon bound
 #define ana_FINAL_EPS	    1.0
-
 //---------------------
-
 #define ana_INCONS_LIST_ID 0
 
 class CHeap;

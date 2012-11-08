@@ -30,8 +30,8 @@
 #ifndef __VIPLANNER_H_
 #define __VIPLANNER_H_
 
-#include <ctime>
 #include <cstdio>
+#include <ctime>
 #include <sbpl/planners/planner.h>
 #include <sbpl/utils/mdp.h>
 

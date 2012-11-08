@@ -33,7 +33,6 @@
 #include <sbpl/utils/heap.h>
 #include <sbpl/utils/key.h>
 #include <sbpl/utils/list.h>
-#include <sbpl/utils/mdp.h>
 
 using namespace std;
 

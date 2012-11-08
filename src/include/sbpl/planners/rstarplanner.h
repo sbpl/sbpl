@@ -38,7 +38,6 @@
 #include <sbpl/utils/mdp.h>
 
 //---configuration----
-
 //control of EPS
 #define RSTAR_DEFAULT_INITIAL_EPS	    3.0
 #define RSTAR_DECREASE_EPS				0.2
@@ -46,9 +45,7 @@
 
 //the number of states to expand for local search in RSTAR before it declares a hard case and postpones its processing
 #define RSTAR_EXPTHRESH  1000 
-
 //---------------------
-
 #define RSTAR_INCONS_LIST_ID 0
 
 class CList;

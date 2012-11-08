@@ -32,15 +32,14 @@
 
 #include <vector>
 #include <cstdio>
+#include <sbpl/config.h>
 #include <sbpl/discrete_space_information/environment.h>
 #include <sbpl/discrete_space_information/environment_nav2D.h>
 #include <sbpl/sbpl_exception.h>
 #include <sbpl/utils/utils.h>
 
 #define ENVNAV2DUU_COSTMULT 1000
-
 #define NAV2DUU_MAXACTIONSWIDTH 9		
-
 #define ENVNAV2DUU_MAXDIRS 8
 
 class CMDPACTION;

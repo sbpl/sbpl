@@ -37,7 +37,6 @@
 
 //eight-connected grid
 #define NAVXYTHETALAT_DXYWIDTH 8
-
 #define ENVNAVXYTHETALAT_DEFAULTOBSTHRESH 254	//see explanation of the value below
 //maximum number of states for storing them into lookup (as opposed to hash)
 #define SBPL_XYTHETALAT_MAXSTATESFORLOOKUP 100000000 
@@ -46,7 +45,6 @@
 //theta increases as we go counterclockwise
 //number of theta values - should be power of 2
 #define NAVXYTHETALAT_THETADIRS 16
-
 //number of actions per x,y,theta state
 //decrease, increase, same angle while moving plus decrease, increase angle while standing.
 #define NAVXYTHETALAT_DEFAULT_ACTIONWIDTH 5 

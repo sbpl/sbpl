@@ -30,7 +30,6 @@
 #include <cmath>
 #include <sbpl/discrete_space_information/environment.h>
 #include <sbpl/planners/adplanner.h>
-#include <sbpl/planners/araplanner.h>
 #include <sbpl/utils/heap.h>
 #include <sbpl/utils/list.h>
 #include <sbpl/utils/mdpconfig.h>
@@ -1173,7 +1172,7 @@ bool ADPlanner::Search(ADSearchStateSpace_t* pSearchStateSpace, vector<int>& pat
             tempStat.eps = pSearchStateSpace->eps_satisfied;
             tempStat.expands = searchexpands - prevexpands;
             tempStat.time = double(clock() - loop_time) / CLOCKS_PER_SEC;
-            tempStat.cost = ((ARAState*)pSearchStateSpace->searchgoalstate->PlannerSpecificData)->g;
+            tempStat.cost = ((ADState*)pSearchStateSpace->searchgoalstate->PlannerSpecificData)->g;
             stats.push_back(tempStat);
         }
 

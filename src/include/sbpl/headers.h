@@ -30,14 +30,6 @@
 #ifndef __HEADERS_H_
 #define __HEADERS_H_
 
-#include <cmath>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <ctime>
-#include <set>
-#include <vector>
-
 #include <sbpl/sbpl_exception.h>
 #include <sbpl/config.h>
 

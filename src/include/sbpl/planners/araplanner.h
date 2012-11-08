@@ -37,7 +37,6 @@
 #include <sbpl/utils/mdp.h>
 
 //---configuration----
-
 //control of EPS
 //initial suboptimality bound (cost solution <= cost(eps*cost optimal solution)
 #define ARA_DEFAULT_INITIAL_EPS	    5.0
@@ -45,9 +44,7 @@
 #define ARA_DECREASE_EPS    0.2
 //final epsilon bound
 #define ARA_FINAL_EPS	    1.0
-
 //---------------------
-
 #define ARA_INCONS_LIST_ID 0
 
 class CHeap;

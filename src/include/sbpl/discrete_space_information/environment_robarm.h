@@ -30,10 +30,10 @@
 #ifndef __ENVIRONMENT_ROBARM_H_
 #define __ENVIRONMENT_ROBARM_H_
 
+#include <cstdio>
 #include <sbpl/discrete_space_information/environment.h>
 
 #define NUMOFLINKS 6
-
 //for R* max. distance in coord to a sample point. It should be exactly this,
 //for one of the coordinates and this or smaller for the rest
 #define ROBARM_LONGACTIONDIST_CELLS 30   
@@ -42,9 +42,7 @@
 //if cleared then the intersection of the whole arm against obstacles 
 //and bounds is checked
 #define ENDEFF_CHECK_ONLY 0
-
 #define UNIFORM_COST 1	//all the actions have the same costs when set
-
 #define INVALID_NUMBER 999
 
 class CMDPSTATE;

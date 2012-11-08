@@ -6,6 +6,7 @@
  * 
  */
 
+#include <cmath>
 #include <sbpl/discrete_space_information/environment.h>
 #include <sbpl/planners/ANAplanner.h>
 #include <sbpl/utils/heap.h>
