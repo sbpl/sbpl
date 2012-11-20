@@ -104,6 +104,12 @@ public:
      */
     virtual void GetSuccs(int SourceStateID, std::vector<int>* SuccIDV, std::vector<int>* CostV) = 0;
 
+
+    virtual void GetSuccsTo(int SourceStateID, int LGoalStateID, std::vector<int>* SuccIDV, std::vector<int>* CostV){
+      SBPL_ERROR("ERROR: environment does not support calls to GetSuccsTo function\n");
+      throw new SBPL_Exception();
+    }
+
     /**
      * \brief see comments for GetSuccs functon
      */

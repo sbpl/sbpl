@@ -294,8 +294,10 @@ bool RSTARPlanner::ComputeLocalPath(int StartStateID, int GoalStateID, int maxc,
         //this setting makes it to get all successors - since this is a deterministic search
         if (bforwardsearch == false)
             environment_->GetPreds(rstarlsearchstate->MDPstate->StateID, &SuccIDV, &CostV);
-        else
-            environment_->GetSuccs(rstarlsearchstate->MDPstate->StateID, &SuccIDV, &CostV);
+        else{
+            environment_->GetSuccsTo(rstarlsearchstate->MDPstate->StateID, GoalStateID, &SuccIDV, &CostV); 
+//            environment_->GetSuccs(rstarlsearchstate->MDPstate->StateID, &SuccIDV, &CostV);
+        }
 
         //iterate over states in SUCCS set
         for (int i = 0; i < (int)SuccIDV.size(); i++) {
