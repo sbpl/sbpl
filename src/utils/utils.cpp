@@ -28,6 +28,7 @@
  */
 
 #include <cmath>
+#include <cstdlib>
 #include <sbpl/planners/planner.h>
 #include <sbpl/utils/utils.h>
 #include <sbpl/utils/key.h>
