@@ -98,6 +98,7 @@ public:
     CMDPSTATE *bestnextstate;
     unsigned int costtobestnextstate;
     int h;
+    short unsigned int last_heuristic_iteration;
 
 public:
     ADSEARCHSTATEDATA() { }
@@ -114,6 +115,7 @@ typedef struct ADSEARCHSTATESPACE
     CHeap* heap;
     CList* inconslist;
     short unsigned int searchiteration;
+    short unsigned int heuristic_searchiteration;
     short unsigned int callnumber;
     CMDPSTATE* searchgoalstate;
     CMDPSTATE* searchstartstate;
@@ -123,6 +125,8 @@ typedef struct ADSEARCHSTATESPACE
     bool bReevaluatefvals;
     bool bReinitializeSearchStateSpace;
     bool bRebuildOpenList;
+    bool bReevaluatehvals;
+    
 } ADSearchStateSpace_t;
 
 /**
@@ -273,6 +277,7 @@ protected:
     ADSearchStateSpace_t* pSearchStateSpace_;
 
     unsigned int searchexpands;
+    unsigned int searchunderexpands;
     int MaxMemoryCounter;
     clock_t TimeStarted;
     FILE *fDeb;
@@ -285,6 +290,8 @@ protected:
     virtual CMDPSTATE* GetState(int stateID, ADSearchStateSpace_t* pSearchStateSpace);
 
     virtual int ComputeHeuristic(CMDPSTATE* MDPstate, ADSearchStateSpace_t* pSearchStateSpace);
+    
+    virtual void ReComputeHeuristic(ADState* state, ADSearchStateSpace_t* pSearchStateSpace);
 
     //initialization of a state
     virtual void InitializeSearchStateInfo(ADState* state, ADSearchStateSpace_t* pSearchStateSpace);
@@ -313,6 +320,8 @@ protected:
     virtual void BuildNewOPENList(ADSearchStateSpace_t* pSearchStateSpace);
 
     virtual void Reevaluatefvals(ADSearchStateSpace_t* pSearchStateSpace);
+    
+    virtual void Reevaluatehvals(ADSearchStateSpace_t* pSearchStateSpace);
 
     //creates (allocates memory) search state space
     //does not initialize search statespace
