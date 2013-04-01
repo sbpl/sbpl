@@ -43,6 +43,7 @@
 #include <crtdbg.h>
 #endif
 
+#include <limits>
 #include <sbpl/discrete_space_information/environment.h>
 #include <sbpl/discrete_space_information/environment_nav2D.h>
 #include <sbpl/discrete_space_information/environment_nav2Duu.h>
