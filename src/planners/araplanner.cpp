@@ -52,6 +52,7 @@ ARAPlanner::ARAPlanner(DiscreteSpaceInformation* environment, bool bSearchForwar
     repair_time = INFINITECOST;
     searchexpands = 0;
     MaxMemoryCounter = 0;
+    MaxExpands = INFINITECOST;
 
 #ifndef ROS
     const char* debug = "debug.txt";
@@ -369,6 +370,7 @@ int ARAPlanner::ImprovePath(ARASearchStateSpace_t* pSearchStateSpace, double Max
     minkey = pSearchStateSpace->heap->getminkeyheap();
     CKey oldkey = minkey;
     while (!pSearchStateSpace->heap->emptyheap() && minkey.key[0] < INFINITECOST && goalkey > minkey &&
+           searchexpands+expands < MaxExpands &&
            (clock() - TimeStarted) < MaxNumofSecs * (double)CLOCKS_PER_SEC &&
                (pSearchStateSpace->eps_satisfied == INFINITECOST ||
                (clock() - TimeStarted) < repair_time * (double)CLOCKS_PER_SEC))
@@ -923,6 +925,7 @@ bool ARAPlanner::Search(ARASearchStateSpace_t* pSearchStateSpace, vector<int>& p
     int prevexpands = 0;
     clock_t loop_time;
     while (pSearchStateSpace->eps_satisfied > final_epsilon &&
+          searchexpands < MaxExpands && 
            (clock() - TimeStarted) < MaxNumofSecs * (double)CLOCKS_PER_SEC &&
                (pSearchStateSpace->eps_satisfied == INFINITECOST ||
                (clock() - TimeStarted) < repair_time * (double)CLOCKS_PER_SEC))
@@ -1039,6 +1042,7 @@ int ARAPlanner::replan(vector<int>* solution_stateIDs_V, ReplanParams params, in
     bsearchuntilfirstsolution = params.return_first_solution;
     use_repair_time = params.repair_time > 0;
     repair_time = params.repair_time;
+    MaxExpands = params.max_expands;
     return replan(params.max_time, solution_stateIDs_V, solcost);
 }
 
@@ -1068,6 +1072,7 @@ int ARAPlanner::replan(double allocated_time_secs, vector<int>* solution_stateID
     {
         SBPL_PRINTF("failed to find a solution\n");
     }
+    MaxExpands = INFINITECOST;
 
     //copy the solution
     *solution_stateIDs_V = pathIds;

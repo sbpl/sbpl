@@ -88,6 +88,7 @@ public:
         dec_eps = 0.2;
         return_first_solution = false;
         repair_time = -1;
+        max_expands = -1;
     }
 
     /**
@@ -129,6 +130,8 @@ public:
      *        longer amount of time (maxTime) to get the first solution. 
      */
     double repair_time;
+
+    unsigned int max_expands;
 };
 
 class PlannerStats
