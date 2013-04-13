@@ -196,11 +196,11 @@ void ARAPlanner::InitializeSearchStateInfo(ARAState* state, ARASearchStateSpace_
     //compute heuristics
 #if USE_HEUR
     if(pSearchStateSpace->searchgoalstate != NULL)
-    state->h = ComputeHeuristic(state->MDPstate, pSearchStateSpace);
+        state->h = ComputeHeuristic(state->MDPstate, pSearchStateSpace);
     else
-    state->h = 0;
+        state->h = 0;
 #else
-    state->h = 0;
+        state->h = 0;
 #endif
 }
 
@@ -641,6 +641,7 @@ int ARAPlanner::SetSearchGoalState(int SearchGoalStateID, ARASearchStateSpace_t*
 
         //recompute heuristic for the heap if heuristics is used
 #if USE_HEUR
+        environment_->EnsureHeuristicsUpdated(bforwardsearch);
         for(int i = 0; i < (int)pSearchStateSpace->searchMDP.StateArray.size(); i++)
         {
             CMDPSTATE* MDPstate = pSearchStateSpace->searchMDP.StateArray[i];
@@ -931,7 +932,8 @@ bool ARAPlanner::Search(ARASearchStateSpace_t* pSearchStateSpace, vector<int>& p
         //decrease eps for all subsequent iterations
         if (fabs(pSearchStateSpace->eps_satisfied - pSearchStateSpace->eps) < ERR_EPS && !bFirstSolution) {
             pSearchStateSpace->eps = pSearchStateSpace->eps - dec_eps;
-            if (pSearchStateSpace->eps < final_epsilon) pSearchStateSpace->eps = final_epsilon;
+            if (pSearchStateSpace->eps < final_epsilon)
+                pSearchStateSpace->eps = final_epsilon;
 
             //the priorities need to be updated
             pSearchStateSpace->bReevaluatefvals = true;
@@ -949,7 +951,8 @@ bool ARAPlanner::Search(ARASearchStateSpace_t* pSearchStateSpace, vector<int>& p
         }
 
         //re-compute f-values if necessary and reorder the heap
-        if (pSearchStateSpace->bReevaluatefvals) Reevaluatefvals(pSearchStateSpace);
+        if (pSearchStateSpace->bReevaluatefvals)
+            Reevaluatefvals(pSearchStateSpace);
 
         //improve or compute path
         if (ImprovePath(pSearchStateSpace, MaxNumofSecs) == 1) {
@@ -986,10 +989,12 @@ bool ARAPlanner::Search(ARASearchStateSpace_t* pSearchStateSpace, vector<int>& p
         prevexpands = searchexpands;
 
         //if just the first solution then we are done
-        if (bFirstSolution) break;
+        if (bFirstSolution)
+            break;
 
         //no solution exists
-        if (((ARAState*)pSearchStateSpace->searchgoalstate->PlannerSpecificData)->g == INFINITECOST) break;
+        if (((ARAState*)pSearchStateSpace->searchgoalstate->PlannerSpecificData)->g == INFINITECOST)
+            break;
     }
     repair_time = old_repair_time;
 

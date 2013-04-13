@@ -905,13 +905,6 @@ void get_2d_footprint_cells(vector<sbpl_2Dpt_t> polygon, set<sbpl_2Dcell_t>* cel
     sbpl_bfs_2d bfs(sizex, sizey, 1);
     bfs.compute_distance_from_point(grid, 0, 0);
 
-    //	for (int i = 0; i < sizex; i++) {
-    //		for (int j = 0; j < sizey; j++) {
-    //			printf("%d ", grid[i][j] != 0);
-    //		}
-    //		printf("\n");
-    //	}
-    printf("\n");
     for (int i = 0; i < sizex; i++)
         delete[] grid[i];
     delete[] grid;
@@ -920,11 +913,8 @@ void get_2d_footprint_cells(vector<sbpl_2Dpt_t> polygon, set<sbpl_2Dcell_t>* cel
     for (int i = 1; i < sizex - 1; i++) {
         for (int j = 1; j < sizey - 1; j++) {
             if (bfs.get_distance(i, j) < 0) cells->insert(sbpl_2Dcell_t(i - 1 + minx, j - 1 + miny));
-            //			printf("%d ", bfs.get_distance(i, j) < 0);
         }
-        //		printf("\n");
     }
-    //	printf("\n");
 }
 
 void writePlannerStats(vector<PlannerStats> s, FILE* fout)
