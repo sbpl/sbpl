@@ -44,7 +44,9 @@
 #define EnvNAVXYTHETALAT3Dpt_t sbpl_xy_theta_pt_t
 #define EnvNAVXYTHETALAT3Dcell_t sbpl_xy_theta_cell_t
 
-#define NORMALIZEDISCTHETA(THETA, THETADIRS) (((THETA>=0)?((THETA)%(THETADIRS)):(((THETA)%(THETADIRS)+THETADIRS)%THETADIRS)))
+#define NORMALIZEDISCTHETA(THETA, THETADIRS) (((THETA >= 0) ?\
+            ((THETA) % (THETADIRS)) :\
+            (((THETA) % (THETADIRS) + THETADIRS) % THETADIRS)))
 
 #define CONTXY2DISC(X, CELLSIZE) (((X)>=0)?((int)((X)/(CELLSIZE))):((int)((X)/(CELLSIZE))-1))
 #define DISCXY2CONT(X, CELLSIZE) ((X)*(CELLSIZE) + (CELLSIZE)/2.0)
@@ -84,12 +86,12 @@ public:
         y = y_;
     }
 
-    bool operator ==(const sbpl_2Dcell_t cell) const
+    bool operator==(const sbpl_2Dcell_t cell) const
     {
         return x == cell.x && y == cell.y;
     }
 
-    bool operator <(const sbpl_2Dcell_t cell) const
+    bool operator<(const sbpl_2Dcell_t cell) const
     {
         return x < cell.x || (x == cell.x && y < cell.y);
     }
@@ -113,12 +115,12 @@ public:
         y = y_;
     }
 
-    bool operator ==(const sbpl_2Dpt_t p) const
+    bool operator==(const sbpl_2Dpt_t p) const
     {
         return x == p.x && y == p.y;
     }
 
-    bool operator <(const sbpl_2Dpt_t p) const
+    bool operator<(const sbpl_2Dpt_t p) const
     {
         return x < p.x || (x == p.x && y < p.y);
     }
@@ -144,12 +146,12 @@ public:
         theta = theta_;
     }
 
-    bool operator ==(const sbpl_xy_theta_cell_t cell) const
+    bool operator==(const sbpl_xy_theta_cell_t cell) const
     {
         return x == cell.x && y == cell.y && theta == cell.theta;
     }
 
-    bool operator <(const sbpl_xy_theta_cell_t cell) const
+    bool operator<(const sbpl_xy_theta_cell_t cell) const
     {
         return x < cell.x || (x == cell.x && (y < cell.y || (y == cell.y && theta < cell.theta)));
     }
@@ -176,12 +178,12 @@ public:
         theta = theta_;
     }
 
-    bool operator ==(const sbpl_xy_theta_pt_t p) const
+    bool operator==(const sbpl_xy_theta_pt_t p) const
     {
         return x == p.x && y == p.y && theta == p.theta;
     }
 
-    bool operator <(const sbpl_xy_theta_pt_t p) const
+    bool operator<(const sbpl_xy_theta_pt_t p) const
     {
         return x < p.x || (x == p.x && (y < p.y || (y == p.y && theta < p.theta)));
     }
@@ -221,8 +223,8 @@ void EnableMemCheck();
 #endif
 void CheckMDP(CMDP* mdp);
 void PrintMatrix(int** matrix, int rows, int cols, FILE* fOut);
-void EvaluatePolicy(CMDP* PolicyMDP, int StartStateID, int GoalStateID, double* PolValue, bool *bFullPolicy,
-                    double *Pcgoal, int* nMerges, bool *bCycles);
+void EvaluatePolicy(CMDP* PolicyMDP, int StartStateID, int GoalStateID, double* PolValue, bool* bFullPolicy,
+                    double* Pcgoal, int* nMerges, bool* bCycles);
 int ComputeNumofStochasticActions(CMDP* pMDP);
 
 /**
@@ -230,19 +232,19 @@ int ComputeNumofStochasticActions(CMDP* pMDP);
  *        path following this function computes bresenham parameters given the
  *        start and end points on the line segment
  */
-void get_bresenham_parameters(int p1x, int p1y, int p2x, int p2y, bresenham_param_t *params);
+void get_bresenham_parameters(int p1x, int p1y, int p2x, int p2y, bresenham_param_t* params);
 
 /**
  * \brief one of the three functions that correspond to bresenham algorithm of
  *        path following returns current cell on the line segment
  */
-void get_current_point(bresenham_param_t *params, int *x, int *y);
+void get_current_point(bresenham_param_t* params, int* x, int* y);
 
 /**
  * \brief one of the three functions that correspond to bresenham algorithm of
  *        path following moves to the next point
  */
-int get_next_point(bresenham_param_t *params);
+int get_next_point(bresenham_param_t* params);
 
 /**
  * \brief converts discretized version of angle into continuous (radians)
@@ -288,9 +290,8 @@ void get_2d_motion_cells(std::vector<sbpl_2Dpt_t> polygon, std::vector<sbpl_xy_t
 
 void get_2d_footprint_cells(std::vector<sbpl_2Dpt_t> polygon, std::vector<sbpl_2Dcell_t>* cells,
                             sbpl_xy_theta_pt_t pose, double res);
-void
-    get_2d_footprint_cells(std::vector<sbpl_2Dpt_t> polygon, std::set<sbpl_2Dcell_t>* cells, sbpl_xy_theta_pt_t pose,
-                           double res);
+void get_2d_footprint_cells(std::vector<sbpl_2Dpt_t> polygon, std::set<sbpl_2Dcell_t>* cells, sbpl_xy_theta_pt_t pose,
+                            double res);
 
 void writePlannerStats(std::vector<PlannerStats> s, FILE* fout);
 

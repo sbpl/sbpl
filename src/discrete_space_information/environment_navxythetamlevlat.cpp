@@ -200,6 +200,7 @@ bool EnvironmentNAVXYTHETAMLEVLAT::IsValidConfiguration(int X, int Y, int Theta)
     for (int levind = 0; levind < numofadditionalzlevs; levind++) {
 
         //compute footprint cells
+        footprint.clear();
         get_2d_footprint_cells(AddLevelFootprintPolygonV[levind], &footprint, pose, EnvNAVXYTHETALATCfg.cellsize_m);
 
         //iterate over all footprint cells
@@ -359,6 +360,7 @@ bool EnvironmentNAVXYTHETAMLEVLAT::InitializeAdditionalLevels(int numofadditiona
 
     //print out the size of a footprint for each additional level
     for (levelind = 0; levelind < numofadditionalzlevs; levelind++) {
+        footprint.clear();
         get_2d_footprint_cells(AddLevelFootprintPolygonV[levelind], &footprint, temppose,
                                EnvNAVXYTHETALATCfg.cellsize_m);
         SBPL_PRINTF("number of cells in footprint for additional level %d = %d\n", levelind,

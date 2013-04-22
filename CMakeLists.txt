@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.8)
 PROJECT( sbpl )
 
+set(CMAKE_BUILD_TYPE Release)
+
 include_directories(src/include)
 
 add_library(sbpl SHARED
