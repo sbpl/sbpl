@@ -311,6 +311,7 @@ protected:
     virtual void BuildNewOPENList(ARASearchStateSpace_t* pSearchStateSpace);
 
     virtual void Reevaluatefvals(ARASearchStateSpace_t* pSearchStateSpace);
+    virtual void Reevaluatehvals(ARASearchStateSpace_t* pSearchStateSpace);
 
     //creates (allocates memory) search state space
     //does not initialize search statespace
