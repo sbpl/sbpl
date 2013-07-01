@@ -503,6 +503,16 @@ void ARAPlanner::Reevaluatefvals(ARASearchStateSpace_t* pSearchStateSpace)
     pSearchStateSpace->bReevaluatefvals = false;
 }
 
+void ARAPlanner::Reevaluatehvals(ARASearchStateSpace_t* pSearchStateSpace)
+{
+    for(int i = 0; i < (int)pSearchStateSpace->searchMDP.StateArray.size(); i++)
+    {
+        CMDPSTATE* MDPstate = pSearchStateSpace->searchMDP.StateArray[i];
+        ARAState* state = (ARAState*)MDPstate->PlannerSpecificData;
+        state->h = ComputeHeuristic(MDPstate, pSearchStateSpace);
+    }
+}
+
 //creates (allocates memory) search state space
 //does not initialize search statespace
 int ARAPlanner::CreateSearchStateSpace(ARASearchStateSpace_t* pSearchStateSpace)
@@ -639,16 +649,8 @@ int ARAPlanner::SetSearchGoalState(int SearchGoalStateID, ARASearchStateSpace_t*
         pSearchStateSpace->bNewSearchIteration = true;
         pSearchStateSpace_->eps = this->finitial_eps;
 
-        //recompute heuristic for the heap if heuristics is used
 #if USE_HEUR
-        environment_->EnsureHeuristicsUpdated(bforwardsearch);
-        for(int i = 0; i < (int)pSearchStateSpace->searchMDP.StateArray.size(); i++)
-        {
-            CMDPSTATE* MDPstate = pSearchStateSpace->searchMDP.StateArray[i];
-            ARAState* state = (ARAState*)MDPstate->PlannerSpecificData;
-            state->h = ComputeHeuristic(MDPstate, pSearchStateSpace);
-        }
-
+        //recompute heuristic for the heap if heuristics is used
         pSearchStateSpace->bReevaluatefvals = true;
 #endif
     }
@@ -895,15 +897,22 @@ bool ARAPlanner::Search(ARASearchStateSpace_t* pSearchStateSpace, vector<int>& p
     TimeStarted = clock();
     searchexpands = 0;
     double old_repair_time = repair_time;
-    if (!use_repair_time) repair_time = MaxNumofSecs;
+    if (!use_repair_time)
+        repair_time = MaxNumofSecs;
 
 #if DEBUG
     SBPL_FPRINTF(fDeb, "new search call (call number=%d)\n", pSearchStateSpace->callnumber);
 #endif
 
-    if (pSearchStateSpace->bReinitializeSearchStateSpace == true) {
+    if (pSearchStateSpace->bReinitializeSearchStateSpace) {
         //re-initialize state space
         ReInitializeSearchStateSpace(pSearchStateSpace);
+    }
+
+    if (pSearchStateSpace->bReevaluatefvals) {
+        // costs have changed or a new goal has been set
+        environment_->EnsureHeuristicsUpdated(bforwardsearch);
+        Reevaluatehvals(pSearchStateSpace);
     }
 
     if (bOptimalSolution) {
@@ -915,9 +924,6 @@ bool ARAPlanner::Search(ARASearchStateSpace_t* pSearchStateSpace, vector<int>& p
         MaxNumofSecs = INFINITECOST;
         repair_time = INFINITECOST;
     }
-
-    //ensure heuristics are up-to-date
-    environment_->EnsureHeuristicsUpdated((bforwardsearch == true));
 
     //the main loop of ARA*
     stats.clear();
