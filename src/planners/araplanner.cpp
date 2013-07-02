@@ -176,7 +176,7 @@ int ARAPlanner::ComputeHeuristic(CMDPSTATE* MDPstate, ARASearchStateSpace_t* pSe
     }
 }
 
-//initialization of a state
+// initialization of a state
 void ARAPlanner::InitializeSearchStateInfo(ARAState* state, ARASearchStateSpace_t* pSearchStateSpace)
 {
     state->g = INFINITECOST;
@@ -904,15 +904,15 @@ bool ARAPlanner::Search(ARASearchStateSpace_t* pSearchStateSpace, vector<int>& p
     SBPL_FPRINTF(fDeb, "new search call (call number=%d)\n", pSearchStateSpace->callnumber);
 #endif
 
-    if (pSearchStateSpace->bReinitializeSearchStateSpace) {
-        //re-initialize state space
-        ReInitializeSearchStateSpace(pSearchStateSpace);
-    }
-
     if (pSearchStateSpace->bReevaluatefvals) {
         // costs have changed or a new goal has been set
         environment_->EnsureHeuristicsUpdated(bforwardsearch);
         Reevaluatehvals(pSearchStateSpace);
+    }
+
+    if (pSearchStateSpace->bReinitializeSearchStateSpace) {
+        //re-initialize state space
+        ReInitializeSearchStateSpace(pSearchStateSpace);
     }
 
     if (bOptimalSolution) {
@@ -1131,11 +1131,13 @@ int ARAPlanner::set_start(int start_stateID)
 
 void ARAPlanner::costs_changed(StateChangeQuery const & stateChange)
 {
+    pSearchStateSpace_->bReevaluatefvals = true;
     pSearchStateSpace_->bReinitializeSearchStateSpace = true;
 }
 
 void ARAPlanner::costs_changed()
 {
+    pSearchStateSpace_->bReevaluatefvals = true;
     pSearchStateSpace_->bReinitializeSearchStateSpace = true;
 }
 
@@ -1153,8 +1155,10 @@ int ARAPlanner::force_planning_from_scratch_and_free_memory()
     SBPL_PRINTF("planner: forceplanfromscratch set\n");
     int start_id = -1;
     int goal_id = -1;
-    if (pSearchStateSpace_->searchstartstate) start_id = pSearchStateSpace_->searchstartstate->StateID;
-    if (pSearchStateSpace_->searchgoalstate) goal_id = pSearchStateSpace_->searchgoalstate->StateID;
+    if (pSearchStateSpace_->searchstartstate)
+        start_id = pSearchStateSpace_->searchstartstate->StateID;
+    if (pSearchStateSpace_->searchgoalstate)
+        goal_id = pSearchStateSpace_->searchgoalstate->StateID;
 
     if (!bforwardsearch) {
         int temp = start_id;
@@ -1162,15 +1166,17 @@ int ARAPlanner::force_planning_from_scratch_and_free_memory()
         goal_id = temp;
     }
 
-    DeleteSearchStateSpace( pSearchStateSpace_);
+    DeleteSearchStateSpace(pSearchStateSpace_);
     CreateSearchStateSpace(pSearchStateSpace_);
     InitializeSearchStateSpace(pSearchStateSpace_);
     for (unsigned int i = 0; i < environment_->StateID2IndexMapping.size(); i++)
         for (int j = 0; j < NUMOFINDICES_STATEID2IND; j++)
             environment_->StateID2IndexMapping[i][j] = -1;
 
-    if (start_id >= 0) set_start(start_id);
-    if (goal_id >= 0) set_goal(goal_id);
+    if (start_id >= 0)
+        set_start(start_id);
+    if (goal_id >= 0)
+        set_goal(goal_id);
     return 1;
 }
 
