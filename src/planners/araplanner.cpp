@@ -919,6 +919,11 @@ bool ARAPlanner::Search(ARASearchStateSpace_t* pSearchStateSpace, vector<int>& p
         ReInitializeSearchStateSpace(pSearchStateSpace);
     }
 
+    ARAState* searchgoalstate = (ARAState*)(pSearchStateSpace->searchgoalstate->PlannerSpecificData);
+    if (searchgoalstate->callnumberaccessed != pSearchStateSpace->callnumber) {
+        ReInitializeSearchStateInfo(searchgoalstate, pSearchStateSpace);
+    }
+
     if (bOptimalSolution) {
         pSearchStateSpace->eps = 1;
         MaxNumofSecs = INFINITECOST;
