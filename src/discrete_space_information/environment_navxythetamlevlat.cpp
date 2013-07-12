@@ -265,7 +265,6 @@ int EnvironmentNAVXYTHETAMLEVLAT::GetActionCostacrossAddLevels(int SourceX, int 
             interm3Dcell.y >= EnvNAVXYTHETALATCfg.EnvHeight_c)
         {
             maxcellcost = EnvNAVXYTHETALATCfg.obsthresh;
-            maxcellcostateachlevel[levelind] = EnvNAVXYTHETALATCfg.obsthresh;
             break;
         }
 

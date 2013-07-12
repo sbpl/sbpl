@@ -122,6 +122,11 @@ bool PathExists(CMDP* pMarkovChain, CMDPSTATE* sourcestate, CMDPSTATE* targetsta
     bool *bProcessed = new bool[pMarkovChain->StateArray.size()];
     bool bFound = false;
 
+    for (i = 0; i < (int)pMarkovChain->StateArray.size(); i++) 
+    {
+        bProcessed[i] = false;
+    }
+
     //insert the source state
     WorkList.push_back(sourcestate);
     while ((int)WorkList.size() > 0) {
@@ -292,6 +297,9 @@ void EvaluatePolicy(CMDP* PolicyMDP, int StartStateID, int GoalStateID, double* 
     } //until delta small
 
     *PolValue = vals[startind];
+
+    delete vals;
+    delete Pcvals;
 
     SBPL_PRINTF("done\n");
 }
