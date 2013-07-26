@@ -1153,7 +1153,6 @@ int EnvironmentROBARM::SizeofCreatedEnv()
 
 void EnvironmentROBARM::PrintState(int stateID, bool bVerbose, FILE* fOut /*=NULL*/)
 {
-    bool bLocal = false;
 
 #if DEBUG
     if(stateID >= (int)EnvROBARM.StateID2CoordTable.size())
@@ -1174,12 +1173,8 @@ void EnvironmentROBARM::PrintState(int stateID, bool bVerbose, FILE* fOut /*=NUL
         SBPL_FPRINTF(fOut, "the state is a goal state\n");
         bGoal = true;
     }
-
-    if (bLocal) {
-        printangles(fOut, HashEntry->coord, bGoal, bVerbose, true);
-    }
-    else
-        printangles(fOut, HashEntry->coord, bGoal, bVerbose, false);
+    
+    printangles(fOut, HashEntry->coord, bGoal, bVerbose, false);
 }
 
 //get the goal as a successor of source state at given cost
