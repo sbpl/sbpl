@@ -205,11 +205,8 @@ for angleind = 1:numberofangles
                     intermcells_m(iind,:) = [startpt(1) + (endpt(1) - startpt(1))*(iind-1)/(numofsamples-1) ...
                                             startpt(2) + (endpt(2) - startpt(2))*(iind-1)/(numofsamples-1) ...
                                             0];
-                    if endpt(3) == 0 && startpt(3) == 2*pi.*(numberofangles-1)/(numberofangles);
-                        intermcells_m(iind,3) = rem(startpt(3) + (2*pi - startpt(3) )*(iind-1)/(numofsamples-1), 2*pi);
-                    else
-                        intermcells_m(iind,3) = rem(startpt(3) + (endpt(3) - startpt(3))*(iind-1)/(numofsamples-1), 2*pi);
-                    end
+                    rotation_angle = (baseendpose_c(3) ) * (2*pi/numberofangles);
+                    intermcells_m(iind,3) = rem(startpt(3) + (rotation_angle)*(iind-1)/(numofsamples-1), 2*pi);
                                                                                     
                 end;            
             else %unicycle-based move forward or backward
