@@ -272,7 +272,7 @@ for angleind = 1:numberofangles
                         dtheta = rv*(dt - l/tv) + startpt(3);
                         intermcells_m(iind,:) = [startpt(1) + l*cos(startpt(3)) + tvoverrv*(sin(dtheta) - sin(startpt(3))) ...
                                                  startpt(2) + l*sin(startpt(3)) - tvoverrv*(cos(dtheta) - cos(startpt(3))) ...
-                                                 dtheta];1
+                                                 dtheta];
                     end;
                 end; 
                 %correct
