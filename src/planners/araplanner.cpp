@@ -652,6 +652,7 @@ int ARAPlanner::SetSearchGoalState(int SearchGoalStateID, ARASearchStateSpace_t*
         pSearchStateSpace->eps_satisfied = INFINITECOST;
         pSearchStateSpace->bNewSearchIteration = true;
         pSearchStateSpace_->eps = this->finitial_eps;
+        pSearchStateSpace_->bRebuildOpenList = true;
 
 #if USE_HEUR
         //recompute heuristic for the heap if heuristics is used
@@ -1102,8 +1103,6 @@ int ARAPlanner::set_goal(int goal_stateID)
     SBPL_PRINTF("planner: setting goal to %d\n", goal_stateID);
     environment_->PrintState(goal_stateID, true, stdout);
 
-    pSearchStateSpace_->bRebuildOpenList = true;
-
     if (bforwardsearch) {
         if (SetSearchGoalState(goal_stateID, pSearchStateSpace_) != 1) {
             SBPL_ERROR("ERROR: failed to set search goal state\n");
@@ -1124,8 +1123,6 @@ int ARAPlanner::set_start(int start_stateID)
 {
     SBPL_PRINTF("planner: setting start to %d\n", start_stateID);
     environment_->PrintState(start_stateID, true, stdout);
-
-    pSearchStateSpace_->bRebuildOpenList = true;
 
     if (bforwardsearch) {
         if (SetSearchStartState(start_stateID, pSearchStateSpace_) != 1) {
