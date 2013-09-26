@@ -602,8 +602,13 @@ void ARAPlanner::ReInitializeSearchStateSpace(ARASearchStateSpace_t* pSearchStat
     if (startstateinfo->callnumberaccessed != pSearchStateSpace->callnumber) {
         ReInitializeSearchStateInfo(startstateinfo, pSearchStateSpace);
     }
-
     startstateinfo->g = 0;
+    
+    //initialize goal state
+    ARAState* searchgoalstate = (ARAState*)(pSearchStateSpace->searchgoalstate->PlannerSpecificData);
+    if (searchgoalstate->callnumberaccessed != pSearchStateSpace->callnumber) {
+        ReInitializeSearchStateInfo(searchgoalstate, pSearchStateSpace);
+    }
 
     //insert start state into the heap
     key.key[0] = (long int)(pSearchStateSpace->eps * startstateinfo->h);
@@ -918,11 +923,6 @@ bool ARAPlanner::Search(ARASearchStateSpace_t* pSearchStateSpace, vector<int>& p
     if (pSearchStateSpace->bReinitializeSearchStateSpace) {
         //re-initialize state space
         ReInitializeSearchStateSpace(pSearchStateSpace);
-    }
-
-    ARAState* searchgoalstate = (ARAState*)(pSearchStateSpace->searchgoalstate->PlannerSpecificData);
-    if (searchgoalstate->callnumberaccessed != pSearchStateSpace->callnumber) {
-        ReInitializeSearchStateInfo(searchgoalstate, pSearchStateSpace);
     }
 
     if (bOptimalSolution) {
