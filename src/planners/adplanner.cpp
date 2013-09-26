@@ -189,6 +189,17 @@ int ADPlanner::ComputeHeuristic(CMDPSTATE* MDPstate, ADSearchStateSpace_t* pSear
     }
 }
 
+void ADPlanner::ReComputeHeuristic(ADState* state, ADSearchStateSpace_t* pSearchStateSpace)
+{
+	state->last_heuristic_iteration = pSearchStateSpace->heuristic_searchiteration;
+	CMDPSTATE * MDPstate = state->MDPstate;
+	if(pSearchStateSpace->searchgoalstate != NULL)
+		state->h = ComputeHeuristic(MDPstate, pSearchStateSpace); 
+	else 
+		state-> h = 0;
+
+}
+
 //initialization of a state
 void ADPlanner::InitializeSearchStateInfo(ADState* state, ADSearchStateSpace_t* pSearchStateSpace)
 {
@@ -207,6 +218,7 @@ void ADPlanner::InitializeSearchStateInfo(ADState* state, ADSearchStateSpace_t* 
 
     //compute heuristics
 #if USE_HEUR
+    state->last_heuristic_iteration = pSearchStateSpace->heuristic_searchiteration;
     if(pSearchStateSpace->searchgoalstate != NULL)
     state->h = ComputeHeuristic(state->MDPstate, pSearchStateSpace);
     else
@@ -234,6 +246,7 @@ void ADPlanner::ReInitializeSearchStateInfo(ADState* state, ADSearchStateSpace_t
 
     //compute heuristics
 #if USE_HEUR
+    state->last_heuristic_iteration = pSearchStateSpace->heuristic_searchiteration;
     if(pSearchStateSpace->searchgoalstate != NULL)
     {
         state->h = ComputeHeuristic(state->MDPstate, pSearchStateSpace);
@@ -339,6 +352,12 @@ void ADPlanner::UpdatePredsofOverconsState(ADState* state, ADSearchStateSpace_t*
         if (predstate->callnumberaccessed != pSearchStateSpace->callnumber) {
             ReInitializeSearchStateInfo(predstate, pSearchStateSpace);
         }
+        
+#if USE_HEUR
+		if(predstate->last_heuristic_iteration != pSearchStateSpace->heuristic_searchiteration)
+	    	ReComputeHeuristic(predstate, pSearchStateSpace);
+#endif
+        
 
         //see if we can improve the value of predstate
         if (predstate->g > state->v + CostV[pind]) {
@@ -387,6 +406,11 @@ void ADPlanner::UpdateSuccsofOverconsState(ADState* state, ADSearchStateSpace_t*
         if (succstate->callnumberaccessed != pSearchStateSpace->callnumber) {
             ReInitializeSearchStateInfo(succstate, pSearchStateSpace);
         }
+        
+#if USE_HEUR
+		if(succstate->last_heuristic_iteration != pSearchStateSpace->heuristic_searchiteration)
+	    	ReComputeHeuristic(succstate, pSearchStateSpace);
+#endif
 
         //see if we can improve the value of succstate
         //taking into account the cost of action
@@ -418,6 +442,11 @@ void ADPlanner::UpdatePredsofUnderconsState(ADState* state, ADSearchStateSpace_t
         if (predstate->callnumberaccessed != pSearchStateSpace->callnumber) {
             ReInitializeSearchStateInfo(predstate, pSearchStateSpace);
         }
+        
+#if USE_HEUR
+		if(predstate->last_heuristic_iteration != pSearchStateSpace->heuristic_searchiteration)
+	    	ReComputeHeuristic(predstate, pSearchStateSpace);
+#endif        
 
         if (predstate->bestnextstate == state->MDPstate) {
             Recomputegval(predstate);
@@ -453,6 +482,11 @@ void ADPlanner::UpdateSuccsofUnderconsState(ADState* state, ADSearchStateSpace_t
         if (succstate->callnumberaccessed != pSearchStateSpace->callnumber) {
             ReInitializeSearchStateInfo(succstate, pSearchStateSpace);
         }
+        
+#if USE_HEUR
+		if(succstate->last_heuristic_iteration != pSearchStateSpace->heuristic_searchiteration)
+	    	ReComputeHeuristic(succstate, pSearchStateSpace);
+#endif        
 
         if (succstate->bestpredstate == state->MDPstate) {
             Recomputegval(succstate);
@@ -471,12 +505,13 @@ int ADPlanner::GetGVal(int StateID, ADSearchStateSpace_t* pSearchStateSpace)
 //returns 1 if the solution is found, 0 if the solution does not exist and 2 if it ran out of time
 int ADPlanner::ComputePath(ADSearchStateSpace_t* pSearchStateSpace, double MaxNumofSecs)
 {
-    int expands;
+    int expands, under_expands;
     ADState *state, *searchgoalstate;
     CKey key, minkey;
     CKey goalkey;
 
     expands = 0;
+    under_expands = 0;
 
     if (pSearchStateSpace->searchgoalstate == NULL) {
         SBPL_ERROR("ERROR searching: no goal state is set\n");
@@ -569,6 +604,8 @@ int ADPlanner::ComputePath(ADSearchStateSpace_t* pSearchStateSpace, double MaxNu
             }
             else
                 UpdateSuccsofUnderconsState(state, pSearchStateSpace);
+ 
+            under_expands ++;
 
         }
 
@@ -620,6 +657,7 @@ int ADPlanner::ComputePath(ADSearchStateSpace_t* pSearchStateSpace, double MaxNu
     //SBPL_FPRINTF(fDeb, "expanded=%d\n", expands);
 
     searchexpands += expands;
+    searchunderexpands += under_expands;
 
     return retv;
 }
@@ -670,6 +708,29 @@ void ADPlanner::Reevaluatefvals(ADSearchStateSpace_t* pSearchStateSpace)
     pSearchStateSpace->bReevaluatefvals = false;
 }
 
+void ADPlanner::Reevaluatehvals(ADSearchStateSpace_t* pSearchStateSpace)
+{
+	int i;
+	CHeap* pheap = pSearchStateSpace->heap;
+	
+	for (i = 1; i <= pheap->currentsize; ++i)
+	{
+		ADState* state = (ADState*)pheap->heap[i].heapstate;
+		ReComputeHeuristic(state, pSearchStateSpace);
+	}
+	
+	//Recompute heuristic for goal state
+	ADState* goal = (ADState*) (pSearchStateSpace->searchgoalstate->PlannerSpecificData);
+	ReComputeHeuristic(goal, pSearchStateSpace);
+	
+	pSearchStateSpace->bReevaluatehvals = false;
+	pSearchStateSpace->bReevaluatefvals = true;
+	
+#if DEBUG
+	SBPL_PRINTF("re-evaluated heuristic values for %d states\n", i);
+#endif
+}
+
 //creates (allocates memory) search state space
 //does not initialize search statespace
 int ADPlanner::CreateSearchStateSpace(ADSearchStateSpace_t* pSearchStateSpace)
@@ -684,6 +745,7 @@ int ADPlanner::CreateSearchStateSpace(ADSearchStateSpace_t* pSearchStateSpace)
     pSearchStateSpace->searchstartstate = NULL;
 
     searchexpands = 0;
+    searchunderexpands = 0;
 
     pSearchStateSpace->bReinitializeSearchStateSpace = false;
 
@@ -764,6 +826,8 @@ void ADPlanner::ReInitializeSearchStateSpace(ADSearchStateSpace_t* pSearchStateS
     pSearchStateSpace->bReinitializeSearchStateSpace = false;
     pSearchStateSpace->bReevaluatefvals = false;
     pSearchStateSpace->bRebuildOpenList = false;
+    pSearchStateSpace->heuristic_searchiteration = 0;  
+    
 }
 
 //very first initialization
@@ -780,6 +844,8 @@ int ADPlanner::InitializeSearchStateSpace(ADSearchStateSpace_t* pSearchStateSpac
     pSearchStateSpace->callnumber = 0;
     pSearchStateSpace->bReevaluatefvals = false;
     pSearchStateSpace->bRebuildOpenList = false;
+    pSearchStateSpace->bReevaluatehvals = false;
+    pSearchStateSpace->heuristic_searchiteration = 0; 
 
     //create and set the search start state
     pSearchStateSpace->searchgoalstate = NULL;
@@ -803,20 +869,7 @@ int ADPlanner::SetSearchGoalState(int SearchGoalStateID, ADSearchStateSpace_t* p
         pSearchStateSpace_->eps = this->finitial_eps;
 
         //recompute heuristic for the heap if heuristics is used
-#if USE_HEUR
-        int i;
-        //TODO - should get rid of and instead use iteration to re-compute h-values online as needed
-        for (i = 0; i < (int)pSearchStateSpace->searchMDP.StateArray.size(); i++) {
-            CMDPSTATE* MDPstate = pSearchStateSpace->searchMDP.StateArray[i];
-            ADState* state = (ADState*)MDPstate->PlannerSpecificData;
-            state->h = ComputeHeuristic(MDPstate, pSearchStateSpace);
-        }
-#if DEBUG
-        SBPL_PRINTF("re-evaluated heuristic values for %d states\n", i);
-#endif
-
-        pSearchStateSpace->bReevaluatefvals = true;
-#endif
+        pSearchStateSpace->bReevaluatehvals = true;
     }
 
     return 1;
@@ -1149,6 +1202,15 @@ bool ADPlanner::Search(ADSearchStateSpace_t* pSearchStateSpace, vector<int>& pat
 
         //build a new open list by merging it with incons one
         if (pSearchStateSpace->bRebuildOpenList) BuildNewOPENList(pSearchStateSpace);
+	
+#if USE_HEUR
+        //re-compute h-values if necessary
+        if(pSearchStateSpace->bReevaluatehvals)
+        {
+	    	pSearchStateSpace->heuristic_searchiteration++;
+            Reevaluatehvals(pSearchStateSpace);
+        }
+#endif	
 
         //re-compute f-values if necessary and reorder the heap
         if (pSearchStateSpace->bReevaluatefvals) Reevaluatefvals(pSearchStateSpace);
@@ -1206,6 +1268,11 @@ bool ADPlanner::Search(ADSearchStateSpace_t* pSearchStateSpace, vector<int>& pat
     if (PathCost == INFINITECOST || pSearchStateSpace_->eps_satisfied == INFINITECOST) {
         SBPL_PRINTF("could not find a solution\n");
         ret = false;
+        if(searchunderexpands >= searchexpands * 0.8 && searchexpands > 10) 
+        {
+            SBPL_PRINTF("MAJORITY OF EXPANSIONS WERE UNDERCONSISTENT (%d %d) Force plan from scrath.", searchunderexpands, searchexpands);
+            force_planning_from_scratch();
+        }	
     }
     else {
         SBPL_PRINTF("solution is found\n");
@@ -1233,7 +1300,13 @@ void ADPlanner::Update_SearchSuccs_of_ChangedEdges(vector<int> const * statesIDV
         SBPL_PRINTF("skipping affected states and instead restarting planner from scratch\n");
         pSearchStateSpace_->bReinitializeSearchStateSpace = true;
     }
-
+    
+    //recompute heuristic for the heap if heuristics is used
+    else
+    {
+        pSearchStateSpace_->bReevaluatehvals = true;
+    }
+	
     //it will be a new search iteration
     pSearchStateSpace_->searchiteration++;
 
