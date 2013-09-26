@@ -1268,7 +1268,7 @@ bool ADPlanner::Search(ADSearchStateSpace_t* pSearchStateSpace, vector<int>& pat
     if (PathCost == INFINITECOST || pSearchStateSpace_->eps_satisfied == INFINITECOST) {
         SBPL_PRINTF("could not find a solution\n");
         ret = false;
-        if(searchunderexpands >= searchexpands * 0.8) 
+        if(searchunderexpands >= searchexpands * 0.8 && searchexpands > 10) 
         {
             SBPL_PRINTF("MAJORITY OF EXPANSIONS WERE UNDERCONSISTENT (%d %d) Force plan from scrath.", searchunderexpands, searchexpands);
             force_planning_from_scratch();
