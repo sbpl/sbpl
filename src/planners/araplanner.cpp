@@ -529,6 +529,7 @@ int ARAPlanner::CreateSearchStateSpace(ARASearchStateSpace_t* pSearchStateSpace)
     pSearchStateSpace->searchstartstate = NULL;
 
     searchexpands = 0;
+    num_of_expands_initial_solution = -1;
 
     pSearchStateSpace->bReinitializeSearchStateSpace = false;
 
@@ -901,6 +902,7 @@ bool ARAPlanner::Search(ARASearchStateSpace_t* pSearchStateSpace, vector<int>& p
     CKey key;
     TimeStarted = clock();
     searchexpands = 0;
+    num_of_expands_initial_solution = -1;
     double old_repair_time = repair_time;
     if (!use_repair_time)
         repair_time = MaxNumofSecs;
