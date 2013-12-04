@@ -121,6 +121,12 @@ bool PathExists(CMDP* pMarkovChain, CMDPSTATE* sourcestate, CMDPSTATE* targetsta
     int i;
     bool *bProcessed = new bool[pMarkovChain->StateArray.size()];
     bool bFound = false;
+    
+    for (i = 0; i < (int)pMarkovChain->StateArray.size(); i++) 
+    {
+        bProcessed[i] = false;
+    }
+
 
     //insert the source state
     WorkList.push_back(sourcestate);
