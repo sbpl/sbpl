@@ -529,6 +529,7 @@ int ARAPlanner::CreateSearchStateSpace(ARASearchStateSpace_t* pSearchStateSpace)
     pSearchStateSpace->searchstartstate = NULL;
 
     searchexpands = 0;
+    num_of_expands_initial_solution = -1;
 
     pSearchStateSpace->bReinitializeSearchStateSpace = false;
 
@@ -602,8 +603,13 @@ void ARAPlanner::ReInitializeSearchStateSpace(ARASearchStateSpace_t* pSearchStat
     if (startstateinfo->callnumberaccessed != pSearchStateSpace->callnumber) {
         ReInitializeSearchStateInfo(startstateinfo, pSearchStateSpace);
     }
-
     startstateinfo->g = 0;
+    
+    //initialize goal state
+    ARAState* searchgoalstate = (ARAState*)(pSearchStateSpace->searchgoalstate->PlannerSpecificData);
+    if (searchgoalstate->callnumberaccessed != pSearchStateSpace->callnumber) {
+        ReInitializeSearchStateInfo(searchgoalstate, pSearchStateSpace);
+    }
 
     //insert start state into the heap
     key.key[0] = (long int)(pSearchStateSpace->eps * startstateinfo->h);
@@ -652,6 +658,7 @@ int ARAPlanner::SetSearchGoalState(int SearchGoalStateID, ARASearchStateSpace_t*
         pSearchStateSpace->eps_satisfied = INFINITECOST;
         pSearchStateSpace->bNewSearchIteration = true;
         pSearchStateSpace_->eps = this->finitial_eps;
+        pSearchStateSpace_->bRebuildOpenList = true;
 
 #if USE_HEUR
         //recompute heuristic for the heap if heuristics is used
@@ -900,6 +907,7 @@ bool ARAPlanner::Search(ARASearchStateSpace_t* pSearchStateSpace, vector<int>& p
     CKey key;
     TimeStarted = clock();
     searchexpands = 0;
+    num_of_expands_initial_solution = -1;
     double old_repair_time = repair_time;
     if (!use_repair_time)
         repair_time = MaxNumofSecs;
@@ -917,11 +925,6 @@ bool ARAPlanner::Search(ARASearchStateSpace_t* pSearchStateSpace, vector<int>& p
     if (pSearchStateSpace->bReinitializeSearchStateSpace) {
         //re-initialize state space
         ReInitializeSearchStateSpace(pSearchStateSpace);
-    }
-
-    ARAState* searchgoalstate = (ARAState*)(pSearchStateSpace->searchgoalstate->PlannerSpecificData);
-    if (searchgoalstate->callnumberaccessed != pSearchStateSpace->callnumber) {
-        ReInitializeSearchStateInfo(searchgoalstate, pSearchStateSpace);
     }
 
     if (bOptimalSolution) {
@@ -1102,8 +1105,6 @@ int ARAPlanner::set_goal(int goal_stateID)
     SBPL_PRINTF("planner: setting goal to %d\n", goal_stateID);
     environment_->PrintState(goal_stateID, true, stdout);
 
-    pSearchStateSpace_->bRebuildOpenList = true;
-
     if (bforwardsearch) {
         if (SetSearchGoalState(goal_stateID, pSearchStateSpace_) != 1) {
             SBPL_ERROR("ERROR: failed to set search goal state\n");
@@ -1124,8 +1125,6 @@ int ARAPlanner::set_start(int start_stateID)
 {
     SBPL_PRINTF("planner: setting start to %d\n", start_stateID);
     environment_->PrintState(start_stateID, true, stdout);
-
-    pSearchStateSpace_->bRebuildOpenList = true;
 
     if (bforwardsearch) {
         if (SetSearchStartState(start_stateID, pSearchStateSpace_) != 1) {

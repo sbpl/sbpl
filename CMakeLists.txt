@@ -21,7 +21,8 @@ add_library(sbpl SHARED
   src/utils/heap.cpp
   src/utils/mdp.cpp
   src/utils/utils.cpp
-  src/utils/2Dgridsearch.cpp	
+  src/utils/2Dgridsearch.cpp
+  src/utils/config.cpp	
   )
 
 set(PKG_NAME "sbpl")

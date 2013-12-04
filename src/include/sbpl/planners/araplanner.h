@@ -244,7 +244,7 @@ public:
     virtual double get_final_eps_planning_time() { return final_eps_planning_time; }
 
     /**
-     * \brief returns the number of expands to find the first solution
+     * \brief Return the number of expands to find the first solution or -1 if no solution has been found.
      */
     virtual int get_n_expands_init_solution() { return num_of_expands_initial_solution; }
 

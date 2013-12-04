@@ -76,18 +76,39 @@
 #else
 #include <cstdio>
 
-#define SBPL_DEBUG          printf
-#define SBPL_DEBUG_NAMED    fprintf
-#define SBPL_INFO           printf
-#define SBPL_WARN           printf
-#define SBPL_ERROR          printf
-#define SBPL_FATAL          printf
+#define SBPL_LEVEL_NONE   0
+#define SBPL_LEVEL_DEBUG  1
+#define SBPL_LEVEL_INFO   2
+#define SBPL_LEVEL_WARN   3
+#define SBPL_LEVEL_ERROR  4
+#define SBPL_LEVEL_FATAL  5
 
-#define SBPL_FOPEN          fopen
-#define SBPL_FCLOSE         fclose
-#define SBPL_PRINTF         printf
-#define SBPL_FPRINTF        fprintf
-#define SBPL_FFLUSH         fflush
+typedef int (*SBPL_PRINT_TEXT_FP)(int level, const char*);
+typedef int (*SBPL_FFLUSH_TEXT_FP)(FILE*);
+
+extern SBPL_PRINT_TEXT_FP sbpl_print_fp;
+extern SBPL_FFLUSH_TEXT_FP sbpl_fflush_fp;
+
+void SET_SBPL_PRINT_TEXT_FP(SBPL_PRINT_TEXT_FP fptr); 
+void SET_SBPL_FFLUSH_TEXT_FP(SBPL_FFLUSH_TEXT_FP fptr);
+
+int SBPL_PRINTALL(int level, const char* format, ...);
+int SBPL_FPRINTALL(FILE* file, const char* format, ...);
+int SBPL_FFLUSHALL(FILE* file);
+
+#define SBPL_DEBUG(...)             SBPL_PRINTALL(SBPL_LEVEL_DEBUG, __VA_ARGS__)
+#define SBPL_DEBUG_NAMED(file, ...) SBPL_FPRINTALL(file, __VA_ARGS__)
+#define SBPL_INFO(...)              SBPL_PRINTALL(SBPL_LEVEL_INFO, __VA_ARGS__)
+#define SBPL_WARN(...)              SBPL_PRINTALL(SBPL_LEVEL_WARN, __VA_ARGS__)
+#define SBPL_ERROR(...)             SBPL_PRINTALL(SBPL_LEVEL_ERROR, __VA_ARGS__)
+#define SBPL_FATAL(...)             SBPL_PRINTALL(SBPL_LEVEL_FATAL, __VA_ARGS__)
+
+#define SBPL_FOPEN                  fopen
+#define SBPL_FCLOSE                 fclose
+#define SBPL_PRINTF(...)            SBPL_PRINTALL(SBPL_LEVEL_NONE, __VA_ARGS__)
+#define SBPL_FPRINTF(file, ...)     SBPL_FPRINTALL(file, __VA_ARGS__)
+#define SBPL_FFLUSH(file)           SBPL_FFLUSHALL(file)
+
 #endif
 
 #endif
