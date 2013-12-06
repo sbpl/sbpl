@@ -124,7 +124,6 @@ typedef struct ARASEARCHSTATESPACE
     bool bReevaluatefvals;
     bool bReinitializeSearchStateSpace;
     bool bNewSearchIteration;
-    bool bRebuildOpenList;
 } ARASearchStateSpace_t;
 
 /**
