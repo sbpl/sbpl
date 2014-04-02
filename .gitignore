@@ -8,6 +8,7 @@ sol.txt
 bin/*
 lib/*
 CMakeFiles/*
+build/*
 
 .project
 .cproject
