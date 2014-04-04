@@ -28,6 +28,9 @@
  */
 
  #include <cstdio>
+ #ifdef ROS
+ #include <ros/ros.h>
+ #endif
 
 #ifndef __CONFIG_H_
 #define __CONFIG_H_
@@ -104,7 +107,6 @@ int SBPL_FFLUSHALL(FILE* file);
 
 // File Output Logger Macros
 #ifdef ROS
-#include <ros/ros.h>
 #define SBPL_DEBUG_NAMED(a,...)     ROS_DEBUG_NAMED("SBPL_" #a,__VA_ARGS__)
 
 #define SBPL_FOPEN(...)             (FILE*)1
