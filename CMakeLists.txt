@@ -25,12 +25,24 @@ add_library(sbpl SHARED
   src/utils/config.cpp	
   )
 
+set(SBPL_INCLUDE_DIR "${CMAKE_INSTALL_PREFIX}/include")
+set(SBPL_LIB_DIR "${CMAKE_INSTALL_PREFIX}/lib")
+  
+# support for pkg-config
 set(PKG_NAME "sbpl")
 set(PKG_DESC "The Search Based Planning Library")
 set(PKG_SBPL_LIBS "-lsbpl")
-set(pkg_conf_file "${CMAKE_CURRENT_SOURCE_DIR}/sbpl.pc")
-configure_file("${pkg_conf_file}.in" "${pkg_conf_file}" @ONLY)
+set(pkg_conf_file_in "${CMAKE_CURRENT_SOURCE_DIR}/sbpl.pc.in")
+set(pkg_conf_file "${PROJECT_BINARY_DIR}/InstallFiles/sbpl.pc")
+configure_file("${pkg_conf_file_in}" "${pkg_conf_file}" @ONLY)
 install(FILES ${pkg_conf_file} DESTINATION lib/pkgconfig/ COMPONENT pkgconfig)
+
+# support for cmake-config:
+configure_file(sbpl-config.cmake.in
+"${PROJECT_BINARY_DIR}/InstallFiles/sbpl-config.cmake" @ONLY)
+install(FILES
+  "${PROJECT_BINARY_DIR}/InstallFiles/sbpl-config.cmake"
+DESTINATION share/sbpl/)
 
 install(DIRECTORY src/include/sbpl DESTINATION include
 	FILES_MATCHING PATTERN "*.h")
