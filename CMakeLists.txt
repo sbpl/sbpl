@@ -1,6 +1,12 @@
 cmake_minimum_required(VERSION 2.8)
 PROJECT( sbpl )
 
+# version (e.g. for packaging)
+set(SBPL_MAJOR_VERSION 1)
+set(SBPL_MINOR_VERSION 1)
+set(SBPL_PATCH_VERSION 4)
+set(SBPL_VERSION ${SBPL_MAJOR_VERSION}.${SBPL_MINOR_VERSION}.${SBPL_PATCH_VERSION})
+
 set(CMAKE_BUILD_TYPE Release)
 
 include_directories(src/include)
@@ -39,9 +45,12 @@ install(FILES ${pkg_conf_file} DESTINATION lib/pkgconfig/ COMPONENT pkgconfig)
 
 # support for cmake-config:
 configure_file(sbpl-config.cmake.in
-"${PROJECT_BINARY_DIR}/InstallFiles/sbpl-config.cmake" @ONLY)
+  "${PROJECT_BINARY_DIR}/InstallFiles/sbpl-config.cmake" @ONLY)
+configure_file(sbpl-config-version.cmake.in
+  "${PROJECT_BINARY_DIR}/InstallFiles/sbpl-config-version.cmake" @ONLY)
 install(FILES
   "${PROJECT_BINARY_DIR}/InstallFiles/sbpl-config.cmake"
+  "${PROJECT_BINARY_DIR}/InstallFiles/sbpl-config-version.cmake"
 DESTINATION share/sbpl/)
 
 install(DIRECTORY src/include/sbpl DESTINATION include
