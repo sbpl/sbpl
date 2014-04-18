@@ -1453,6 +1453,12 @@ int ADPlanner::set_search_mode(bool bSearchUntilFirstSolution)
 
 void ADPlanner::costs_changed(StateChangeQuery const & stateChange)
 {
+    //recompute f values
+    pSearchStateSpace_->bReevaluatefvals = true;
+
+    //no processing if no search efforts anyway
+    if (pSearchStateSpace_->bReinitializeSearchStateSpace == true || pSearchStateSpace_->searchiteration == 0) return; 
+
     if (bforwardsearch)
         Update_SearchSuccs_of_ChangedEdges(stateChange.getSuccessors());
     else
