@@ -313,6 +313,7 @@ protected:
     virtual void BuildNewOPENList(ADSearchStateSpace_t* pSearchStateSpace);
 
     virtual void Reevaluatefvals(ADSearchStateSpace_t* pSearchStateSpace);
+    virtual void Reevaluatehvals(ADSearchStateSpace_t* pSearchStateSpace);
 
     //creates (allocates memory) search state space
     //does not initialize search statespace
