@@ -484,8 +484,6 @@ void ARAPlanner::BuildNewOPENList(ARASearchStateSpace_t* pSearchStateSpace)
         //remove from INCONS
         pinconslist->remove(state, ARA_INCONS_LIST_ID);
     }
-
-    pSearchStateSpace->bRebuildOpenList = false;
 }
 
 void ARAPlanner::Reevaluatefvals(ARASearchStateSpace_t* pSearchStateSpace)
@@ -618,7 +616,6 @@ void ARAPlanner::ReInitializeSearchStateSpace(ARASearchStateSpace_t* pSearchStat
 
     pSearchStateSpace->bReinitializeSearchStateSpace = false;
     pSearchStateSpace->bReevaluatefvals = false;
-    pSearchStateSpace->bRebuildOpenList = false;
 }
 
 //very first initialization
@@ -635,7 +632,6 @@ int ARAPlanner::InitializeSearchStateSpace(ARASearchStateSpace_t* pSearchStateSp
     pSearchStateSpace->bNewSearchIteration = true;
     pSearchStateSpace->callnumber = 0;
     pSearchStateSpace->bReevaluatefvals = false;
-    pSearchStateSpace->bRebuildOpenList = false;
 
     //create and set the search start state
     pSearchStateSpace->searchgoalstate = NULL;
@@ -658,7 +654,6 @@ int ARAPlanner::SetSearchGoalState(int SearchGoalStateID, ARASearchStateSpace_t*
         pSearchStateSpace->eps_satisfied = INFINITECOST;
         pSearchStateSpace->bNewSearchIteration = true;
         pSearchStateSpace_->eps = this->finitial_eps;
-        pSearchStateSpace_->bRebuildOpenList = true;
 
 #if USE_HEUR
         //recompute heuristic for the heap if heuristics is used
@@ -955,18 +950,15 @@ bool ARAPlanner::Search(ARASearchStateSpace_t* pSearchStateSpace, vector<int>& p
 
             //the priorities need to be updated
             pSearchStateSpace->bReevaluatefvals = true;
-            pSearchStateSpace->bRebuildOpenList = true;
 
             //it will be a new search
             pSearchStateSpace->bNewSearchIteration = true;
-        }
-
-        if (pSearchStateSpace->bRebuildOpenList)
-            BuildNewOPENList(pSearchStateSpace);
+        }           
 
         if (pSearchStateSpace->bNewSearchIteration) {
             pSearchStateSpace->searchiteration++;
             pSearchStateSpace->bNewSearchIteration = false;
+            BuildNewOPENList(pSearchStateSpace);
         }
 
         //re-compute f-values if necessary and reorder the heap
@@ -1146,14 +1138,12 @@ void ARAPlanner::costs_changed(StateChangeQuery const & stateChange)
 {
     pSearchStateSpace_->bReevaluatefvals = true;
     pSearchStateSpace_->bReinitializeSearchStateSpace = true;
-    pSearchStateSpace_->bRebuildOpenList = true;
 }
 
 void ARAPlanner::costs_changed()
 {
     pSearchStateSpace_->bReevaluatefvals = true;
     pSearchStateSpace_->bReinitializeSearchStateSpace = true;
-    pSearchStateSpace_->bRebuildOpenList = true;
 }
 
 int ARAPlanner::force_planning_from_scratch()
