@@ -139,6 +139,35 @@ public:
      */
     virtual void GetSuccs(int SourceStateID, std::vector<int>* SuccIDV, std::vector<int>* CostV);
 
+
+    virtual void GetLazySuccs(int SourceStateID, std::vector<int>* SuccIDV, std::vector<int>* CostV, std::vector<bool>* isTrueCost){
+      GetSuccs(SourceStateID, SuccIDV, CostV);
+      isTrueCost->resize(SuccIDV->size(),true);
+    };
+    virtual void GetSuccsWithUniqueIds(int SourceStateID, std::vector<int>* SuccIDV, std::vector<int>* CostV){
+      GetSuccs(SourceStateID, SuccIDV, CostV);
+    };
+    virtual void GetLazySuccsWithUniqueIds(int SourceStateID, std::vector<int>* SuccIDV, std::vector<int>* CostV, std::vector<bool>* isTrueCost){
+      GetLazySuccs(SourceStateID, SuccIDV, CostV, isTrueCost);
+    };
+
+    virtual int GetTrueCost(int parentID, int childID){return -1;};//FIXME: this shouldn't ever be called because we always return true cost...
+
+    virtual bool isGoal(int id){
+      return EnvNAV2D.goalstateid == id;
+    };
+
+    virtual void GetLazyPreds(int TargetStateID, std::vector<int>* PredIDV, std::vector<int>* CostV, std::vector<bool>* isTrueCost){
+      GetPreds(TargetStateID, PredIDV, CostV);
+      isTrueCost->resize(PredIDV->size(),true);
+    };
+    virtual void GetPredsWithUniqueIds(int TargetStateID, std::vector<int>* PredIDV, std::vector<int>* CostV){
+      GetPreds(TargetStateID, PredIDV, CostV);
+    };
+    virtual void GetLazyPredsWithUniqueIds(int TargetStateID, std::vector<int>* PredIDV, std::vector<int>* CostV, std::vector<bool>* isTrueCost){
+      GetLazyPreds(TargetStateID, PredIDV, CostV, isTrueCost);
+    };
+
     /**
      * \brief see comments on the same function in the parent class
      */

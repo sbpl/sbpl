@@ -57,6 +57,7 @@
 #include <sbpl/planners/ppcpplanner.h>
 #include <sbpl/planners/rstarplanner.h>
 #include <sbpl/planners/viplanner.h>
+#include <sbpl/planners/lazyARA.h>
 #include <sbpl/utils/2Dgridsearch.h>
 #include <sbpl/utils/heap.h>
 #include <sbpl/utils/list.h>
