@@ -24,6 +24,7 @@ add_library(sbpl SHARED
   src/planners/ppcpplanner.cpp
   src/planners/ANAplanner.cpp
   src/planners/rstarplanner.cpp
+  src/planners/lazyARA.cpp
   src/utils/heap.cpp
   src/utils/mdp.cpp
   src/utils/utils.cpp
