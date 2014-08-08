@@ -77,7 +77,7 @@ LazyARAState* LazyARAPlanner::GetState(int id){
 }
 
 void LazyARAPlanner::ExpandState(LazyARAState* parent){
-  bool print = false; //parent->id == 285566;
+  bool print = false; //parent->id == goal_state_id; //parent->id == 285566;
   if(print)
     printf("expand %d\n",parent->id);
   vector<int> children;
@@ -103,7 +103,7 @@ void LazyARAPlanner::ExpandState(LazyARAState* parent){
 //it's minimum f-value is an underestimate (the edge cost from the parent is a guess and needs to be evaluated properly)
 //it hasn't been expanded yet this iteration
 void LazyARAPlanner::EvaluateState(LazyARAState* state){
-  bool print = false; //state->id == 285566;
+  bool print = false; //state->id == goal_state_id; //state->id == 285566;
   if(print)
     printf("evaluate %d (from %d)\n",state->id, state->best_parent->id);
   LazyARAState* parent = state->best_parent;
@@ -115,8 +115,15 @@ void LazyARAPlanner::EvaluateState(LazyARAState* state){
   //printf("parent_id=%d\n",parent->id);
   int trueCost = environment_->GetTrueCost(parent->id, state->id);
   //printf("has a true cost of %d\n",trueCost);
-  if(trueCost > 0) //if the evaluated true cost is valid (positive), insert it into the lazy list
+  if(trueCost > 0){ //if the evaluated true cost is valid (positive), insert it into the lazy list
+    if(print)
+      printf("  edge is valid with cost %d added to parent->v=%d\n",trueCost,parent->v);
     insertLazyList(state,parent,trueCost,true);
+  }
+  else{
+    if(print)
+      printf("  edge not valid\n");
+  }
 }
 
 //this should only be used with EvaluateState since it is assuming state hasn't been expanded yet (only evaluated)
@@ -141,9 +148,9 @@ void LazyARAPlanner::getNextLazyElement(LazyARAState* state){
 }
 
 void LazyARAPlanner::insertLazyList(LazyARAState* state, LazyARAState* parent, int edgeCost, bool isTrueCost){
-  bool print = false; //state->id == 285566 || parent->id == 285566;
+  bool print = false; //state->id == goal_state_id; //state->id == 285566 || parent->id == 285566;
   if(print)
-    printf("state->id=%d state->g=%d parent->v=%d edgeCost=%d isTrueCost=%d\n",state->id,state->g,parent->v,edgeCost,isTrueCost);
+    printf("insertLazyList state->id=%d parent->id=%d state->g=%d parent->v=%d edgeCost=%d isTrueCost=%d\n",state->id,parent->id,state->g,parent->v,edgeCost,isTrueCost);
   if(state->v <= parent->v + edgeCost)
     return;
   else if(state->g <= parent->v + edgeCost){
@@ -184,12 +191,12 @@ void LazyARAPlanner::insertLazyList(LazyARAState* state, LazyARAState* parent, i
 }
 
 void LazyARAPlanner::putStateInHeap(LazyARAState* state){
-  bool print = false; //state->id == 285566;
+  bool print = false; //state->id == goal_state_id; //state->id == 285566;
   //we only allow one expansion per search iteration
   //so insert into heap if not closed yet
   if(state->iteration_closed != search_iteration){
     if(print)
-      printf("put state in open\n");
+      printf("put state %d in open with state->g=%d and state->isTrueCost=%d\n",state->id,state->g,state->isTrueCost);
     CKey key;
     key.key[0] = state->g + int(eps * state->h);
     //if the state is already in the heap, just update its priority
@@ -203,7 +210,7 @@ void LazyARAPlanner::putStateInHeap(LazyARAState* state){
   //that we know we have better costs for
   else if(!state->in_incons){
     if(print)
-      printf("put state in incons\n");
+      printf("put state %d in incons with state->g and state->isTrueCost=%d\n",state->id,state->g,state->isTrueCost);
     incons.push_back(state);
     state->in_incons = true;
   }
@@ -218,6 +225,7 @@ int LazyARAPlanner::ImprovePath(){
   while(!heap.emptyheap() && 
         min_key.key[0] < INFINITECOST && 
         (goal_state->g > min_key.key[0] || !goal_state->isTrueCost) &&
+        (goal_state->v > min_key.key[0]) &&
         !outOfTime()){
 
     //get the state		
@@ -250,6 +258,20 @@ int LazyARAPlanner::ImprovePath(){
   }
 
   search_expands += expands;
+
+  if(goal_state->v < goal_state->g){
+    goal_state->g = goal_state->v;
+    goal_state->best_parent = goal_state->expanded_best_parent;
+  }
+
+  /*
+  if(goal_state->g == INFINITECOST)
+    printf("goal g is inf\n");
+  if(heap.emptyheap())
+    printf("heap empty\n");
+  if(min_key.key[0] >= INFINITECOST)
+    printf("min key inf\n");
+  */
    
   if(goal_state->g == INFINITECOST && (heap.emptyheap() || min_key.key[0] >= INFINITECOST))
     return 0;//solution does not exists
@@ -469,6 +491,16 @@ void LazyARAPlanner::prepareNextSearchIteration(){
 
 
 //-----------------------------Interface function-----------------------------------------------------
+int LazyARAPlanner::replan(double allocated_time_secs, std::vector<int>* solution_stateIDs_V){
+  int solcost;
+  return replan(allocated_time_secs, solution_stateIDs_V, &solcost);
+}
+
+int LazyARAPlanner::replan(double allocated_time_sec, std::vector<int>* solution_stateIDs_V, int* solcost){
+  params.max_time = allocated_time_sec;
+  return replan(solution_stateIDs_V, params, solcost);
+}
+
 int LazyARAPlanner::replan(vector<int>* solution_stateIDs_V, ReplanParams p){
   int solcost;
   return replan(solution_stateIDs_V, p, &solcost);

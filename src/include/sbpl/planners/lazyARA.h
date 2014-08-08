@@ -68,15 +68,8 @@ class LazyListElement{
 class LazyARAPlanner : public SBPLPlanner{
 
 public:
-	virtual int replan(double allocated_time_secs, std::vector<int>* solution_stateIDs_V){
-    printf("Not supported. Use ReplanParams");
-    return -1;
-  };
-	virtual int replan(double allocated_time_sec, std::vector<int>* solution_stateIDs_V, int* solcost){
-    printf("Not supported. Use ReplanParams");
-    return -1;
-  };
-
+	virtual int replan(double allocated_time_secs, std::vector<int>* solution_stateIDs_V);
+	virtual int replan(double allocated_time_sec, std::vector<int>* solution_stateIDs_V, int* solcost);
   virtual int replan(int start, int goal, std::vector<int>* solution_stateIDs_V, ReplanParams params, int* solcost);
   virtual int replan(std::vector<int>* solution_stateIDs_V, ReplanParams params);
   virtual int replan(std::vector<int>* solution_stateIDs_V, ReplanParams params, int* solcost);
@@ -91,18 +84,40 @@ public:
   virtual int force_planning_from_scratch_and_free_memory(){return 1;};
 
 	virtual int set_search_mode(bool bSearchUntilFirstSolution){
-    printf("Not supported. Use ReplanParams");
-    return -1;
+    params.return_first_solution = bSearchUntilFirstSolution;
+    return 1;
   };
 
 	virtual void set_initialsolution_eps(double initialsolution_eps){
-    printf("Not supported. Use ReplanParams");
+    params.initial_eps = initialsolution_eps;
   };
 
   LazyARAPlanner(DiscreteSpaceInformation* environment, bool bforwardsearch);
   ~LazyARAPlanner(){};
 
   virtual void get_search_stats(std::vector<PlannerStats>* s);
+
+  double get_initial_eps(){ 
+    if(stats.empty()) return -1;
+    return stats.front().eps; };
+  double get_solution_eps() const { 
+    if(stats.empty()) return -1;
+    return stats.back().eps; };
+  double get_final_epsilon() { 
+    if(stats.empty()) return -1;
+    return stats.back().eps; };
+  double get_initial_eps_planning_time(){ 
+    if(stats.empty()) return -1;
+    return stats.front().time; };
+  double get_final_eps_planning_time(){ 
+    if(stats.empty()) return -1;
+    return totalPlanTime; };
+  int get_n_expands_init_solution(){ 
+    if(stats.empty()) return -1;
+    return stats.front().expands; };
+  int get_n_expands() const { 
+    if(stats.empty()) return -1;
+    return totalExpands; };
 
 protected:
   //data structures (open and incons lists)
