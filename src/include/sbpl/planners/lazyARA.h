@@ -81,7 +81,10 @@ public:
   virtual void costs_changed(){return;};
 
   virtual int force_planning_from_scratch(){return 1;};
-  virtual int force_planning_from_scratch_and_free_memory(){return 1;};
+  virtual int force_planning_from_scratch_and_free_memory(){
+    freeMemory();
+    return 1;
+  };
 
 	virtual int set_search_mode(bool bSearchUntilFirstSolution){
     params.return_first_solution = bSearchUntilFirstSolution;
@@ -93,7 +96,7 @@ public:
   };
 
   LazyARAPlanner(DiscreteSpaceInformation* environment, bool bforwardsearch);
-  ~LazyARAPlanner(){};
+  ~LazyARAPlanner();
 
   virtual void get_search_stats(std::vector<PlannerStats>* s);
 
@@ -155,6 +158,7 @@ protected:
   void getNextLazyElement(LazyARAState* state);
   void insertLazyList(LazyARAState* state, LazyARAState* parent, int edgeCost, bool isTrueCost);
   void putStateInHeap(LazyARAState* state);
+  void freeMemory();
 
 	virtual int ImprovePath();
 

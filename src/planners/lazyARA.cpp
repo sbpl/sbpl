@@ -39,6 +39,20 @@ LazyARAPlanner::LazyARAPlanner(DiscreteSpaceInformation* environment, bool bSear
   start_state_id = -1;
 }
 
+LazyARAPlanner::~LazyARAPlanner(){
+  freeMemory();
+}
+
+void LazyARAPlanner::freeMemory(){
+  heap.makeemptyheap();
+  incons.clear();
+  stats.clear();
+  for(unsigned int i=0; i<states.size(); i++)
+    if(states[i])
+      delete states[i];
+  states.clear();
+}
+
 LazyARAState* LazyARAPlanner::GetState(int id){	
   //if this stateID is out of bounds of our state vector then grow the list
   if(id >= int(states.size())){
@@ -373,6 +387,8 @@ void LazyARAPlanner::initializeSearch(){
   search_expands = 0;
   totalPlanTime = 0;
   totalExpands = 0;
+  reconstructTime = 0;
+  totalTime = 0;
 
   //clear open list, incons list, and stats list
   heap.makeemptyheap();
@@ -492,7 +508,7 @@ void LazyARAPlanner::prepareNextSearchIteration(){
 
 //-----------------------------Interface function-----------------------------------------------------
 int LazyARAPlanner::replan(double allocated_time_secs, std::vector<int>* solution_stateIDs_V){
-  int solcost;
+  int solcost = 0;
   return replan(allocated_time_secs, solution_stateIDs_V, &solcost);
 }
 
@@ -502,7 +518,7 @@ int LazyARAPlanner::replan(double allocated_time_sec, std::vector<int>* solution
 }
 
 int LazyARAPlanner::replan(vector<int>* solution_stateIDs_V, ReplanParams p){
-  int solcost;
+  int solcost = 0;
   return replan(solution_stateIDs_V, p, &solcost);
 }
 
