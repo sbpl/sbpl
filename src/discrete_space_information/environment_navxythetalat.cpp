@@ -2800,7 +2800,54 @@ bool EnvironmentNAVXYTHETALAT::isGoal(int id){
   return EnvNAVXYTHETALAT.goalstateid == id;
 }
 
-//void EnvironmentNAVXYTHETALAT::GetPreds(int TargetStateID, std::vector<int>* PredIDV, std::vector<int>* CostV, std::vector<bool>* isTrueCost);
-//void EnvironmentNAVXYTHETALAT::GetPredsWithUniqueIds(int TargetStateID, std::vector<int>* PredIDV, std::vector<int>* CostV);
-//void EnvironmentNAVXYTHETALAT::GetPredsWithUniqueIds(int TargetStateID, std::vector<int>* PredIDV, std::vector<int>* CostV, std::vector<bool>* isTrueCost);
+void EnvironmentNAVXYTHETALAT::GetLazyPreds(int TargetStateID, vector<int>* PredIDV, vector<int>* CostV, vector<bool>* isTrueCost)
+{
+  int aind;
+
+#if TIME_DEBUG
+  clock_t currenttime = clock();
+#endif
+
+  //get X, Y for the state
+  EnvNAVXYTHETALATHashEntry_t* HashEntry = StateID2CoordTable[TargetStateID];
+
+  //clear the successor array
+  PredIDV->clear();
+  CostV->clear();
+  PredIDV->reserve(EnvNAVXYTHETALATCfg.PredActionsV[(unsigned int)HashEntry->Theta].size());
+  CostV->reserve(EnvNAVXYTHETALATCfg.PredActionsV[(unsigned int)HashEntry->Theta].size());
+
+  //iterate through actions
+  vector<EnvNAVXYTHETALATAction_t*>* actionsV = &EnvNAVXYTHETALATCfg.PredActionsV[(unsigned int)HashEntry->Theta];
+  for (aind = 0; aind < (int)EnvNAVXYTHETALATCfg.PredActionsV[(unsigned int)HashEntry->Theta].size(); aind++) {
+
+    EnvNAVXYTHETALATAction_t* nav3daction = actionsV->at(aind);
+
+    int predX = HashEntry->X - nav3daction->dX;
+    int predY = HashEntry->Y - nav3daction->dY;
+    int predTheta = nav3daction->starttheta;
+
+    //skip the invalid cells
+    if (!IsValidCell(predX, predY)) continue;
+
+    EnvNAVXYTHETALATHashEntry_t* OutHashEntry;
+    if((OutHashEntry = (this->*GetHashEntry)(predX, predY, predTheta)) == NULL)
+      OutHashEntry = (this->*CreateNewHashEntry)(predX, predY, predTheta);
+    PredIDV->push_back(OutHashEntry->stateID);
+    CostV->push_back(nav3daction->cost);
+    isTrueCost->push_back(false);
+  }
+
+#if TIME_DEBUG
+  time_getsuccs += clock()-currenttime;
+#endif
+}
+
+void EnvironmentNAVXYTHETALAT::GetPredsWithUniqueIds(int TargetStateID, vector<int>* PredIDV, vector<int>* CostV){
+  GetPreds(TargetStateID, PredIDV, CostV);
+}
+
+void EnvironmentNAVXYTHETALAT::GetLazyPredsWithUniqueIds(int TargetStateID, vector<int>* PredIDV, vector<int>* CostV, vector<bool>* isTrueCost){
+  GetLazyPreds(TargetStateID, PredIDV, CostV, isTrueCost);
+}
 
