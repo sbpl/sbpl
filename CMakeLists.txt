@@ -3,8 +3,8 @@ PROJECT( sbpl )
 
 # version (e.g. for packaging)
 set(SBPL_MAJOR_VERSION 1)
-set(SBPL_MINOR_VERSION 1)
-set(SBPL_PATCH_VERSION 4)
+set(SBPL_MINOR_VERSION 2)
+set(SBPL_PATCH_VERSION 0)
 set(SBPL_VERSION ${SBPL_MAJOR_VERSION}.${SBPL_MINOR_VERSION}.${SBPL_PATCH_VERSION})
 
 set(CMAKE_BUILD_TYPE Release)
@@ -24,6 +24,7 @@ add_library(sbpl SHARED
   src/planners/ppcpplanner.cpp
   src/planners/ANAplanner.cpp
   src/planners/rstarplanner.cpp
+  src/planners/lazyARA.cpp
   src/utils/heap.cpp
   src/utils/mdp.cpp
   src/utils/utils.cpp

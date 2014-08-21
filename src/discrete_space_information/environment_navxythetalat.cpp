@@ -1715,6 +1715,15 @@ void EnvironmentNAVXYTHETALATTICE::GetSuccs(int SourceStateID, vector<int>* Succ
 {
     GetSuccs(SourceStateID, SuccIDV, CostV, NULL);
 }
+void EnvironmentNAVXYTHETALATTICE::GetLazySuccs(int SourceStateID, std::vector<int>* SuccIDV, std::vector<int>* CostV, std::vector<bool>* isTrueCost){
+    GetLazySuccs(SourceStateID, SuccIDV, CostV, isTrueCost, NULL);
+}
+void EnvironmentNAVXYTHETALATTICE::GetSuccsWithUniqueIds(int SourceStateID, std::vector<int>* SuccIDV, std::vector<int>* CostV){
+    GetSuccsWithUniqueIds(SourceStateID, SuccIDV, CostV, NULL);
+}
+void EnvironmentNAVXYTHETALATTICE::GetLazySuccsWithUniqueIds(int SourceStateID, std::vector<int>* SuccIDV, std::vector<int>* CostV, std::vector<bool>* isTrueCost){
+    GetLazySuccsWithUniqueIds(SourceStateID, SuccIDV, CostV, isTrueCost, NULL);
+}
 
 const EnvNAVXYTHETALATConfig_t* EnvironmentNAVXYTHETALATTICE::GetEnvNavConfig()
 {
@@ -2676,3 +2685,122 @@ int EnvironmentNAVXYTHETALAT::SizeofCreatedEnv()
 }
 
 //------------------------------------------------------------------------------
+
+
+void EnvironmentNAVXYTHETALAT::GetLazySuccs(int SourceStateID, std::vector<int>* SuccIDV, std::vector<int>* CostV, std::vector<bool>* isTrueCost,
+                                        std::vector<EnvNAVXYTHETALATAction_t*>* actionV /*=NULL*/)
+{
+    int aind;
+
+#if TIME_DEBUG
+    clock_t currenttime = clock();
+#endif
+
+    //clear the successor array
+    SuccIDV->clear();
+    CostV->clear();
+    SuccIDV->reserve(EnvNAVXYTHETALATCfg.actionwidth);
+    CostV->reserve(EnvNAVXYTHETALATCfg.actionwidth);
+    isTrueCost->reserve(EnvNAVXYTHETALATCfg.actionwidth);
+    if (actionV != NULL) {
+        actionV->clear();
+        actionV->reserve(EnvNAVXYTHETALATCfg.actionwidth);
+    }
+
+    //goal state should be absorbing
+    if (SourceStateID == EnvNAVXYTHETALAT.goalstateid) return;
+
+    //get X, Y for the state
+    EnvNAVXYTHETALATHashEntry_t* HashEntry = StateID2CoordTable[SourceStateID];
+
+    //iterate through actions
+    for (aind = 0; aind < EnvNAVXYTHETALATCfg.actionwidth; aind++) {
+        EnvNAVXYTHETALATAction_t* nav3daction = &EnvNAVXYTHETALATCfg.ActionsV[(unsigned int)HashEntry->Theta][aind];
+        int newX = HashEntry->X + nav3daction->dX;
+        int newY = HashEntry->Y + nav3daction->dY;
+        int newTheta = NORMALIZEDISCTHETA(nav3daction->endtheta, EnvNAVXYTHETALATCfg.NumThetaDirs);
+
+        //skip the invalid cells
+        if (!IsValidCell(newX, newY)) continue;
+
+        if(!actionV){//if we are supposed to return the action, then don't do lazy
+          EnvNAVXYTHETALATHashEntry_t* OutHashEntry;
+          if((OutHashEntry = (this->*GetHashEntry)(newX, newY, newTheta)) == NULL)
+            OutHashEntry = (this->*CreateNewHashEntry)(newX, newY, newTheta);
+          SuccIDV->push_back(OutHashEntry->stateID);
+          CostV->push_back(nav3daction->cost);
+          isTrueCost->push_back(false);
+          continue;
+        }
+
+        //get cost
+        int cost = GetActionCost(HashEntry->X, HashEntry->Y, HashEntry->Theta, nav3daction);
+        if (cost >= INFINITECOST) continue;
+
+        EnvNAVXYTHETALATHashEntry_t* OutHashEntry;
+        if ((OutHashEntry = (this->*GetHashEntry)(newX, newY, newTheta)) == NULL) {
+            //have to create a new entry
+            OutHashEntry = (this->*CreateNewHashEntry)(newX, newY, newTheta);
+        }
+
+        SuccIDV->push_back(OutHashEntry->stateID);
+        CostV->push_back(cost);
+        isTrueCost->push_back(true);
+        if (actionV != NULL) actionV->push_back(nav3daction);
+    }
+
+#if TIME_DEBUG
+    time_getsuccs += clock()-currenttime;
+#endif
+}
+
+int EnvironmentNAVXYTHETALAT::GetTrueCost(int parentID, int childID){
+  EnvNAVXYTHETALATHashEntry_t* fromHash = StateID2CoordTable[parentID];
+  EnvNAVXYTHETALATHashEntry_t* toHash = StateID2CoordTable[childID];
+
+  for(int i=0; i<EnvNAVXYTHETALATCfg.actionwidth; i++){
+    EnvNAVXYTHETALATAction_t* nav3daction = &EnvNAVXYTHETALATCfg.ActionsV[(unsigned int)fromHash->Theta][i];
+    int newX = fromHash->X + nav3daction->dX;
+    int newY = fromHash->Y + nav3daction->dY;
+    int newTheta = NORMALIZEDISCTHETA(nav3daction->endtheta, EnvNAVXYTHETALATCfg.NumThetaDirs);
+
+    //skip the invalid cells
+    if(!IsValidCell(newX, newY))
+      continue;
+
+    EnvNAVXYTHETALATHashEntry_t* hash;
+    if((hash = (this->*GetHashEntry)(newX, newY, newTheta)) == NULL)
+      continue;
+    if(hash->stateID != toHash->stateID)
+      continue;
+
+    //get cost
+    int cost = GetActionCost(fromHash->X, fromHash->Y, fromHash->Theta, nav3daction);
+
+    if(cost >= INFINITECOST)
+      return -1;
+    return cost;
+  }
+  printf("this should never happen! we didn't find the state we need to get the true cost for!\n");
+  throw new SBPL_Exception();
+  return -1;
+}
+
+void EnvironmentNAVXYTHETALAT::GetSuccsWithUniqueIds(int SourceStateID, std::vector<int>* SuccIDV, std::vector<int>* CostV,
+                                                     std::vector<EnvNAVXYTHETALATAction_t*>* actionV /*=NULL*/){
+  GetSuccs(SourceStateID, SuccIDV, CostV, actionV);
+}
+
+void EnvironmentNAVXYTHETALAT::GetLazySuccsWithUniqueIds(int SourceStateID, std::vector<int>* SuccIDV, std::vector<int>* CostV, std::vector<bool>* isTrueCost,
+                                                     std::vector<EnvNAVXYTHETALATAction_t*>* actionV /*=NULL*/){
+  GetLazySuccs(SourceStateID, SuccIDV, CostV, isTrueCost, actionV);
+}
+
+bool EnvironmentNAVXYTHETALAT::isGoal(int id){
+  return EnvNAVXYTHETALAT.goalstateid == id;
+}
+
+//void EnvironmentNAVXYTHETALAT::GetPreds(int TargetStateID, std::vector<int>* PredIDV, std::vector<int>* CostV, std::vector<bool>* isTrueCost);
+//void EnvironmentNAVXYTHETALAT::GetPredsWithUniqueIds(int TargetStateID, std::vector<int>* PredIDV, std::vector<int>* CostV);
+//void EnvironmentNAVXYTHETALAT::GetPredsWithUniqueIds(int TargetStateID, std::vector<int>* PredIDV, std::vector<int>* CostV, std::vector<bool>* isTrueCost);
+

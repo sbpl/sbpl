@@ -105,9 +105,83 @@ public:
     virtual void GetSuccs(int SourceStateID, std::vector<int>* SuccIDV, std::vector<int>* CostV) = 0;
 
     /**
+     * \brief This version is used with lazy planners. The environment must tell which successors have
+     *        been evaluated fully (and therefore their true cost is being returned) or if it has not been.
+     *        If a successor's cost is not true, then the cost must not overestimate the true cost.
+     */
+    virtual void GetLazySuccs(int SourceStateID, std::vector<int>* SuccIDV, std::vector<int>* CostV, std::vector<bool>* isTrueCost){
+      SBPL_ERROR("ERROR: GetLazySuccs is not implemented for this environment!\n");
+      throw new SBPL_Exception();
+    };
+
+    /**
+     * \brief This version of GetSuccs is needed for E-Graphs. It always returns a unique ID for 
+     *        every successor. Generally, this function operates the same as the usual GetSuccs
+     *        and only has different behavior when dealing with an underspecified goal condition
+     *        so that several different states will have to map to the same id number (most planners
+     *        in sbpl use a single goal id number to identify the goal). This function is used 
+     *        in conjunction with isGoal.
+     */
+    virtual void GetSuccsWithUniqueIds(int SourceStateID, std::vector<int>* SuccIDV, std::vector<int>* CostV){
+      SBPL_ERROR("ERROR: GetSuccsWithUniqueIds is not implemented for this environment!\n");
+      throw new SBPL_Exception();
+    };
+
+    /**
+     * \brief The lazy version of GetSuccsUniqueIds.
+     */
+    virtual void GetLazySuccsWithUniqueIds(int SourceStateID, std::vector<int>* SuccIDV, std::vector<int>* CostV, std::vector<bool>* isTrueCost){
+      SBPL_ERROR("ERROR: GetLazySuccsWithUniqueIds (lazy) is not implemented for this environment!\n");
+      throw new SBPL_Exception();
+    };
+
+    /**
+     * \brief Used with lazy planners. This evaluates a edge fully that had previously been provided by GetSuccs
+     *        without a "true cost". If the edge is found to be invalid, it should return -1
+     */
+    virtual int GetTrueCost(int parentID, int childID){
+      SBPL_ERROR("ERROR: GetTrueCost (used for lazy planning) is not implemented for this environment!\n");
+      throw new SBPL_Exception();
+      return -1;
+    };
+
+    /**
+     * \brief This function is generally used with E-Graphs (in conjunction with GetSuccsWithUniqueIds). 
+     */
+    virtual bool isGoal(int id){
+      SBPL_ERROR("ERROR: isGoal is not implemented for this environment!\n");
+      throw new SBPL_Exception();
+      return false;
+    };
+
+    /**
      * \brief see comments for GetSuccs functon
      */
     virtual void GetPreds(int TargetStateID, std::vector<int>* PredIDV, std::vector<int>* CostV) = 0;
+
+    /**
+     * \brief see comments for GetSuccs functon
+     */
+    virtual void GetLazyPreds(int TargetStateID, std::vector<int>* PredIDV, std::vector<int>* CostV, std::vector<bool>* isTrueCost){
+      SBPL_ERROR("ERROR: GetLazyPreds is not implemented for this environment!\n");
+      throw new SBPL_Exception();
+    };
+
+    /**
+     * \brief see comments for GetSuccs functon
+     */
+    virtual void GetPredsWithUniqueIds(int TargetStateID, std::vector<int>* PredIDV, std::vector<int>* CostV){
+      SBPL_ERROR("ERROR: GetPredsWithUniqueIds is not implemented for this environment!\n");
+      throw new SBPL_Exception();
+    };
+
+    /**
+     * \brief see comments for GetSuccs functon
+     */
+    virtual void GetLazyPredsWithUniqueIds(int TargetStateID, std::vector<int>* PredIDV, std::vector<int>* CostV, std::vector<bool>* isTrueCost){
+      SBPL_ERROR("ERROR: GetLazyPredsWithUniqueIds is not implemented for this environment!\n");
+      throw new SBPL_Exception();
+    };
      
     /**
      * \brief see comments for GetSuccs functon
