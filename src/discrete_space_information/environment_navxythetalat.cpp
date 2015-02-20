@@ -1945,6 +1945,58 @@ int EnvironmentNAVXYTHETALAT::GetStateFromCoord(int x, int y, int theta)
     return OutHashEntry->stateID;
 }
 
+void EnvironmentNAVXYTHETALAT::GetActionsFromStateIDPath(vector<int>* stateIDPath, 
+                                                             vector<EnvNAVXYTHETALATAction_t>* action_list)
+{
+    vector<EnvNAVXYTHETALATAction_t*> actionV;
+    vector<int> CostV;
+    vector<int> SuccIDV;
+    int targetx_c, targety_c, targettheta_c;
+    int sourcex_c, sourcey_c, sourcetheta_c;
+
+    SBPL_PRINTF("checks=%ld\n", checks);
+
+    action_list->clear();
+
+    for (int pind = 0; pind < (int)(stateIDPath->size()) - 1; pind++) {
+        int sourceID = stateIDPath->at(pind);
+        int targetID = stateIDPath->at(pind + 1);
+
+        //get successors and pick the target via the cheapest action
+        SuccIDV.clear();
+        CostV.clear();
+        actionV.clear();
+        GetSuccs(sourceID, &SuccIDV, &CostV, &actionV);
+
+        int bestcost = INFINITECOST;
+        int bestsind = -1;
+
+        for (int sind = 0; sind < (int)SuccIDV.size(); sind++) {
+            if (SuccIDV[sind] == targetID && CostV[sind] <= bestcost) {
+                bestcost = CostV[sind];
+                bestsind = sind;
+            }
+        }
+        if (bestsind == -1) {
+            SBPL_ERROR("ERROR: successor not found for transition:\n");
+            GetCoordFromState(sourceID, sourcex_c, sourcey_c, sourcetheta_c);
+            GetCoordFromState(targetID, targetx_c, targety_c, targettheta_c);
+            SBPL_PRINTF("%d %d %d -> %d %d %d\n", sourcex_c, sourcey_c, sourcetheta_c, targetx_c, targety_c,
+                        targettheta_c);
+            throw new SBPL_Exception();
+        }
+        
+#if DEBUG
+        SBPL_FPRINTF(fDeb, "Start: %.3f %.3f %.3f Target: %.3f %.3f %.3f Prim ID, Start Theta: %d %d\n",
+            sourcex_c, sourcey_c, sourcetheta_c,
+            targetx_c, targety_c, targettheta_c,
+            actionV[bestsind]->aind, actionV[bestsind]->starttheta);
+#endif
+        
+        action_list->push_back(*(actionV[bestsind]));
+    }
+}
+
 void EnvironmentNAVXYTHETALAT::ConvertStateIDPathintoXYThetaPath(vector<int>* stateIDPath,
                                                                  vector<sbpl_xy_theta_pt_t>* xythetaPath)
 {

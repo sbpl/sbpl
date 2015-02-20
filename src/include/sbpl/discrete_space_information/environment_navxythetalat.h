@@ -516,6 +516,12 @@ public:
      * \brief returns stateID for a state with coords x,y,theta
      */
     virtual int GetStateFromCoord(int x, int y, int theta);
+    
+    /**
+     * \brief returns the actions / motion primitives of the passed path.
+     */
+    virtual void GetActionsFromStateIDPath(std::vector<int>* stateIDPath, 
+                                           std::vector<EnvNAVXYTHETALATAction_t>* action_list);
 
     /** \brief converts a path given by stateIDs into a sequence of
      *         coordinates. Note that since motion primitives are short actions
