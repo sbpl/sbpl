@@ -9,7 +9,14 @@ set(SBPL_VERSION ${SBPL_MAJOR_VERSION}.${SBPL_MINOR_VERSION}.${SBPL_PATCH_VERSIO
 
 set(CMAKE_BUILD_TYPE Release)
 
+## Compiler flags
+if(CMAKE_COMPILER_IS_GNUCXX)
+    ## signed char is default on x86 gcc, not on arm however.
+    set(CMAKE_CXX_FLAGS "-fsigned-char")        
+endif()
+
 include_directories(src/include)
+
 
 add_library(sbpl SHARED
   src/discrete_space_information/environment_nav2D.cpp
