@@ -41,7 +41,7 @@
 //initial suboptimality bound (cost solution <= cost(eps*cost optimal solution)
 #define AD_DEFAULT_INITIAL_EPS	    10.0
 //as planning time exist, AD* decreases epsilon bound
-#define AD_DECREASE_EPS    0.2
+#define AD_DECREASE_EPS    0.1
 //final epsilon bound
 #define AD_FINAL_EPS	    1.0
 //---------------------
@@ -163,6 +163,11 @@ public:
      * \brief set the start state
      */
     virtual int set_start(int start_stateID);
+
+    /**
+     * \brief increments the start of search (for a robot that moves on the path while planning)
+     */
+    virtual int increment_start(int steps);
 
     /**
      * \brief set a flag to get rid of the previous search efforts, and
@@ -335,6 +340,8 @@ protected:
     virtual int SetSearchGoalState(int SearchGoalStateID, ADSearchStateSpace_t* pSearchStateSpace);
 
     virtual int SetSearchStartState(int SearchStartStateID, ADSearchStateSpace_t* pSearchStateSpace);
+
+    virtual int IncrementSearchGoalState(int steps, ADSearchStateSpace_t* pSearchStateSpace);
 
     //reconstruct path functions are only relevant for forward search
     virtual int ReconstructPath(ADSearchStateSpace_t* pSearchStateSpace);

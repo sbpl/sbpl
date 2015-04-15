@@ -225,6 +225,15 @@ public:
     virtual int set_start(int start_stateID) = 0;
 
     /**
+     * \brief increments the start of search (for a robot that moves on the path while planning)
+     */
+    virtual int increment_start(int steps)
+    {
+        SBPL_ERROR("incrementing the start point is unimplemented for this planner\n");
+        return 0;
+    }
+
+    /**
      * \brief forgets previous planning efforts and starts planning from scratch next time replan is called
      */
     virtual int force_planning_from_scratch() = 0;
