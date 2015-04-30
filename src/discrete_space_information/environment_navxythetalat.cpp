@@ -1955,7 +1955,8 @@ void EnvironmentNAVXYTHETALAT::ConvertStateIDPathintoXYThetaPath(vector<int>* st
 	vector<int> SuccIDV;
 	int targetx_c, targety_c, targettheta_c;
 	int sourcex_c, sourcey_c, sourcetheta_c;
-
+	double sourcex, sourcey;
+	int bestsind;
 	SBPL_PRINTF("checks=%ld\n", checks);
 
 	xythetaPath->clear();
@@ -1979,7 +1980,7 @@ void EnvironmentNAVXYTHETALAT::ConvertStateIDPathintoXYThetaPath(vector<int>* st
 		GetSuccs(sourceID, &SuccIDV, &CostV, &actionV);
 
 		int bestcost = INFINITECOST;
-		int bestsind = -1;
+		bestsind = -1;
 
 #if DEBUG
 		GetCoordFromState(sourceID, sourcex_c, sourcey_c, sourcetheta_c);
@@ -2012,7 +2013,6 @@ void EnvironmentNAVXYTHETALAT::ConvertStateIDPathintoXYThetaPath(vector<int>* st
 		//now push in the actual path
 		int sourcex_c, sourcey_c, sourcetheta_c;
 		GetCoordFromState(sourceID, sourcex_c, sourcey_c, sourcetheta_c);
-		double sourcex, sourcey;
 		sourcex = DISCXY2CONT(sourcex_c, EnvNAVXYTHETALATCfg.cellsize_m);
 		sourcey = DISCXY2CONT(sourcey_c, EnvNAVXYTHETALATCfg.cellsize_m);
 		//TODO - when there are no motion primitives we should still print source state
@@ -2036,6 +2036,12 @@ void EnvironmentNAVXYTHETALAT::ConvertStateIDPathintoXYThetaPath(vector<int>* st
 			//store
 			xythetaPath->push_back(intermpt);
 		}
+	}
+	if((int)SuccIDV.size()>0){
+		sbpl_xy_theta_pt_t intermpt = actionV[bestsind]->intermptV[((int)actionV[bestsind]->intermptV.size())-1];
+		intermpt.x += sourcex;
+		intermpt.y += sourcey;
+		xythetaPath->push_back(intermpt);
 	}
 }
 
