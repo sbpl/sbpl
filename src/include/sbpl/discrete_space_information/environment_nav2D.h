@@ -45,6 +45,11 @@ class MDPConfig;
 //configuration parameters
 typedef struct ENV_NAV2D_CONFIG
 {
+    ENV_NAV2D_CONFIG() 
+    {
+        Grid2D = NULL;
+    }
+
     int EnvWidth_c;
     int EnvHeight_c;
     int StartX_c;
@@ -75,8 +80,13 @@ typedef struct ENVHASHENTRY
 } EnvNAV2DHashEntry_t;
 
 //variables that dynamically change (e.g., array of states, ...)
-typedef struct
+typedef struct ENVNAV2D
 {
+    ENVNAV2D() 
+    {
+        Coord2StateIDHashTable = NULL;
+    }
+
     int startstateid;
     int goalstateid;
 

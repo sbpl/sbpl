@@ -218,6 +218,19 @@ public:
     virtual void print_searchpath(FILE* fOut);
 
     /**
+     * \brief Compute the suboptimality bound for the most recent solution.
+     *
+     * The suboptimality bound of the solution may be provably less than the
+     * value of epsilon satisfied during the most recent planning iteration.
+     * This suboptimality bound is computed as the ratio between the current
+     * g-value for the goal and the minimum un-weighted f-value of a locally
+     * inconsistent state.
+     * 
+     * \return The suboptimality bound of the most recently computed solution
+     */
+    double compute_suboptimality();
+
+    /**
      * \brief constructor
      */
     ARAPlanner(DiscreteSpaceInformation* environment, bool bforwardsearch);
