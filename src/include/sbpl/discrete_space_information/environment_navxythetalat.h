@@ -478,6 +478,7 @@ protected:
     virtual bool ReadinPose(sbpl_xy_theta_pt_t* pose, FILE* fIn);
 
     virtual void PrintHeuristicValues();
+
 };
 
 class EnvironmentNAVXYTHETALAT : public EnvironmentNAVXYTHETALATTICE
@@ -607,6 +608,8 @@ public:
      * \brief see comments on the same function in the parent class
      */
     virtual void PrintVars() { }
+
+    double get_heuristics_computation_time();
 
 protected:
     //hash table of size x_size*y_size. Maps from coords to stateId

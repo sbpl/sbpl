@@ -414,7 +414,7 @@ bool SBPL2DGridSearch::search_withheap(unsigned char** Grid2D, unsigned char obs
                 "largestoptfval=%d (start=%d %d goal=%d %d)\n",
                 numofExpands, (int)(((clock() - starttime) / (double)CLOCKS_PER_SEC) * 1000),
                 searchStates2D_[goalx_c][goaly_c].g, largestcomputedoptf_, startx_c, starty_c, goalx_c, goaly_c);
-
+    heuristics_computation_time=(((clock() - starttime) / (double)CLOCKS_PER_SEC));
     return true;
 }
 
@@ -816,6 +816,8 @@ bool SBPL2DGridSearch::search_withslidingbuckets(unsigned char** Grid2D, unsigne
                 "largestoptfval=%d (start=%d %d goal=%d %d)\n",
                 numofExpands, (int)(((clock() - starttime) / (double)CLOCKS_PER_SEC) * 1000),
                 searchStates2D_[goalx_c][goaly_c].g, largestcomputedoptf_, startx_c, starty_c, goalx_c, goaly_c);
+                
+    heuristics_computation_time=(((clock() - starttime) / (double)CLOCKS_PER_SEC));
 
 #if DEBUG
     SBPL_FCLOSE(f2Dsearch);

@@ -157,6 +157,11 @@ public:
      */
     int getlargestcomputedoptimalf_inmm() { return largestcomputedoptf_; }
 
+    /**
+     * \brief returns the initial epsilon
+     */
+    double get_heuristics_computation_time() { return heuristics_computation_time; }
+
 private:
     inline bool withinMap(int x, int y)
     {
@@ -210,6 +215,8 @@ private:
 
     //termination criterion used in the search
     SBPL_2DGRIDSEARCH_TERM_CONDITION term_condition_usedlast;
+
+    double heuristics_computation_time;
 };
 
 #endif

@@ -118,7 +118,7 @@ public:
      * \brief This version of GetSuccs is needed for E-Graphs. It always returns a unique ID for 
      *        every successor. Generally, this function operates the same as the usual GetSuccs
      *        and only has different behavior when dealing with an underspecified goal condition
-     *        so that several different states will have to map to the same id number (most planners
+     *        so that several different states will have t envdebug = "envdebug.txt";o map to the same id number (most planners
      *        in sbpl use a single goal id number to identify the goal). This function is used 
      *        in conjunction with isGoal.
      */
@@ -294,7 +294,7 @@ public:
     DiscreteSpaceInformation()
     {
 #ifndef ROS
-        const char* envdebug = "envdebug.txt";
+        const char* envdebug = "/home/philipp/envdebug.txt";
 #endif
         if ((fDeb = SBPL_FOPEN(envdebug, "w")) == NULL) {
             SBPL_ERROR("ERROR: failed to open debug file for environment\n");
