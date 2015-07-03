@@ -65,6 +65,8 @@ EnvironmentNAVXYTHETALATTICE::EnvironmentNAVXYTHETALATTICE()
     bNeedtoRecomputeStartHeuristics = true;
     bNeedtoRecomputeGoalHeuristics = true;
     iteration = 0;
+    bucketsize = 0; // fixed bucket size
+    blocksize = 1;
 
     EnvNAVXYTHETALAT.bInitialized = false;
 
@@ -1494,9 +1496,9 @@ void EnvironmentNAVXYTHETALATTICE::ComputeHeuristicValues()
 
     //allocated 2D grid searches
     grid2Dsearchfromstart = new SBPL2DGridSearch(EnvNAVXYTHETALATCfg.EnvWidth_c, EnvNAVXYTHETALATCfg.EnvHeight_c,
-                                                 (float)EnvNAVXYTHETALATCfg.cellsize_m);
+                                                 (float)EnvNAVXYTHETALATCfg.cellsize_m, blocksize, bucketsize);
     grid2Dsearchfromgoal = new SBPL2DGridSearch(EnvNAVXYTHETALATCfg.EnvWidth_c, EnvNAVXYTHETALATCfg.EnvHeight_c,
-                                                (float)EnvNAVXYTHETALATCfg.cellsize_m);
+                                                (float)EnvNAVXYTHETALATCfg.cellsize_m, blocksize, bucketsize);
 
     //set OPEN type to sliding buckets
     grid2Dsearchfromstart->setOPENdatastructure(SBPL_2DGRIDSEARCH_OPENTYPE_SLIDINGBUCKETS);
@@ -1766,6 +1768,16 @@ void EnvironmentNAVXYTHETALATTICE::PrintEnv_Config(FILE* fOut)
 
     SBPL_ERROR("ERROR in EnvNAVXYTHETALAT... function: PrintEnv_Config is undefined\n");
     throw new SBPL_Exception();
+}
+
+void EnvironmentNAVXYTHETALATTICE::Set2DBlockSize(int BlockSize)
+{
+    blocksize = BlockSize;
+}
+
+void EnvironmentNAVXYTHETALATTICE::Set2DBucketSize(int BucketSize)
+{
+    bucketsize = BucketSize;
 }
 
 void EnvironmentNAVXYTHETALATTICE::PrintTimeStat(FILE* fOut)

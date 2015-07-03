@@ -35,6 +35,10 @@
 #include <sbpl/discrete_space_information/environment.h>
 #include <sbpl/utils/utils.h>
 
+// Define to test against in client code. Signals that Set2DBlockSize and
+// Set2DBucketSize are available in EnvironmentNAVXYTHETALATTICE
+#define SBPL_CUSTOM_2D_OPTIONS 1
+
 //eight-connected grid
 #define NAVXYTHETALAT_DXYWIDTH 8
 #define ENVNAVXYTHETALAT_DEFAULTOBSTHRESH 254	//see explanation of the value below
@@ -264,6 +268,20 @@ public:
     virtual void PrintEnv_Config(FILE* fOut);
 
     /**
+     * \brief set the block size for the 2D heuristic. A block size of 1 is the default and will result in
+     *        a single cell in the 2D heuristic search corresponding to 1 cell from the source map.
+     *        A block size of 2 will result in a single cell in the 2D heuristic search corresponding to
+     *        a 2x2 set of blocks from the source map with a cost of the max of the 2x2 source cells.
+     */
+    virtual void Set2DBlockSize(int BlockSize);
+
+    /**
+     * @brief Set2DBucketSize Set the initial size of the CSlidingBuckets used for the fringe priority list
+     * @param BucketSize
+     */
+    virtual void Set2DBucketSize(int BucketSize);
+
+    /**
      * \brief initialize environment. Gridworld is defined as matrix A of size width by height.
      *        So, internally, it is accessed as A[x][y] with x ranging from 0 to width-1 and and y from 0 to height-1
      *        Each element in A[x][y] is unsigned char. A[x][y] = 0 corresponds to
@@ -420,6 +438,8 @@ protected:
     std::vector<sbpl_xy_theta_cell_t> affectedsuccstatesV; //arrays of states whose outgoing actions cross cell 0,0
     std::vector<sbpl_xy_theta_cell_t> affectedpredstatesV; //arrays of states whose incoming actions cross cell 0,0
     int iteration;
+    int blocksize; // 2D block size
+    int bucketsize; // 2D bucket size
 
     //2D search for heuristic computations
     bool bNeedtoRecomputeStartHeuristics; //set whenever grid2Dsearchfromstart needs to be re-executed
