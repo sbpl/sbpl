@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<package>
+  <name>sbpl-cpr</name>
+  <version>:{version}</version>
+  <description>Search-based planning library (SBPL) with CPR modifications.</description>
+  <maintainer email="mike@vanadiumlabs.com">Michael Ferguson</maintainer>
+  <maintainer email="jmercer@clearpathrobotics.com">Jason Mercer</maintainer>
+  <license>BSD</license>
+
+  <url type="website">http://sbpl.net</url>
+  <url type="bugtracker">https://github.com/sbpl/sbpl/issues</url>
+  <url type="repository">https://github.com/sbpl/sbpl</url>
+
+  <author>Search-Based Planning Lab</author>
+
+  <buildtool_depend>cmake</buildtool_depend>
+
+  <build_depend>cmake</build_depend>
+
+  <export>
+    <build_type>cmake</build_type>
+  </export>
+</package>
