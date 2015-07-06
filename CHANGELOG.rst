@@ -2,8 +2,8 @@
 Changelog for package sbpl-cpr
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.1 (2015-07-06)
+------------------
 * Added version to package.
 * Added catkin related file and changed destination name/dirs from sbpl to sbpl-cpr
 * Optional memory saving features related to SBPL2DGridSearch. Can save many GB of memory for large grids.
