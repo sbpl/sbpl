@@ -70,3 +70,5 @@ target_link_libraries(test_sbpl sbpl_cpr)
 
 add_executable(test_adjacency_list src/test/test_adjacency_list.cpp)
 target_link_libraries(test_adjacency_list sbpl_cpr)
+
+install(FILES package.xml DESTINATION share/sbpl_cpr)

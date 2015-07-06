@@ -1,16 +1,24 @@
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Changelog for package sbpl-cpr
+Changelog for package sbpl_cpr
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Forthcoming
+-----------
+* Merge pull request #2 from clearpathrobotics/sbpl_features
+  Sbpl features
+* Changed from sbpl-cpr to sbpl_cpr
+* Contributors: Jason Mercer
 
 1.2.1 (2015-07-06)
 ------------------
+* Added changelog
 * Added version to package.
 * Added catkin related file and changed destination name/dirs from sbpl to sbpl-cpr
 * Optional memory saving features related to SBPL2DGridSearch. Can save many GB of memory for large grids.
   Added feature: Search the 2D heuristic at a different resolution than the 3D main grid for EnvironmentNAVXYTHETALATTICE. Default is a 1:1 correspondence as before but different resoltions available with Set2DBlockSize.
   Added feature: Allow 2D priority queue to have dynamically allocated memory for the CSlidingBucket. Default action is fixed/worst case as before but setting an explicit initial bucket size with Set2DBucketSize will allow the buckets to grow.
 * add compute_suboptimality method to ara*
-* Merge pull request `#28 <https://github.com/clearpathrobotics/sbpl/issues/28>`_ from shoppel/master
+* Merge pull request #28 from shoppel/master
   Adds a method to request the used actions in EnvironmentNAVXYTHETALAT.
 * Adds a method to request the used actions.
 * Merge branch 'master' of https://github.com/sbpl/sbpl
@@ -21,22 +29,22 @@ Changelog for package sbpl-cpr
 1.2.0 (2014-08-08)
 ------------------
 * bump version to 1.2.0
-* Merge pull request `#24 <https://github.com/clearpathrobotics/sbpl/issues/24>`_ from sbpl/dev
+* Merge pull request #24 from sbpl/dev
   Merge of dev into master
-* Merge pull request `#23 <https://github.com/clearpathrobotics/sbpl/issues/23>`_ from sbpl/master
+* Merge pull request #23 from sbpl/master
   Merge of master into dev
-* Merge pull request `#22 <https://github.com/clearpathrobotics/sbpl/issues/22>`_ from robotman0/dev
+* Merge pull request #22 from robotman0/dev
   Bug fix in LazyARA. It also now fully supports the planner API.
 * Bug fix in LazyARA. It also now fully supports the planner API.
-* Merge pull request `#21 <https://github.com/clearpathrobotics/sbpl/issues/21>`_ from robotman0/dev
+* Merge pull request #21 from robotman0/dev
   Updated the environment API to support lazy and egraph planners. Added LazyARA*.
 * Updated the environment API to support lazy and egraph planners. Added a LazyARA* planner.
 * Merge branch 'dev'
 * Merge branch 'dev' of https://github.com/sbpl/sbpl into dev
 * Merge branch 'master' into dev
-* Merge pull request `#20 <https://github.com/clearpathrobotics/sbpl/issues/20>`_ from bmacallister85/dev_ad_planner_h_bug
+* Merge pull request #20 from bmacallister85/dev_ad_planner_h_bug
   adplanner bug fixes
-* Merge pull request `#19 <https://github.com/clearpathrobotics/sbpl/issues/19>`_ from ahornung/master
+* Merge pull request #19 from ahornung/master
   Adding release version number to CMakeList, pkg-config, and cmake-config
 * adplanner:   Reinsert check for search efforts in costs_changed method and set bReevalutefvals flag.
 * Proposed AD* changes
@@ -46,7 +54,7 @@ Changelog for package sbpl-cpr
 * Adding release version number to CMakeList, pkg-config, and cmake-config
 * correct ros define in config header
 * disable debug output unless DEBUG flag is set
-* Merge pull request `#18 <https://github.com/clearpathrobotics/sbpl/issues/18>`_ from ahornung/master
+* Merge pull request #18 from ahornung/master
   Adding a CMake config
 * Separating generated pkgconfig file from source dir, is now put into build dir before installing
 * Adding a CMake config
@@ -55,10 +63,10 @@ Changelog for package sbpl-cpr
   The absolute path to the library enables multiple
   installations side-by-side, you can point CMake to the one you want to
   use with the env.var sbpl_DIR.
-* Merge pull request `#16 <https://github.com/clearpathrobotics/sbpl/issues/16>`_ from bmacallister85/origin/dev-ara-redunant-flag-remove
+* Merge pull request #16 from bmacallister85/origin/dev-ara-redunant-flag-remove
   Origin/dev ara redunant flag remove
-* test `#1 <https://github.com/clearpathrobotics/sbpl/issues/1>`_ commit
-* Merge pull request `#15 <https://github.com/clearpathrobotics/sbpl/issues/15>`_ from bmacallister85/dev
+* test #1 commit
+* Merge pull request #15 from bmacallister85/dev
   Dev
 * araplanner: removed redundant bRebuildOpenList flag
 * Merge remote-tracking branch 'refs/remotes/sbpl/master' into dev
@@ -66,35 +74,35 @@ Changelog for package sbpl-cpr
 * Merge branch 'master' of https://github.com/sbpl/sbpl
 * Update documentation for get_n_expands_init_solution
 * return correct inital solution expansions when planner fails
-* Merge pull request `#14 <https://github.com/clearpathrobotics/sbpl/issues/14>`_ from bmacallister85/origin/ara-timeout-fix-improvement
+* Merge pull request #14 from bmacallister85/origin/ara-timeout-fix-improvement
   araplanner:
-* Merge pull request `#6 <https://github.com/clearpathrobotics/sbpl/issues/6>`_ from bmacallister85/origin/dev2
+* Merge pull request #6 from bmacallister85/origin/dev2
   environment_navxythetamlevlat.cpp: Removed out of bounds indexing call i...
 * araplanner:
   Moved reinitialization of goal state to inside ReInitializeSearchStateSpace
 * remove outdated vs project files; use cmake to generate these
 * update and prettify the README to reflect current build steps
-* Merge pull request `#12 <https://github.com/clearpathrobotics/sbpl/issues/12>`_ from bmacallister85/origin/ara-bug-fix
+* Merge pull request #12 from bmacallister85/origin/ara-bug-fix
   Bug fix for araplanner
 * Bug fix for araplanner
-* Merge pull request `#11 <https://github.com/clearpathrobotics/sbpl/issues/11>`_ from bmacallister85/master-motion-prim-corrections
+* Merge pull request #11 from bmacallister85/master-motion-prim-corrections
   Master motion prim corrections
 * Removed misplaced character.
 * Motion primitive scripts can now produce longer rotation in place motions.
-* Merge pull request `#9 <https://github.com/clearpathrobotics/sbpl/issues/9>`_ from bmacallister85/origin/master2
+* Merge pull request #9 from bmacallister85/origin/master2
   sbpl message macros changed to allow the use of a special function to ha...
-* Merge pull request `#10 <https://github.com/clearpathrobotics/sbpl/issues/10>`_ from bmacallister85/origin/master-motion-prim-corrections
+* Merge pull request #10 from bmacallister85/origin/master-motion-prim-corrections
   For all motion primitive scripts and files, corrected rotate in place m...
-* Merge pull request `#8 <https://github.com/clearpathrobotics/sbpl/issues/8>`_ from bmacallister85/origin/dev4
+* Merge pull request #8 from bmacallister85/origin/dev4
   utils.cpp: Set default values for array in PathExists method.  Added del...
-* Merge pull request `#7 <https://github.com/clearpathrobotics/sbpl/issues/7>`_ from bmacallister85/origin/dev3
+* Merge pull request #7 from bmacallister85/origin/dev3
   environment_roboarm.cpp: Removed unused variable and conditional in Prin...
 * For all motion primitive scripts  and files, corrected rotate in place motions between last and first angles.
 * sbpl message macros changed to allow the use of a special function to handle output at different levels similar to ROS.
 * utils.cpp: Set default values for array in PathExists method.  Added deletes in EvaluatePolicy method.
 * environment_roboarm.cpp: Removed unused variable and conditional in PrintSate method.
 * environment_navxythetamlevlat.cpp: Removed out of bounds indexing call in GetActionCostacrossAddLevels method.
-* Merge pull request `#5 <https://github.com/clearpathrobotics/sbpl/issues/5>`_ from bmacallister85/master
+* Merge pull request #5 from bmacallister85/master
   2dGridSearch delete/free mismatch
 * 2dgridsearch.cpp: Replaced delete with free  in SBPL2DGridSearch::search_withslidingbuckets method.
 * fix bug caused by heuristic computation taking up all allocated time
