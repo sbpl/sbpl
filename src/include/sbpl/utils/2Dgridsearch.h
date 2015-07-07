@@ -91,7 +91,15 @@ public:
 class SBPL2DGridSearch
 {
 public:
-    SBPL2DGridSearch(int width_x, int height_y, float cellsize_m);
+    /**
+     * @brief SBPL2DGridSearch Create a search space for 2D grids
+     * @param width_x grid width
+     * @param height_y grid height
+     * @param cellsize_m resolution
+     * @param downsample edge length of block in main grid that corresponds to a single cell in this grid
+     * @param initial_dynamic_bucket_size Initial dynamic bucket size, set to 0 for fixed size
+     */
+    SBPL2DGridSearch(int width_x, int height_y, float cellsize_m, int downsample=1, int initial_dynamic_bucket_size=32);
     ~SBPL2DGridSearch()
     {
         destroy();
@@ -132,6 +140,8 @@ public:
      */
     inline int getlowerboundoncostfromstart_inmm(int x, int y)
     {
+        x /= downsample_; // local x
+        y /= downsample_; // local y
         if (term_condition_usedlast == SBPL_2DGRIDSEARCH_TERM_CONDITION_OPTPATHFOUND) {
             //heuristic search
             int h = SBPL_2DGRIDSEARCH_HEUR2D(x,y);
@@ -167,6 +177,9 @@ private:
     inline void initializeSearchState2D(SBPL_2DGridSearchState* state2D);
     bool createSearchStates2D(void);
 
+    /// Pointer to getCost function appropriate for resample size
+    unsigned char (*getCost)(unsigned char**, int, int, int);
+
     bool search_withheap(unsigned char** Grid2D, unsigned char obsthresh, int startx_c, int starty_c, int goalx_c,
                          int goaly_c, SBPL_2DGRIDSEARCH_TERM_CONDITION termination_condition);
     bool search_exp(unsigned char** Grid2D, unsigned char obsthresh, int startx_c, int starty_c, int goalx_c,
@@ -177,6 +190,7 @@ private:
                                    int goalx_c, int goaly_c, SBPL_2DGRIDSEARCH_TERM_CONDITION termination_condition);
 
     //2D search data
+    int initial_dynamic_bucket_size_;
     CSlidingBucket* OPEN2DBLIST_;
     CIntHeap* OPEN2D_;
     SBPL_2DGridSearchState** searchStates2D_;
@@ -204,6 +218,9 @@ private:
 
     //search iteration
     int iteration_;
+
+    // the size of the block edge in the main gid that corresponds to 1 cell in the 2D grid
+    int downsample_;
 
     //largest optimal g-value computed by search
     int largestcomputedoptf_;
