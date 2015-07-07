@@ -32,8 +32,8 @@
 
 #include <cstdio>
 #include <vector>
-#include <sbpl/discrete_space_information/environment.h>
-#include <sbpl/utils/utils.h>
+#include <sbpl_cpr/discrete_space_information/environment.h>
+#include <sbpl_cpr/utils/utils.h>
 
 #define ENVNAV2D_COSTMULT 1000
 #define ENVNAV2D_DEFAULTOBSTHRESH 1 //253-for willow garage	//see explanation of the value below

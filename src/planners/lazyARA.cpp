@@ -26,7 +26,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include <sbpl/planners/lazyARA.h>
+#include <sbpl_cpr/planners/lazyARA.h>
 using namespace std;
 
 LazyARAPlanner::LazyARAPlanner(DiscreteSpaceInformation* environment, bool bSearchForward) :

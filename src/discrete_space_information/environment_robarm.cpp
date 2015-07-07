@@ -31,12 +31,12 @@
 #include <cstdlib>
 #include <cstring>
 #include <queue>
-#include <sbpl/discrete_space_information/environment_robarm.h>
-#include <sbpl/planners/planner.h>
-#include <sbpl/utils/key.h>
-#include <sbpl/utils/mdp.h>
-#include <sbpl/utils/mdpconfig.h>
-#include <sbpl/utils/utils.h>
+#include <sbpl_cpr/discrete_space_information/environment_robarm.h>
+#include <sbpl_cpr/planners/planner.h>
+#include <sbpl_cpr/utils/key.h>
+#include <sbpl_cpr/utils/mdp.h>
+#include <sbpl_cpr/utils/mdpconfig.h>
+#include <sbpl_cpr/utils/utils.h>
 
 using namespace std;
 

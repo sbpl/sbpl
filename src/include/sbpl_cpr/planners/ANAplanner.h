@@ -11,8 +11,8 @@
 
 #include <cstdio>
 #include <ctime>
-#include <sbpl/planners/planner.h>
-#include <sbpl/utils/mdp.h>
+#include <sbpl_cpr/planners/planner.h>
+#include <sbpl_cpr/utils/mdp.h>
 
 //---configuration----
 //control of EPS

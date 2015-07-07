@@ -31,9 +31,9 @@
 #define __ENVIRONMENT_NAVXYTHETAMLEVLAT_H_
 
 #include <vector>
-#include <sbpl/discrete_space_information/environment_navxythetalat.h>
-#include <sbpl/sbpl_exception.h>
-#include <sbpl/utils/utils.h>
+#include <sbpl_cpr/discrete_space_information/environment_navxythetalat.h>
+#include <sbpl_cpr/sbpl_exception.h>
+#include <sbpl_cpr/utils/utils.h>
 
 // these structures contain footprints for the additional levels 
 // each of these structures corresponds to one of the EnvNAVXYTHETALATAction_t structures

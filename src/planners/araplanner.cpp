@@ -27,17 +27,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <sbpl/planners/araplanner.h>
+#include <sbpl_cpr/planners/araplanner.h>
 
 #include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <limits>
 
-#include <sbpl/discrete_space_information/environment.h>
-#include <sbpl/utils/heap.h>
-#include <sbpl/utils/key.h>
-#include <sbpl/utils/list.h>
+#include <sbpl_cpr/discrete_space_information/environment.h>
+#include <sbpl_cpr/utils/heap.h>
+#include <sbpl_cpr/utils/key.h>
+#include <sbpl_cpr/utils/list.h>
 
 using namespace std;
 

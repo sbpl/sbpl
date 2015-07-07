@@ -33,7 +33,7 @@
 
 using namespace std;
 
-#include <sbpl/headers.h>
+#include <sbpl_cpr/headers.h>
 
 enum PlannerType
 {

@@ -32,10 +32,10 @@
 
 #include <cstdio>
 #include <ctime>
-#include <sbpl/planners/planner.h>
-#include <sbpl/utils/heap.h>
-#include <sbpl/utils/key.h>
-#include <sbpl/utils/mdp.h>
+#include <sbpl_cpr/planners/planner.h>
+#include <sbpl_cpr/utils/heap.h>
+#include <sbpl_cpr/utils/key.h>
+#include <sbpl_cpr/utils/mdp.h>
 
 //---configuration----
 //control of EPS

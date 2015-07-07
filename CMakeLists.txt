@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
-PROJECT( sbpl )
+PROJECT( sbpl_cpr )
 
 # version (e.g. for packaging)
 set(SBPL_MAJOR_VERSION 1)
@@ -11,7 +11,7 @@ set(CMAKE_BUILD_TYPE Release)
 
 include_directories(src/include)
 
-add_library(sbpl SHARED
+add_library(sbpl_cpr SHARED
   src/discrete_space_information/environment_nav2D.cpp
   src/discrete_space_information/environment_navxythetalat.cpp
   src/discrete_space_information/environment_navxythetamlevlat.cpp
@@ -36,11 +36,11 @@ set(SBPL_INCLUDE_DIR "${CMAKE_INSTALL_PREFIX}/include")
 set(SBPL_LIB_DIR "${CMAKE_INSTALL_PREFIX}/lib")
   
 # support for pkg-config
-set(PKG_NAME "sbpl")
-set(PKG_DESC "The Search Based Planning Library")
-set(PKG_SBPL_LIBS "-lsbpl")
+set(PKG_NAME "sbpl_cpr")
+set(PKG_DESC "The Search Based Planning Library (CPR version)")
+set(PKG_SBPL_LIBS "-lsbpl_cpr")
 set(pkg_conf_file_in "${CMAKE_CURRENT_SOURCE_DIR}/sbpl.pc.in")
-set(pkg_conf_file "${PROJECT_BINARY_DIR}/InstallFiles/sbpl.pc")
+set(pkg_conf_file "${PROJECT_BINARY_DIR}/InstallFiles/sbpl_cpr.pc")
 configure_file("${pkg_conf_file_in}" "${pkg_conf_file}" @ONLY)
 install(FILES ${pkg_conf_file} DESTINATION lib/pkgconfig/ COMPONENT pkgconfig)
 
@@ -49,18 +49,26 @@ configure_file(sbpl-config.cmake.in
   "${PROJECT_BINARY_DIR}/InstallFiles/sbpl-config.cmake" @ONLY)
 configure_file(sbpl-config-version.cmake.in
   "${PROJECT_BINARY_DIR}/InstallFiles/sbpl-config-version.cmake" @ONLY)
+
 install(FILES
   "${PROJECT_BINARY_DIR}/InstallFiles/sbpl-config.cmake"
-  "${PROJECT_BINARY_DIR}/InstallFiles/sbpl-config-version.cmake"
-DESTINATION share/sbpl/)
+RENAME sbpl_cpr-config.cmake
+DESTINATION share/sbpl_cpr/)
 
-install(DIRECTORY src/include/sbpl DESTINATION include
+install(FILES
+  "${PROJECT_BINARY_DIR}/InstallFiles/sbpl-config-version.cmake"
+RENAME sbpl_cpr-config-version.cmake
+DESTINATION share/sbpl_cpr/)
+
+install(DIRECTORY src/include/sbpl_cpr/ DESTINATION include/sbpl_cpr
 	FILES_MATCHING PATTERN "*.h")
-install(TARGETS sbpl
+install(TARGETS sbpl_cpr
 	LIBRARY DESTINATION lib)
 
 add_executable(test_sbpl src/test/main.cpp)
-target_link_libraries(test_sbpl sbpl)
+target_link_libraries(test_sbpl sbpl_cpr)
 
 add_executable(test_adjacency_list src/test/test_adjacency_list.cpp)
-target_link_libraries(test_adjacency_list sbpl)
+target_link_libraries(test_adjacency_list sbpl_cpr)
+
+install(FILES package.xml DESTINATION share/sbpl_cpr)

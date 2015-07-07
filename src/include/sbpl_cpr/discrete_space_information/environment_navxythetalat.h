@@ -32,8 +32,8 @@
 
 #include <cstdio>
 #include <vector>
-#include <sbpl/discrete_space_information/environment.h>
-#include <sbpl/utils/utils.h>
+#include <sbpl_cpr/discrete_space_information/environment.h>
+#include <sbpl_cpr/utils/utils.h>
 
 // Define to test against in client code. Signals that Set2DBlockSize and
 // Set2DBucketSize are available in EnvironmentNAVXYTHETALATTICE

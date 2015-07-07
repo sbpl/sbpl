@@ -27,8 +27,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <sbpl/discrete_space_information/environment.h>
-#include <sbpl/planners/ppcpplanner.h>
+#include <sbpl_cpr/discrete_space_information/environment.h>
+#include <sbpl_cpr/planners/ppcpplanner.h>
 
 using namespace std;
 
