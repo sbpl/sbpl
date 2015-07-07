@@ -1,4 +1,4 @@
-#include <sbpl/config.h>
+#include <sbpl_cpr/config.h>
 #include <cstdarg>
 #include <cstdlib>
 #include <cstring>

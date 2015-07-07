@@ -30,8 +30,8 @@
 #ifndef __HEAP_H_
 #define __HEAP_H_
 
-#include <sbpl/planners/planner.h>
-#include <sbpl/utils/key.h>
+#include <sbpl_cpr/planners/planner.h>
+#include <sbpl_cpr/utils/key.h>
 
 //the maximum size of the heap
 #define HEAPSIZE 20000000 

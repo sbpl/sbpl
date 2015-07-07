@@ -29,8 +29,8 @@
 
 //MDP.cpp - contains all the functions for MDP classes
 #include <cmath>
-#include <sbpl/utils/mdp.h>
-#include <sbpl/utils/utils.h>
+#include <sbpl_cpr/utils/mdp.h>
+#include <sbpl_cpr/utils/utils.h>
 
 using namespace std;
 

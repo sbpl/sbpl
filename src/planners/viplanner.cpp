@@ -28,11 +28,11 @@
  */
 
 #include <cmath>
-#include <sbpl/discrete_space_information/environment.h>
-#include <sbpl/planners/viplanner.h>
-#include <sbpl/utils/key.h>
-#include <sbpl/utils/mdpconfig.h>
-#include <sbpl/utils/utils.h>
+#include <sbpl_cpr/discrete_space_information/environment.h>
+#include <sbpl_cpr/planners/viplanner.h>
+#include <sbpl_cpr/utils/key.h>
+#include <sbpl_cpr/utils/mdpconfig.h>
+#include <sbpl_cpr/utils/utils.h>
 
 using namespace std;
 

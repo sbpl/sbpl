@@ -60,7 +60,7 @@ install(FILES
 RENAME sbpl_cpr-config-version.cmake
 DESTINATION share/sbpl_cpr/)
 
-install(DIRECTORY src/include/sbpl/ DESTINATION include/sbpl_cpr
+install(DIRECTORY src/include/sbpl_cpr/ DESTINATION include/sbpl_cpr
 	FILES_MATCHING PATTERN "*.h")
 install(TARGETS sbpl_cpr
 	LIBRARY DESTINATION lib)

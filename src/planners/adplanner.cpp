@@ -28,11 +28,11 @@
  */
 
 #include <cmath>
-#include <sbpl/discrete_space_information/environment.h>
-#include <sbpl/planners/adplanner.h>
-#include <sbpl/utils/heap.h>
-#include <sbpl/utils/list.h>
-#include <sbpl/utils/mdpconfig.h>
+#include <sbpl_cpr/discrete_space_information/environment.h>
+#include <sbpl_cpr/planners/adplanner.h>
+#include <sbpl_cpr/utils/heap.h>
+#include <sbpl_cpr/utils/list.h>
+#include <sbpl_cpr/utils/mdpconfig.h>
 
 using namespace std;
 

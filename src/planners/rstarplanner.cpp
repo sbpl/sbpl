@@ -28,9 +28,9 @@
  */
 
 #include <cmath>
-#include <sbpl/discrete_space_information/environment.h>
-#include <sbpl/planners/rstarplanner.h>
-#include <sbpl/utils/list.h>
+#include <sbpl_cpr/discrete_space_information/environment.h>
+#include <sbpl_cpr/planners/rstarplanner.h>
+#include <sbpl_cpr/utils/list.h>
 
 using namespace std;
 

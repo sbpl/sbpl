@@ -29,11 +29,11 @@
 
 #include <cmath>
 #include <cstdlib>
-#include <sbpl/planners/planner.h>
-#include <sbpl/utils/utils.h>
-#include <sbpl/utils/key.h>
-#include <sbpl/utils/mdp.h>
-#include <sbpl/utils/sbpl_bfs_2d.h>
+#include <sbpl_cpr/planners/planner.h>
+#include <sbpl_cpr/utils/utils.h>
+#include <sbpl_cpr/utils/key.h>
+#include <sbpl_cpr/utils/mdp.h>
+#include <sbpl_cpr/utils/sbpl_bfs_2d.h>
 
 using namespace std;
 

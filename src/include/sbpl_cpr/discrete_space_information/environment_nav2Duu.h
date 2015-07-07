@@ -32,11 +32,11 @@
 
 #include <vector>
 #include <cstdio>
-#include <sbpl/config.h>
-#include <sbpl/discrete_space_information/environment.h>
-#include <sbpl/discrete_space_information/environment_nav2D.h>
-#include <sbpl/sbpl_exception.h>
-#include <sbpl/utils/utils.h>
+#include <sbpl_cpr/config.h>
+#include <sbpl_cpr/discrete_space_information/environment.h>
+#include <sbpl_cpr/discrete_space_information/environment_nav2D.h>
+#include <sbpl_cpr/sbpl_exception.h>
+#include <sbpl_cpr/utils/utils.h>
 
 #define ENVNAV2DUU_COSTMULT 1000
 #define NAV2DUU_MAXACTIONSWIDTH 9		

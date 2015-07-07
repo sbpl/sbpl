@@ -32,7 +32,7 @@
 
 #include <cstddef>
 #include <vector>
-#include <sbpl/config.h>
+#include <sbpl_cpr/config.h>
 
 #define 	GETSTATEIND(stateid, mapid) StateID2IndexMapping[mapid][stateid]
 

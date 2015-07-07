@@ -29,7 +29,7 @@
 #ifndef _LAZY_ARA_PLANNER_H_
 #define _LAZY_ARA_PLANNER_H_
 
-#include "../../sbpl/headers.h"
+#include "../../sbpl_cpr/headers.h"
 #include <queue>
 
 class LazyListElement;

@@ -31,9 +31,9 @@
 #define __2DGRIDSEARCH_H_
 
 #include <cstdlib>
-#include <sbpl/planners/planner.h>
-#include <sbpl/utils/key.h>
-#include <sbpl/utils/utils.h>
+#include <sbpl_cpr/planners/planner.h>
+#include <sbpl_cpr/utils/key.h>
+#include <sbpl_cpr/utils/utils.h>
 
 #define SBPL_2DGRIDSEARCH_NUMOF2DDIRS 16
 

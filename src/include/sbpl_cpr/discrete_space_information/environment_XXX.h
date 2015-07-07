@@ -32,7 +32,7 @@
 
 #include <cstdio>
 #include <vector>
-#include <sbpl/discrete_space_information/environment.h>
+#include <sbpl_cpr/discrete_space_information/environment.h>
 
 #define XXX_MAXACTIONSWIDTH 9		
 

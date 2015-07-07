@@ -31,7 +31,7 @@
 #define __ENVIRONMENT_ROBARM_H_
 
 #include <cstdio>
-#include <sbpl/discrete_space_information/environment.h>
+#include <sbpl_cpr/discrete_space_information/environment.h>
 
 #define NUMOFLINKS 6
 //for R* max. distance in coord to a sample point. It should be exactly this,
