@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>sbpl_cpr</name>
-  <version>1.3.0</version>
+  <version>1.3.1</version>
   <description>Search-based planning library (SBPL) with CPR modifications.</description>
   <maintainer email="mike@vanadiumlabs.com">Michael Ferguson</maintainer>
   <maintainer email="jmercer@clearpathrobotics.com">Jason Mercer</maintainer>
