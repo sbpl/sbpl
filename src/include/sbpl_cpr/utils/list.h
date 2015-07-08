@@ -465,6 +465,7 @@ public:
           dynamicsize = new int[numofbuckets];
           for (int i = 0; i < numofbuckets; i++) {
             dynamicsize[i] = 0;
+            bucketV[i] = NULL;
           }
         }
         else
