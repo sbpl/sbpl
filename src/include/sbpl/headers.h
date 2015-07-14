@@ -50,9 +50,12 @@
 #include <sbpl/discrete_space_information/environment_navxythetamlevlat.h>
 #include <sbpl/discrete_space_information/environment_robarm.h>
 #include <sbpl/discrete_space_information/environment_XXX.h>
+#include <sbpl/heuristics/heuristic.h>
+#include <sbpl/heuristics/embedded_heuristic.h>
 #include <sbpl/planners/adplanner.h>
 #include <sbpl/planners/ANAplanner.h>
 #include <sbpl/planners/araplanner.h>
+#include <sbpl/planners/mhaplanner.h>
 #include <sbpl/planners/planner.h>
 #include <sbpl/planners/ppcpplanner.h>
 #include <sbpl/planners/rstarplanner.h>
