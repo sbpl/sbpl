@@ -608,6 +608,8 @@ public:
      */
     virtual void PrintVars() { }
 
+    const EnvNAVXYTHETALATHashEntry_t* GetStateEntry(int state_id) const;
+
 protected:
     //hash table of size x_size*y_size. Maps from coords to stateId
     int HashTableSize;

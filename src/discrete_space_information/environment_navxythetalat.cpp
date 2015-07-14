@@ -2736,6 +2736,17 @@ int EnvironmentNAVXYTHETALAT::SizeofCreatedEnv()
     return (int)StateID2CoordTable.size();
 }
 
+const EnvNAVXYTHETALATHashEntry_t*
+EnvironmentNAVXYTHETALAT::GetStateEntry(int state_id) const
+{
+    if (state_id >= 0 && state_id < (int)StateID2CoordTable.size()) {
+        return StateID2CoordTable[state_id];
+    }
+    else {
+        return NULL;
+    }
+}
+
 //------------------------------------------------------------------------------
 
 
