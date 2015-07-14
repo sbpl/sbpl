@@ -68,8 +68,7 @@ public:
     virtual void costs_changed();
 
     virtual int     set_search_mode(bool bSearchUntilFirstSolution);
-    virtual void    set_initialsolution_eps(double initialsolution_eps);
-    virtual void    set_mha_eps(double eps_mha);
+    virtual void    set_initialsolution_eps(double eps);
 
     virtual double  get_solution_eps() const;
     virtual int     get_n_expands() const;
@@ -79,16 +78,40 @@ public:
     virtual int     get_n_expands_init_solution();
     virtual double  get_final_epsilon();
     virtual void    get_search_stats(std::vector<PlannerStats>* s);
-    virtual double  get_mha_eps() const;
+
+    /// @{
+    /// Homogeneous accessor methods for search mode and timing parameters
+
+    void    set_initial_eps(double eps) { return set_initialsolution_eps(eps); }
+    void    set_mha_eps(double eps_mha);
+    void    set_final_eps(double eps);
+    void    set_dec_eps(double eps);
+    void    set_max_expansions(int expansion_count);
+    void    set_max_time(double max_time);
+
+    // double get_initial_eps();
+    double  get_mha_eps() const;
+    double  get_final_eps() const;
+    double  get_dec_eps() const;
+    int     get_max_expansions() const;
+    double  get_max_time() const;
+
+    /// @}
 
 private:
 
+    // Related objects
     Heuristic* m_hanchor;
     Heuristic** m_heurs;
     int m_hcount;           ///< number of additional heuristics used
 
-    double m_eps_mha;
-    double m_eps;
+    ReplanParams m_params;
+    int m_max_expansions;
+
+    double m_eps_mha;       ///< current w_2
+    double m_eps;           ///< current w_1
+    int m_num_expansions;   ///< current number of expansion
+    double m_elapsed;       ///< current amount of seconds
 
     int m_call_number;
 

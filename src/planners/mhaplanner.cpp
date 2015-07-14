@@ -2,6 +2,7 @@
 
 #include <assert.h>
 #include <stdlib.h>
+#include <time.h>
 #include <algorithm>
 
 #include <sbpl/utils/key.h>
@@ -17,6 +18,7 @@ MHAPlanner::MHAPlanner(
     m_hanchor(hanchor),
     m_heurs(heurs),
     m_hcount(hcount),
+    m_params(0.0),
     m_eps_mha(1.0),
     m_eps(1.0),
     m_call_number(0), // uninitialized
@@ -28,6 +30,21 @@ MHAPlanner::MHAPlanner(
     environment_ = environment;
 
     m_open = new CHeap[hcount + 1];
+
+    // Overwrite default members for ReplanParams to represent a single optimal
+    // search
+    m_params.initial_eps = 1.0;
+    m_params.final_eps = 1.0;
+    m_params.dec_eps = 0.0;
+    m_params.return_first_solution = false;
+    m_params.max_time = 0.0;
+    m_params.repair_time = 0.0;
+
+    /// Four Modes:
+    ///     Search Until Solution Bounded
+    ///     Search Until Solution Unbounded
+    ///     Improve Solution Bounded
+    ///     Improve Solution Unbounded
 }
 
 MHAPlanner::~MHAPlanner()
@@ -72,8 +89,9 @@ int MHAPlanner::replan(
     std::vector<int>* solution_stateIDs_V,
     int* solcost)
 {
-    // call ReplanParams variant
-    return 0;
+    ReplanParams params = m_params;
+    params.max_time = allocated_time_sec;
+    return replan(solution_stateIDs_V, params, solcost);
 }
 
 int MHAPlanner::replan(
@@ -92,6 +110,9 @@ int MHAPlanner::replan(
     // TODO: pick up from where last search left off and detect lazy
     // reinitializations
     reinit_search();
+
+    m_params = params;
+    m_eps = m_params.initial_eps;
 
     ++m_call_number;
     reinit_state(m_goal_state);
@@ -160,13 +181,9 @@ int MHAPlanner::set_search_mode(bool bSearchUntilFirstSolution)
     return 0;
 }
 
-void MHAPlanner::set_initialsolution_eps(double initialsolution_eps)
+void MHAPlanner::set_initialsolution_eps(double eps)
 {
-}
-
-void MHAPlanner::set_mha_eps(double eps_mha)
-{
-    m_eps_mha = eps_mha;
+    m_params.initial_eps = eps;
 }
 
 double MHAPlanner::get_solution_eps() const
@@ -208,9 +225,54 @@ void MHAPlanner::get_search_stats(std::vector<PlannerStats>* s)
 {
 }
 
+void MHAPlanner::set_mha_eps(double eps)
+{
+    m_eps_mha = eps;
+}
+
+void MHAPlanner::set_final_eps(double eps)
+{
+    m_params.final_eps = eps;
+}
+
+void MHAPlanner::set_dec_eps(double eps)
+{
+    m_params.dec_eps = eps;
+}
+
+void MHAPlanner::set_max_expansions(int expansion_count)
+{
+    m_num_expansions = expansion_count;
+}
+
+void MHAPlanner::set_max_time(double max_time)
+{
+    m_params.max_time = max_time;
+}
+
 double MHAPlanner::get_mha_eps() const
 {
     return m_eps_mha;
+}
+
+double MHAPlanner::get_final_eps() const
+{
+    return m_params.final_eps;
+}
+
+double MHAPlanner::get_dec_eps() const
+{
+    return m_params.dec_eps;
+}
+
+int MHAPlanner::get_max_expansions() const
+{
+    return m_max_expansions;
+}
+
+double MHAPlanner::get_max_time() const
+{
+    return m_params.max_time;
 }
 
 MHASearchState* MHAPlanner::get_state(int state_id)
