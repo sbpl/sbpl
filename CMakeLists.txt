@@ -18,7 +18,6 @@ add_library(sbpl SHARED
   src/discrete_space_information/environment_nav2Duu.cpp
   src/discrete_space_information/environment_XXX.cpp
   src/discrete_space_information/environment_robarm.cpp
-  src/heuristics/embedded_heuristic.cpp
   src/planners/araplanner.cpp
   src/planners/adplanner.cpp
   src/planners/viplanner.cpp
@@ -26,7 +25,6 @@ add_library(sbpl SHARED
   src/planners/ANAplanner.cpp
   src/planners/rstarplanner.cpp
   src/planners/lazyARA.cpp
-  src/planners/mhaplanner.cpp
   src/utils/heap.cpp
   src/utils/mdp.cpp
   src/utils/utils.cpp
@@ -36,7 +34,7 @@ add_library(sbpl SHARED
 
 set(SBPL_INCLUDE_DIR "${CMAKE_INSTALL_PREFIX}/include")
 set(SBPL_LIB_DIR "${CMAKE_INSTALL_PREFIX}/lib")
-  
+
 # support for pkg-config
 set(PKG_NAME "sbpl")
 set(PKG_DESC "The Search Based Planning Library")
@@ -55,6 +53,18 @@ install(FILES
   "${PROJECT_BINARY_DIR}/InstallFiles/sbpl-config.cmake"
   "${PROJECT_BINARY_DIR}/InstallFiles/sbpl-config-version.cmake"
 DESTINATION share/sbpl/)
+
+# support for build tree export
+option(SBPL_BUILD_TREE_EXPORT "Enable build tree exports" ON)
+if (${SBPL_BUILD_TREE_EXPORT})
+    export(TARGETS sbpl FILE sbpl-targets.cmake)
+    set(CONF_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/include")
+    configure_file(
+        sbpl-config-tree-export.cmake.in 
+        "${PROJECT_BINARY_DIR}/sbpl-config.cmake" 
+        @ONLY)
+    export(PACKAGE sbpl)
+endif()
 
 install(DIRECTORY src/include/sbpl DESTINATION include
 	FILES_MATCHING PATTERN "*.h")
