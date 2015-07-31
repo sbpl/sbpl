@@ -228,7 +228,7 @@ void LazyARAPlanner::putStateInHeap(LazyARAState* state){
   //that we know we have better costs for
   else if(!state->in_incons){
     if(print)
-      printf("put state %d in incons with state->g and state->isTrueCost=%d\n",state->id,state->g,state->isTrueCost);
+      printf("put state %d in incons with state->g=%d and state->isTrueCost=%d\n",state->id,state->g,state->isTrueCost);
     incons.push_back(state);
     state->in_incons = true;
   }
