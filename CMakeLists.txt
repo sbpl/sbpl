@@ -18,13 +18,15 @@ add_library(sbpl SHARED
   src/discrete_space_information/environment_nav2Duu.cpp
   src/discrete_space_information/environment_XXX.cpp
   src/discrete_space_information/environment_robarm.cpp
-  src/planners/araplanner.cpp
+  src/heuristics/embedded_heuristic.cpp
   src/planners/adplanner.cpp
-  src/planners/viplanner.cpp
-  src/planners/ppcpplanner.cpp
   src/planners/ANAplanner.cpp
-  src/planners/rstarplanner.cpp
+  src/planners/araplanner.cpp
   src/planners/lazyARA.cpp
+  src/planners/mhaplanner.cpp
+  src/planners/ppcpplanner.cpp
+  src/planners/rstarplanner.cpp
+  src/planners/viplanner.cpp
   src/utils/heap.cpp
   src/utils/mdp.cpp
   src/utils/utils.cpp
