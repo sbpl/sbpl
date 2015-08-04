@@ -427,10 +427,11 @@ void MHAPlanner::init_state(
 {
     state->call_number = 0; // not initialized for any iteration
     state->state_id = state_id;
+    state->closed_in_anc = false;
+    state->closed_in_add = false;
     for (int i = 0; i < num_heuristics(); ++i) {
         state->od[i].open_state.heapindex = 0;
         state->od[i].h = compute_heuristic(state->state_id, i);
-        state->od[i].closed = false;
         // hijack list element pointers to map back to mha search state
         assert(sizeof(state->od[i].open_state.listelem) >= sizeof(struct listelement*));
         reinterpret_cast<size_t&>(state->od[i].open_state.listelem[0]) = mha_state_idx;
@@ -444,10 +445,12 @@ void MHAPlanner::reinit_state(MHASearchState* state)
         state->g = INFINITECOST;
         state->bp = NULL;
 
+        state->closed_in_anc = false;
+        state->closed_in_add = false;
+
         for (int i = 0; i < num_heuristics(); ++i) {
             state->od[i].open_state.heapindex = 0;
             state->od[i].h = compute_heuristic(state->state_id, i);
-            state->od[i].closed = false;
         }
     }
 }
@@ -475,7 +478,12 @@ void MHAPlanner::expand(MHASearchState* state, int hidx)
 
     assert(!closed_in_add_search(state) || !closed_in_anc_search(state));
 
-    state->od[hidx].closed = true;
+    if (hidx == 0) {
+        state->closed_in_anc = true;
+    }
+    else {
+        state->closed_in_add = true;
+    }
     ++m_num_expansions;
 
     // remove s from all open lists
@@ -575,25 +583,15 @@ void MHAPlanner::extract_path(std::vector<int>* solution_path)
 
 bool MHAPlanner::closed_in_anc_search(MHASearchState* state) const
 {
-    return state->od[0].closed;
+    return state->closed_in_anc;
 }
 
 bool MHAPlanner::closed_in_add_search(MHASearchState* state) const
 {
-    for (int i = 1; i < num_heuristics(); ++i) {
-        if (state->od[i].closed) {
-            return true;
-        }
-    }
-    return false;
+    return state->closed_in_add;
 }
 
 bool MHAPlanner::closed_in_any_search(MHASearchState* state) const
 {
-    for (int i = 0; i < num_heuristics(); ++i) {
-        if (state->od[i].closed) {
-            return true;
-        }
-    }
-    return false;
+    return state->closed_in_anc || state->closed_in_add;
 }

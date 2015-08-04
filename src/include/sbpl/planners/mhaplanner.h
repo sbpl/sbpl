@@ -12,11 +12,13 @@ struct MHASearchState
     int g;
     MHASearchState* bp;
 
+    bool closed_in_anc;
+    bool closed_in_add;
+
     struct HeapData
     {
         AbstractSearchState open_state;
         int h;
-        bool closed; // TODO: ok to condense this to one bool for "closed in any additional search"
     };
 
     HeapData od[1]; // overallocated for additional n heuristics
