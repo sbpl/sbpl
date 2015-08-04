@@ -7,6 +7,11 @@
 
 #include <sbpl/utils/key.h>
 
+static double GetTime()
+{
+    return (double)clock() / (double)CLOCKS_PER_SEC;
+}
+
 MHAPlanner::MHAPlanner(
     DiscreteSpaceInformation* environment,
     Heuristic* hanchor,
@@ -19,8 +24,13 @@ MHAPlanner::MHAPlanner(
     m_heurs(heurs),
     m_hcount(hcount),
     m_params(0.0),
-    m_eps_mha(1.0),
+    m_initial_eps_mha(1.0),
+    m_max_expansions(0),
     m_eps(1.0),
+    m_eps_mha(1.0),
+    m_eps_satisfied((double)INFINITECOST),
+    m_num_expansions(0),
+    m_elapsed(0.0),
     m_call_number(0), // uninitialized
     m_start_state(NULL),
     m_goal_state(NULL),
@@ -121,14 +131,26 @@ int MHAPlanner::replan(
     SBPL_INFO("  Max Time: %0.3f", m_params.max_time);
     SBPL_INFO("  Repair Time: %0.3f", m_params.repair_time);
     SBPL_INFO("MHA Search parameters:");
-    SBPL_INFO("  MHA Epsilon: %0.3f", m_eps_mha);
+    SBPL_INFO("  MHA Epsilon: %0.3f", m_initial_eps_mha);
     SBPL_INFO("  Max Expansions: %d", m_max_expansions);
+
+    environment_->EnsureHeuristicsUpdated(true); // TODO: support backwards search
 
     // TODO: pick up from where last search left off and detect lazy
     // reinitializations
     reinit_search();
 
     m_eps = m_params.initial_eps;
+    m_eps_mha = m_initial_eps_mha;
+    m_eps_satisfied = (double)INFINITECOST;
+
+    // reset time limits
+    m_num_expansions = 0;
+    m_elapsed = 0.0;
+
+    double start_time, end_time;
+
+    start_time = GetTime();
 
     ++m_call_number;
     reinit_state(m_goal_state);
@@ -143,14 +165,17 @@ int MHAPlanner::replan(
         SBPL_INFO("Inserted start state into search %d with f = %d", hidx, key.key[0]);
     }
 
-    // TODO: time and expansion limits
-    while (!m_open[0].emptyheap()) { 
+    end_time = GetTime();
+    m_elapsed += (end_time - start_time);
+
+    while (!m_open[0].emptyheap() && !time_limit_reached()) { 
+        start_time = GetTime();
         for (int hidx = 1; hidx < num_heuristics(); ++hidx) {
-            // TODO: watch out for heaps exhausting prematurely
             if (!m_open[hidx].emptyheap() && get_minf(m_open[hidx]) <=
                 m_eps_mha * get_minf(m_open[0]))
             {
                 if (m_goal_state->g <= get_minf(m_open[hidx])) {
+                    m_eps_satisfied = m_eps * m_eps_mha;
                     extract_path(solution_stateIDs_V);
                     return 1;
                 }
@@ -162,7 +187,7 @@ int MHAPlanner::replan(
             }
             else {
                 if (m_goal_state->g <= get_minf(m_open[0])) {
-                    // terminate and return path pointed to by bp(g)
+                    m_eps_satisfied = m_eps * m_eps_mha;
                     extract_path(solution_stateIDs_V);
                     return 1;
                 }
@@ -173,6 +198,8 @@ int MHAPlanner::replan(
                 }
             }
         }
+        end_time = GetTime();
+        m_elapsed += (end_time - start_time);
     }
 
     return 0;
@@ -206,48 +233,48 @@ void MHAPlanner::set_initialsolution_eps(double eps)
     m_params.initial_eps = eps;
 }
 
-double MHAPlanner::get_solution_eps() const
-{
-    return 0.0;
-}
-
-int MHAPlanner::get_n_expands() const
-{
-    return 0;
-}
-
 double MHAPlanner::get_initial_eps()
 {
-    return 0.0;
+    return m_params.initial_eps;
 }
 
-double MHAPlanner::get_initial_eps_planning_time()
+double MHAPlanner::get_solution_eps() const
 {
-    return 0.0;
-}
-
-double MHAPlanner::get_final_eps_planning_time()
-{
-    return 0.0;
-}
-
-int MHAPlanner::get_n_expands_init_solution()
-{
-    return 0;
+    return m_eps_satisfied;
 }
 
 double MHAPlanner::get_final_epsilon()
 {
-    return 0.0;
+    return m_eps_satisfied;
+}
+
+double MHAPlanner::get_final_eps_planning_time()
+{
+    return m_elapsed;
+}
+
+double MHAPlanner::get_initial_eps_planning_time()
+{
+    return m_elapsed;
+}
+
+int MHAPlanner::get_n_expands() const
+{
+    return m_num_expansions;
+}
+
+int MHAPlanner::get_n_expands_init_solution()
+{
+    return m_num_expansions;
 }
 
 void MHAPlanner::get_search_stats(std::vector<PlannerStats>* s)
 {
 }
 
-void MHAPlanner::set_mha_eps(double eps)
+void MHAPlanner::set_initial_mha_eps(double eps)
 {
-    m_eps_mha = eps;
+    m_initial_eps_mha = eps;
 }
 
 void MHAPlanner::set_final_eps(double eps)
@@ -262,7 +289,7 @@ void MHAPlanner::set_dec_eps(double eps)
 
 void MHAPlanner::set_max_expansions(int expansion_count)
 {
-    m_num_expansions = expansion_count;
+    m_max_expansions = expansion_count;
 }
 
 void MHAPlanner::set_max_time(double max_time)
@@ -270,9 +297,9 @@ void MHAPlanner::set_max_time(double max_time)
     m_params.max_time = max_time;
 }
 
-double MHAPlanner::get_mha_eps() const
+double MHAPlanner::get_initial_mha_eps() const
 {
-    return m_eps_mha;
+    return m_initial_eps_mha;
 }
 
 double MHAPlanner::get_final_eps() const
@@ -312,12 +339,15 @@ bool MHAPlanner::check_params(const ReplanParams& params)
         return false;
     }
 
-    if (m_eps_mha < 1.0) {
+    if (m_initial_eps_mha < 1.0) {
         SBPL_ERROR("MHA Epsilon must be greater than or equal to 1");
         return false;
     }
 
-    if (params.max_time <= 0.0 && m_max_expansions <= 0) {
+    if (params.return_first_solution &&
+        params.max_time <= 0.0 &&
+        m_max_expansions <= 0)
+    {
         SBPL_ERROR("Max Time or Max Expansions must be positive");
         return false;
     }
@@ -325,13 +355,27 @@ bool MHAPlanner::check_params(const ReplanParams& params)
     return true;
 }
 
+bool MHAPlanner::time_limit_reached() const
+{
+    if (m_params.return_first_solution) {
+        return false;
+    }
+    else if (m_params.max_time > 0.0 && m_elapsed >= m_params.max_time) {
+        return true;
+    }
+    else if (m_max_expansions > 0 && m_num_expansions >= m_max_expansions) {
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
 MHASearchState* MHAPlanner::get_state(int state_id)
 {
     assert(state_id >= 0 && state_id < environment_->StateID2IndexMapping.size());
     int* idxs = environment_->StateID2IndexMapping[state_id];
     if (idxs[MHAMDP_STATEID2IND] == -1) {
-//        SBPL_DEBUG("Creating new search state for graph state %d", state_id);
-
         // overallocate search state for appropriate heuristic information
         const size_t state_size =
                 sizeof(MHASearchState) +
@@ -432,6 +476,7 @@ void MHAPlanner::expand(MHASearchState* state, int hidx)
     assert(!closed_in_add_search(state) || !closed_in_anc_search(state));
 
     state->od[hidx].closed = true;
+    ++m_num_expansions;
 
     // remove s from all open lists
     for (int hidx = 0; hidx < num_heuristics(); ++hidx) {

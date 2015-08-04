@@ -16,7 +16,7 @@ struct MHASearchState
     {
         AbstractSearchState open_state;
         int h;
-        bool closed;
+        bool closed; // TODO: ok to condense this to one bool for "closed in any additional search"
     };
 
     HeapData od[1]; // overallocated for additional n heuristics
@@ -67,36 +67,59 @@ public:
     /// \sa ARAPlanner::costs_changed()
     virtual void costs_changed();
 
+    /// \name Search Parameter Accessors
+    ///@{
+
+    /// \sa SBPLPlanner::set_search_mode(bool)
     virtual int     set_search_mode(bool bSearchUntilFirstSolution);
+    /// \sa SBPLPlanner::set_initialsolution_eps(double)
     virtual void    set_initialsolution_eps(double eps);
 
-    virtual double  get_solution_eps() const;
-    virtual int     get_n_expands() const;
+    /// \sa SBPLPlanner::get_initial_eps()
     virtual double  get_initial_eps();
-    virtual double  get_initial_eps_planning_time();
-    virtual double  get_final_eps_planning_time();
-    virtual int     get_n_expands_init_solution();
+
+    ///@}
+
+    /// \name Search Statistics
+    ///@{
+
+    /// \sa SBPLPlanner::get_solution_eps() const
+    virtual double  get_solution_eps() const;
+    /// \sa SBPLPlanner::get_final_epsilon()
     virtual double  get_final_epsilon();
+
+    /// \sa SBPLPlanner::get_final_eps_planning_time
+    virtual double  get_final_eps_planning_time();
+    /// \sa SBPLPlanner::get_initial_eps_planning_time
+    virtual double  get_initial_eps_planning_time();
+
+    /// \sa SBPLPlanner::get_n_expands() const
+    virtual int     get_n_expands() const;
+    ///\sa SBPLPlanner::get_n_expands_init_solution()
+    virtual int     get_n_expands_init_solution();
+    /// \sa SBPLPlanner::get_search_states(std::vector<PlannerStates>*)
     virtual void    get_search_stats(std::vector<PlannerStats>* s);
 
-    /// @{
-    /// Homogeneous accessor methods for search mode and timing parameters
+    ///@}
+
+    /// \name Homogeneous accessor methods for search mode and timing parameters
+    // @{
 
     void    set_initial_eps(double eps) { return set_initialsolution_eps(eps); }
-    void    set_mha_eps(double eps_mha);
+    void    set_initial_mha_eps(double eps_mha);
     void    set_final_eps(double eps);
     void    set_dec_eps(double eps);
     void    set_max_expansions(int expansion_count);
     void    set_max_time(double max_time);
 
     // double get_initial_eps();
-    double  get_mha_eps() const;
+    double  get_initial_mha_eps() const;
     double  get_final_eps() const;
     double  get_dec_eps() const;
     int     get_max_expansions() const;
     double  get_max_time() const;
 
-    /// @}
+    ///@}
 
 private:
 
@@ -106,10 +129,15 @@ private:
     int m_hcount;           ///< number of additional heuristics used
 
     ReplanParams m_params;
+    double m_initial_eps_mha;
     int m_max_expansions;
 
-    double m_eps_mha;       ///< current w_2
     double m_eps;           ///< current w_1
+    double m_eps_mha;       ///< current w_2
+
+    /// suboptimality bound satisfied by the last search
+    double m_eps_satisfied; 
+
     int m_num_expansions;   ///< current number of expansion
     double m_elapsed;       ///< current amount of seconds
 
@@ -123,6 +151,8 @@ private:
     CHeap* m_open; ///< sequence of (m_hcount + 1) open lists
 
     bool check_params(const ReplanParams& params);
+
+    bool time_limit_reached() const;
 
     int num_heuristics() const { return m_hcount + 1; }
     MHASearchState* get_state(int state_id);
