@@ -107,11 +107,27 @@ int MHAPlanner::replan(
     ReplanParams params,
     int* solcost)
 {
+    if (!check_params(params)) { // errors printed within
+        return 0;
+    }
+
+    m_params = params;
+
+    SBPL_INFO("Generic Search parameters:");
+    SBPL_INFO("  Initial Epsilon: %0.3f", m_params.initial_eps);
+    SBPL_INFO("  Final Epsilon: %0.3f", m_params.final_eps);
+    SBPL_INFO("  Delta Epsilon: %0.3f", m_params.dec_eps);
+    SBPL_INFO("  Return First Solution: %s", m_params.return_first_solution ? "true" : "false");
+    SBPL_INFO("  Max Time: %0.3f", m_params.max_time);
+    SBPL_INFO("  Repair Time: %0.3f", m_params.repair_time);
+    SBPL_INFO("MHA Search parameters:");
+    SBPL_INFO("  MHA Epsilon: %0.3f", m_eps_mha);
+    SBPL_INFO("  Max Expansions: %d", m_max_expansions);
+
     // TODO: pick up from where last search left off and detect lazy
     // reinitializations
     reinit_search();
 
-    m_params = params;
     m_eps = m_params.initial_eps;
 
     ++m_call_number;
@@ -120,24 +136,27 @@ int MHAPlanner::replan(
     m_start_state->g = 0;
 
     // insert start state into all heaps with key(start, i) as priority
-    for (int hidx = 0; hidx < num_total_heuristics(); ++hidx) {
+    for (int hidx = 0; hidx < num_heuristics(); ++hidx) {
         CKey key;
         key.key[0] = compute_key(m_start_state, hidx);
         m_open[hidx].insertheap(&m_start_state->od[hidx].open_state, key);
+        SBPL_INFO("Inserted start state into search %d with f = %d", hidx, key.key[0]);
     }
 
     // TODO: time and expansion limits
     while (!m_open[0].emptyheap()) { 
-        for (int i = 0; i < m_hcount; ++i) {
+        for (int hidx = 1; hidx < num_heuristics(); ++hidx) {
             // TODO: watch out for heaps exhausting prematurely
-            const int hidx = 1 + i;
-            if (get_minf(m_open[hidx]) <= m_eps_mha * get_minf(m_open[0])) {
+            if (!m_open[hidx].emptyheap() && get_minf(m_open[hidx]) <=
+                m_eps_mha * get_minf(m_open[0]))
+            {
                 if (m_goal_state->g <= get_minf(m_open[hidx])) {
                     extract_path(solution_stateIDs_V);
                     return 1;
                 }
                 else {
-                    MHASearchState* s = state_from_open_state(m_open[hidx].getminheap());
+                    MHASearchState* s =
+                            state_from_open_state(m_open[hidx].getminheap());
                     expand(s, hidx);
                 }
             }
@@ -148,7 +167,8 @@ int MHAPlanner::replan(
                     return 1;
                 }
                 else {
-                    MHASearchState* s = state_from_open_state(m_open[hidx].getminheap());
+                    MHASearchState* s =
+                            state_from_open_state(m_open[0].getminheap());
                     expand(s, 0);
                 }
             }
@@ -275,6 +295,36 @@ double MHAPlanner::get_max_time() const
     return m_params.max_time;
 }
 
+bool MHAPlanner::check_params(const ReplanParams& params)
+{
+    if (params.initial_eps < 1.0) {
+        SBPL_ERROR("Initial Epsilon must be greater than or equal to 1");
+        return false;
+    }
+
+    if (params.final_eps > params.initial_eps) {
+        SBPL_ERROR("Final Epsilon must be less than or equal to initial epsilon");
+        return false;
+    }
+
+    if (params.dec_eps <= 0.0) {
+        SBPL_ERROR("Delta epsilon must be strictly positive");
+        return false;
+    }
+
+    if (m_eps_mha < 1.0) {
+        SBPL_ERROR("MHA Epsilon must be greater than or equal to 1");
+        return false;
+    }
+
+    if (params.max_time <= 0.0 && m_max_expansions <= 0) {
+        SBPL_ERROR("Max Time or Max Expansions must be positive");
+        return false;
+    }
+
+    return true;
+}
+
 MHASearchState* MHAPlanner::get_state(int state_id)
 {
     assert(state_id >= 0 && state_id < environment_->StateID2IndexMapping.size());
@@ -333,7 +383,7 @@ void MHAPlanner::init_state(
 {
     state->call_number = 0; // not initialized for any iteration
     state->state_id = state_id;
-    for (int i = 0; i < m_hcount + 1; ++i) {
+    for (int i = 0; i < num_heuristics(); ++i) {
         state->od[i].open_state.heapindex = 0;
         state->od[i].h = compute_heuristic(state->state_id, i);
         state->od[i].closed = false;
@@ -350,7 +400,7 @@ void MHAPlanner::reinit_state(MHASearchState* state)
         state->g = INFINITECOST;
         state->bp = NULL;
 
-        for (int i = 0; i < m_hcount + 1; ++i) {
+        for (int i = 0; i < num_heuristics(); ++i) {
             state->od[i].open_state.heapindex = 0;
             state->od[i].h = compute_heuristic(state->state_id, i);
             state->od[i].closed = false;
@@ -365,7 +415,7 @@ void MHAPlanner::reinit_search()
 
 void MHAPlanner::clear_open_lists()
 {
-    for (int i = 0; i < num_total_heuristics(); ++i) {
+    for (int i = 0; i < num_heuristics(); ++i) {
         m_open[i].makeemptyheap();
     }
 }
@@ -378,8 +428,13 @@ int MHAPlanner::compute_key(MHASearchState* state, int hidx)
 void MHAPlanner::expand(MHASearchState* state, int hidx)
 {
     SBPL_DEBUG("Expanding state %d in search %d", state->state_id, hidx);
+
+    assert(!closed_in_add_search(state) || !closed_in_anc_search(state));
+
+    state->od[hidx].closed = true;
+
     // remove s from all open lists
-    for (int hidx = 0; hidx < m_hcount; ++hidx) {
+    for (int hidx = 0; hidx < num_heuristics(); ++hidx) {
         if (m_open[hidx].inheap(&state->od[hidx].open_state)) {
             m_open[hidx].deleteheap(&state->od[hidx].open_state);
         }
@@ -390,39 +445,39 @@ void MHAPlanner::expand(MHASearchState* state, int hidx)
     environment_->GetSuccs(state->state_id, &succ_ids, &costs);
     assert(succ_ids.size() == costs.size());
 
-    // for s' in succ(s) do
     for (size_t sidx = 0; sidx < succ_ids.size(); ++sidx)  {
         const int cost = costs[sidx];
         MHASearchState* succ_state = get_state(succ_ids[sidx]);
-        // reinit_state(s')
         reinit_state(succ_state);
+
+        SBPL_INFO(" Successor %d", succ_state->state_id);
 
         int new_g = state->g + costs[sidx];
         if (new_g < succ_state->g) {
             succ_state->g = new_g;
             succ_state->bp = state;
-            if (!succ_state->od[0].closed) {
+            if (!closed_in_anc_search(succ_state)) {
                 const int fanchor = compute_key(succ_state, 0);
-
                 insert_or_update(succ_state, 0, fanchor);
+                SBPL_INFO("  Update in search %d with f = %d", 0, fanchor);
 
-                // if not any closed(s', i) for i = 1, n then
-                bool closed = false;
-                for (int hidx = 1; hidx < m_hcount + 1; ++hidx) {
-                    closed |= succ_state->od[hidx].closed;
-                }
-
-                if (!closed) {
-                    for (int hidx = 1; hidx < m_hcount + 1; ++hidx) {
+                if (!closed_in_add_search(succ_state)) {
+                    for (int hidx = 1; hidx < num_heuristics(); ++hidx) {
                         int fn = compute_key(succ_state, hidx);
                         if (fn <= m_eps_mha * fanchor) {
                             insert_or_update(succ_state, hidx, fn);
+                            SBPL_INFO("  Update in search %d with f = %d", hidx, fn);
+                        }
+                        else {
+                            SBPL_INFO("  Skipping update of in search %d (%0.3f > %0.3f)", hidx, (double)fn, m_eps_mha * fanchor);
                         }
                     }
                 }
             }
         }
     }
+
+    assert(closed_in_any_search(state));
 }
 
 MHASearchState* MHAPlanner::state_from_open_state(
@@ -471,4 +526,29 @@ void MHAPlanner::extract_path(std::vector<int>* solution_path)
 
     // TODO: special cases for backward search
     std::reverse(solution_path->begin(), solution_path->end());
+}
+
+bool MHAPlanner::closed_in_anc_search(MHASearchState* state) const
+{
+    return state->od[0].closed;
+}
+
+bool MHAPlanner::closed_in_add_search(MHASearchState* state) const
+{
+    for (int i = 1; i < num_heuristics(); ++i) {
+        if (state->od[i].closed) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool MHAPlanner::closed_in_any_search(MHASearchState* state) const
+{
+    for (int i = 0; i < num_heuristics(); ++i) {
+        if (state->od[i].closed) {
+            return true;
+        }
+    }
+    return false;
 }

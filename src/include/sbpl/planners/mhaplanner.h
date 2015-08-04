@@ -122,7 +122,9 @@ private:
 
     CHeap* m_open; ///< sequence of (m_hcount + 1) open lists
 
-    int num_total_heuristics() const { return m_hcount + 1; }
+    bool check_params(const ReplanParams& params);
+
+    int num_heuristics() const { return m_hcount + 1; }
     MHASearchState* get_state(int state_id);
     void init_state(MHASearchState* state, size_t mha_state_idx, int state_id);
     void reinit_state(MHASearchState* state);
@@ -137,6 +139,10 @@ private:
     void insert_or_update(MHASearchState* state, int hidx, int f);
 
     void extract_path(std::vector<int>* solution_path);
+
+    bool closed_in_anc_search(MHASearchState* state) const;
+    bool closed_in_add_search(MHASearchState* state) const;
+    bool closed_in_any_search(MHASearchState* state) const;
 };
 
 #endif
