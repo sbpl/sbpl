@@ -225,7 +225,7 @@ void MHAPlanner::costs_changed()
 
 int MHAPlanner::set_search_mode(bool bSearchUntilFirstSolution)
 {
-    return 0;
+    return m_params.return_first_solution = bSearchUntilFirstSolution;
 }
 
 void MHAPlanner::set_initialsolution_eps(double eps)
