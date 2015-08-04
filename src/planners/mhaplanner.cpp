@@ -162,7 +162,7 @@ int MHAPlanner::replan(
         CKey key;
         key.key[0] = compute_key(m_start_state, hidx);
         m_open[hidx].insertheap(&m_start_state->od[hidx].open_state, key);
-        SBPL_INFO("Inserted start state into search %d with f = %d", hidx, key.key[0]);
+        SBPL_DEBUG("Inserted start state into search %d with f = %d", hidx, key.key[0]);
     }
 
     end_time = GetTime();
@@ -200,6 +200,13 @@ int MHAPlanner::replan(
         }
         end_time = GetTime();
         m_elapsed += (end_time - start_time);
+    }
+
+    if (m_open[0].emptyheap()) {
+        SBPL_DEBUG("Anchor search exhausted");
+    }
+    if (time_limit_reached()) {
+        SBPL_DEBUG("Time limit reached");
     }
 
     return 0;
@@ -503,7 +510,7 @@ void MHAPlanner::expand(MHASearchState* state, int hidx)
         MHASearchState* succ_state = get_state(succ_ids[sidx]);
         reinit_state(succ_state);
 
-        SBPL_INFO(" Successor %d", succ_state->state_id);
+        SBPL_DEBUG(" Successor %d", succ_state->state_id);
 
         int new_g = state->g + costs[sidx];
         if (new_g < succ_state->g) {
@@ -512,17 +519,17 @@ void MHAPlanner::expand(MHASearchState* state, int hidx)
             if (!closed_in_anc_search(succ_state)) {
                 const int fanchor = compute_key(succ_state, 0);
                 insert_or_update(succ_state, 0, fanchor);
-                SBPL_INFO("  Update in search %d with f = %d", 0, fanchor);
+                SBPL_DEBUG("  Update in search %d with f = %d", 0, fanchor);
 
                 if (!closed_in_add_search(succ_state)) {
                     for (int hidx = 1; hidx < num_heuristics(); ++hidx) {
                         int fn = compute_key(succ_state, hidx);
                         if (fn <= m_eps_mha * fanchor) {
                             insert_or_update(succ_state, hidx, fn);
-                            SBPL_INFO("  Update in search %d with f = %d", hidx, fn);
+                            SBPL_DEBUG("  Update in search %d with f = %d", hidx, fn);
                         }
                         else {
-                            SBPL_INFO("  Skipping update of in search %d (%0.3f > %0.3f)", hidx, (double)fn, m_eps_mha * fanchor);
+                            SBPL_DEBUG("  Skipping update of in search %d (%0.3f > %0.3f)", hidx, (double)fn, m_eps_mha * fanchor);
                         }
                     }
                 }
