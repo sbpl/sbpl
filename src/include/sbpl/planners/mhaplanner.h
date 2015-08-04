@@ -59,7 +59,12 @@ public:
             ReplanParams params,
             int* solcost);
 
+    /// \sa SBPLPlanner::force_planning_from_scratch()
+    /// \return 1 on success; 0 otherwise
     virtual int force_planning_from_scratch();
+
+    /// \sa SBPLPlanner::force_planning_from_scratch_and_free_memory()
+    /// \return 1 on success; 0 otherwise
     virtual int force_planning_from_scratch_and_free_memory();
 
     virtual void costs_changed(StateChangeQuery const & stateChange);
