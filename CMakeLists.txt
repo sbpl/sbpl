@@ -57,7 +57,7 @@ install(FILES
 DESTINATION share/sbpl/)
 
 # support for build tree export
-option(SBPL_BUILD_TREE_EXPORT "Enable build tree exports" ON)
+option(SBPL_BUILD_TREE_EXPORT "Enable build tree exports" OFF)
 if (${SBPL_BUILD_TREE_EXPORT})
     export(TARGETS sbpl FILE sbpl-targets.cmake)
     set(CONF_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/include")
