@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008, Maxim Likhachev
+ * Copyright (c) 2015, Maxim Likhachev
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -26,19 +26,27 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+ 
+#ifndef sbpl_Heuristic_h
+#define sbpl_Heuristic_h
 
-#ifndef SBPL_EXCEPTION_H
-#define SBPL_EXCEPTION_H
+#include <sbpl/discrete_space_information/environment.h>
 
-#include <exception>
-
-class SBPL_Exception : public std::exception
+class Heuristic
 {
 public:
-    virtual const char* what() const throw()
-    {
-        return "SBPL has encountered a fatal error!";
-    }
+
+    Heuristic(DiscreteSpaceInformation* environment) :
+        m_environment(environment)
+    { }
+
+    virtual int GetGoalHeuristic(int state_id) = 0;
+    virtual int GetStartHeuristic(int state_id) = 0;
+    virtual int GetFromToHeuristic(int from_id, int to_id) = 0;
+
+protected:
+
+    DiscreteSpaceInformation* m_environment;
 };
 
 #endif

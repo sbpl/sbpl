@@ -10,7 +10,7 @@
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the University of Pennsylvania nor the names of its
+ *     * Neither the name of the Carnegie Mellon University nor the names of its
  *       contributors may be used to endorse or promote products derived from
  *       this software without specific prior written permission.
  * 
@@ -50,6 +50,7 @@ enum STATEID2IND
 #define RSTARMDP_STATEID2IND STATEID2IND_SLOT0
 #define RSTARMDP_LSEARCH_STATEID2IND STATEID2IND_SLOT1
 #define anaMDP_STATEID2IND STATEID2IND_SLOT0
+#define MHAMDP_STATEID2IND STATEID2IND_SLOT0
 
 //for example
 //#define YYYPLANNER_STATEID2IND STATEID2IND_SLOT0

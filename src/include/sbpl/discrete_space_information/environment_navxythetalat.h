@@ -10,7 +10,7 @@
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the University of Pennsylvania nor the names of its
+ *     * Neither the name of the Carnegie Mellon University nor the names of its
  *       contributors may be used to endorse or promote products derived from
  *       this software without specific prior written permission.
  * 
@@ -562,6 +562,9 @@ public:
      * \brief returns all predecessors states and corresponding costs of actions
      */
     virtual void GetPreds(int TargetStateID, std::vector<int>* PredIDV, std::vector<int>* CostV);
+    virtual void GetLazyPreds(int TargetStateID, std::vector<int>* PredIDV, std::vector<int>* CostV, std::vector<bool>* isTrueCost);
+    virtual void GetPredsWithUniqueIds(int TargetStateID, std::vector<int>* PredIDV, std::vector<int>* CostV);
+    virtual void GetLazyPredsWithUniqueIds(int TargetStateID, std::vector<int>* PredIDV, std::vector<int>* CostV, std::vector<bool>* isTrueCost);
 
     /**
      * \brief returns all successors states, costs of corresponding actions
@@ -577,9 +580,6 @@ public:
     virtual void GetLazySuccsWithUniqueIds(int SourceStateID, std::vector<int>* SuccIDV, std::vector<int>* CostV, std::vector<bool>* isTrueCost, std::vector<EnvNAVXYTHETALATAction_t*>* actionindV = NULL);
     virtual int GetTrueCost(int parentID, int childID);
     virtual bool isGoal(int id);
-    //virtual void GetPreds(int TargetStateID, std::vector<int>* PredIDV, std::vector<int>* CostV, std::vector<bool>* isTrueCost);
-    //virtual void GetPredsWithUniqueIds(int TargetStateID, std::vector<int>* PredIDV, std::vector<int>* CostV);
-    //virtual void GetPredsWithUniqueIds(int TargetStateID, std::vector<int>* PredIDV, std::vector<int>* CostV, std::vector<bool>* isTrueCost);
 
 
     /** \brief this function fill in Predecessor/Successor states of edges
@@ -627,6 +627,8 @@ public:
      * \brief see comments on the same function in the parent class
      */
     virtual void PrintVars() { }
+
+    const EnvNAVXYTHETALATHashEntry_t* GetStateEntry(int state_id) const;
 
 protected:
     //hash table of size x_size*y_size. Maps from coords to stateId

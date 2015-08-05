@@ -10,7 +10,7 @@
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the University of Pennsylvania nor the names of its
+ *     * Neither the name of the Carnegie Mellon University nor the names of its
  *       contributors may be used to endorse or promote products derived from
  *       this software without specific prior written permission.
  * 
@@ -81,7 +81,10 @@ public:
   virtual void costs_changed(){return;};
 
   virtual int force_planning_from_scratch(){return 1;};
-  virtual int force_planning_from_scratch_and_free_memory(){return 1;};
+  virtual int force_planning_from_scratch_and_free_memory(){
+    freeMemory();
+    return 1;
+  };
 
 	virtual int set_search_mode(bool bSearchUntilFirstSolution){
     params.return_first_solution = bSearchUntilFirstSolution;
@@ -93,7 +96,7 @@ public:
   };
 
   LazyARAPlanner(DiscreteSpaceInformation* environment, bool bforwardsearch);
-  ~LazyARAPlanner(){};
+  ~LazyARAPlanner();
 
   virtual void get_search_stats(std::vector<PlannerStats>* s);
 
@@ -155,6 +158,7 @@ protected:
   void getNextLazyElement(LazyARAState* state);
   void insertLazyList(LazyARAState* state, LazyARAState* parent, int edgeCost, bool isTrueCost);
   void putStateInHeap(LazyARAState* state);
+  void freeMemory();
 
 	virtual int ImprovePath();
 
