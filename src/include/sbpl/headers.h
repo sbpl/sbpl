@@ -10,7 +10,7 @@
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the University of Pennsylvania nor the names of its
+ *     * Neither the name of the Carnegie Mellon University nor the names of its
  *       contributors may be used to endorse or promote products derived from
  *       this software without specific prior written permission.
  * 
@@ -50,9 +50,12 @@
 #include <sbpl/discrete_space_information/environment_navxythetamlevlat.h>
 #include <sbpl/discrete_space_information/environment_robarm.h>
 #include <sbpl/discrete_space_information/environment_XXX.h>
+#include <sbpl/heuristics/heuristic.h>
+#include <sbpl/heuristics/embedded_heuristic.h>
 #include <sbpl/planners/adplanner.h>
 #include <sbpl/planners/ANAplanner.h>
 #include <sbpl/planners/araplanner.h>
+#include <sbpl/planners/mhaplanner.h>
 #include <sbpl/planners/planner.h>
 #include <sbpl/planners/ppcpplanner.h>
 #include <sbpl/planners/rstarplanner.h>
