@@ -204,7 +204,7 @@ private:
     int get_minf(CHeap& pq) const;
     void insert_or_update(MHASearchState* state, int hidx, int f);
 
-    void extract_path(std::vector<int>* solution_path);
+    void extract_path(std::vector<int>* solution_path, int* solcost);
 
     bool closed_in_anc_search(MHASearchState* state) const;
     bool closed_in_add_search(MHASearchState* state) const;
