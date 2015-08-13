@@ -199,13 +199,27 @@ int MHAPlanner::replan(
 
     while (!m_open[0].emptyheap() && !time_limit_reached()) { 
         start_time = GetTime();
+
+        // special case for mha* without additional heuristics
+        if (num_heuristics() == 1) { 
+            if (m_goal_state->g <= get_minf(m_open[0])) {
+                m_eps_satisfied = m_eps * m_eps_mha;
+                extract_path(solution_stateIDs_V, solcost);
+                return 1;
+            }
+            else {
+                MHASearchState* s = state_from_open_state(m_open[0].getminheap());
+                expand(s, 0);
+            }
+        }
+
         for (int hidx = 1; hidx < num_heuristics(); ++hidx) {
             if (!m_open[hidx].emptyheap() && get_minf(m_open[hidx]) <=
                 m_eps_mha * get_minf(m_open[0]))
             {
                 if (m_goal_state->g <= get_minf(m_open[hidx])) {
                     m_eps_satisfied = m_eps * m_eps_mha;
-                    extract_path(solution_stateIDs_V);
+                    extract_path(solution_stateIDs_V, solcost);
                     return 1;
                 }
                 else {
@@ -217,7 +231,7 @@ int MHAPlanner::replan(
             else {
                 if (m_goal_state->g <= get_minf(m_open[0])) {
                     m_eps_satisfied = m_eps * m_eps_mha;
-                    extract_path(solution_stateIDs_V);
+                    extract_path(solution_stateIDs_V, solcost);
                     return 1;
                 }
                 else {
@@ -604,13 +618,17 @@ void MHAPlanner::insert_or_update(MHASearchState* state, int hidx, int f)
     }
 }
 
-void MHAPlanner::extract_path(std::vector<int>* solution_path)
+void MHAPlanner::extract_path(std::vector<int>* solution_path, int* solcost)
 {
     SBPL_DEBUG("Extracting path");
     solution_path->clear();
+    *solcost = 0;
     for (MHASearchState* state = m_goal_state; state; state = state->bp)
     {
         solution_path->push_back(state->state_id);
+        if (state->bp) {
+            *solcost += (state->g - state->bp->g);
+        }
     }
 
     // TODO: special cases for backward search
