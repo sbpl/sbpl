@@ -199,6 +199,20 @@ int MHAPlanner::replan(
 
     while (!m_open[0].emptyheap() && !time_limit_reached()) { 
         start_time = GetTime();
+
+        // special case for mha* without additional heuristics
+        if (num_heuristics() == 1) { 
+            if (m_goal_state->g <= get_minf(m_open[0])) {
+                m_eps_satisfied = m_eps * m_eps_mha;
+                extract_path(solution_stateIDs_V);
+                return 1;
+            }
+            else {
+                MHASearchState* s = state_from_open_state(m_open[0].getminheap());
+                expand(s, 0);
+            }
+        }
+
         for (int hidx = 1; hidx < num_heuristics(); ++hidx) {
             if (!m_open[hidx].emptyheap() && get_minf(m_open[hidx]) <=
                 m_eps_mha * get_minf(m_open[0]))
