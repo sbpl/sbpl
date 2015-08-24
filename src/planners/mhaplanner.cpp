@@ -191,7 +191,7 @@ int MHAPlanner::replan(
         CKey key;
         key.key[0] = compute_key(m_start_state, hidx);
         m_open[hidx].insertheap(&m_start_state->od[hidx].open_state, key);
-        SBPL_DEBUG("Inserted start state into search %d with f = %d", hidx, key.key[0]);
+        SBPL_DEBUG("Inserted start state %d into search %d with f = %d", m_start_state->state_id, hidx, key.key[0]);
     }
 
     end_time = GetTime();
@@ -214,6 +214,10 @@ int MHAPlanner::replan(
         }
 
         for (int hidx = 1; hidx < num_heuristics(); ++hidx) {
+            if (m_open[0].emptyheap()) {
+                break;
+            }
+
             if (!m_open[hidx].emptyheap() && get_minf(m_open[hidx]) <=
                 m_eps_mha * get_minf(m_open[0]))
             {
