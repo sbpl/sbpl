@@ -174,6 +174,14 @@ void EnvironmentNAVXYTHETALATTICE::SetConfiguration(int width, int height, const
     EnvNAVXYTHETALATCfg.cellsize_m = cellsize_m;
     EnvNAVXYTHETALATCfg.timetoturn45degsinplace_secs = timetoturn45degsinplace_secs;
 
+    //unallocate the 2D environment
+    if (EnvNAVXYTHETALATCfg.Grid2D != NULL) {
+        for (int x = 0; x < EnvNAVXYTHETALATCfg.EnvWidth_c; x++)
+            delete[] EnvNAVXYTHETALATCfg.Grid2D[x];
+        delete[] EnvNAVXYTHETALATCfg.Grid2D;
+        EnvNAVXYTHETALATCfg.Grid2D = NULL;
+    }
+
     //allocate the 2D environment
     EnvNAVXYTHETALATCfg.Grid2D = new unsigned char*[EnvNAVXYTHETALATCfg.EnvWidth_c];
     for (int x = 0; x < EnvNAVXYTHETALATCfg.EnvWidth_c; x++) {
@@ -427,6 +435,14 @@ void EnvironmentNAVXYTHETALATTICE::ReadConfiguration(FILE* fCfg)
     if (EnvNAVXYTHETALATCfg.EndTheta < 0 || EnvNAVXYTHETALATCfg.EndTheta >= EnvNAVXYTHETALATCfg.NumThetaDirs) {
         SBPL_ERROR("ERROR: illegal goal coordinates for theta\n");
         throw new SBPL_Exception();
+    }
+
+    //unallocate the 2d environment
+    if (EnvNAVXYTHETALATCfg.Grid2D != NULL) {
+        for (int x = 0; x < EnvNAVXYTHETALATCfg.EnvWidth_c; x++)
+            delete[] EnvNAVXYTHETALATCfg.Grid2D[x];
+        delete[] EnvNAVXYTHETALATCfg.Grid2D;
+        EnvNAVXYTHETALATCfg.Grid2D = NULL;
     }
 
     //allocate the 2D environment
