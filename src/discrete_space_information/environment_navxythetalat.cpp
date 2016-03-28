@@ -36,8 +36,6 @@
 #include <sbpl/utils/mdp.h>
 #include <sbpl/utils/mdpconfig.h>
 
-using namespace std;
-
 #if TIME_DEBUG
 static clock_t time3_addallout = 0;
 static clock_t time_gethash = 0;
@@ -50,14 +48,12 @@ static long int checks = 0;
 #define XYTHETA2INDEX(X,Y,THETA) (THETA + X*EnvNAVXYTHETALATCfg.NumThetaDirs + \
                                   Y*EnvNAVXYTHETALATCfg.EnvWidth_c*EnvNAVXYTHETALATCfg.NumThetaDirs)
 
-//-----------------constructors/destructors-------------------------------
-
 EnvironmentNAVXYTHETALATTICE::EnvironmentNAVXYTHETALATTICE()
 {
     EnvNAVXYTHETALATCfg.obsthresh = ENVNAVXYTHETALAT_DEFAULTOBSTHRESH;
-    //the value that pretty much makes it disabled
+    // the value that pretty much makes it disabled
     EnvNAVXYTHETALATCfg.cost_inscribed_thresh = EnvNAVXYTHETALATCfg.obsthresh;
-    //the value that pretty much makes it disabled
+    // the value that pretty much makes it disabled
     EnvNAVXYTHETALATCfg.cost_possibly_circumscribed_thresh = -1;
 
     grid2Dsearchfromstart = NULL;
@@ -75,7 +71,7 @@ EnvironmentNAVXYTHETALATTICE::EnvironmentNAVXYTHETALATTICE()
 
     EnvNAVXYTHETALATCfg.NumThetaDirs = NAVXYTHETALAT_THETADIRS;
 
-    //no memory allocated in cfg yet
+    // no memory allocated in cfg yet
     EnvNAVXYTHETALATCfg.Grid2D = NULL;
     EnvNAVXYTHETALATCfg.ActionsV = NULL;
     EnvNAVXYTHETALATCfg.PredActionsV = NULL;
@@ -84,23 +80,29 @@ EnvironmentNAVXYTHETALATTICE::EnvironmentNAVXYTHETALATTICE()
 EnvironmentNAVXYTHETALATTICE::~EnvironmentNAVXYTHETALATTICE()
 {
     SBPL_PRINTF("destroying XYTHETALATTICE\n");
-    if (grid2Dsearchfromstart != NULL) delete grid2Dsearchfromstart;
+    if (grid2Dsearchfromstart != NULL) {
+        delete grid2Dsearchfromstart;
+    }
     grid2Dsearchfromstart = NULL;
 
-    if (grid2Dsearchfromgoal != NULL) delete grid2Dsearchfromgoal;
+    if (grid2Dsearchfromgoal != NULL) {
+        delete grid2Dsearchfromgoal;
+    }
     grid2Dsearchfromgoal = NULL;
 
     if (EnvNAVXYTHETALATCfg.Grid2D != NULL) {
-        for (int x = 0; x < EnvNAVXYTHETALATCfg.EnvWidth_c; x++)
+        for (int x = 0; x < EnvNAVXYTHETALATCfg.EnvWidth_c; x++) {
             delete[] EnvNAVXYTHETALATCfg.Grid2D[x];
+        }
         delete[] EnvNAVXYTHETALATCfg.Grid2D;
         EnvNAVXYTHETALATCfg.Grid2D = NULL;
     }
 
     //delete actions
     if (EnvNAVXYTHETALATCfg.ActionsV != NULL) {
-        for (int tind = 0; tind < EnvNAVXYTHETALATCfg.NumThetaDirs; tind++)
+        for (int tind = 0; tind < EnvNAVXYTHETALATCfg.NumThetaDirs; tind++) {
             delete[] EnvNAVXYTHETALATCfg.ActionsV[tind];
+        }
         delete[] EnvNAVXYTHETALATCfg.ActionsV;
         EnvNAVXYTHETALATCfg.ActionsV = NULL;
     }
@@ -109,10 +111,6 @@ EnvironmentNAVXYTHETALATTICE::~EnvironmentNAVXYTHETALATTICE()
         EnvNAVXYTHETALATCfg.PredActionsV = NULL;
     }
 }
-
-//---------------------------------------------------------------------
-
-//-------------------problem specific and local functions---------------------
 
 static unsigned int inthash(unsigned int key)
 {
@@ -127,11 +125,14 @@ static unsigned int inthash(unsigned int key)
     return key;
 }
 
-void EnvironmentNAVXYTHETALATTICE::SetConfiguration(int width, int height, const unsigned char* mapdata, int startx,
-                                                    int starty, int starttheta, int goalx, int goaly, int goaltheta,
-                                                    double cellsize_m, double nominalvel_mpersecs,
-                                                    double timetoturn45degsinplace_secs,
-                                                    const vector<sbpl_2Dpt_t> & robot_perimeterV)
+void EnvironmentNAVXYTHETALATTICE::SetConfiguration(
+    int width, int height, const unsigned char* mapdata,
+    int startx, int starty, int starttheta,
+    int goalx, int goaly, int goaltheta,
+    double cellsize_m,
+    double nominalvel_mpersecs,
+    double timetoturn45degsinplace_secs,
+    const std::vector<sbpl_2Dpt_t>& robot_perimeterV)
 {
     EnvNAVXYTHETALATCfg.EnvWidth_c = width;
     EnvNAVXYTHETALATCfg.EnvHeight_c = height;
@@ -139,34 +140,40 @@ void EnvironmentNAVXYTHETALATTICE::SetConfiguration(int width, int height, const
     EnvNAVXYTHETALATCfg.StartY_c = starty;
     EnvNAVXYTHETALATCfg.StartTheta = starttheta;
 
-    if (EnvNAVXYTHETALATCfg.StartX_c < 0 || EnvNAVXYTHETALATCfg.StartX_c >= EnvNAVXYTHETALATCfg.EnvWidth_c) {
-        SBPL_ERROR("ERROR: illegal start coordinates\n");
+    if (EnvNAVXYTHETALATCfg.StartX_c < 0 ||
+        EnvNAVXYTHETALATCfg.StartX_c >= EnvNAVXYTHETALATCfg.EnvWidth_c)
+    {
         throw SBPL_Exception("ERROR: illegal start coordinates");
     }
-    if (EnvNAVXYTHETALATCfg.StartY_c < 0 || EnvNAVXYTHETALATCfg.StartY_c >= EnvNAVXYTHETALATCfg.EnvHeight_c) {
-        SBPL_ERROR("ERROR: illegal start coordinates\n");
-        throw SBPL_Exception();
+    if (EnvNAVXYTHETALATCfg.StartY_c < 0 ||
+        EnvNAVXYTHETALATCfg.StartY_c >= EnvNAVXYTHETALATCfg.EnvHeight_c)
+    {
+        throw SBPL_Exception("ERROR: illegal start coordinates");
     }
-    if (EnvNAVXYTHETALATCfg.StartTheta < 0 || EnvNAVXYTHETALATCfg.StartTheta >= EnvNAVXYTHETALATCfg.NumThetaDirs) {
-        SBPL_ERROR("ERROR: illegal start coordinates for theta\n");
-        throw SBPL_Exception();
+    if (EnvNAVXYTHETALATCfg.StartTheta < 0 ||
+        EnvNAVXYTHETALATCfg.StartTheta >= EnvNAVXYTHETALATCfg.NumThetaDirs)
+    {
+        throw SBPL_Exception("ERROR: illegal start coordinates for theta");
     }
 
     EnvNAVXYTHETALATCfg.EndX_c = goalx;
     EnvNAVXYTHETALATCfg.EndY_c = goaly;
     EnvNAVXYTHETALATCfg.EndTheta = goaltheta;
 
-    if (EnvNAVXYTHETALATCfg.EndX_c < 0 || EnvNAVXYTHETALATCfg.EndX_c >= EnvNAVXYTHETALATCfg.EnvWidth_c) {
-        SBPL_ERROR("ERROR: illegal goal coordinates\n");
-        throw SBPL_Exception();
+    if (EnvNAVXYTHETALATCfg.EndX_c < 0 ||
+        EnvNAVXYTHETALATCfg.EndX_c >= EnvNAVXYTHETALATCfg.EnvWidth_c)
+    {
+        throw SBPL_Exception("ERROR: illegal goal coordinates");
     }
-    if (EnvNAVXYTHETALATCfg.EndY_c < 0 || EnvNAVXYTHETALATCfg.EndY_c >= EnvNAVXYTHETALATCfg.EnvHeight_c) {
-        SBPL_ERROR("ERROR: illegal goal coordinates\n");
-        throw SBPL_Exception();
+    if (EnvNAVXYTHETALATCfg.EndY_c < 0 ||
+        EnvNAVXYTHETALATCfg.EndY_c >= EnvNAVXYTHETALATCfg.EnvHeight_c)
+    {
+        throw SBPL_Exception("ERROR: illegal goal coordinates");
     }
-    if (EnvNAVXYTHETALATCfg.EndTheta < 0 || EnvNAVXYTHETALATCfg.EndTheta >= EnvNAVXYTHETALATCfg.NumThetaDirs) {
-        SBPL_ERROR("ERROR: illegal goal coordinates for theta\n");
-        throw SBPL_Exception();
+    if (EnvNAVXYTHETALATCfg.EndTheta < 0 ||
+        EnvNAVXYTHETALATCfg.EndTheta >= EnvNAVXYTHETALATCfg.NumThetaDirs)
+    {
+        throw SBPL_Exception("ERROR: illegal goal coordinates for theta");
     }
 
     EnvNAVXYTHETALATCfg.FootprintPolygon = robot_perimeterV;
@@ -175,21 +182,22 @@ void EnvironmentNAVXYTHETALATTICE::SetConfiguration(int width, int height, const
     EnvNAVXYTHETALATCfg.cellsize_m = cellsize_m;
     EnvNAVXYTHETALATCfg.timetoturn45degsinplace_secs = timetoturn45degsinplace_secs;
 
-    //unallocate the 2D environment
+    // unallocate the 2D environment
     if (EnvNAVXYTHETALATCfg.Grid2D != NULL) {
-        for (int x = 0; x < EnvNAVXYTHETALATCfg.EnvWidth_c; x++)
+        for (int x = 0; x < EnvNAVXYTHETALATCfg.EnvWidth_c; x++) {
             delete[] EnvNAVXYTHETALATCfg.Grid2D[x];
+        }
         delete[] EnvNAVXYTHETALATCfg.Grid2D;
         EnvNAVXYTHETALATCfg.Grid2D = NULL;
     }
 
-    //allocate the 2D environment
+    // allocate the 2D environment
     EnvNAVXYTHETALATCfg.Grid2D = new unsigned char*[EnvNAVXYTHETALATCfg.EnvWidth_c];
     for (int x = 0; x < EnvNAVXYTHETALATCfg.EnvWidth_c; x++) {
         EnvNAVXYTHETALATCfg.Grid2D[x] = new unsigned char[EnvNAVXYTHETALATCfg.EnvHeight_c];
     }
 
-    //environment:
+    // environment:
     if (0 == mapdata) {
         for (int y = 0; y < EnvNAVXYTHETALATCfg.EnvHeight_c; y++) {
             for (int x = 0; x < EnvNAVXYTHETALATCfg.EnvWidth_c; x++) {
@@ -208,46 +216,45 @@ void EnvironmentNAVXYTHETALATTICE::SetConfiguration(int width, int height, const
 
 void EnvironmentNAVXYTHETALATTICE::ReadConfiguration(FILE* fCfg)
 {
-    //read in the configuration of environment and initialize  EnvNAVXYTHETALATCfg structure
+    // read in the configuration of environment and initialize
+    // EnvNAVXYTHETALATCfg structure
     char sTemp[1024], sTemp1[1024];
     int dTemp;
     int x, y;
 
-    //discretization(cells)
+    // discretization(cells)
     if (fscanf(fCfg, "%s", sTemp) != 1) {
-        SBPL_ERROR("ERROR: ran out of env file early (discretization)\n");
-        throw SBPL_Exception();
+        throw SBPL_Exception("ERROR: ran out of env file early (discretization)");
     }
     strcpy(sTemp1, "discretization(cells):");
     if (strcmp(sTemp1, sTemp) != 0) {
-        SBPL_ERROR("ERROR: configuration file has incorrect format (discretization)\n");
-        SBPL_PRINTF("Expected %s got %s\n", sTemp1, sTemp);
-        throw SBPL_Exception();
+        std::stringstream ss;
+        ss << "ERROR: configuration file has incorrect format (discretization)" <<
+                " Expected " << sTemp1 << " got " << sTemp;
+        throw SBPL_Exception(ss.str());
     }
     if (fscanf(fCfg, "%s", sTemp) != 1) {
-        SBPL_ERROR("ERROR: ran out of env file early (discretization)\n");
-        throw SBPL_Exception();
+        throw SBPL_Exception("ERROR: ran out of env file early (discretization)");
     }
     EnvNAVXYTHETALATCfg.EnvWidth_c = atoi(sTemp);
     if (fscanf(fCfg, "%s", sTemp) != 1) {
-        SBPL_ERROR("ERROR: ran out of env file early (discretization)\n");
-        throw SBPL_Exception();
+        throw SBPL_Exception("ERROR: ran out of env file early (discretization)");
     }
     EnvNAVXYTHETALATCfg.EnvHeight_c = atoi(sTemp);
 
     // Scan for optional NumThetaDirs parameter. Check for following obsthresh.
     if (fscanf(fCfg, "%s", sTemp) != 1) {
-        SBPL_ERROR("ERROR: ran out of env file early\n");
-        throw SBPL_Exception();
+        throw SBPL_Exception("ERROR: ran out of env file early");
     }
     strcpy(sTemp1, "NumThetaDirs:");
     if (strcmp(sTemp1, sTemp) != 0) {
         // optional NumThetaDirs not available; default is NAVXYTHETALAT_THETADIRS (16)
         strcpy(sTemp1, "obsthresh:");
         if (strcmp(sTemp1, sTemp) != 0) {
-            SBPL_ERROR("ERROR: configuration file has incorrect format\n");
-            SBPL_PRINTF("Expected %s got %s\n", sTemp1, sTemp);
-            throw SBPL_Exception();
+            std::stringstream ss;
+            ss << "ERROR: configuration file has incorrect format" <<
+                    " Expected " << sTemp1 << " got " << sTemp;
+            throw SBPL_Exception(ss.str());
         }
         else {
             EnvNAVXYTHETALATCfg.NumThetaDirs = NAVXYTHETALAT_THETADIRS;
@@ -255,256 +262,272 @@ void EnvironmentNAVXYTHETALATTICE::ReadConfiguration(FILE* fCfg)
     }
     else {
         if (fscanf(fCfg, "%s", sTemp) != 1) {
-            SBPL_ERROR("ERROR: ran out of env file early (NumThetaDirs)\n");
-            throw SBPL_Exception();
+            throw SBPL_Exception("ERROR: ran out of env file early (NumThetaDirs)");
         }
         EnvNAVXYTHETALATCfg.NumThetaDirs = atoi(sTemp);
 
         //obsthresh:
         if (fscanf(fCfg, "%s", sTemp) != 1) {
-            SBPL_ERROR("ERROR: ran out of env file early (obsthresh)\n");
-            throw SBPL_Exception();
+            throw SBPL_Exception("ERROR: ran out of env file early (obsthresh)");
         }
         strcpy(sTemp1, "obsthresh:");
         if (strcmp(sTemp1, sTemp) != 0) {
-            SBPL_ERROR("ERROR: configuration file has incorrect format\n");
-            SBPL_PRINTF("Expected %s got %s\n", sTemp1, sTemp);
-            SBPL_PRINTF("see existing examples of env files for the right format of heading\n");
-            throw SBPL_Exception();
+            std::stringstream ss;
+            ss << "ERROR: configuration file has incorrect format" <<
+                " Expected " << sTemp1 << " got " << sTemp <<
+                " see existing examples of env files for the right format of heading";
+            throw SBPL_Exception(ss.str());
         }
     }
 
     // obsthresh
     if (fscanf(fCfg, "%s", sTemp) != 1) {
-        SBPL_ERROR("ERROR: ran out of env file early\n");
-        throw SBPL_Exception();
+        throw SBPL_Exception("ERROR: ran out of env file early");
     }
     EnvNAVXYTHETALATCfg.obsthresh = atoi(sTemp);
     SBPL_PRINTF("obsthresh = %d\n", EnvNAVXYTHETALATCfg.obsthresh);
 
     //cost_inscribed_thresh:
     if (fscanf(fCfg, "%s", sTemp) != 1) {
-        SBPL_ERROR("ERROR: ran out of env file early\n");
-        throw SBPL_Exception();
+        throw SBPL_Exception("ERROR: ran out of env file early");
     }
     strcpy(sTemp1, "cost_inscribed_thresh:");
     if (strcmp(sTemp1, sTemp) != 0) {
-        SBPL_ERROR("ERROR: configuration file has incorrect format\n");
-        SBPL_PRINTF("Expected %s got %s\n", sTemp1, sTemp);
-        SBPL_PRINTF("see existing examples of env files for the right format of heading\n");
-        throw SBPL_Exception();
+        std::stringstream ss;
+        ss << "ERROR: configuration file has incorrect format" <<
+                " Expected " << sTemp1 << " got " << sTemp <<
+                " see existing examples of env files for the right format of heading";
+        throw SBPL_Exception(ss.str());
     }
     if (fscanf(fCfg, "%s", sTemp) != 1) {
-        SBPL_ERROR("ERROR: ran out of env file early\n");
-        throw SBPL_Exception();
+        throw SBPL_Exception("ERROR: ran out of env file early");
     }
     EnvNAVXYTHETALATCfg.cost_inscribed_thresh = atoi(sTemp);
     SBPL_PRINTF("cost_inscribed_thresh = %d\n", EnvNAVXYTHETALATCfg.cost_inscribed_thresh);
 
     //cost_possibly_circumscribed_thresh:
     if (fscanf(fCfg, "%s", sTemp) != 1) {
-        SBPL_ERROR("ERROR: ran out of env file early\n");
-        throw SBPL_Exception();
+        throw SBPL_Exception("ERROR: ran out of env file early");
     }
     strcpy(sTemp1, "cost_possibly_circumscribed_thresh:");
     if (strcmp(sTemp1, sTemp) != 0) {
-        SBPL_ERROR("ERROR: configuration file has incorrect format\n");
-        SBPL_PRINTF("Expected %s got %s\n", sTemp1, sTemp);
-        SBPL_PRINTF("see existing examples of env files for the right format of heading\n");
-        throw SBPL_Exception();
+        std::stringstream ss;
+        ss << "ERROR: configuration file has incorrect format" <<
+                " Expected " << sTemp1 << " got " << sTemp <<
+                " see existing examples of env files for the right format of heading";
+        throw SBPL_Exception(ss.str());
     }
     if (fscanf(fCfg, "%s", sTemp) != 1) {
-        SBPL_ERROR("ERROR: ran out of env file early\n");
-        throw SBPL_Exception();
+        throw SBPL_Exception("ERROR: ran out of env file early");
     }
     EnvNAVXYTHETALATCfg.cost_possibly_circumscribed_thresh = atoi(sTemp);
     SBPL_PRINTF("cost_possibly_circumscribed_thresh = %d\n", EnvNAVXYTHETALATCfg.cost_possibly_circumscribed_thresh);
 
     //cellsize
     if (fscanf(fCfg, "%s", sTemp) != 1) {
-        SBPL_ERROR("ERROR: ran out of env file early\n");
-        throw SBPL_Exception();
+        throw SBPL_Exception("ERROR: ran out of env file early");
     }
     strcpy(sTemp1, "cellsize(meters):");
     if (strcmp(sTemp1, sTemp) != 0) {
-        SBPL_ERROR("ERROR: configuration file has incorrect format\n");
-        SBPL_PRINTF("Expected %s got %s\n", sTemp1, sTemp);
-        throw SBPL_Exception();
+        std::stringstream ss;
+        ss << "ERROR: configuration file has incorrect format" <<
+                " Expected " << sTemp1 << " got " << sTemp;
+        throw SBPL_Exception(ss.str());
     }
     if (fscanf(fCfg, "%s", sTemp) != 1) {
-        SBPL_ERROR("ERROR: ran out of env file early\n");
-        throw SBPL_Exception();
+        throw SBPL_Exception("ERROR: ran out of env file early");
     }
     EnvNAVXYTHETALATCfg.cellsize_m = atof(sTemp);
 
     //speeds
     if (fscanf(fCfg, "%s", sTemp) != 1) {
-        SBPL_ERROR("ERROR: ran out of env file early\n");
-        throw SBPL_Exception();
+        throw SBPL_Exception("ERROR: ran out of env file early");
     }
     strcpy(sTemp1, "nominalvel(mpersecs):");
     if (strcmp(sTemp1, sTemp) != 0) {
-        SBPL_ERROR("ERROR: configuration file has incorrect format\n");
-        SBPL_PRINTF("Expected %s got %s\n", sTemp1, sTemp);
-        throw SBPL_Exception();
+        std::stringstream ss;
+        ss << "ERROR: configuration file has incorrect format" <<
+            " Expected " << sTemp1 << " got " << sTemp;
+        throw SBPL_Exception(ss.str());
     }
     if (fscanf(fCfg, "%s", sTemp) != 1) {
-        SBPL_ERROR("ERROR: ran out of env file early\n");
-        throw SBPL_Exception();
+        throw SBPL_Exception("ERROR: ran out of env file early");
     }
     EnvNAVXYTHETALATCfg.nominalvel_mpersecs = atof(sTemp);
     if (fscanf(fCfg, "%s", sTemp) != 1) {
-        SBPL_ERROR("ERROR: ran out of env file early\n");
-        throw SBPL_Exception();
+        throw SBPL_Exception("ERROR: ran out of env file early");
     }
     strcpy(sTemp1, "timetoturn45degsinplace(secs):");
     if (strcmp(sTemp1, sTemp) != 0) {
-        SBPL_ERROR("ERROR: configuration file has incorrect format\n");
-        SBPL_PRINTF("Expected %s got %s\n", sTemp1, sTemp);
-        throw SBPL_Exception();
+        std::stringstream ss;
+        ss << "ERROR: configuration file has incorrect format" <<
+                " Expected " << sTemp1 << " got " << sTemp;
+        throw SBPL_Exception(ss.str());
     }
     if (fscanf(fCfg, "%s", sTemp) != 1) {
-        SBPL_ERROR("ERROR: ran out of env file early\n");
-        throw SBPL_Exception();
+        throw SBPL_Exception("ERROR: ran out of env file early");
     }
     EnvNAVXYTHETALATCfg.timetoturn45degsinplace_secs = atof(sTemp);
 
-    //start(meters,rads):
+    // start(meters,rads):
     if (fscanf(fCfg, "%s", sTemp) != 1) {
-        SBPL_ERROR("ERROR: ran out of env file early\n");
-        throw SBPL_Exception();
+        throw SBPL_Exception("ERROR: ran out of env file early");
     }
     if (fscanf(fCfg, "%s", sTemp) != 1) {
-        SBPL_ERROR("ERROR: ran out of env file early\n");
-        throw SBPL_Exception();
+        throw SBPL_Exception("ERROR: ran out of env file early");
     }
     EnvNAVXYTHETALATCfg.StartX_c = CONTXY2DISC(atof(sTemp), EnvNAVXYTHETALATCfg.cellsize_m);
     if (fscanf(fCfg, "%s", sTemp) != 1) {
-        SBPL_ERROR("ERROR: ran out of env file early\n");
-        throw SBPL_Exception();
+        throw SBPL_Exception("ERROR: ran out of env file early");
     }
     EnvNAVXYTHETALATCfg.StartY_c = CONTXY2DISC(atof(sTemp), EnvNAVXYTHETALATCfg.cellsize_m);
     if (fscanf(fCfg, "%s", sTemp) != 1) {
-        SBPL_ERROR("ERROR: ran out of env file early\n");
-        throw SBPL_Exception();
+        throw SBPL_Exception("ERROR: ran out of env file early");
     }
-    //if (!bUseNonUniformAngles) EnvNAVXYTHETALATCfg.StartTheta = ContTheta2Disc(atof(sTemp), EnvNAVXYTHETALATCfg.NumThetaDirs);
+
+//    if (!bUseNonUniformAngles) {
+//        EnvNAVXYTHETALATCfg.StartTheta = ContTheta2Disc(atof(sTemp), EnvNAVXYTHETALATCfg.NumThetaDirs);
+//    }
+
     EnvNAVXYTHETALATCfg.StartTheta_rad = atof(sTemp);
 
-    if (EnvNAVXYTHETALATCfg.StartX_c < 0 || EnvNAVXYTHETALATCfg.StartX_c >= EnvNAVXYTHETALATCfg.EnvWidth_c) {
-        SBPL_ERROR("ERROR: illegal start coordinates\n");
-        throw SBPL_Exception();
+    if (EnvNAVXYTHETALATCfg.StartX_c < 0 ||
+        EnvNAVXYTHETALATCfg.StartX_c >= EnvNAVXYTHETALATCfg.EnvWidth_c)
+    {
+        throw SBPL_Exception("ERROR: illegal start coordinates");
     }
-    if (EnvNAVXYTHETALATCfg.StartY_c < 0 || EnvNAVXYTHETALATCfg.StartY_c >= EnvNAVXYTHETALATCfg.EnvHeight_c) {
-        SBPL_ERROR("ERROR: illegal start coordinates\n");
-        throw SBPL_Exception();
+    if (EnvNAVXYTHETALATCfg.StartY_c < 0 ||
+        EnvNAVXYTHETALATCfg.StartY_c >= EnvNAVXYTHETALATCfg.EnvHeight_c)
+    {
+        throw SBPL_Exception("ERROR: illegal start coordinates");
     }
-    //if (!NON_UNIFORM_ANGLES) 
-    //{
-    //	if (EnvNAVXYTHETALATCfg.StartTheta < 0 || EnvNAVXYTHETALATCfg.StartTheta >= EnvNAVXYTHETALATCfg.NumThetaDirs) {
-    //	    throw SBPL_Exception("ERROR: illegal start coordinates for theta);
-    //	}
-    //}
 
-    //end(meters,rads):
+//    if (!NON_UNIFORM_ANGLES) {
+//        if (EnvNAVXYTHETALATCfg.StartTheta < 0 ||
+//        EnvNAVXYTHETALATCfg.StartTheta >= EnvNAVXYTHETALATCfg.NumThetaDirs)
+//        {
+//            throw SBPL_Exception("ERROR: illegal start coordinates for theta");
+//        }
+//    }
+
+    // end(meters,rads):
     if (fscanf(fCfg, "%s", sTemp) != 1) {
-        SBPL_ERROR("ERROR: ran out of env file early\n");
-        throw SBPL_Exception();
+        throw SBPL_Exception("ERROR: ran out of env file early");
     }
     if (fscanf(fCfg, "%s", sTemp) != 1) {
-        SBPL_ERROR("ERROR: ran out of env file early\n");
-        throw SBPL_Exception();
+        throw SBPL_Exception("ERROR: ran out of env file early");
     }
     EnvNAVXYTHETALATCfg.EndX_c = CONTXY2DISC(atof(sTemp), EnvNAVXYTHETALATCfg.cellsize_m);
     if (fscanf(fCfg, "%s", sTemp) != 1) {
-        SBPL_ERROR("ERROR: ran out of env file early\n");
-        throw SBPL_Exception();
+        throw SBPL_Exception("ERROR: ran out of env file early");
     }
     EnvNAVXYTHETALATCfg.EndY_c = CONTXY2DISC(atof(sTemp), EnvNAVXYTHETALATCfg.cellsize_m);
     if (fscanf(fCfg, "%s", sTemp) != 1) {
-        SBPL_ERROR("ERROR: ran out of env file early\n");
-        throw SBPL_Exception();
+        throw SBPL_Exception("ERROR: ran out of env file early");
     }
-    //if (!NON_UNIFORM_ANGLES) EnvNAVXYTHETALATCfg.EndTheta = ContTheta2Disc(atof(sTemp), EnvNAVXYTHETALATCfg.NumThetaDirs);
+
+//    if (!NON_UNIFORM_ANGLES) {
+//        EnvNAVXYTHETALATCfg.EndTheta = ContTheta2Disc(atof(sTemp), EnvNAVXYTHETALATCfg.NumThetaDirs);
+//    }
+
     EnvNAVXYTHETALATCfg.EndTheta_rad = atof(sTemp);
-    ;
 
-    if (EnvNAVXYTHETALATCfg.EndX_c < 0 || EnvNAVXYTHETALATCfg.EndX_c >= EnvNAVXYTHETALATCfg.EnvWidth_c) {
-        SBPL_ERROR("ERROR: illegal end coordinates\n");
-        throw SBPL_Exception();
+    if (EnvNAVXYTHETALATCfg.EndX_c < 0 ||
+        EnvNAVXYTHETALATCfg.EndX_c >= EnvNAVXYTHETALATCfg.EnvWidth_c)
+    {
+        throw SBPL_Exception("ERROR: illegal end coordinates");
     }
-    if (EnvNAVXYTHETALATCfg.EndY_c < 0 || EnvNAVXYTHETALATCfg.EndY_c >= EnvNAVXYTHETALATCfg.EnvHeight_c) {
-        SBPL_ERROR("ERROR: illegal end coordinates\n");
-        throw SBPL_Exception();
+    if (EnvNAVXYTHETALATCfg.EndY_c < 0 ||
+        EnvNAVXYTHETALATCfg.EndY_c >= EnvNAVXYTHETALATCfg.EnvHeight_c)
+    {
+        throw SBPL_Exception("ERROR: illegal end coordinates");
     }
-    if (EnvNAVXYTHETALATCfg.EndTheta < 0 || EnvNAVXYTHETALATCfg.EndTheta >= EnvNAVXYTHETALATCfg.NumThetaDirs) {
-        SBPL_ERROR("ERROR: illegal goal coordinates for theta\n");
-        throw SBPL_Exception();
+    if (EnvNAVXYTHETALATCfg.EndTheta < 0 ||
+        EnvNAVXYTHETALATCfg.EndTheta >= EnvNAVXYTHETALATCfg.NumThetaDirs)
+    {
+        throw SBPL_Exception("ERROR: illegal goal coordinates for theta");
     }
 
-    //if (!NON_UNIFORM_ANGLES) 
-    //{
-    //	if (EnvNAVXYTHETALATCfg.EndTheta < 0 || EnvNAVXYTHETALATCfg.EndTheta >= EnvNAVXYTHETALATCfg.NumThetaDirs) {
-    //	    throw SBPL_Exception("ERROR: illegal goal coordinates for theta");
-    //	}
-    //}
+//    if (!NON_UNIFORM_ANGLES) {
+//        if (EnvNAVXYTHETALATCfg.EndTheta < 0 ||
+//            EnvNAVXYTHETALATCfg.EndTheta >= EnvNAVXYTHETALATCfg.NumThetaDirs)
+//        {
+//            throw SBPL_Exception("ERROR: illegal goal coordinates for theta");
+//        }
+//    }
 
-    //unallocate the 2d environment
+    // unallocate the 2d environment
     if (EnvNAVXYTHETALATCfg.Grid2D != NULL) {
-        for (int x = 0; x < EnvNAVXYTHETALATCfg.EnvWidth_c; x++)
+        for (int x = 0; x < EnvNAVXYTHETALATCfg.EnvWidth_c; x++) {
             delete[] EnvNAVXYTHETALATCfg.Grid2D[x];
+        }
         delete[] EnvNAVXYTHETALATCfg.Grid2D;
         EnvNAVXYTHETALATCfg.Grid2D = NULL;
     }
 
-    //allocate the 2D environment
+    // allocate the 2D environment
     EnvNAVXYTHETALATCfg.Grid2D = new unsigned char*[EnvNAVXYTHETALATCfg.EnvWidth_c];
     for (x = 0; x < EnvNAVXYTHETALATCfg.EnvWidth_c; x++) {
         EnvNAVXYTHETALATCfg.Grid2D[x] = new unsigned char[EnvNAVXYTHETALATCfg.EnvHeight_c];
     }
 
-    //environment:
+    // environment:
     if (fscanf(fCfg, "%s", sTemp) != 1) {
-        SBPL_ERROR("ERROR: ran out of env file early\n");
-        throw SBPL_Exception();
+        throw SBPL_Exception("ERROR: ran out of env file early");
     }
-    for (y = 0; y < EnvNAVXYTHETALATCfg.EnvHeight_c; y++)
+    for (y = 0; y < EnvNAVXYTHETALATCfg.EnvHeight_c; y++) {
         for (x = 0; x < EnvNAVXYTHETALATCfg.EnvWidth_c; x++) {
             if (fscanf(fCfg, "%d", &dTemp) != 1) {
-                SBPL_ERROR("ERROR: incorrect format of config file\n");
-                throw SBPL_Exception();
+                throw SBPL_Exception("ERROR: incorrect format of config file");
             }
             EnvNAVXYTHETALATCfg.Grid2D[x][y] = dTemp;
         }
+    }
 }
 
-bool EnvironmentNAVXYTHETALATTICE::ReadinCell(sbpl_xy_theta_cell_t* cell, FILE* fIn)
+bool EnvironmentNAVXYTHETALATTICE::ReadinCell(
+    sbpl_xy_theta_cell_t* cell,
+    FILE* fIn)
 {
     char sTemp[60];
 
-    if (fscanf(fIn, "%s", sTemp) == 0) return false;
+    if (fscanf(fIn, "%s", sTemp) == 0) {
+        return false;
+    }
     cell->x = atoi(sTemp);
-    if (fscanf(fIn, "%s", sTemp) == 0) return false;
+    if (fscanf(fIn, "%s", sTemp) == 0) {
+        return false;
+    }
     cell->y = atoi(sTemp);
-    if (fscanf(fIn, "%s", sTemp) == 0) return false;
+    if (fscanf(fIn, "%s", sTemp) == 0) {
+        return false;
+    }
     cell->theta = atoi(sTemp);
 
-    //normalize the angle
+    // normalize the angle
     cell->theta = normalizeDiscAngle(cell->theta);
-    //cell->theta = NORMALIZEDISCTHETA(cell->theta, EnvNAVXYTHETALATCfg.NumThetaDirs);
+    // cell->theta = NORMALIZEDISCTHETA(cell->theta, EnvNAVXYTHETALATCfg.NumThetaDirs);
 
     return true;
 }
 
-bool EnvironmentNAVXYTHETALATTICE::ReadinPose(sbpl_xy_theta_pt_t* pose, FILE* fIn)
+bool EnvironmentNAVXYTHETALATTICE::ReadinPose(
+    sbpl_xy_theta_pt_t* pose,
+    FILE* fIn)
 {
     char sTemp[60];
 
-    if (fscanf(fIn, "%s", sTemp) == 0) return false;
+    if (fscanf(fIn, "%s", sTemp) == 0) {
+        return false;
+    }
     pose->x = atof(sTemp);
-    if (fscanf(fIn, "%s", sTemp) == 0) return false;
+    if (fscanf(fIn, "%s", sTemp) == 0) {
+        return false;
+    }
     pose->y = atof(sTemp);
-    if (fscanf(fIn, "%s", sTemp) == 0) return false;
+    if (fscanf(fIn, "%s", sTemp) == 0) {
+        return false;
+    }
     pose->theta = atof(sTemp);
 
     pose->theta = normalizeAngle(pose->theta);
@@ -512,120 +535,105 @@ bool EnvironmentNAVXYTHETALATTICE::ReadinPose(sbpl_xy_theta_pt_t* pose, FILE* fI
     return true;
 }
 
-//New
 int EnvironmentNAVXYTHETALATTICE::normalizeDiscAngle(int theta) const
 {
-	if (bUseNonUniformAngles)
-	{
-		if (theta < 0)
-		{
-			theta += EnvNAVXYTHETALATCfg.NumThetaDirs;
-		}
-		if (theta >= EnvNAVXYTHETALATCfg.NumThetaDirs)
-		{
-			theta -= EnvNAVXYTHETALATCfg.NumThetaDirs;
-		}
-	}
-	else
-	{
-		theta = NORMALIZEDISCTHETA(theta, EnvNAVXYTHETALATCfg.NumThetaDirs);
-	}
-	return theta;
+    if (bUseNonUniformAngles) {
+        if (theta < 0) {
+            theta += EnvNAVXYTHETALATCfg.NumThetaDirs;
+        }
+        if (theta >= EnvNAVXYTHETALATCfg.NumThetaDirs) {
+            theta -= EnvNAVXYTHETALATCfg.NumThetaDirs;
+        }
+    }
+    else {
+        theta = NORMALIZEDISCTHETA(theta, EnvNAVXYTHETALATCfg.NumThetaDirs);
+    }
+    return theta;
 }
 
 double EnvironmentNAVXYTHETALATTICE::DiscTheta2ContNew(int theta) const
 {
-	if (bUseNonUniformAngles)
-		return DiscTheta2ContFromSet(theta);
-	else
-		return DiscTheta2Cont(theta, EnvNAVXYTHETALATCfg.NumThetaDirs);
+    if (bUseNonUniformAngles) {
+        return DiscTheta2ContFromSet(theta);
+    }
+    else {
+        return DiscTheta2Cont(theta, EnvNAVXYTHETALATCfg.NumThetaDirs);
+    }
 }
 
 int EnvironmentNAVXYTHETALATTICE::ContTheta2DiscNew(double theta) const
 {
-	if (bUseNonUniformAngles)
-		return ContTheta2DiscFromSet(theta);
-	else
-		return ContTheta2Disc(theta, EnvNAVXYTHETALATCfg.NumThetaDirs);
+    if (bUseNonUniformAngles) {
+        return ContTheta2DiscFromSet(theta);
+    }
+    else {
+        return ContTheta2Disc(theta, EnvNAVXYTHETALATCfg.NumThetaDirs);
+    }
 }
 
 double EnvironmentNAVXYTHETALATTICE::DiscTheta2ContFromSet(int theta) const
 {
-	theta = normalizeDiscAngle(theta);
+    theta = normalizeDiscAngle(theta);
 
-	if (EnvNAVXYTHETALATCfg.NumThetaDirs >= (int) EnvNAVXYTHETALATCfg.ThetaDirs.size()) //ThetaDirs should contain extra angle (2PI) for overlap
-	{
-		SBPL_ERROR("ERROR: list of bin angles are not properly set to use function DiscTheta2ContFromSet\n");
-		SBPL_FFLUSH(stdout);
-		throw new SBPL_Exception();
-	}
+    // ThetaDirs should contain extra angle (2PI) for overlap
+    if (EnvNAVXYTHETALATCfg.NumThetaDirs >= (int)EnvNAVXYTHETALATCfg.ThetaDirs.size()) {
+        throw SBPL_Exception("ERROR: list of bin angles are not properly set to use function DiscTheta2ConfFromSet");
+    }
 
-	if (theta > EnvNAVXYTHETALATCfg.NumThetaDirs || theta < 0)
-	{
-		SBPL_ERROR("ERROR: discrete value theta %d, out of range");
-		SBPL_FFLUSH(stdout);
-		throw new SBPL_Exception();
-	}
-	return EnvNAVXYTHETALATCfg.ThetaDirs[theta];
+    if (theta > EnvNAVXYTHETALATCfg.NumThetaDirs || theta < 0) {
+        std::stringstream ss;
+        ss << "ERROR: discrete value theta " << theta << " out of range";
+        throw SBPL_Exception(ss.str());
+    }
+    return EnvNAVXYTHETALATCfg.ThetaDirs[theta];
 }
 
 int EnvironmentNAVXYTHETALATTICE::ContTheta2DiscFromSet(double theta) const
 {
-	theta = normalizeAngle(theta);
-	//SBPL_PRINTF("ContTheta2DiscFromSet: theta = %f EnvNAVXYTHETAVELOLATCfg.NumThetaDirs=%d ThetaDirs.size=%d\n", 
-	//		theta, EnvNAVXYTHETAVELOLATCfg.NumThetaDirs, (int)EnvNAVXYTHETAVELOLATCfg.ThetaDirs.size());
-	if (EnvNAVXYTHETALATCfg.NumThetaDirs >= (int) EnvNAVXYTHETALATCfg.ThetaDirs.size()) //ThetaDirs should contain extra angle (2PI) for overlap
-	{
-		SBPL_ERROR("ERROR: list of bin angles are not properly set to use function ContTheta2DiscFromSet\n");
-		SBPL_FFLUSH(stdout);
-		throw new SBPL_Exception();
-	}
+    theta = normalizeAngle(theta);
+    // ThetaDirs should contain extra angle (2PI) for overlap
+    if (EnvNAVXYTHETALATCfg.NumThetaDirs >= (int) EnvNAVXYTHETALATCfg.ThetaDirs.size()) {
+        throw SBPL_Exception("ERROR: list of bin angles are not properly set to use function ContTheta2DiscFromSet");
+    }
 
-	int lower_bound_ind = -1;
-	int upper_bound_ind = -1;
-	for (int i = 1; i < (int) EnvNAVXYTHETALATCfg.ThetaDirs.size(); i++)
-	{
-		//SBPL_PRINTF("i=%d EnvNAVXYTHETAVELOLATCfg.ThetaDirs[i]=%f\n", i, EnvNAVXYTHETAVELOLATCfg.ThetaDirs[i]);
-		if ((EnvNAVXYTHETALATCfg.ThetaDirs[i]) >= theta)
-		{
-			lower_bound_ind = i - 1;
-			upper_bound_ind = i;
-			break;
-		}
-	}
+    int lower_bound_ind = -1;
+    int upper_bound_ind = -1;
+    for (int i = 1; i < (int) EnvNAVXYTHETALATCfg.ThetaDirs.size(); i++) {
+        if ((EnvNAVXYTHETALATCfg.ThetaDirs[i]) >= theta) {
+            lower_bound_ind = i - 1;
+            upper_bound_ind = i;
+            break;
+        }
+    }
 
-	//Critical error if could not find bin location from given angle
-	if (lower_bound_ind == -1)
-	{
-		SBPL_ERROR("ERROR: unable to find bin index for angle %f\n", theta);
-		SBPL_FFLUSH(stdout);
-		throw new SBPL_Exception();
-	}
+    // Critical error if could not find bin location from given angle
+    if (lower_bound_ind == -1) {
+        std::stringstream ss;
+        ss << "ERROR: unable to find bin index for angle " << theta;
+        throw SBPL_Exception(ss.str());
+    }
 
-	//Get closest angle of two
-	double angle_low = EnvNAVXYTHETALATCfg.ThetaDirs[lower_bound_ind];
-	double angle_up = EnvNAVXYTHETALATCfg.ThetaDirs[upper_bound_ind];
-	double diff_low = fabs(theta - angle_low);
-	double diff_up = fabs(theta - angle_up);
+    // Get closest angle of two
+    double angle_low = EnvNAVXYTHETALATCfg.ThetaDirs[lower_bound_ind];
+    double angle_up = EnvNAVXYTHETALATCfg.ThetaDirs[upper_bound_ind];
+    double diff_low = fabs(theta - angle_low);
+    double diff_up = fabs(theta - angle_up);
 
-	//SBPL_PRINTF("lower_bound_ind=%d upper_bound_ind=%d angle_low=%f angle_up=%f diff_low=%f diff_up=%f\n", lower_bound_ind, upper_bound_ind, angle_low, angle_up, diff_low, diff_up);
-	if (diff_low < diff_up)
-	{
-		return lower_bound_ind;
-	}
-	else
-	{
-		//Wrap upper bound index around when it reaches last index (assumed to be 2PI)
-		if (upper_bound_ind == EnvNAVXYTHETALATCfg.NumThetaDirs)
-		{
-			upper_bound_ind = 0;
-		}
-		return upper_bound_ind;
-	}
+    if (diff_low < diff_up) {
+        return lower_bound_ind;
+    }
+    else {
+        // Wrap upper bound index around when it reaches last index (assumed to be 2PI)
+        if (upper_bound_ind == EnvNAVXYTHETALATCfg.NumThetaDirs) {
+            upper_bound_ind = 0;
+        }
+        return upper_bound_ind;
+    }
 }
-//New
 
-bool EnvironmentNAVXYTHETALATTICE::ReadinMotionPrimitive(SBPL_xytheta_mprimitive* pMotPrim, FILE* fIn)
+bool EnvironmentNAVXYTHETALATTICE::ReadinMotionPrimitive(
+    SBPL_xytheta_mprimitive* pMotPrim,
+    FILE* fIn)
 {
     char sTemp[1024];
     int dTemp;
@@ -633,21 +641,25 @@ bool EnvironmentNAVXYTHETALATTICE::ReadinMotionPrimitive(SBPL_xytheta_mprimitive
     int numofIntermPoses;
     float fTemp;
 
-    //read in actionID
+    // read in actionID
     strcpy(sExpected, "primID:");
-    if (fscanf(fIn, "%s", sTemp) == 0) return false;
-    if (strcmp(sTemp, sExpected) != 0) {
-        SBPL_ERROR("ERROR: expected %s but got %s\n", sExpected, sTemp);
-	fflush(stdout); 
+    if (fscanf(fIn, "%s", sTemp) == 0) {
         return false;
     }
-    if (fscanf(fIn, "%d", &pMotPrim->motprimID) != 1) return false;
-    //SBPL_PRINTF("primID: %d\n", pMotPrim->motprimID);
-    //fflush(stdout); 
+    if (strcmp(sTemp, sExpected) != 0) {
+        SBPL_ERROR("ERROR: expected %s but got %s\n", sExpected, sTemp);
+        fflush(stdout);
+        return false;
+    }
+    if (fscanf(fIn, "%d", &pMotPrim->motprimID) != 1) {
+        return false;
+    }
 
-    //read in start angle
+    // read in start angle
     strcpy(sExpected, "startangle_c:");
-    if (fscanf(fIn, "%s", sTemp) == 0) return false;
+    if (fscanf(fIn, "%s", sTemp) == 0) {
+        return false;
+    }
     if (strcmp(sTemp, sExpected) != 0) {
         SBPL_ERROR("ERROR: expected %s but got %s\n", sExpected, sTemp);
         return false;
@@ -657,12 +669,12 @@ bool EnvironmentNAVXYTHETALATTICE::ReadinMotionPrimitive(SBPL_xytheta_mprimitive
         return false;
     }
     pMotPrim->starttheta_c = dTemp;
-    //SBPL_PRINTF("startangle_c: %d\n", pMotPrim->starttheta_c);
-    //fflush(stdout); 
 
-    //read in end pose
+    // read in end pose
     strcpy(sExpected, "endpose_c:");
-    if (fscanf(fIn, "%s", sTemp) == 0) return false;
+    if (fscanf(fIn, "%s", sTemp) == 0) {
+        return false;
+    }
     if (strcmp(sTemp, sExpected) != 0) {
         SBPL_ERROR("ERROR: expected %s but got %s\n", sExpected, sTemp);
         return false;
@@ -672,44 +684,52 @@ bool EnvironmentNAVXYTHETALATTICE::ReadinMotionPrimitive(SBPL_xytheta_mprimitive
         SBPL_ERROR("ERROR: failed to read in endsearchpose\n");
         return false;
     }
-    //SBPL_PRINTF("endcell: %d %d %d\n", pMotPrim->endcell.x, pMotPrim->endcell.y, pMotPrim->endcell.theta);
-    //fflush(stdout); 
 
-    //read in action cost
+    // read in action cost
     strcpy(sExpected, "additionalactioncostmult:");
-    if (fscanf(fIn, "%s", sTemp) == 0) return false;
+    if (fscanf(fIn, "%s", sTemp) == 0) {
+        return false;
+    }
     if (strcmp(sTemp, sExpected) != 0) {
         SBPL_ERROR("ERROR: expected %s but got %s\n", sExpected, sTemp);
         return false;
     }
-    if (fscanf(fIn, "%d", &dTemp) != 1) return false;
-    //SBPL_PRINTF("additionalactioncostmult: %d\n", dTemp);
+    if (fscanf(fIn, "%d", &dTemp) != 1) {
+        return false;
+    }
     pMotPrim->additionalactioncostmult = dTemp;
 
-    if (bUseNonUniformAngles)   
-    {
-    	//read in action turning radius
-    	strcpy(sExpected, "turning_radius:");
-    	if (fscanf(fIn, "%s", sTemp) == 0) return false;
-    	if (strcmp(sTemp, sExpected) != 0) {
-    	    SBPL_ERROR("ERROR: expected %s but got %s\n", sExpected, sTemp);
-    	    return false;
-    	}
-    	if (fscanf(fIn, "%f", &fTemp) != 1) return false;
-    	//SBPL_PRINTF("turning_radius: %f\n", fTemp);
-    	pMotPrim->turning_radius = fTemp;
+    if (bUseNonUniformAngles) {
+        // read in action turning radius
+        strcpy(sExpected, "turning_radius:");
+        if (fscanf(fIn, "%s", sTemp) == 0) {
+            return false;
+        }
+        if (strcmp(sTemp, sExpected) != 0) {
+            SBPL_ERROR("ERROR: expected %s but got %s\n", sExpected, sTemp);
+            return false;
+        }
+        if (fscanf(fIn, "%f", &fTemp) != 1) {
+            return false;
+        }
+        pMotPrim->turning_radius = fTemp;
     }
 
-    //read in intermediate poses
+    // read in intermediate poses
     strcpy(sExpected, "intermediateposes:");
-    if (fscanf(fIn, "%s", sTemp) == 0) return false;
+    if (fscanf(fIn, "%s", sTemp) == 0) {
+        return false;
+    }
     if (strcmp(sTemp, sExpected) != 0) {
         SBPL_ERROR("ERROR: expected %s but got %s\n", sExpected, sTemp);
         return false;
     }
-    if (fscanf(fIn, "%d", &numofIntermPoses) != 1) return false;
-    //all intermposes should be with respect to 0,0 as starting pose since it will be added later and should be done
-    //after the action is rotated by initial orientation
+    if (fscanf(fIn, "%d", &numofIntermPoses) != 1) {
+        return false;
+    }
+    // all intermposes should be with respect to 0,0 as starting pose since it
+    // will be added later and should be done after the action is rotated by
+    // initial orientation
     for (int i = 0; i < numofIntermPoses; i++) {
         sbpl_xy_theta_pt_t intermpose;
         if (ReadinPose(&intermpose, fIn) == false) {
@@ -719,12 +739,12 @@ bool EnvironmentNAVXYTHETALATTICE::ReadinMotionPrimitive(SBPL_xytheta_mprimitive
         pMotPrim->intermptV.push_back(intermpose);
     }
 
-    //Check that the last pose of the motion matches (within lattice resolution) the designated end pose of the primitive
+    // Check that the last pose of the motion matches (within lattice
+    // resolution) the designated end pose of the primitive
     sbpl_xy_theta_pt_t sourcepose;
     sourcepose.x = DISCXY2CONT(0, EnvNAVXYTHETALATCfg.cellsize_m);
     sourcepose.y = DISCXY2CONT(0, EnvNAVXYTHETALATCfg.cellsize_m);
     sourcepose.theta = DiscTheta2ContNew(pMotPrim->starttheta_c);
-    //sourcepose.theta = DiscTheta2Cont(pMotPrim->starttheta_c, EnvNAVXYTHETALATCfg.NumThetaDirs);
     double mp_endx_m = sourcepose.x + pMotPrim->intermptV[pMotPrim->intermptV.size() - 1].x;
     double mp_endy_m = sourcepose.y + pMotPrim->intermptV[pMotPrim->intermptV.size() - 1].y;
     double mp_endtheta_rad = pMotPrim->intermptV[pMotPrim->intermptV.size() - 1].theta;
@@ -733,8 +753,9 @@ bool EnvironmentNAVXYTHETALATTICE::ReadinMotionPrimitive(SBPL_xytheta_mprimitive
     int endx_c = CONTXY2DISC(mp_endx_m, EnvNAVXYTHETALATCfg.cellsize_m);
     int endy_c = CONTXY2DISC(mp_endy_m, EnvNAVXYTHETALATCfg.cellsize_m);
     endtheta_c = ContTheta2DiscNew(mp_endtheta_rad);
-    //endtheta_c = ContTheta2Disc(mp_endtheta_rad, EnvNAVXYTHETALATCfg.NumThetaDirs);
-    if (endx_c != pMotPrim->endcell.x || endy_c != pMotPrim->endcell.y || endtheta_c != pMotPrim->endcell.theta) 
+    if (endx_c != pMotPrim->endcell.x ||
+        endy_c != pMotPrim->endcell.y ||
+        endtheta_c != pMotPrim->endcell.theta)
     {
         SBPL_ERROR( "ERROR: incorrect primitive %d with startangle=%d "
                    "last interm point %f %f %f does not match end pose %d %d %d\n",
@@ -763,92 +784,99 @@ bool EnvironmentNAVXYTHETALATTICE::ReadMotionPrimitives(FILE* fMotPrims)
 
     //read in the resolution
     strcpy(sExpected, "resolution_m:");
-    if (fscanf(fMotPrims, "%s", sTemp) == 0) return false;
-    if (strcmp(sTemp, sExpected) != 0) {
-        SBPL_ERROR("ERROR: expected %s but got %s\n", sExpected, sTemp);
-	fflush(stdout); 
+    if (fscanf(fMotPrims, "%s", sTemp) == 0) {
         return false;
     }
-    if (fscanf(fMotPrims, "%f", &fTemp) == 0) return false;
+    if (strcmp(sTemp, sExpected) != 0) {
+        SBPL_ERROR("ERROR: expected %s but got %s\n", sExpected, sTemp);
+        fflush(stdout);
+        return false;
+    }
+    if (fscanf(fMotPrims, "%f", &fTemp) == 0) {
+        return false;
+    }
     if (fabs(fTemp - EnvNAVXYTHETALATCfg.cellsize_m) > ERR_EPS) {
-        SBPL_ERROR("ERROR: invalid resolution %f (instead of %f) in the dynamics file\n", fTemp,
-                   EnvNAVXYTHETALATCfg.cellsize_m);
+        SBPL_ERROR("ERROR: invalid resolution %f (instead of %f) in the dynamics file\n", fTemp, EnvNAVXYTHETALATCfg.cellsize_m);
         fflush(stdout);
         return false;
     }
     SBPL_INFO("resolution_m: %f\n", fTemp);
 
-    if (fscanf(fMotPrims, "%s", sTemp) == 0) return false;
+    if (fscanf(fMotPrims, "%s", sTemp) == 0) {
+        return false;
+    }
     SBPL_INFO("sTemp: %s\n", sTemp);
-    if (strncmp(sTemp, "min_turning_radius_m:", 21) == 0) bUseNonUniformAngles = true;
+    if (strncmp(sTemp, "min_turning_radius_m:", 21) == 0) {
+        bUseNonUniformAngles = true;
+    }
     SBPL_INFO("bUseNonUniformAngles = %d", bUseNonUniformAngles);
 
-
-//resolution_m: 0.100000
-//min_turning_radius_m: 1.000000
-//numberofangles: 16
-//angle:0 0.00000000
-
-    if (bUseNonUniformAngles)
-    {
-	    float min_turn_rad;
-	    strcpy(sExpected, "min_turning_radius_m:");
-	    //if (fscanf(fMotPrims, "%s", sTemp) == 0) return false;
-	    if (strcmp(sTemp, sExpected) != 0) {
-		SBPL_ERROR("ERROR: expected %s but got %s\n", sExpected, sTemp);
-		fflush(stdout);
-		return false;
-	    }
-	    if (fscanf(fMotPrims, "%f", &min_turn_rad) == 0) return false;
-	    SBPL_PRINTF("min_turn_rad: %f\n", min_turn_rad);
-	    fflush(stdout);
-	    if (fscanf(fMotPrims, "%s", sTemp) == 0) return false;
+    if (bUseNonUniformAngles) {
+        float min_turn_rad;
+        strcpy(sExpected, "min_turning_radius_m:");
+        if (strcmp(sTemp, sExpected) != 0) {
+            SBPL_ERROR("ERROR: expected %s but got %s\n", sExpected, sTemp);
+            fflush(stdout);
+            return false;
+        }
+        if (fscanf(fMotPrims, "%f", &min_turn_rad) == 0) {
+            return false;
+        }
+        SBPL_PRINTF("min_turn_rad: %f\n", min_turn_rad);
+        fflush(stdout);
+        if (fscanf(fMotPrims, "%s", sTemp) == 0) {
+            return false;
+        }
     }
-    
 
-    //read in the angular resolution
+    // read in the angular resolution
     strcpy(sExpected, "numberofangles:");
-    //if (fscanf(fMotPrims, "%s", sTemp) == 0) return false;
     if (strcmp(sTemp, sExpected) != 0) {
-	SBPL_ERROR("ERROR: expected %s but got %s\n", sExpected, sTemp);
-	return false;
+       SBPL_ERROR("ERROR: expected %s but got %s\n", sExpected, sTemp);
+       return false;
     }
-    if (fscanf(fMotPrims, "%d", &dTemp) == 0) return false;
+    if (fscanf(fMotPrims, "%d", &dTemp) == 0) {
+        return false;
+    }
     if (dTemp != EnvNAVXYTHETALATCfg.NumThetaDirs) {
-	SBPL_ERROR("ERROR: invalid angular resolution %d angles (instead of %d angles) in the motion primitives file\n",
-	           dTemp, EnvNAVXYTHETALATCfg.NumThetaDirs);
-	return false;
+        SBPL_ERROR("ERROR: invalid angular resolution %d angles (instead of %d angles) in the motion primitives file\n", dTemp, EnvNAVXYTHETALATCfg.NumThetaDirs);
+        return false;
     }
     SBPL_PRINTF("numberofangles: %d\n", dTemp);
     EnvNAVXYTHETALATCfg.NumThetaDirs = dTemp;
 
-    if (bUseNonUniformAngles)
-    {
-	    //read in angles
-	    EnvNAVXYTHETALATCfg.ThetaDirs.clear();
-	    for (int i = 0; i < EnvNAVXYTHETALATCfg.NumThetaDirs; i++)
-	    {
-			ostringstream string_angle_index;
-			string_angle_index << i;
-			string angle_string = "angle:" + string_angle_index.str();
-			
-			float angle;
-			strcpy(sExpected, angle_string.c_str());
-	    		if (fscanf(fMotPrims, "%s", sTemp) == 0) return false;
-	    		if (strcmp(sTemp, sExpected) != 0) {
-				SBPL_ERROR("ERROR: expected %s but got %s\n", sExpected, sTemp);
-				return false;
-	    		}
-	    		if (fscanf(fMotPrims, "%f", &angle) == 0) return false;
-			SBPL_PRINTF("%s %f\n", angle_string.c_str(), angle);
-			EnvNAVXYTHETALATCfg.ThetaDirs.push_back(angle);
-	    }
-	    EnvNAVXYTHETALATCfg.ThetaDirs.push_back(2.0 * M_PI); // Add 2 PI at end for overlap
+    if (bUseNonUniformAngles) {
+        // read in angles
+        EnvNAVXYTHETALATCfg.ThetaDirs.clear();
+        for (int i = 0; i < EnvNAVXYTHETALATCfg.NumThetaDirs; i++)
+        {
+            std::ostringstream string_angle_index;
+            string_angle_index << i;
+            std::string angle_string = "angle:" + string_angle_index.str();
+
+            float angle;
+            strcpy(sExpected, angle_string.c_str());
+            if (fscanf(fMotPrims, "%s", sTemp) == 0) {
+                return false;
+            }
+            if (strcmp(sTemp, sExpected) != 0) {
+                SBPL_ERROR("ERROR: expected %s but got %s\n", sExpected, sTemp);
+                return false;
+            }
+            if (fscanf(fMotPrims, "%f", &angle) == 0) {
+                return false;
+            }
+            SBPL_PRINTF("%s %f\n", angle_string.c_str(), angle);
+            EnvNAVXYTHETALATCfg.ThetaDirs.push_back(angle);
+        }
+        EnvNAVXYTHETALATCfg.ThetaDirs.push_back(2.0 * M_PI); // Add 2 PI at end for overlap
     }
 
-    //read in the total number of actions
+    // read in the total number of actions
     strcpy(sExpected, "totalnumberofprimitives:");
-    if (fscanf(fMotPrims, "%s", sTemp) == 0) return false;
+    if (fscanf(fMotPrims, "%s", sTemp) == 0) {
+        return false;
+    }
     if (strcmp(sTemp, sExpected) != 0) {
         SBPL_ERROR("ERROR: expected %s but got %s\n", sExpected, sTemp);
         return false;
@@ -858,129 +886,166 @@ bool EnvironmentNAVXYTHETALATTICE::ReadMotionPrimitives(FILE* fMotPrims)
     }
     SBPL_PRINTF("totalnumberofprimitives: %d\n", totalNumofActions);
 
-    //Read in motion primitive for each action
+    // Read in motion primitive for each action
     for (int i = 0; i < totalNumofActions; i++) {
         SBPL_xytheta_mprimitive motprim;
 
-        if (EnvironmentNAVXYTHETALATTICE::ReadinMotionPrimitive(&motprim, fMotPrims) == false) return false;
+        if (!EnvironmentNAVXYTHETALATTICE::ReadinMotionPrimitive(&motprim, fMotPrims)) {
+            return false;
+        }
 
         EnvNAVXYTHETALATCfg.mprimV.push_back(motprim);
     }
-    SBPL_PRINTF("done ");
+    SBPL_PRINTF("done");
     SBPL_FFLUSH(stdout);
     return true;
 }
 
-void EnvironmentNAVXYTHETALATTICE::ComputeReplanningDataforAction(EnvNAVXYTHETALATAction_t* action)
+void EnvironmentNAVXYTHETALATTICE::ComputeReplanningDataforAction(
+    EnvNAVXYTHETALATAction_t* action)
 {
     int j;
 
-    //iterate over all the cells involved in the action
+    // iterate over all the cells involved in the action
     sbpl_xy_theta_cell_t startcell3d, endcell3d;
     for (int i = 0; i < (int)action->intersectingcellsV.size(); i++) {
-        //compute the translated affected search Pose - what state has an
-        //outgoing action whose intersecting cell is at 0,0
+        // compute the translated affected search Pose - what state has an
+        // outgoing action whose intersecting cell is at 0,0
         startcell3d.theta = action->starttheta;
         startcell3d.x = -action->intersectingcellsV.at(i).x;
         startcell3d.y = -action->intersectingcellsV.at(i).y;
 
-        //compute the translated affected search Pose - what state has an
-        //incoming action whose intersecting cell is at 0,0
-    	if (bUseNonUniformAngles)
-		endcell3d.theta = normalizeDiscAngle(action->endtheta);
-    	else
-        	endcell3d.theta = NORMALIZEDISCTHETA(action->endtheta, EnvNAVXYTHETALATCfg.NumThetaDirs);
+        // compute the translated affected search Pose - what state has an
+        // incoming action whose intersecting cell is at 0,0
+        if (bUseNonUniformAngles) {
+            endcell3d.theta = normalizeDiscAngle(action->endtheta);
+        }
+        else {
+            endcell3d.theta = NORMALIZEDISCTHETA(action->endtheta, EnvNAVXYTHETALATCfg.NumThetaDirs);
+        }
         endcell3d.x = startcell3d.x + action->dX;
         endcell3d.y = startcell3d.y + action->dY;
 
         //store the cells if not already there
         for (j = 0; j < (int)affectedsuccstatesV.size(); j++) {
-            if (affectedsuccstatesV.at(j) == endcell3d) break;
+            if (affectedsuccstatesV.at(j) == endcell3d) {
+                break;
+            }
         }
-        if (j == (int)affectedsuccstatesV.size()) affectedsuccstatesV.push_back(endcell3d);
+        if (j == (int)affectedsuccstatesV.size()) {
+            affectedsuccstatesV.push_back(endcell3d);
+        }
 
         for (j = 0; j < (int)affectedpredstatesV.size(); j++) {
-            if (affectedpredstatesV.at(j) == startcell3d) break;
+            if (affectedpredstatesV.at(j) == startcell3d) {
+                break;
+            }
         }
-        if (j == (int)affectedpredstatesV.size()) affectedpredstatesV.push_back(startcell3d);
-    }//over intersecting cells
+        if (j == (int)affectedpredstatesV.size()) {
+            affectedpredstatesV.push_back(startcell3d);
+        }
+    } // over intersecting cells
 
-    //add the centers since with h2d we are using these in cost computations
-    //---intersecting cell = origin
-    //compute the translated affected search Pose - what state has an outgoing action whose intersecting cell is at 0,0
+    // add the centers since with h2d we are using these in cost computations
+    // ---intersecting cell = origin
+    // compute the translated affected search Pose - what state has an outgoing
+    // action whose intersecting cell is at 0,0
     startcell3d.theta = action->starttheta;
     startcell3d.x = -0;
     startcell3d.y = -0;
 
-    //compute the translated affected search Pose - what state has an incoming action whose intersecting cell is at 0,0
-    if (bUseNonUniformAngles)
-    	endcell3d.theta = normalizeDiscAngle(action->endtheta);
-    else
-    	endcell3d.theta = NORMALIZEDISCTHETA(action->endtheta, EnvNAVXYTHETALATCfg.NumThetaDirs);
+    // compute the translated affected search Pose - what state has an incoming
+    // action whose intersecting cell is at 0,0
+    if (bUseNonUniformAngles) {
+        endcell3d.theta = normalizeDiscAngle(action->endtheta);
+    }
+    else {
+        endcell3d.theta = NORMALIZEDISCTHETA(action->endtheta, EnvNAVXYTHETALATCfg.NumThetaDirs);
+    }
     endcell3d.x = startcell3d.x + action->dX;
     endcell3d.y = startcell3d.y + action->dY;
 
     //store the cells if not already there
     for (j = 0; j < (int)affectedsuccstatesV.size(); j++) {
-        if (affectedsuccstatesV.at(j) == endcell3d) break;
+        if (affectedsuccstatesV.at(j) == endcell3d) {
+            break;
+        }
     }
-    if (j == (int)affectedsuccstatesV.size()) affectedsuccstatesV.push_back(endcell3d);
+    if (j == (int)affectedsuccstatesV.size()) {
+        affectedsuccstatesV.push_back(endcell3d);
+    }
 
     for (j = 0; j < (int)affectedpredstatesV.size(); j++) {
-        if (affectedpredstatesV.at(j) == startcell3d) break;
+        if (affectedpredstatesV.at(j) == startcell3d) {
+            break;
+        }
     }
-    if (j == (int)affectedpredstatesV.size()) affectedpredstatesV.push_back(startcell3d);
+    if (j == (int)affectedpredstatesV.size()) {
+        affectedpredstatesV.push_back(startcell3d);
+    }
 
     //---intersecting cell = outcome state
-    //compute the translated affected search Pose - what state has an outgoing action whose intersecting cell is at 0,0
+    // compute the translated affected search Pose - what state has an outgoing
+    // action whose intersecting cell is at 0,0
     startcell3d.theta = action->starttheta;
     startcell3d.x = -action->dX;
     startcell3d.y = -action->dY;
 
-    //compute the translated affected search Pose - what state has an incoming action whose intersecting cell is at 0,0
-    if (bUseNonUniformAngles)
-    	endcell3d.theta = normalizeDiscAngle(action->endtheta);
-    else
-    	endcell3d.theta = NORMALIZEDISCTHETA(action->endtheta, EnvNAVXYTHETALATCfg.NumThetaDirs);
+    // compute the translated affected search Pose - what state has an incoming
+    // action whose intersecting cell is at 0,0
+    if (bUseNonUniformAngles) {
+        endcell3d.theta = normalizeDiscAngle(action->endtheta);
+    }
+    else {
+        endcell3d.theta = NORMALIZEDISCTHETA(action->endtheta, EnvNAVXYTHETALATCfg.NumThetaDirs);
+    }
     endcell3d.x = startcell3d.x + action->dX;
     endcell3d.y = startcell3d.y + action->dY;
 
     for (j = 0; j < (int)affectedsuccstatesV.size(); j++) {
-        if (affectedsuccstatesV.at(j) == endcell3d) break;
+        if (affectedsuccstatesV.at(j) == endcell3d) {
+            break;
+        }
     }
-    if (j == (int)affectedsuccstatesV.size()) affectedsuccstatesV.push_back(endcell3d);
+    if (j == (int)affectedsuccstatesV.size()) {
+        affectedsuccstatesV.push_back(endcell3d);
+    }
 
     for (j = 0; j < (int)affectedpredstatesV.size(); j++) {
-        if (affectedpredstatesV.at(j) == startcell3d) break;
+        if (affectedpredstatesV.at(j) == startcell3d) {
+            break;
+        }
     }
-    if (j == (int)affectedpredstatesV.size()) affectedpredstatesV.push_back(startcell3d);
+    if (j == (int)affectedpredstatesV.size()) {
+        affectedpredstatesV.push_back(startcell3d);
+    }
 }
 
-//computes all the 3D states whose outgoing actions are potentially affected
-//when cell (0,0) changes its status it also does the same for the 3D states
-//whose incoming actions are potentially affected when cell (0,0) changes its
-//status
+// computes all the 3D states whose outgoing actions are potentially affected
+// when cell (0,0) changes its status it also does the same for the 3D states
+// whose incoming actions are potentially affected when cell (0,0) changes its
+// status
 void EnvironmentNAVXYTHETALATTICE::ComputeReplanningData()
 {
-    //iterate over all actions
-    //orientations
+    // iterate over all actions
+    // orientations
     for (int tind = 0; tind < EnvNAVXYTHETALATCfg.NumThetaDirs; tind++) {
-        //actions
+        // actions
         for (int aind = 0; aind < EnvNAVXYTHETALATCfg.actionwidth; aind++) {
-            //compute replanning data for this action 
+            // compute replanning data for this action
             ComputeReplanningDataforAction(&EnvNAVXYTHETALATCfg.ActionsV[tind][aind]);
         }
     }
 }
 
-//here motionprimitivevector contains actions only for 0 angle
+// here motionprimitivevector contains actions only for 0 angle
 void EnvironmentNAVXYTHETALATTICE::PrecomputeActionswithBaseMotionPrimitive(
-        vector<SBPL_xytheta_mprimitive>* motionprimitiveV)
+    std::vector<SBPL_xytheta_mprimitive>* motionprimitiveV)
 {
     SBPL_PRINTF("Pre-computing action data using base motion primitives...\n");
     EnvNAVXYTHETALATCfg.ActionsV = new EnvNAVXYTHETALATAction_t*[EnvNAVXYTHETALATCfg.NumThetaDirs];
-    EnvNAVXYTHETALATCfg.PredActionsV = new vector<EnvNAVXYTHETALATAction_t*> [EnvNAVXYTHETALATCfg.NumThetaDirs];
-    vector<sbpl_2Dcell_t> footprint;
+    EnvNAVXYTHETALATCfg.PredActionsV = new std::vector<EnvNAVXYTHETALATAction_t*> [EnvNAVXYTHETALATCfg.NumThetaDirs];
+    std::vector<sbpl_2Dcell_t> footprint;
 
     //iterate over source angles
     for (int tind = 0; tind < EnvNAVXYTHETALATCfg.NumThetaDirs; tind++) {
@@ -991,8 +1056,8 @@ void EnvironmentNAVXYTHETALATTICE::PrecomputeActionswithBaseMotionPrimitive(
         sbpl_xy_theta_pt_t sourcepose;
         sourcepose.x = DISCXY2CONT(0, EnvNAVXYTHETALATCfg.cellsize_m);
         sourcepose.y = DISCXY2CONT(0, EnvNAVXYTHETALATCfg.cellsize_m);
-	sourcepose.theta = DiscTheta2ContNew(tind);
-	//sourcepose.theta = DiscTheta2Cont(tind, EnvNAVXYTHETALATCfg.NumThetaDirs);
+    sourcepose.theta = DiscTheta2ContNew(tind);
+    //sourcepose.theta = DiscTheta2Cont(tind, EnvNAVXYTHETALATCfg.NumThetaDirs);
 
         //iterate over motion primitives
         for (size_t aind = 0; aind < motionprimitiveV->size(); aind++) {
@@ -1006,10 +1071,10 @@ void EnvironmentNAVXYTHETALATTICE::PrecomputeActionswithBaseMotionPrimitive(
             double endx = sourcepose.x + (mp_endx_m * cos(sourcepose.theta) - mp_endy_m * sin(sourcepose.theta));
             double endy = sourcepose.y + (mp_endx_m * sin(sourcepose.theta) + mp_endy_m * cos(sourcepose.theta));
 
-       	    int endx_c = CONTXY2DISC(endx, EnvNAVXYTHETALATCfg.cellsize_m);
+            int endx_c = CONTXY2DISC(endx, EnvNAVXYTHETALATCfg.cellsize_m);
             int endy_c = CONTXY2DISC(endy, EnvNAVXYTHETALATCfg.cellsize_m);
-	    EnvNAVXYTHETALATCfg.ActionsV[tind][aind].endtheta = ContTheta2DiscNew(mp_endtheta_rad + sourcepose.theta);
-	    //EnvNAVXYTHETALATCfg.ActionsV[tind][aind].endtheta = ContTheta2Disc(mp_endtheta_rad + sourcepose.theta, EnvNAVXYTHETALATCfg.NumThetaDirs);
+        EnvNAVXYTHETALATCfg.ActionsV[tind][aind].endtheta = ContTheta2DiscNew(mp_endtheta_rad + sourcepose.theta);
+        //EnvNAVXYTHETALATCfg.ActionsV[tind][aind].endtheta = ContTheta2Disc(mp_endtheta_rad + sourcepose.theta, EnvNAVXYTHETALATCfg.NumThetaDirs);
             EnvNAVXYTHETALATCfg.ActionsV[tind][aind].dX = endx_c;
             EnvNAVXYTHETALATCfg.ActionsV[tind][aind].dY = endy_c;
 
@@ -1085,58 +1150,58 @@ void EnvironmentNAVXYTHETALATTICE::PrecomputeActionswithBaseMotionPrimitive(
     SBPL_PRINTF("done pre-computing action data based on motion primitives\n");
 }
 
-//here motionprimitivevector contains actions for all angles
+// here motionprimitivevector contains actions for all angles
 void EnvironmentNAVXYTHETALATTICE::PrecomputeActionswithCompleteMotionPrimitive(
-        vector<SBPL_xytheta_mprimitive>* motionprimitiveV)
+    std::vector<SBPL_xytheta_mprimitive>* motionprimitiveV)
 {
     SBPL_PRINTF("Pre-computing action data using motion primitives for every angle...\n");
     EnvNAVXYTHETALATCfg.ActionsV = new EnvNAVXYTHETALATAction_t*[EnvNAVXYTHETALATCfg.NumThetaDirs];
-    EnvNAVXYTHETALATCfg.PredActionsV = new vector<EnvNAVXYTHETALATAction_t*> [EnvNAVXYTHETALATCfg.NumThetaDirs];
-    vector<sbpl_2Dcell_t> footprint;
+    EnvNAVXYTHETALATCfg.PredActionsV = new std::vector<EnvNAVXYTHETALATAction_t*>[EnvNAVXYTHETALATCfg.NumThetaDirs];
+    std::vector<sbpl_2Dcell_t> footprint;
 
     if (motionprimitiveV->size() % EnvNAVXYTHETALATCfg.NumThetaDirs != 0) {
-        SBPL_ERROR("ERROR: motionprimitives should be uniform across actions\n");
-        throw SBPL_Exception();
+        throw SBPL_Exception("ERROR: motionprimitives should be uniform across actions");
     }
 
     EnvNAVXYTHETALATCfg.actionwidth = ((int)motionprimitiveV->size()) / EnvNAVXYTHETALATCfg.NumThetaDirs;
 
-    //iterate over source angles
+    // iterate over source angles
     int maxnumofactions = 0;
     for (int tind = 0; tind < EnvNAVXYTHETALATCfg.NumThetaDirs; tind++) {
         SBPL_PRINTF("pre-computing for angle %d out of %d angles\n", tind, EnvNAVXYTHETALATCfg.NumThetaDirs);
 
         EnvNAVXYTHETALATCfg.ActionsV[tind] = new EnvNAVXYTHETALATAction_t[EnvNAVXYTHETALATCfg.actionwidth];
 
-        //compute sourcepose
+        // compute sourcepose
         sbpl_xy_theta_pt_t sourcepose;
         sourcepose.x = DISCXY2CONT(0, EnvNAVXYTHETALATCfg.cellsize_m);
         sourcepose.y = DISCXY2CONT(0, EnvNAVXYTHETALATCfg.cellsize_m);
-	sourcepose.theta = DiscTheta2ContNew(tind);
-	//sourcepose.theta = DiscTheta2Cont(tind, EnvNAVXYTHETALATCfg.NumThetaDirs);
+        sourcepose.theta = DiscTheta2ContNew(tind);
 
-        //iterate over motion primitives
+        // iterate over motion primitives
         int numofactions = 0;
         int aind = -1;
         for (int mind = 0; mind < (int)motionprimitiveV->size(); mind++) {
             //find a motion primitive for this angle
-            if (motionprimitiveV->at(mind).starttheta_c != tind) continue;
+            if (motionprimitiveV->at(mind).starttheta_c != tind) {
+                continue;
+            }
 
             aind++;
             numofactions++;
 
-            //action index
+            // action index
             EnvNAVXYTHETALATCfg.ActionsV[tind][aind].aind = aind;
 
-            //start angle
+            // start angle
             EnvNAVXYTHETALATCfg.ActionsV[tind][aind].starttheta = tind;
 
-            //compute dislocation
+            // compute dislocation
             EnvNAVXYTHETALATCfg.ActionsV[tind][aind].endtheta = motionprimitiveV->at(mind).endcell.theta;
             EnvNAVXYTHETALATCfg.ActionsV[tind][aind].dX = motionprimitiveV->at(mind).endcell.x;
             EnvNAVXYTHETALATCfg.ActionsV[tind][aind].dY = motionprimitiveV->at(mind).endcell.y;
 
-            //compute and store interm points as well as intersecting cells
+            // compute and store interm points as well as intersecting cells
             EnvNAVXYTHETALATCfg.ActionsV[tind][aind].intersectingcellsV.clear();
             EnvNAVXYTHETALATCfg.ActionsV[tind][aind].intermptV.clear();
             EnvNAVXYTHETALATCfg.ActionsV[tind][aind].interm3DcellsV.clear();
@@ -1146,8 +1211,7 @@ void EnvironmentNAVXYTHETALATTICE::PrecomputeActionswithCompleteMotionPrimitive(
             previnterm3Dcell.y = 0;
 
             // Compute all the intersected cells for this action (intermptV and interm3DcellsV)
-            for (int pind = 0; pind < (int)motionprimitiveV->at(mind).intermptV.size(); pind++) 
-	    {
+            for (int pind = 0; pind < (int)motionprimitiveV->at(mind).intermptV.size(); pind++) {
                 sbpl_xy_theta_pt_t intermpt = motionprimitiveV->at(mind).intermptV[pind];
                 EnvNAVXYTHETALATCfg.ActionsV[tind][aind].intermptV.push_back(intermpt);
 
@@ -1162,15 +1226,17 @@ void EnvironmentNAVXYTHETALATTICE::PrecomputeActionswithCompleteMotionPrimitive(
                 intermediate2dCell.y = CONTXY2DISC(pose.y, EnvNAVXYTHETALATCfg.cellsize_m);
 
                 // add unique cells to the list
-                if (EnvNAVXYTHETALATCfg.ActionsV[tind][aind].interm3DcellsV.size() == 0 || intermediate2dCell.x
-                    != previnterm3Dcell.x || intermediate2dCell.y != previnterm3Dcell.y) {
+                if (EnvNAVXYTHETALATCfg.ActionsV[tind][aind].interm3DcellsV.size() == 0 ||
+                    intermediate2dCell.x != previnterm3Dcell.x ||
+                    intermediate2dCell.y != previnterm3Dcell.y)
+                {
                     EnvNAVXYTHETALATCfg.ActionsV[tind][aind].interm3DcellsV.push_back(intermediate2dCell);
                 }
 
                 previnterm3Dcell = intermediate2dCell;
             }
 
-            //compute linear and angular time
+            // compute linear and angular time
             double linear_distance = 0;
             for (unsigned int i = 1; i < EnvNAVXYTHETALATCfg.ActionsV[tind][aind].intermptV.size(); i++) {
                 double x0 = EnvNAVXYTHETALATCfg.ActionsV[tind][aind].intermptV[i - 1].x;
@@ -1183,25 +1249,24 @@ void EnvironmentNAVXYTHETALATTICE::PrecomputeActionswithCompleteMotionPrimitive(
             }
             double linear_time = linear_distance / EnvNAVXYTHETALATCfg.nominalvel_mpersecs;
             double angular_distance;
-	    angular_distance = fabs(computeMinUnsignedAngleDiff(DiscTheta2ContNew(EnvNAVXYTHETALATCfg.ActionsV[tind][aind].endtheta),
-                                                     DiscTheta2ContNew(EnvNAVXYTHETALATCfg.ActionsV[tind][aind].starttheta)));
-	    //angular_distance = fabs(computeMinUnsignedAngleDiff(DiscTheta2Cont(EnvNAVXYTHETALATCfg.ActionsV[tind][aind].endtheta,
-            //                                         EnvNAVXYTHETALATCfg.NumThetaDirs),
-            //                                         DiscTheta2Cont(EnvNAVXYTHETALATCfg.ActionsV[tind][aind].starttheta,
-            //                                         EnvNAVXYTHETALATCfg.NumThetaDirs)));
+            angular_distance = fabs(computeMinUnsignedAngleDiff(
+                    DiscTheta2ContNew(EnvNAVXYTHETALATCfg.ActionsV[tind][aind].endtheta),
+                    DiscTheta2ContNew(EnvNAVXYTHETALATCfg.ActionsV[tind][aind].starttheta)));
 
             double angular_time = angular_distance / ((PI_CONST / 4.0) /
                                   EnvNAVXYTHETALATCfg.timetoturn45degsinplace_secs);
-            //make the cost the max of the two times
+            // make the cost the max of the two times
             EnvNAVXYTHETALATCfg.ActionsV[tind][aind].cost =
-                    (int)(ceil(NAVXYTHETALAT_COSTMULT_MTOMM * max(linear_time, angular_time)));
-            //use any additional cost multiplier
+                    (int)(ceil(NAVXYTHETALAT_COSTMULT_MTOMM * std::max(linear_time, angular_time)));
+            // use any additional cost multiplier
             EnvNAVXYTHETALATCfg.ActionsV[tind][aind].cost *= motionprimitiveV->at(mind).additionalactioncostmult;
 
-            //now compute the intersecting cells for this motion (including ignoring the source footprint)
-            get_2d_motion_cells(EnvNAVXYTHETALATCfg.FootprintPolygon, motionprimitiveV->at(mind).intermptV,
-                                &EnvNAVXYTHETALATCfg.ActionsV[tind][aind].intersectingcellsV,
-                                EnvNAVXYTHETALATCfg.cellsize_m);
+            // now compute the intersecting cells for this motion (including ignoring the source footprint)
+            get_2d_motion_cells(
+                    EnvNAVXYTHETALATCfg.FootprintPolygon,
+                    motionprimitiveV->at(mind).intermptV,
+                    &EnvNAVXYTHETALATCfg.ActionsV[tind][aind].intersectingcellsV,
+                    EnvNAVXYTHETALATCfg.cellsize_m);
 
 #if DEBUG
             SBPL_FPRINTF(fDeb,
@@ -1220,24 +1285,30 @@ void EnvironmentNAVXYTHETALATTICE::PrecomputeActionswithCompleteMotionPrimitive(
                          (int)EnvNAVXYTHETALATCfg.ActionsV[tind][aind].intersectingcellsV.size());
 #endif
 
-            //add to the list of backward actions
+            // add to the list of backward actions
             int targettheta = EnvNAVXYTHETALATCfg.ActionsV[tind][aind].endtheta;
-            if (targettheta < 0) targettheta = targettheta + EnvNAVXYTHETALATCfg.NumThetaDirs;
+            if (targettheta < 0) {
+                targettheta = targettheta + EnvNAVXYTHETALATCfg.NumThetaDirs;
+            }
             EnvNAVXYTHETALATCfg.PredActionsV[targettheta].push_back(&(EnvNAVXYTHETALATCfg.ActionsV[tind][aind]));
         }
 
-        if (maxnumofactions < numofactions) maxnumofactions = numofactions;
+        if (maxnumofactions < numofactions) {
+            maxnumofactions = numofactions;
+        }
     }
 
-    //at this point we don't allow nonuniform number of actions
+    // at this point we don't allow nonuniform number of actions
     if (motionprimitiveV->size() != (size_t)(EnvNAVXYTHETALATCfg.NumThetaDirs * maxnumofactions)) {
-        SBPL_ERROR("ERROR: nonuniform number of actions is not supported "
-                   "(maxnumofactions=%d while motprims=%d thetas=%d\n",
-                   maxnumofactions, (unsigned int)motionprimitiveV->size(), EnvNAVXYTHETALATCfg.NumThetaDirs);
-        throw SBPL_Exception();
+        std::stringstream ss;
+        ss << "ERROR: nonuniform number of actions is not supported" <<
+                " (maxnumofactions=" << maxnumofactions << " while motprims=" <<
+                motionprimitiveV->size() << " thetas=" <<
+                EnvNAVXYTHETALATCfg.NumThetaDirs;
+        throw SBPL_Exception(ss.str());
     }
 
-    //now compute replanning data
+    // now compute replanning data
     ComputeReplanningData();
 
     SBPL_PRINTF("done pre-computing action data based on motion primitives\n");
@@ -1247,51 +1318,51 @@ void EnvironmentNAVXYTHETALATTICE::DeprecatedPrecomputeActions()
 {
     SBPL_PRINTF("Use of DeprecatedPrecomputeActions() is deprecated and probably doesn't work!\n");
 
-    //construct list of actions
+    // construct list of actions
     SBPL_PRINTF("Pre-computing action data using the motion primitives for a 3D kinematic planning...\n");
     EnvNAVXYTHETALATCfg.ActionsV = new EnvNAVXYTHETALATAction_t*[EnvNAVXYTHETALATCfg.NumThetaDirs];
-    EnvNAVXYTHETALATCfg.PredActionsV = new vector<EnvNAVXYTHETALATAction_t*> [EnvNAVXYTHETALATCfg.NumThetaDirs];
-    vector<sbpl_2Dcell_t> footprint;
-    //iterate over source angles
+    EnvNAVXYTHETALATCfg.PredActionsV = new std::vector<EnvNAVXYTHETALATAction_t*> [EnvNAVXYTHETALATCfg.NumThetaDirs];
+    std::vector<sbpl_2Dcell_t> footprint;
+    // iterate over source angles
     for (int tind = 0; tind < EnvNAVXYTHETALATCfg.NumThetaDirs; tind++) {
         SBPL_PRINTF("processing angle %d\n", tind);
         EnvNAVXYTHETALATCfg.ActionsV[tind] = new EnvNAVXYTHETALATAction_t[EnvNAVXYTHETALATCfg.actionwidth];
 
-        //compute sourcepose
+        // compute sourcepose
         sbpl_xy_theta_pt_t sourcepose;
         sourcepose.x = DISCXY2CONT(0, EnvNAVXYTHETALATCfg.cellsize_m);
         sourcepose.y = DISCXY2CONT(0, EnvNAVXYTHETALATCfg.cellsize_m);
-	sourcepose.theta = DiscTheta2ContNew(tind);
-        //sourcepose.theta = DiscTheta2Cont(tind, EnvNAVXYTHETALATCfg.NumThetaDirs);
+        sourcepose.theta = DiscTheta2ContNew(tind);
 
-        //the construction assumes that the robot first turns and then goes along this new theta
+        // the construction assumes that the robot first turns and then goes
+        // along this new theta
         int aind = 0;
         for (; aind < 3; aind++) {
             EnvNAVXYTHETALATCfg.ActionsV[tind][aind].aind = aind;
             EnvNAVXYTHETALATCfg.ActionsV[tind][aind].starttheta = tind;
-            //-1,0,1
-            EnvNAVXYTHETALATCfg.ActionsV[tind][aind].endtheta = (tind + aind - 1) % EnvNAVXYTHETALATCfg.NumThetaDirs; 
+            // -1,0,1
+            EnvNAVXYTHETALATCfg.ActionsV[tind][aind].endtheta = (tind + aind - 1) % EnvNAVXYTHETALATCfg.NumThetaDirs;
             double angle = DiscTheta2ContNew(EnvNAVXYTHETALATCfg.ActionsV[tind][aind].endtheta);
-            //double angle = DiscTheta2Cont(EnvNAVXYTHETALATCfg.ActionsV[tind][aind].endtheta,
-            //                              EnvNAVXYTHETALATCfg.NumThetaDirs);
             EnvNAVXYTHETALATCfg.ActionsV[tind][aind].dX = (int)(cos(angle) + 0.5 * (cos(angle) > 0 ? 1 : -1));
             EnvNAVXYTHETALATCfg.ActionsV[tind][aind].dY = (int)(sin(angle) + 0.5 * (sin(angle) > 0 ? 1 : -1));
-            EnvNAVXYTHETALATCfg.ActionsV[tind][aind].cost = (int)(ceil(NAVXYTHETALAT_COSTMULT_MTOMM
-                * EnvNAVXYTHETALATCfg.cellsize_m / EnvNAVXYTHETALATCfg.nominalvel_mpersecs
-                * sqrt((double)(EnvNAVXYTHETALATCfg.ActionsV[tind][aind].dX
-                    * EnvNAVXYTHETALATCfg.ActionsV[tind][aind].dX + EnvNAVXYTHETALATCfg.ActionsV[tind][aind].dY
-                    * EnvNAVXYTHETALATCfg.ActionsV[tind][aind].dY))));
+            EnvNAVXYTHETALATCfg.ActionsV[tind][aind].cost = (int)(ceil(NAVXYTHETALAT_COSTMULT_MTOMM *
+                    EnvNAVXYTHETALATCfg.cellsize_m / EnvNAVXYTHETALATCfg.nominalvel_mpersecs *
+                    sqrt((double)(EnvNAVXYTHETALATCfg.ActionsV[tind][aind].dX *
+                            EnvNAVXYTHETALATCfg.ActionsV[tind][aind].dX + EnvNAVXYTHETALATCfg.ActionsV[tind][aind].dY *
+                            EnvNAVXYTHETALATCfg.ActionsV[tind][aind].dY))));
 
-            //compute intersecting cells
+            // compute intersecting cells
             sbpl_xy_theta_pt_t pose;
             pose.x = DISCXY2CONT(EnvNAVXYTHETALATCfg.ActionsV[tind][aind].dX, EnvNAVXYTHETALATCfg.cellsize_m);
             pose.y = DISCXY2CONT(EnvNAVXYTHETALATCfg.ActionsV[tind][aind].dY, EnvNAVXYTHETALATCfg.cellsize_m);
             pose.theta = angle;
             EnvNAVXYTHETALATCfg.ActionsV[tind][aind].intermptV.clear();
             EnvNAVXYTHETALATCfg.ActionsV[tind][aind].intersectingcellsV.clear();
-            get_2d_footprint_cells(EnvNAVXYTHETALATCfg.FootprintPolygon,
-                                   &EnvNAVXYTHETALATCfg.ActionsV[tind][aind].intersectingcellsV, pose,
-                                   EnvNAVXYTHETALATCfg.cellsize_m);
+            get_2d_footprint_cells(
+                    EnvNAVXYTHETALATCfg.FootprintPolygon,
+                    &EnvNAVXYTHETALATCfg.ActionsV[tind][aind].intersectingcellsV,
+                    pose,
+                    EnvNAVXYTHETALATCfg.cellsize_m);
             RemoveSourceFootprint(sourcepose, &EnvNAVXYTHETALATCfg.ActionsV[tind][aind].intersectingcellsV);
 
 #if DEBUG
@@ -1301,50 +1372,54 @@ void EnvironmentNAVXYTHETALATTICE::DeprecatedPrecomputeActions()
                         EnvNAVXYTHETALATCfg.ActionsV[tind][aind].cost);
 #endif
 
-            //add to the list of backward actions
+            // add to the list of backward actions
             int targettheta = EnvNAVXYTHETALATCfg.ActionsV[tind][aind].endtheta;
-            if (targettheta < 0) targettheta = targettheta + EnvNAVXYTHETALATCfg.NumThetaDirs;
+            if (targettheta < 0) {
+                targettheta = targettheta + EnvNAVXYTHETALATCfg.NumThetaDirs;
+            }
             EnvNAVXYTHETALATCfg.PredActionsV[targettheta].push_back(&(EnvNAVXYTHETALATCfg.ActionsV[tind][aind]));
         }
 
-        //decrease and increase angle without movement
+        // decrease and increase angle without movement
         aind = 3;
         EnvNAVXYTHETALATCfg.ActionsV[tind][aind].aind = aind;
         EnvNAVXYTHETALATCfg.ActionsV[tind][aind].starttheta = tind;
         EnvNAVXYTHETALATCfg.ActionsV[tind][aind].endtheta = tind - 1;
-        if (EnvNAVXYTHETALATCfg.ActionsV[tind][aind].endtheta < 0)
+        if (EnvNAVXYTHETALATCfg.ActionsV[tind][aind].endtheta < 0) {
             EnvNAVXYTHETALATCfg.ActionsV[tind][aind].endtheta += EnvNAVXYTHETALATCfg.NumThetaDirs;
+        }
         EnvNAVXYTHETALATCfg.ActionsV[tind][aind].dX = 0;
         EnvNAVXYTHETALATCfg.ActionsV[tind][aind].dY = 0;
-        EnvNAVXYTHETALATCfg.ActionsV[tind][aind].cost = (int)(NAVXYTHETALAT_COSTMULT_MTOMM *
-                                                              EnvNAVXYTHETALATCfg.timetoturn45degsinplace_secs);
+        EnvNAVXYTHETALATCfg.ActionsV[tind][aind].cost =
+                (int)(NAVXYTHETALAT_COSTMULT_MTOMM * EnvNAVXYTHETALATCfg.timetoturn45degsinplace_secs);
 
-        //compute intersecting cells
+        // compute intersecting cells
         sbpl_xy_theta_pt_t pose;
         pose.x = DISCXY2CONT(EnvNAVXYTHETALATCfg.ActionsV[tind][aind].dX, EnvNAVXYTHETALATCfg.cellsize_m);
         pose.y = DISCXY2CONT(EnvNAVXYTHETALATCfg.ActionsV[tind][aind].dY, EnvNAVXYTHETALATCfg.cellsize_m);
-        pose.theta =
-		DiscTheta2ContNew(EnvNAVXYTHETALATCfg.ActionsV[tind][aind].endtheta);
-                //DiscTheta2Cont(EnvNAVXYTHETALATCfg.ActionsV[tind][aind].endtheta, EnvNAVXYTHETALATCfg.NumThetaDirs);
+        pose.theta = DiscTheta2ContNew(EnvNAVXYTHETALATCfg.ActionsV[tind][aind].endtheta);
         EnvNAVXYTHETALATCfg.ActionsV[tind][aind].intermptV.clear();
         EnvNAVXYTHETALATCfg.ActionsV[tind][aind].intersectingcellsV.clear();
-        get_2d_footprint_cells(EnvNAVXYTHETALATCfg.FootprintPolygon,
-                               &EnvNAVXYTHETALATCfg.ActionsV[tind][aind].intersectingcellsV, pose,
-                               EnvNAVXYTHETALATCfg.cellsize_m);
+        get_2d_footprint_cells(
+                EnvNAVXYTHETALATCfg.FootprintPolygon,
+                &EnvNAVXYTHETALATCfg.ActionsV[tind][aind].intersectingcellsV,
+                pose,
+                EnvNAVXYTHETALATCfg.cellsize_m);
         RemoveSourceFootprint(sourcepose, &EnvNAVXYTHETALATCfg.ActionsV[tind][aind].intersectingcellsV);
 
 #if DEBUG
         SBPL_PRINTF("action tind=%d aind=%d: endtheta=%d (%f) dX=%d dY=%d cost=%d\n",
                     tind, aind, EnvNAVXYTHETALATCfg.ActionsV[tind][aind].endtheta,
-		    DiscTheta2ContNew(EnvNAVXYTHETALATCfg.ActionsV[tind][aind].endtheta),
-                    //DiscTheta2Cont(EnvNAVXYTHETALATCfg.ActionsV[tind][aind].endtheta, EnvNAVXYTHETALATCfg.NumThetaDirs),
+                    DiscTheta2ContNew(EnvNAVXYTHETALATCfg.ActionsV[tind][aind].endtheta),
                     EnvNAVXYTHETALATCfg.ActionsV[tind][aind].dX, EnvNAVXYTHETALATCfg.ActionsV[tind][aind].dY,
                     EnvNAVXYTHETALATCfg.ActionsV[tind][aind].cost);
 #endif
 
-        //add to the list of backward actions
+        // add to the list of backward actions
         int targettheta = EnvNAVXYTHETALATCfg.ActionsV[tind][aind].endtheta;
-        if (targettheta < 0) targettheta = targettheta + EnvNAVXYTHETALATCfg.NumThetaDirs;
+        if (targettheta < 0) {
+            targettheta = targettheta + EnvNAVXYTHETALATCfg.NumThetaDirs;
+        }
         EnvNAVXYTHETALATCfg.PredActionsV[targettheta].push_back(&(EnvNAVXYTHETALATCfg.ActionsV[tind][aind]));
 
         aind = 4;
@@ -1353,47 +1428,47 @@ void EnvironmentNAVXYTHETALATTICE::DeprecatedPrecomputeActions()
         EnvNAVXYTHETALATCfg.ActionsV[tind][aind].endtheta = (tind + 1) % EnvNAVXYTHETALATCfg.NumThetaDirs;
         EnvNAVXYTHETALATCfg.ActionsV[tind][aind].dX = 0;
         EnvNAVXYTHETALATCfg.ActionsV[tind][aind].dY = 0;
-        EnvNAVXYTHETALATCfg.ActionsV[tind][aind].cost = (int)(NAVXYTHETALAT_COSTMULT_MTOMM *
-                                                              EnvNAVXYTHETALATCfg.timetoturn45degsinplace_secs);
+        EnvNAVXYTHETALATCfg.ActionsV[tind][aind].cost =
+                (int)(NAVXYTHETALAT_COSTMULT_MTOMM * EnvNAVXYTHETALATCfg.timetoturn45degsinplace_secs);
 
-        //compute intersecting cells
+        // compute intersecting cells
         pose.x = DISCXY2CONT(EnvNAVXYTHETALATCfg.ActionsV[tind][aind].dX, EnvNAVXYTHETALATCfg.cellsize_m);
         pose.y = DISCXY2CONT(EnvNAVXYTHETALATCfg.ActionsV[tind][aind].dY, EnvNAVXYTHETALATCfg.cellsize_m);
-        pose.theta =
-                DiscTheta2ContNew(EnvNAVXYTHETALATCfg.ActionsV[tind][aind].endtheta);
-		//DiscTheta2Cont(EnvNAVXYTHETALATCfg.ActionsV[tind][aind].endtheta, EnvNAVXYTHETALATCfg.NumThetaDirs);
+        pose.theta = DiscTheta2ContNew(EnvNAVXYTHETALATCfg.ActionsV[tind][aind].endtheta);
         EnvNAVXYTHETALATCfg.ActionsV[tind][aind].intermptV.clear();
         EnvNAVXYTHETALATCfg.ActionsV[tind][aind].intersectingcellsV.clear();
-        get_2d_footprint_cells(EnvNAVXYTHETALATCfg.FootprintPolygon,
-                               &EnvNAVXYTHETALATCfg.ActionsV[tind][aind].intersectingcellsV, pose,
-                               EnvNAVXYTHETALATCfg.cellsize_m);
+        get_2d_footprint_cells(
+                EnvNAVXYTHETALATCfg.FootprintPolygon,
+                &EnvNAVXYTHETALATCfg.ActionsV[tind][aind].intersectingcellsV,
+                pose,
+                EnvNAVXYTHETALATCfg.cellsize_m);
         RemoveSourceFootprint(sourcepose, &EnvNAVXYTHETALATCfg.ActionsV[tind][aind].intersectingcellsV);
 
 #if DEBUG
         SBPL_PRINTF("action tind=%d aind=%d: endtheta=%d (%f) dX=%d dY=%d cost=%d\n",
                     tind, aind, EnvNAVXYTHETALATCfg.ActionsV[tind][aind].endtheta, DiscTheta2ContNew(EnvNAVXYTHETALATCfg.ActionsV[tind][aind].endtheta),
-		    //tind, aind, EnvNAVXYTHETALATCfg.ActionsV[tind][aind].endtheta, DiscTheta2Cont(EnvNAVXYTHETALATCfg.ActionsV[tind][aind].endtheta, EnvNAVXYTHETALATCfg.NumThetaDirs),
                     EnvNAVXYTHETALATCfg.ActionsV[tind][aind].dX, EnvNAVXYTHETALATCfg.ActionsV[tind][aind].dY,
                     EnvNAVXYTHETALATCfg.ActionsV[tind][aind].cost);
 #endif
 
-        //add to the list of backward actions
+        // add to the list of backward actions
         targettheta = EnvNAVXYTHETALATCfg.ActionsV[tind][aind].endtheta;
         if (targettheta < 0) targettheta = targettheta + EnvNAVXYTHETALATCfg.NumThetaDirs;
         EnvNAVXYTHETALATCfg.PredActionsV[targettheta].push_back(&(EnvNAVXYTHETALATCfg.ActionsV[tind][aind]));
     }
 
-    //now compute replanning data
+    // now compute replanning data
     ComputeReplanningData();
 
     SBPL_PRINTF("done pre-computing action data\n");
 }
 
-void EnvironmentNAVXYTHETALATTICE::InitializeEnvConfig(vector<SBPL_xytheta_mprimitive>* motionprimitiveV)
+void EnvironmentNAVXYTHETALATTICE::InitializeEnvConfig(std::vector<SBPL_xytheta_mprimitive>* motionprimitiveV)
 {
-    //aditional to configuration file initialization of EnvNAVXYTHETALATCfg if necessary
+    // additional to configuration file initialization of EnvNAVXYTHETALATCfg if
+    // necessary
 
-    //dXY dirs
+    // dXY dirs
     EnvNAVXYTHETALATCfg.dXY[0][0] = -1;
     EnvNAVXYTHETALATCfg.dXY[0][1] = -1;
     EnvNAVXYTHETALATCfg.dXY[1][0] = -1;
@@ -1415,11 +1490,15 @@ void EnvironmentNAVXYTHETALATTICE::InitializeEnvConfig(vector<SBPL_xytheta_mprim
     temppose.x = 0.0;
     temppose.y = 0.0;
     temppose.theta = 0.0;
-    vector<sbpl_2Dcell_t> footprint;
-    get_2d_footprint_cells(EnvNAVXYTHETALATCfg.FootprintPolygon, &footprint, temppose, EnvNAVXYTHETALATCfg.cellsize_m);
+    std::vector<sbpl_2Dcell_t> footprint;
+    get_2d_footprint_cells(
+            EnvNAVXYTHETALATCfg.FootprintPolygon,
+            &footprint,
+            temppose,
+            EnvNAVXYTHETALATCfg.cellsize_m);
     SBPL_PRINTF("number of cells in footprint of the robot = %d\n", (unsigned int)footprint.size());
 
-    for (vector<sbpl_2Dcell_t>::iterator it = footprint.begin(); it != footprint.end(); ++it) {
+    for (std::vector<sbpl_2Dcell_t>::iterator it = footprint.begin(); it != footprint.end(); ++it) {
         SBPL_PRINTF("Footprint cell at (%d, %d)\n", it->x, it->y);
     }
 
@@ -1433,43 +1512,51 @@ void EnvironmentNAVXYTHETALATTICE::InitializeEnvConfig(vector<SBPL_xytheta_mprim
     }
 #endif
 
-    if (motionprimitiveV == NULL)
+    if (motionprimitiveV == NULL) {
         DeprecatedPrecomputeActions();
-    else
+    }
+    else {
         PrecomputeActionswithCompleteMotionPrimitive(motionprimitiveV);
+    }
 }
 
 bool EnvironmentNAVXYTHETALATTICE::IsValidCell(int X, int Y)
 {
-    return (X >= 0 && X < EnvNAVXYTHETALATCfg.EnvWidth_c && Y >= 0 && Y < EnvNAVXYTHETALATCfg.EnvHeight_c &&
+    return (X >= 0 && X < EnvNAVXYTHETALATCfg.EnvWidth_c &&
+            Y >= 0 && Y < EnvNAVXYTHETALATCfg.EnvHeight_c &&
             EnvNAVXYTHETALATCfg.Grid2D[X][Y] < EnvNAVXYTHETALATCfg.obsthresh);
 }
 
 bool EnvironmentNAVXYTHETALATTICE::IsWithinMapCell(int X, int Y)
 {
-    return (X >= 0 && X < EnvNAVXYTHETALATCfg.EnvWidth_c && Y >= 0 && Y < EnvNAVXYTHETALATCfg.EnvHeight_c);
+    return (X >= 0 && X < EnvNAVXYTHETALATCfg.EnvWidth_c &&
+            Y >= 0 && Y < EnvNAVXYTHETALATCfg.EnvHeight_c);
 }
 
 bool EnvironmentNAVXYTHETALATTICE::IsValidConfiguration(int X, int Y, int Theta)
 {
-    vector<sbpl_2Dcell_t> footprint;
+    std::vector<sbpl_2Dcell_t> footprint;
     sbpl_xy_theta_pt_t pose;
 
-    //compute continuous pose
+    // compute continuous pose
     pose.x = DISCXY2CONT(X, EnvNAVXYTHETALATCfg.cellsize_m);
     pose.y = DISCXY2CONT(Y, EnvNAVXYTHETALATCfg.cellsize_m);
     pose.theta = DiscTheta2ContNew(Theta);
-    //pose.theta = DiscTheta2Cont(Theta, EnvNAVXYTHETALATCfg.NumThetaDirs);
-   
-    //compute footprint cells
-    get_2d_footprint_cells(EnvNAVXYTHETALATCfg.FootprintPolygon, &footprint, pose, EnvNAVXYTHETALATCfg.cellsize_m);
 
-    //iterate over all footprint cells
+    // compute footprint cells
+    get_2d_footprint_cells(
+            EnvNAVXYTHETALATCfg.FootprintPolygon,
+            &footprint,
+            pose,
+            EnvNAVXYTHETALATCfg.cellsize_m);
+
+    // iterate over all footprint cells
     for (int find = 0; find < (int)footprint.size(); find++) {
         int x = footprint.at(find).x;
         int y = footprint.at(find).y;
 
-        if (x < 0 || x >= EnvNAVXYTHETALATCfg.EnvWidth_c || y < 0 || y >= EnvNAVXYTHETALATCfg.EnvHeight_c ||
+        if (x < 0 || x >= EnvNAVXYTHETALATCfg.EnvWidth_c ||
+            y < 0 || y >= EnvNAVXYTHETALATCfg.EnvHeight_c ||
             EnvNAVXYTHETALATCfg.Grid2D[x][y] >= EnvNAVXYTHETALATCfg.obsthresh)
         {
             return false;
@@ -1479,19 +1566,24 @@ bool EnvironmentNAVXYTHETALATTICE::IsValidConfiguration(int X, int Y, int Theta)
     return true;
 }
 
-int EnvironmentNAVXYTHETALATTICE::GetActionCost(int SourceX, int SourceY, int SourceTheta,
-                                                EnvNAVXYTHETALATAction_t* action)
+int EnvironmentNAVXYTHETALATTICE::GetActionCost(
+    int SourceX, int SourceY, int SourceTheta,
+    EnvNAVXYTHETALATAction_t* action)
 {
     sbpl_2Dcell_t cell;
     sbpl_xy_theta_cell_t interm3Dcell;
     int i;
 
-    //TODO - go over bounding box (minpt and maxpt) to test validity and skip
-    //testing boundaries below, also order intersect cells so that the four
-    //farthest pts go first
+    // TODO - go over bounding box (minpt and maxpt) to test validity and skip
+    // testing boundaries below, also order intersect cells so that the four
+    // farthest pts go first
 
-    if (!IsValidCell(SourceX, SourceY)) return INFINITECOST;
-    if (!IsValidCell(SourceX + action->dX, SourceY + action->dY)) return INFINITECOST;
+    if (!IsValidCell(SourceX, SourceY)) {
+        return INFINITECOST;
+    }
+    if (!IsValidCell(SourceX + action->dX, SourceY + action->dY)) {
+        return INFINITECOST;
+    }
 
     if (EnvNAVXYTHETALATCfg.Grid2D[SourceX + action->dX][SourceY + action->dY] >=
         EnvNAVXYTHETALATCfg.cost_inscribed_thresh)
@@ -1499,51 +1591,60 @@ int EnvironmentNAVXYTHETALATTICE::GetActionCost(int SourceX, int SourceY, int So
         return INFINITECOST;
     }
 
-    //need to iterate over discretized center cells and compute cost based on them
+    // need to iterate over discretized center cells and compute cost based on them
     unsigned char maxcellcost = 0;
     for (i = 0; i < (int)action->interm3DcellsV.size(); i++) {
         interm3Dcell = action->interm3DcellsV.at(i);
         interm3Dcell.x = interm3Dcell.x + SourceX;
         interm3Dcell.y = interm3Dcell.y + SourceY;
 
-        if (interm3Dcell.x < 0 || interm3Dcell.x >= EnvNAVXYTHETALATCfg.EnvWidth_c || interm3Dcell.y < 0
-            || interm3Dcell.y >= EnvNAVXYTHETALATCfg.EnvHeight_c) return INFINITECOST;
+        if (interm3Dcell.x < 0 || interm3Dcell.x >= EnvNAVXYTHETALATCfg.EnvWidth_c ||
+            interm3Dcell.y < 0 || interm3Dcell.y >= EnvNAVXYTHETALATCfg.EnvHeight_c)
+        {
+            return INFINITECOST;
+        }
 
         maxcellcost = __max(maxcellcost, EnvNAVXYTHETALATCfg.Grid2D[interm3Dcell.x][interm3Dcell.y]);
 
-        //check that the robot is NOT in the cell at which there is no valid orientation
-        if (maxcellcost >= EnvNAVXYTHETALATCfg.cost_inscribed_thresh) return INFINITECOST;
+        // check that the robot is NOT in the cell at which there is no valid orientation
+        if (maxcellcost >= EnvNAVXYTHETALATCfg.cost_inscribed_thresh) {
+            return INFINITECOST;
+        }
     }
 
-    //check collisions that for the particular footprint orientation along the action
-    if (EnvNAVXYTHETALATCfg.FootprintPolygon.size() > 1 && (int)maxcellcost >=
-        EnvNAVXYTHETALATCfg.cost_possibly_circumscribed_thresh)
+    // check collisions that for the particular footprint orientation along the action
+    if (EnvNAVXYTHETALATCfg.FootprintPolygon.size() > 1 &&
+        (int)maxcellcost >= EnvNAVXYTHETALATCfg.cost_possibly_circumscribed_thresh)
     {
         checks++;
 
         for (i = 0; i < (int)action->intersectingcellsV.size(); i++) {
-            //get the cell in the map
+            // get the cell in the map
             cell = action->intersectingcellsV.at(i);
             cell.x = cell.x + SourceX;
             cell.y = cell.y + SourceY;
 
-            //check validity
-            if (!IsValidCell(cell.x, cell.y)) return INFINITECOST;
+            // check validity
+            if (!IsValidCell(cell.x, cell.y)) {
+                return INFINITECOST;
+            }
 
-            //if(EnvNAVXYTHETALATCfg.Grid2D[cell.x][cell.y] > currentmaxcost)
-            ////cost computation changed: cost = max(cost of centers of the
-            //robot along action)
-            //	currentmaxcost = EnvNAVXYTHETALATCfg.Grid2D[cell.x][cell.y];
-            //	//intersecting cells are only used for collision checking
+// cost computation changed: cost = max(cost of centers of the robot along
+// action) intersecting cells are only used for collision checking
+//            if (EnvNAVXYTHETALATCfg.Grid2D[cell.x][cell.y] > currentmaxcost) {
+//              currentmaxcost = EnvNAVXYTHETALATCfg.Grid2D[cell.x][cell.y];
+//            }
         }
     }
 
-    //to ensure consistency of h2D:
+    // to ensure consistency of h2D:
     maxcellcost = __max(maxcellcost, EnvNAVXYTHETALATCfg.Grid2D[SourceX][SourceY]);
-    int currentmaxcost =
-            (int)__max(maxcellcost, EnvNAVXYTHETALATCfg.Grid2D[SourceX + action->dX][SourceY + action->dY]);
+    int currentmaxcost = (int)__max(
+            maxcellcost,
+            EnvNAVXYTHETALATCfg.Grid2D[SourceX + action->dX][SourceY + action->dY]);
 
-    return action->cost * (currentmaxcost + 1); //use cell cost as multiplicative factor
+    // use cell cost as multiplicative factor
+    return action->cost * (currentmaxcost + 1);
 }
 
 double EnvironmentNAVXYTHETALATTICE::EuclideanDistance_m(int X1, int Y1, int X2, int Y2)
@@ -1552,19 +1653,15 @@ double EnvironmentNAVXYTHETALATTICE::EuclideanDistance_m(int X1, int Y1, int X2,
     return EnvNAVXYTHETALATCfg.cellsize_m * sqrt((double)sqdist);
 }
 
-//calculates a set of cells that correspond to the specified footprint
-//adds points to it (does not clear it beforehand)
-void EnvironmentNAVXYTHETALATTICE::CalculateFootprintForPose(sbpl_xy_theta_pt_t pose, vector<sbpl_2Dcell_t>* footprint,
-                                                             const vector<sbpl_2Dpt_t>& FootprintPolygon)
+// calculates a set of cells that correspond to the specified footprint adds
+// points to it (does not clear it beforehand)
+void EnvironmentNAVXYTHETALATTICE::CalculateFootprintForPose(
+    sbpl_xy_theta_pt_t pose, std::vector<sbpl_2Dcell_t>* footprint,
+    const std::vector<sbpl_2Dpt_t>& FootprintPolygon)
 {
     int pind;
 
-#if DEBUG
-    //  SBPL_PRINTF("---Calculating Footprint for Pose: %f %f %f---\n",
-    //	 pose.x, pose.y, pose.theta);
-#endif
-
-    //handle special case where footprint is just a point
+    // handle special case where footprint is just a point
     if (FootprintPolygon.size() <= 1) {
         sbpl_2Dcell_t cell;
         cell.x = CONTXY2DISC(pose.x, EnvNAVXYTHETALATCfg.cellsize_m);
@@ -1573,26 +1670,25 @@ void EnvironmentNAVXYTHETALATTICE::CalculateFootprintForPose(sbpl_xy_theta_pt_t 
         for (pind = 0; pind < (int)footprint->size(); pind++) {
             if (cell.x == footprint->at(pind).x && cell.y == footprint->at(pind).y) break;
         }
-        if (pind == (int)footprint->size()) footprint->push_back(cell);
+        if (pind == (int)footprint->size()) {
+            footprint->push_back(cell);
+        }
         return;
     }
 
-    vector<sbpl_2Dpt_t> bounding_polygon;
+    std::vector<sbpl_2Dpt_t> bounding_polygon;
     unsigned int find;
     double max_x = -INFINITECOST, min_x = INFINITECOST, max_y = -INFINITECOST, min_y = INFINITECOST;
     sbpl_2Dpt_t pt(0, 0);
     for (find = 0; find < FootprintPolygon.size(); find++) {
-        //rotate and translate the corner of the robot
+        // rotate and translate the corner of the robot
         pt = FootprintPolygon[find];
 
-        //rotate and translate the point
+        // rotate and translate the point
         sbpl_2Dpt_t corner;
         corner.x = cos(pose.theta) * pt.x - sin(pose.theta) * pt.y + pose.x;
         corner.y = sin(pose.theta) * pt.x + cos(pose.theta) * pt.y + pose.y;
         bounding_polygon.push_back(corner);
-#if DEBUG
-        //    SBPL_PRINTF("Pt: %f %f, Corner: %f %f\n", pt.x, pt.y, corner.x, corner.y);
-#endif
         if (corner.x < min_x || find == 0) {
             min_x = corner.x;
         }
@@ -1607,10 +1703,8 @@ void EnvironmentNAVXYTHETALATTICE::CalculateFootprintForPose(sbpl_xy_theta_pt_t 
         }
     }
 
-#if DEBUG
-    //  SBPL_PRINTF("Footprint bounding box: %f %f %f %f\n", min_x, max_x, min_y, max_y);
-#endif
-    //initialize previous values to something that will fail the if condition during the first iteration in the for loop
+    // initialize previous values to something that will fail the if condition
+    // during the first iteration in the for loop
     int prev_discrete_x = CONTXY2DISC(pt.x, EnvNAVXYTHETALATCfg.cellsize_m) + 1;
     int prev_discrete_y = CONTXY2DISC(pt.y, EnvNAVXYTHETALATCfg.cellsize_m) + 1;
     int prev_inside = 0;
@@ -1624,36 +1718,27 @@ void EnvironmentNAVXYTHETALATTICE::CalculateFootprintForPose(sbpl_xy_theta_pt_t 
             discrete_x = CONTXY2DISC(pt.x, EnvNAVXYTHETALATCfg.cellsize_m);
             discrete_y = CONTXY2DISC(pt.y, EnvNAVXYTHETALATCfg.cellsize_m);
 
-            //see if we just tested this point
+            // see if we just tested this point
             if (discrete_x != prev_discrete_x || discrete_y != prev_discrete_y || prev_inside == 0) {
 
-#if DEBUG
-                //		SBPL_PRINTF("Testing point: %f %f Discrete: %d %d\n", pt.x, pt.y, discrete_x, discrete_y);
-#endif
-
                 if (IsInsideFootprint(pt, &bounding_polygon)) {
-                    //convert to a grid point
-
-#if DEBUG
-                    //			SBPL_PRINTF("Pt Inside %f %f\n", pt.x, pt.y);
-#endif
+                    // convert to a grid point
 
                     sbpl_2Dcell_t cell;
                     cell.x = discrete_x;
                     cell.y = discrete_y;
 
-                    //insert point if not there already
+                    // insert point if not there already
                     int pind = 0;
                     for (pind = 0; pind < (int)footprint->size(); pind++) {
                         if (cell.x == footprint->at(pind).x && cell.y == footprint->at(pind).y) break;
                     }
-                    if (pind == (int)footprint->size()) footprint->push_back(cell);
+                    if (pind == (int)footprint->size()) {
+                        footprint->push_back(cell);
+                    }
 
                     prev_inside = 1;
 
-#if DEBUG
-                    //			SBPL_PRINTF("Added pt to footprint: %f %f\n", pt.x, pt.y);
-#endif
                 }
                 else {
                     prev_inside = 0;
@@ -1661,36 +1746,37 @@ void EnvironmentNAVXYTHETALATTICE::CalculateFootprintForPose(sbpl_xy_theta_pt_t 
 
             }
             else {
-#if DEBUG
-                //SBPL_PRINTF("Skipping pt: %f %f\n", pt.x, pt.y);
-#endif
+
             }
 
             prev_discrete_x = discrete_x;
             prev_discrete_y = discrete_y;
-        }//over x_min...x_max
+        } // over x_min...x_max
     }
 }
 
-//calculates a set of cells that correspond to the footprint of the base
-//adds points to it (does not clear it beforehand)
-void EnvironmentNAVXYTHETALATTICE::CalculateFootprintForPose(sbpl_xy_theta_pt_t pose, vector<sbpl_2Dcell_t>* footprint)
+// calculates a set of cells that correspond to the footprint of the base adds
+// points to it (does not clear it beforehand)
+void EnvironmentNAVXYTHETALATTICE::CalculateFootprintForPose(
+    sbpl_xy_theta_pt_t pose,
+    std::vector<sbpl_2Dcell_t>* footprint)
 {
     CalculateFootprintForPose(pose, footprint, EnvNAVXYTHETALATCfg.FootprintPolygon);
 }
 
-//removes a set of cells that correspond to the specified footprint at the sourcepose
-//adds points to it (does not clear it beforehand)
-void EnvironmentNAVXYTHETALATTICE::RemoveSourceFootprint(sbpl_xy_theta_pt_t sourcepose,
-                                                         vector<sbpl_2Dcell_t>* footprint,
-                                                         const vector<sbpl_2Dpt_t>& FootprintPolygon)
+// removes a set of cells that correspond to the specified footprint at the
+// sourcepose adds points to it (does not clear it beforehand)
+void EnvironmentNAVXYTHETALATTICE::RemoveSourceFootprint(
+    sbpl_xy_theta_pt_t sourcepose,
+    std::vector<sbpl_2Dcell_t>* footprint,
+    const std::vector<sbpl_2Dpt_t>& FootprintPolygon)
 {
-    vector<sbpl_2Dcell_t> sourcefootprint;
+    std::vector<sbpl_2Dcell_t> sourcefootprint;
 
-    //compute source footprint
+    // compute source footprint
     get_2d_footprint_cells(FootprintPolygon, &sourcefootprint, sourcepose, EnvNAVXYTHETALATCfg.cellsize_m);
 
-    //now remove the source cells from the footprint
+    // now remove the source cells from the footprint
     for (int sind = 0; sind < (int)sourcefootprint.size(); sind++) {
         for (int find = 0; find < (int)footprint->size(); find++) {
             if (sourcefootprint.at(sind).x == footprint->at(find).x && sourcefootprint.at(sind).y
@@ -1698,82 +1784,74 @@ void EnvironmentNAVXYTHETALATTICE::RemoveSourceFootprint(sbpl_xy_theta_pt_t sour
                 footprint->erase(footprint->begin() + find);
                 break;
             }
-        }//over footprint
-    }//over source
+        } // over footprint
+    } // over source
 }
 
-//removes a set of cells that correspond to the footprint of the base at the sourcepose
-//adds points to it (does not clear it beforehand)
-void EnvironmentNAVXYTHETALATTICE::RemoveSourceFootprint(sbpl_xy_theta_pt_t sourcepose,
-                                                         vector<sbpl_2Dcell_t>* footprint)
+// removes a set of cells that correspond to the footprint of the base at the
+// sourcepose adds points to it (does not clear it beforehand)
+void EnvironmentNAVXYTHETALATTICE::RemoveSourceFootprint(
+    sbpl_xy_theta_pt_t sourcepose,
+    std::vector<sbpl_2Dcell_t>* footprint)
 {
     RemoveSourceFootprint(sourcepose, footprint, EnvNAVXYTHETALATCfg.FootprintPolygon);
 }
 
-//------------------------------------------------------------------------------
-
-//------------------------------Heuristic computation--------------------------
-
 void EnvironmentNAVXYTHETALATTICE::EnsureHeuristicsUpdated(bool bGoalHeuristics)
 {
     if (bNeedtoRecomputeStartHeuristics && !bGoalHeuristics) {
-        grid2Dsearchfromstart->search(EnvNAVXYTHETALATCfg.Grid2D, EnvNAVXYTHETALATCfg.cost_inscribed_thresh,
-                                      EnvNAVXYTHETALATCfg.StartX_c, EnvNAVXYTHETALATCfg.StartY_c,
-                                      EnvNAVXYTHETALATCfg.EndX_c, EnvNAVXYTHETALATCfg.EndY_c,
-                                      SBPL_2DGRIDSEARCH_TERM_CONDITION_TWOTIMESOPTPATH);
+        grid2Dsearchfromstart->search(
+                EnvNAVXYTHETALATCfg.Grid2D,
+                EnvNAVXYTHETALATCfg.cost_inscribed_thresh,
+                EnvNAVXYTHETALATCfg.StartX_c, EnvNAVXYTHETALATCfg.StartY_c,
+                EnvNAVXYTHETALATCfg.EndX_c, EnvNAVXYTHETALATCfg.EndY_c,
+                SBPL_2DGRIDSEARCH_TERM_CONDITION_TWOTIMESOPTPATH);
         bNeedtoRecomputeStartHeuristics = false;
-        SBPL_PRINTF("2dsolcost_infullunits=%d\n",
-                    (int)(grid2Dsearchfromstart->getlowerboundoncostfromstart_inmm(EnvNAVXYTHETALATCfg.EndX_c,
-                                                                                   EnvNAVXYTHETALATCfg.EndY_c) /
-                          EnvNAVXYTHETALATCfg.nominalvel_mpersecs));
-
+        SBPL_PRINTF("2dsolcost_infullunits=%d\n", (int)(grid2Dsearchfromstart->getlowerboundoncostfromstart_inmm(EnvNAVXYTHETALATCfg.EndX_c, EnvNAVXYTHETALATCfg.EndY_c) / EnvNAVXYTHETALATCfg.nominalvel_mpersecs));
     }
 
     if (bNeedtoRecomputeGoalHeuristics && bGoalHeuristics) {
-        grid2Dsearchfromgoal->search(EnvNAVXYTHETALATCfg.Grid2D, EnvNAVXYTHETALATCfg.cost_inscribed_thresh,
-                                     EnvNAVXYTHETALATCfg.EndX_c, EnvNAVXYTHETALATCfg.EndY_c,
-                                     EnvNAVXYTHETALATCfg.StartX_c, EnvNAVXYTHETALATCfg.StartY_c,
-                                     SBPL_2DGRIDSEARCH_TERM_CONDITION_TWOTIMESOPTPATH);
+        grid2Dsearchfromgoal->search(
+                EnvNAVXYTHETALATCfg.Grid2D,
+                EnvNAVXYTHETALATCfg.cost_inscribed_thresh,
+                EnvNAVXYTHETALATCfg.EndX_c, EnvNAVXYTHETALATCfg.EndY_c,
+                EnvNAVXYTHETALATCfg.StartX_c, EnvNAVXYTHETALATCfg.StartY_c,
+                SBPL_2DGRIDSEARCH_TERM_CONDITION_TWOTIMESOPTPATH);
         bNeedtoRecomputeGoalHeuristics = false;
-        SBPL_PRINTF("2dsolcost_infullunits=%d\n",
-                    (int)(grid2Dsearchfromgoal->getlowerboundoncostfromstart_inmm(EnvNAVXYTHETALATCfg.StartX_c,
-                                                                                  EnvNAVXYTHETALATCfg.StartY_c) /
-                          EnvNAVXYTHETALATCfg.nominalvel_mpersecs));
+        SBPL_PRINTF("2dsolcost_infullunits=%d\n", (int)(grid2Dsearchfromgoal->getlowerboundoncostfromstart_inmm(EnvNAVXYTHETALATCfg.StartX_c, EnvNAVXYTHETALATCfg.StartY_c) / EnvNAVXYTHETALATCfg.nominalvel_mpersecs));
     }
 }
 
 void EnvironmentNAVXYTHETALATTICE::ComputeHeuristicValues()
 {
-    //whatever necessary pre-computation of heuristic values is done here
+    // whatever necessary pre-computation of heuristic values is done here
     SBPL_PRINTF("Precomputing heuristics...\n");
 
-    //allocated 2D grid searches
-    grid2Dsearchfromstart = new SBPL2DGridSearch(EnvNAVXYTHETALATCfg.EnvWidth_c, EnvNAVXYTHETALATCfg.EnvHeight_c,
-                                                 (float)EnvNAVXYTHETALATCfg.cellsize_m, blocksize, bucketsize);
-    grid2Dsearchfromgoal = new SBPL2DGridSearch(EnvNAVXYTHETALATCfg.EnvWidth_c, EnvNAVXYTHETALATCfg.EnvHeight_c,
-                                                (float)EnvNAVXYTHETALATCfg.cellsize_m, blocksize, bucketsize);
+    // allocated 2D grid searches
+    grid2Dsearchfromstart = new SBPL2DGridSearch(
+            EnvNAVXYTHETALATCfg.EnvWidth_c, EnvNAVXYTHETALATCfg.EnvHeight_c,
+            (float)EnvNAVXYTHETALATCfg.cellsize_m, blocksize, bucketsize);
+    grid2Dsearchfromgoal = new SBPL2DGridSearch(
+            EnvNAVXYTHETALATCfg.EnvWidth_c, EnvNAVXYTHETALATCfg.EnvHeight_c,
+            (float)EnvNAVXYTHETALATCfg.cellsize_m, blocksize, bucketsize);
 
-    //set OPEN type to sliding buckets
+    // set OPEN type to sliding buckets
     grid2Dsearchfromstart->setOPENdatastructure(SBPL_2DGRIDSEARCH_OPENTYPE_SLIDINGBUCKETS);
     grid2Dsearchfromgoal->setOPENdatastructure(SBPL_2DGRIDSEARCH_OPENTYPE_SLIDINGBUCKETS);
 
     SBPL_PRINTF("done\n");
 }
 
-//------------debugging functions---------------------------------------------
 bool EnvironmentNAVXYTHETALATTICE::CheckQuant(FILE* fOut)
 {
-	for (double theta = -10; theta < 10; theta += 2.0 * PI_CONST / EnvNAVXYTHETALATCfg.NumThetaDirs * 0.01) {
-        
-	int nTheta, nnewTheta;
-	double newTheta;
-	nTheta = ContTheta2DiscNew(theta);
-	newTheta = DiscTheta2ContNew(nTheta);
-	nnewTheta = ContTheta2DiscNew(newTheta);
-
-	//nTheta = ContTheta2Disc(theta, EnvNAVXYTHETALATCfg.NumThetaDirs);
-	//newTheta = DiscTheta2Cont(nTheta, EnvNAVXYTHETALATCfg.NumThetaDirs);
-        //nnewTheta = ContTheta2Disc(newTheta, EnvNAVXYTHETALATCfg.NumThetaDirs);
+    for (double theta = -10; theta < 10;
+        theta += 2.0 * PI_CONST / EnvNAVXYTHETALATCfg.NumThetaDirs * 0.01)
+    {
+        int nTheta, nnewTheta;
+        double newTheta;
+        nTheta = ContTheta2DiscNew(theta);
+        newTheta = DiscTheta2ContNew(nTheta);
+        nnewTheta = ContTheta2DiscNew(newTheta);
 
         SBPL_FPRINTF(fOut, "theta=%f(%f)->%d->%f->%d\n", theta, theta * 180 / PI_CONST, nTheta, newTheta, nnewTheta);
 
@@ -1786,12 +1864,10 @@ bool EnvironmentNAVXYTHETALATTICE::CheckQuant(FILE* fOut)
     return true;
 }
 
-//-----------------------------------------------------------------------------
-
-//-----------interface with outside functions-----------------------------------
-
-bool EnvironmentNAVXYTHETALATTICE::InitializeEnv(const char* sEnvFile, const vector<sbpl_2Dpt_t>& perimeterptsV,
-                                                 const char* sMotPrimFile)
+bool EnvironmentNAVXYTHETALATTICE::InitializeEnv(
+    const char* sEnvFile,
+    const std::vector<sbpl_2Dpt_t>& perimeterptsV,
+    const char* sMotPrimFile)
 {
     EnvNAVXYTHETALATCfg.FootprintPolygon = perimeterptsV;
 
@@ -1800,8 +1876,9 @@ bool EnvironmentNAVXYTHETALATTICE::InitializeEnv(const char* sEnvFile, const vec
 
     FILE* fCfg = fopen(sEnvFile, "r");
     if (fCfg == NULL) {
-        SBPL_ERROR("ERROR: unable to open %s\n", sEnvFile);
-        throw SBPL_Exception();
+        std::stringstream ss;
+        ss << "ERROR: unable to open " << sEnvFile;
+        throw SBPL_Exception(ss.str());
     }
 
     ReadConfiguration(fCfg);
@@ -1810,30 +1887,33 @@ bool EnvironmentNAVXYTHETALATTICE::InitializeEnv(const char* sEnvFile, const vec
     if (sMotPrimFile != NULL) {
         FILE* fMotPrim = fopen(sMotPrimFile, "r");
         if (fMotPrim == NULL) {
-            SBPL_ERROR("ERROR: unable to open %s\n", sMotPrimFile);
-            throw SBPL_Exception();
+            std::stringstream ss;
+            ss << "ERROR: unable to open " << sMotPrimFile;
+            throw SBPL_Exception(ss.str());
         }
         if (ReadMotionPrimitives(fMotPrim) == false) {
-            SBPL_ERROR("ERROR: failed to read in motion primitive file\n");
-            throw SBPL_Exception();
+            throw SBPL_Exception("ERROR: failed to read in motion primitive file");
         }
 
-	EnvNAVXYTHETALATCfg.StartTheta = ContTheta2DiscNew(EnvNAVXYTHETALATCfg.StartTheta_rad);
-    	if (EnvNAVXYTHETALATCfg.StartTheta < 0 || EnvNAVXYTHETALATCfg.StartTheta >= EnvNAVXYTHETALATCfg.NumThetaDirs) {
-		SBPL_ERROR("ERROR: illegal start coordinates for theta\n");
-		throw new SBPL_Exception();
-    	}
-    	EnvNAVXYTHETALATCfg.EndTheta = ContTheta2DiscNew(EnvNAVXYTHETALATCfg.EndTheta_rad);
-    	if (EnvNAVXYTHETALATCfg.EndTheta < 0 || EnvNAVXYTHETALATCfg.EndTheta >= EnvNAVXYTHETALATCfg.NumThetaDirs) {
-		SBPL_ERROR("ERROR: illegal goal coordinates for theta\n");
-		throw new SBPL_Exception();
-    	}
+        EnvNAVXYTHETALATCfg.StartTheta = ContTheta2DiscNew(EnvNAVXYTHETALATCfg.StartTheta_rad);
+        if (EnvNAVXYTHETALATCfg.StartTheta < 0 ||
+            EnvNAVXYTHETALATCfg.StartTheta >= EnvNAVXYTHETALATCfg.NumThetaDirs)
+        {
+            throw new SBPL_Exception("ERROR: illegal start coordinates for theta");
+        }
+        EnvNAVXYTHETALATCfg.EndTheta = ContTheta2DiscNew(EnvNAVXYTHETALATCfg.EndTheta_rad);
+        if (EnvNAVXYTHETALATCfg.EndTheta < 0 ||
+            EnvNAVXYTHETALATCfg.EndTheta >= EnvNAVXYTHETALATCfg.NumThetaDirs)
+        {
+            throw new SBPL_Exception("ERROR: illegal goal coordinates for theta");
+        }
 
         InitGeneral(&EnvNAVXYTHETALATCfg.mprimV);
         fclose(fMotPrim);
     }
-    else
+    else {
         InitGeneral( NULL);
+    }
 
     SBPL_PRINTF("size of env: %d by %d\n", EnvNAVXYTHETALATCfg.EnvWidth_c, EnvNAVXYTHETALATCfg.EnvHeight_c);
 
@@ -1855,26 +1935,45 @@ bool EnvironmentNAVXYTHETALATTICE::InitializeEnv(const char* sEnvFile)
     return true;
 }
 
-bool EnvironmentNAVXYTHETALATTICE::InitializeEnv(int width, int height, const vector<sbpl_2Dpt_t> & perimeterptsV,
-                                                 double cellsize_m, double nominalvel_mpersecs,
-                                                 double timetoturn45degsinplace_secs, unsigned char obsthresh,
-                                                 const char* sMotPrimFile, EnvNAVXYTHETALAT_InitParms params)
+bool EnvironmentNAVXYTHETALATTICE::InitializeEnv(
+    int width,
+    int height,
+    const std::vector<sbpl_2Dpt_t>& perimeterptsV,
+    double cellsize_m,
+    double nominalvel_mpersecs,
+    double timetoturn45degsinplace_secs,
+    unsigned char obsthresh,
+    const char* sMotPrimFile,
+    EnvNAVXYTHETALAT_InitParms params)
 {
     EnvNAVXYTHETALATCfg.NumThetaDirs = params.numThetas;
 
-    return InitializeEnv(width, height, params.mapdata, params.startx, params.starty, params.starttheta, params.goalx,
-                         params.goaly, params.goaltheta, params.goaltol_x, params.goaltol_y, params.goaltol_theta,
-                         perimeterptsV, cellsize_m, nominalvel_mpersecs, timetoturn45degsinplace_secs, obsthresh,
-                         sMotPrimFile);
+    return InitializeEnv(
+            width, height,
+            params.mapdata,
+            params.startx, params.starty, params.starttheta,
+            params.goalx, params.goaly, params.goaltheta,
+            params.goaltol_x, params.goaltol_y, params.goaltol_theta,
+            perimeterptsV,
+            cellsize_m,
+            nominalvel_mpersecs, timetoturn45degsinplace_secs,
+            obsthresh,
+            sMotPrimFile);
 }
 
-bool EnvironmentNAVXYTHETALATTICE::InitializeEnv(int width, int height, const unsigned char* mapdata, double startx,
-                                                 double starty, double starttheta, double goalx, double goaly,
-                                                 double goaltheta, double goaltol_x, double goaltol_y,
-                                                 double goaltol_theta, const vector<sbpl_2Dpt_t> & perimeterptsV,
-                                                 double cellsize_m, double nominalvel_mpersecs,
-                                                 double timetoturn45degsinplace_secs, unsigned char obsthresh,
-                                                 const char* sMotPrimFile)
+bool EnvironmentNAVXYTHETALATTICE::InitializeEnv(
+    int width,
+    int height,
+    const unsigned char* mapdata,
+    double startx, double starty, double starttheta,
+    double goalx, double goaly, double goaltheta,
+    double goaltol_x, double goaltol_y, double goaltol_theta,
+    const std::vector<sbpl_2Dpt_t> & perimeterptsV,
+    double cellsize_m,
+    double nominalvel_mpersecs,
+    double timetoturn45degsinplace_secs,
+    unsigned char obsthresh,
+    const char* sMotPrimFile)
 {
     SBPL_PRINTF("env: initialize with width=%d height=%d start=%.3f %.3f %.3f "
                 "goalx=%.3f %.3f %.3f cellsize=%.3f nomvel=%.3f timetoturn=%.3f, obsthresh=%d\n",
@@ -1894,69 +1993,71 @@ bool EnvironmentNAVXYTHETALATTICE::InitializeEnv(int width, int height, const un
     EnvNAVXYTHETALATCfg.StartTheta_rad = starttheta;
     EnvNAVXYTHETALATCfg.EndTheta_rad = goaltheta;
 
-    //TODO - need to set the tolerance as well
-
-    //SetConfiguration(width, height, mapdata, CONTXY2DISC(startx, cellsize_m), CONTXY2DISC(starty, cellsize_m),
-    //                 ContTheta2Disc(starttheta, EnvNAVXYTHETALATCfg.NumThetaDirs), CONTXY2DISC(goalx, cellsize_m),
-    //                 CONTXY2DISC(goaly, cellsize_m), ContTheta2Disc(goaltheta, EnvNAVXYTHETALATCfg.NumThetaDirs),
-    //                 cellsize_m, nominalvel_mpersecs, timetoturn45degsinplace_secs, perimeterptsV);
+    // TODO - need to set the tolerance as well
 
     if (sMotPrimFile != NULL) {
         FILE* fMotPrim = fopen(sMotPrimFile, "r");
         if (fMotPrim == NULL) {
-            SBPL_ERROR("ERROR: unable to open %s\n", sMotPrimFile);
-            throw SBPL_Exception();
+            std::stringstream ss;
+            ss << "ERROR: unable to open " << sMotPrimFile;
+            throw SBPL_Exception(ss.str());
         }
 
         if (ReadMotionPrimitives(fMotPrim) == false) {
-            SBPL_ERROR("ERROR: failed to read in motion primitive file\n");
-            throw SBPL_Exception();
+            throw SBPL_Exception("ERROR: failed to read in motion primitive file");
         }
         fclose(fMotPrim);
     }
 
     EnvNAVXYTHETALATCfg.StartTheta = ContTheta2DiscNew(EnvNAVXYTHETALATCfg.StartTheta_rad);
-    if (EnvNAVXYTHETALATCfg.StartTheta < 0 || EnvNAVXYTHETALATCfg.StartTheta >= EnvNAVXYTHETALATCfg.NumThetaDirs) {
-	SBPL_ERROR("ERROR: illegal start coordinates for theta\n");
-	throw new SBPL_Exception();
+    if (EnvNAVXYTHETALATCfg.StartTheta < 0 ||
+        EnvNAVXYTHETALATCfg.StartTheta >= EnvNAVXYTHETALATCfg.NumThetaDirs)
+    {
+        throw new SBPL_Exception("ERROR: illegal start coordinates for theta");
     }
     EnvNAVXYTHETALATCfg.EndTheta = ContTheta2DiscNew(EnvNAVXYTHETALATCfg.EndTheta_rad);
-    if (EnvNAVXYTHETALATCfg.EndTheta < 0 || EnvNAVXYTHETALATCfg.EndTheta >= EnvNAVXYTHETALATCfg.NumThetaDirs) {
-	SBPL_ERROR("ERROR: illegal goal coordinates for theta\n");
-	throw new SBPL_Exception();
+    if (EnvNAVXYTHETALATCfg.EndTheta < 0 ||
+        EnvNAVXYTHETALATCfg.EndTheta >= EnvNAVXYTHETALATCfg.NumThetaDirs)
+    {
+        throw new SBPL_Exception("ERROR: illegal goal coordiantes for theta");
     }
 
-    SetConfiguration(width, height, mapdata, CONTXY2DISC(startx, cellsize_m), CONTXY2DISC(starty, cellsize_m),
-                     EnvNAVXYTHETALATCfg.StartTheta, CONTXY2DISC(goalx, cellsize_m),
-                     CONTXY2DISC(goaly, cellsize_m), EnvNAVXYTHETALATCfg.EndTheta,
-                     cellsize_m, nominalvel_mpersecs, timetoturn45degsinplace_secs, perimeterptsV);
+    SetConfiguration(
+            width, height, mapdata,
+            CONTXY2DISC(startx, cellsize_m), CONTXY2DISC(starty, cellsize_m), EnvNAVXYTHETALATCfg.StartTheta,
+            CONTXY2DISC(goalx, cellsize_m), CONTXY2DISC(goaly, cellsize_m), EnvNAVXYTHETALATCfg.EndTheta,
+            cellsize_m,
+            nominalvel_mpersecs, timetoturn45degsinplace_secs,
+            perimeterptsV);
 
     if (EnvNAVXYTHETALATCfg.mprimV.size() != 0) {
         InitGeneral(&EnvNAVXYTHETALATCfg.mprimV);
     }
-    else
+    else {
         InitGeneral( NULL);
+    }
 
     return true;
 }
 
-bool EnvironmentNAVXYTHETALATTICE::InitGeneral(vector<SBPL_xytheta_mprimitive>* motionprimitiveV)
+bool EnvironmentNAVXYTHETALATTICE::InitGeneral(
+    std::vector<SBPL_xytheta_mprimitive>* motionprimitiveV)
 {
-    //Initialize other parameters of the environment
+    // Initialize other parameters of the environment
     InitializeEnvConfig(motionprimitiveV);
 
-    //initialize Environment
+    // initialize Environment
     InitializeEnvironment();
 
-    //pre-compute heuristics
+    // pre-compute heuristics
     ComputeHeuristicValues();
 
     return true;
 }
 
-bool EnvironmentNAVXYTHETALATTICE::InitializeMDPCfg(MDPConfig *MDPCfg)
+bool EnvironmentNAVXYTHETALATTICE::InitializeMDPCfg(MDPConfig* MDPCfg)
 {
-    //initialize MDPCfg with the start and goal ids
+    // initialize MDPCfg with the start and goal ids
     MDPCfg->goalstateid = EnvNAVXYTHETALAT.goalstateid;
     MDPCfg->startstateid = EnvNAVXYTHETALAT.startstateid;
 
@@ -1965,13 +2066,10 @@ bool EnvironmentNAVXYTHETALATTICE::InitializeMDPCfg(MDPConfig *MDPCfg)
 
 void EnvironmentNAVXYTHETALATTICE::PrintHeuristicValues()
 {
-#ifndef ROS
     const char* heur = "heur.txt";
-#endif
     FILE* fHeur = SBPL_FOPEN(heur, "w");
     if (fHeur == NULL) {
-        SBPL_ERROR("ERROR: could not open debug file to write heuristic\n");
-        throw SBPL_Exception();
+        throw SBPL_Exception("ERROR: could not open debug file to write heuristic");
     }
     SBPL2DGridSearch* grid2Dsearch = NULL;
 
@@ -1984,15 +2082,18 @@ void EnvironmentNAVXYTHETALATTICE::PrintHeuristicValues()
             grid2Dsearch = grid2Dsearchfromgoal;
             SBPL_FPRINTF(fHeur, "goal heuristics:\n");
         }
-        else
+        else {
             continue;
+        }
 
         for (int y = 0; y < EnvNAVXYTHETALATCfg.EnvHeight_c; y++) {
             for (int x = 0; x < EnvNAVXYTHETALATCfg.EnvWidth_c; x++) {
-                if (grid2Dsearch->getlowerboundoncostfromstart_inmm(x, y) < INFINITECOST)
+                if (grid2Dsearch->getlowerboundoncostfromstart_inmm(x, y) < INFINITECOST) {
                     SBPL_FPRINTF(fHeur, "%5d ", grid2Dsearch->getlowerboundoncostfromstart_inmm(x, y));
-                else
+                }
+                else {
                     SBPL_FPRINTF(fHeur, "XXXXX ");
+                }
             }
             SBPL_FPRINTF(fHeur, "\n");
         }
@@ -2002,23 +2103,40 @@ void EnvironmentNAVXYTHETALATTICE::PrintHeuristicValues()
 
 void EnvironmentNAVXYTHETALATTICE::SetAllPreds(CMDPSTATE* state)
 {
-    //implement this if the planner needs access to predecessors
-
-    SBPL_ERROR("ERROR in EnvNAVXYTHETALAT... function: SetAllPreds is undefined\n");
-    throw SBPL_Exception();
+    // implement this if the planner needs access to predecessors
+    throw SBPL_Exception("ERROR in EnvNAVXYTHETALAT... function: SetAllPreds is undefined");
 }
 
-void EnvironmentNAVXYTHETALATTICE::GetSuccs(int SourceStateID, vector<int>* SuccIDV, vector<int>* CostV)
+void EnvironmentNAVXYTHETALATTICE::GetSuccs(
+    int SourceStateID,
+    std::vector<int>* SuccIDV,
+    std::vector<int>* CostV)
 {
     GetSuccs(SourceStateID, SuccIDV, CostV, NULL);
 }
-void EnvironmentNAVXYTHETALATTICE::GetLazySuccs(int SourceStateID, std::vector<int>* SuccIDV, std::vector<int>* CostV, std::vector<bool>* isTrueCost){
+void EnvironmentNAVXYTHETALATTICE::GetLazySuccs(
+    int SourceStateID,
+    std::vector<int>* SuccIDV,
+    std::vector<int>* CostV,
+    std::vector<bool>* isTrueCost)
+{
     GetLazySuccs(SourceStateID, SuccIDV, CostV, isTrueCost, NULL);
 }
-void EnvironmentNAVXYTHETALATTICE::GetSuccsWithUniqueIds(int SourceStateID, std::vector<int>* SuccIDV, std::vector<int>* CostV){
+
+void EnvironmentNAVXYTHETALATTICE::GetSuccsWithUniqueIds(
+    int SourceStateID,
+    std::vector<int>* SuccIDV,
+    std::vector<int>* CostV)
+{
     GetSuccsWithUniqueIds(SourceStateID, SuccIDV, CostV, NULL);
 }
-void EnvironmentNAVXYTHETALATTICE::GetLazySuccsWithUniqueIds(int SourceStateID, std::vector<int>* SuccIDV, std::vector<int>* CostV, std::vector<bool>* isTrueCost){
+
+void EnvironmentNAVXYTHETALATTICE::GetLazySuccsWithUniqueIds(
+    int SourceStateID,
+    std::vector<int>* SuccIDV,
+    std::vector<int>* CostV,
+    std::vector<bool>* isTrueCost)
+{
     GetLazySuccsWithUniqueIds(SourceStateID, SuccIDV, CostV, isTrueCost, NULL);
 }
 
@@ -2027,12 +2145,11 @@ const EnvNAVXYTHETALATConfig_t* EnvironmentNAVXYTHETALATTICE::GetEnvNavConfig()
     return &EnvNAVXYTHETALATCfg;
 }
 
-bool EnvironmentNAVXYTHETALATTICE::UpdateCost(int x, int y, unsigned char newcost)
+bool EnvironmentNAVXYTHETALATTICE::UpdateCost(
+    int x,
+    int y,
+    unsigned char newcost)
 {
-#if DEBUG
-    //SBPL_FPRINTF(fDeb, "Cost updated for cell %d %d from old cost=%d to new cost=%d\n", x,y,EnvNAVXYTHETALATCfg.Grid2D[x][y], newcost);
-#endif
-
     EnvNAVXYTHETALATCfg.Grid2D[x][y] = newcost;
 
     bNeedtoRecomputeStartHeuristics = true;
@@ -2059,10 +2176,8 @@ bool EnvironmentNAVXYTHETALATTICE::SetMap(const unsigned char* mapdata)
 
 void EnvironmentNAVXYTHETALATTICE::PrintEnv_Config(FILE* fOut)
 {
-    //implement this if the planner needs to print out EnvNAVXYTHETALAT. configuration
-
-    SBPL_ERROR("ERROR in EnvNAVXYTHETALAT... function: PrintEnv_Config is undefined\n");
-    throw SBPL_Exception();
+    // implement this if the planner needs to print out EnvNAVXYTHETALAT. configuration
+    throw SBPL_Exception("ERROR in EnvNAVXYTHETALAT... function: PrintEnv_Config is undefined");
 }
 
 void EnvironmentNAVXYTHETALATTICE::Set2DBlockSize(int BlockSize)
@@ -2091,25 +2206,38 @@ bool EnvironmentNAVXYTHETALATTICE::IsObstacle(int x, int y)
     SBPL_FPRINTF(fDeb, "Status of cell %d %d is queried. Its cost=%d\n", x,y,EnvNAVXYTHETALATCfg.Grid2D[x][y]);
 #endif
 
-    return (EnvNAVXYTHETALATCfg.Grid2D[x][y] >= EnvNAVXYTHETALATCfg.obsthresh);
+    return EnvNAVXYTHETALATCfg.Grid2D[x][y] >= EnvNAVXYTHETALATCfg.obsthresh;
 }
 
-void EnvironmentNAVXYTHETALATTICE::GetEnvParms(int *size_x, int *size_y, int* num_thetas, double* startx,
-                                               double* starty, double*starttheta, double* goalx, double* goaly,
-                                               double* goaltheta, double* cellsize_m, double* nominalvel_mpersecs,
-                                               double* timetoturn45degsinplace_secs, unsigned char* obsthresh, vector<
-                                                   SBPL_xytheta_mprimitive>* mprimitiveV)
+void EnvironmentNAVXYTHETALATTICE::GetEnvParms(
+    int *size_x, int *size_y, int* num_thetas,
+    double* startx, double* starty, double* starttheta,
+    double* goalx, double* goaly, double* goaltheta,
+    double* cellsize_m,
+    double* nominalvel_mpersecs,
+    double* timetoturn45degsinplace_secs,
+    unsigned char* obsthresh,
+    std::vector<SBPL_xytheta_mprimitive>* mprimitiveV)
 {
     *num_thetas = EnvNAVXYTHETALATCfg.NumThetaDirs;
-    GetEnvParms(size_x, size_y, startx, starty, starttheta, goalx, goaly, goaltheta, cellsize_m, nominalvel_mpersecs,
-                timetoturn45degsinplace_secs, obsthresh, mprimitiveV);
+    GetEnvParms(
+            size_x, size_y,
+            startx, starty, starttheta,
+            goalx, goaly, goaltheta,
+            cellsize_m,
+            nominalvel_mpersecs, timetoturn45degsinplace_secs,
+            obsthresh,
+            mprimitiveV);
 }
 
-void EnvironmentNAVXYTHETALATTICE::GetEnvParms(int *size_x, int *size_y, double* startx, double* starty,
-                                               double*starttheta, double* goalx, double* goaly, double* goaltheta,
-                                               double* cellsize_m, double* nominalvel_mpersecs,
-                                               double* timetoturn45degsinplace_secs, unsigned char* obsthresh,
-                                               vector<SBPL_xytheta_mprimitive>* mprimitiveV)
+void EnvironmentNAVXYTHETALATTICE::GetEnvParms(
+    int* size_x, int* size_y,
+    double* startx, double* starty, double* starttheta,
+    double* goalx, double* goaly, double* goaltheta,
+    double* cellsize_m,
+    double* nominalvel_mpersecs, double* timetoturn45degsinplace_secs,
+    unsigned char* obsthresh,
+    std::vector<SBPL_xytheta_mprimitive>* mprimitiveV)
 {
     *size_x = EnvNAVXYTHETALATCfg.EnvWidth_c;
     *size_y = EnvNAVXYTHETALATCfg.EnvHeight_c;
@@ -2117,11 +2245,9 @@ void EnvironmentNAVXYTHETALATTICE::GetEnvParms(int *size_x, int *size_y, double*
     *startx = DISCXY2CONT(EnvNAVXYTHETALATCfg.StartX_c, EnvNAVXYTHETALATCfg.cellsize_m);
     *starty = DISCXY2CONT(EnvNAVXYTHETALATCfg.StartY_c, EnvNAVXYTHETALATCfg.cellsize_m);
     *starttheta = DiscTheta2ContNew(EnvNAVXYTHETALATCfg.StartTheta);
-    //*starttheta = DiscTheta2Cont(EnvNAVXYTHETALATCfg.StartTheta, EnvNAVXYTHETALATCfg.NumThetaDirs);
     *goalx = DISCXY2CONT(EnvNAVXYTHETALATCfg.EndX_c, EnvNAVXYTHETALATCfg.cellsize_m);
     *goaly = DISCXY2CONT(EnvNAVXYTHETALATCfg.EndY_c, EnvNAVXYTHETALATCfg.cellsize_m);
     *goaltheta = DiscTheta2ContNew(EnvNAVXYTHETALATCfg.EndTheta);
-    //*goaltheta = DiscTheta2Cont(EnvNAVXYTHETALATCfg.EndTheta, EnvNAVXYTHETALATCfg.NumThetaDirs);
 
     *cellsize_m = EnvNAVXYTHETALATCfg.cellsize_m;
     *nominalvel_mpersecs = EnvNAVXYTHETALATCfg.nominalvel_mpersecs;
@@ -2132,24 +2258,26 @@ void EnvironmentNAVXYTHETALATTICE::GetEnvParms(int *size_x, int *size_y, double*
     *mprimitiveV = EnvNAVXYTHETALATCfg.mprimV;
 }
 
-bool EnvironmentNAVXYTHETALATTICE::PoseContToDisc(double px, double py, double pth, int &ix, int &iy, int &ith) const
+bool EnvironmentNAVXYTHETALATTICE::PoseContToDisc(
+    double px, double py, double pth, int &ix, int &iy, int &ith) const
 {
     ix = CONTXY2DISC(px, EnvNAVXYTHETALATCfg.cellsize_m);
     iy = CONTXY2DISC(py, EnvNAVXYTHETALATCfg.cellsize_m);
     ith = ContTheta2DiscNew(pth);
-    //ith = ContTheta2Disc(pth, EnvNAVXYTHETALATCfg.NumThetaDirs); // ContTheta2Disc() normalizes the angle
-    return (pth >= -2 * PI_CONST) && (pth <= 2 * PI_CONST) && (ix >= 0) && (ix < EnvNAVXYTHETALATCfg.EnvWidth_c) &&
-           (iy >= 0) && (iy < EnvNAVXYTHETALATCfg.EnvHeight_c);
+    return (pth >= -2 * PI_CONST) && (pth <= 2 * PI_CONST) &&
+            (ix >= 0) && (ix < EnvNAVXYTHETALATCfg.EnvWidth_c) &&
+            (iy >= 0) && (iy < EnvNAVXYTHETALATCfg.EnvHeight_c);
 }
 
-bool EnvironmentNAVXYTHETALATTICE::PoseDiscToCont(int ix, int iy, int ith, double &px, double &py, double &pth) const
+bool EnvironmentNAVXYTHETALATTICE::PoseDiscToCont(
+    int ix, int iy, int ith, double &px, double &py, double &pth) const
 {
     px = DISCXY2CONT(ix, EnvNAVXYTHETALATCfg.cellsize_m);
     py = DISCXY2CONT(iy, EnvNAVXYTHETALATCfg.cellsize_m);
     pth = normalizeAngle(DiscTheta2ContNew(ith));
-    //pth = normalizeAngle(DiscTheta2Cont(ith, EnvNAVXYTHETALATCfg.NumThetaDirs));
-    return (ith >= 0) && (ith < EnvNAVXYTHETALATCfg.NumThetaDirs) && (ix >= 0) &&
-           (ix < EnvNAVXYTHETALATCfg.EnvWidth_c) && (iy >= 0) && (iy < EnvNAVXYTHETALATCfg.EnvHeight_c);
+    return (ith >= 0) && (ith < EnvNAVXYTHETALATCfg.NumThetaDirs) &&
+            (ix >= 0) && (ix < EnvNAVXYTHETALATCfg.EnvWidth_c) &&
+            (iy >= 0) && (iy < EnvNAVXYTHETALATCfg.EnvHeight_c);
 }
 
 unsigned char EnvironmentNAVXYTHETALATTICE::GetMapCost(int x, int y)
@@ -2157,9 +2285,11 @@ unsigned char EnvironmentNAVXYTHETALATTICE::GetMapCost(int x, int y)
     return EnvNAVXYTHETALATCfg.Grid2D[x][y];
 }
 
-bool EnvironmentNAVXYTHETALATTICE::SetEnvParameter(const char* parameter, int value)
+bool EnvironmentNAVXYTHETALATTICE::SetEnvParameter(
+    const char* parameter,
+    int value)
 {
-    if (EnvNAVXYTHETALAT.bInitialized == true) {
+    if (EnvNAVXYTHETALAT.bInitialized) {
         SBPL_ERROR("ERROR: all parameters must be set before initialization of the environment\n");
         return false;
     }
@@ -2207,27 +2337,24 @@ int EnvironmentNAVXYTHETALATTICE::GetEnvParameter(const char* parameter)
         return (int)EnvNAVXYTHETALATCfg.obsthresh;
     }
     else {
-        SBPL_ERROR("ERROR: invalid parameter %s\n", parameter);
-        throw SBPL_Exception();
+        std::stringstream ss;
+        ss << "ERROR: invalid parameter " << parameter;
+        throw SBPL_Exception(ss.str());
     }
 }
-
-//------------------------------------------------------------------------------
-
-//-----------------XYTHETA Enivornment (child) class---------------------------
 
 EnvironmentNAVXYTHETALAT::~EnvironmentNAVXYTHETALAT()
 {
     SBPL_PRINTF("destroying XYTHETALAT\n");
 
-    //delete the states themselves first
+    // delete the states themselves first
     for (int i = 0; i < (int)StateID2CoordTable.size(); i++) {
         delete StateID2CoordTable.at(i);
         StateID2CoordTable.at(i) = NULL;
     }
     StateID2CoordTable.clear();
 
-    //delete hashtable
+    // delete hashtable
     if (Coord2StateIDHashTable != NULL) {
         delete[] Coord2StateIDHashTable;
         Coord2StateIDHashTable = NULL;
@@ -2238,7 +2365,8 @@ EnvironmentNAVXYTHETALAT::~EnvironmentNAVXYTHETALAT()
     }
 }
 
-void EnvironmentNAVXYTHETALAT::GetCoordFromState(int stateID, int& x, int& y, int& theta) const
+void EnvironmentNAVXYTHETALAT::GetCoordFromState(
+    int stateID, int& x, int& y, int& theta) const
 {
     EnvNAVXYTHETALATHashEntry_t* HashEntry = StateID2CoordTable[stateID];
     x = HashEntry->X;
@@ -2250,18 +2378,19 @@ int EnvironmentNAVXYTHETALAT::GetStateFromCoord(int x, int y, int theta)
 {
     EnvNAVXYTHETALATHashEntry_t* OutHashEntry;
     if ((OutHashEntry = (this->*GetHashEntry)(x, y, theta)) == NULL) {
-        //have to create a new entry
+        // have to create a new entry
         OutHashEntry = (this->*CreateNewHashEntry)(x, y, theta);
     }
     return OutHashEntry->stateID;
 }
 
-void EnvironmentNAVXYTHETALAT::GetActionsFromStateIDPath(vector<int>* stateIDPath, 
-                                                             vector<EnvNAVXYTHETALATAction_t>* action_list)
+void EnvironmentNAVXYTHETALAT::GetActionsFromStateIDPath(
+    std::vector<int>* stateIDPath,
+    std::vector<EnvNAVXYTHETALATAction_t>* action_list)
 {
-    vector<EnvNAVXYTHETALATAction_t*> actionV;
-    vector<int> CostV;
-    vector<int> SuccIDV;
+    std::vector<EnvNAVXYTHETALATAction_t*> actionV;
+    std::vector<int> CostV;
+    std::vector<int> SuccIDV;
     int targetx_c, targety_c, targettheta_c;
     int sourcex_c, sourcey_c, sourcetheta_c;
 
@@ -2273,7 +2402,7 @@ void EnvironmentNAVXYTHETALAT::GetActionsFromStateIDPath(vector<int>* stateIDPat
         int sourceID = stateIDPath->at(pind);
         int targetID = stateIDPath->at(pind + 1);
 
-        //get successors and pick the target via the cheapest action
+        // get successors and pick the target via the cheapest action
         SuccIDV.clear();
         CostV.clear();
         actionV.clear();
@@ -2289,12 +2418,11 @@ void EnvironmentNAVXYTHETALAT::GetActionsFromStateIDPath(vector<int>* stateIDPat
             }
         }
         if (bestsind == -1) {
-            SBPL_ERROR("ERROR: successor not found for transition:\n");
+            SBPL_ERROR("ERROR: successor not found for transition");
             GetCoordFromState(sourceID, sourcex_c, sourcey_c, sourcetheta_c);
             GetCoordFromState(targetID, targetx_c, targety_c, targettheta_c);
-            SBPL_PRINTF("%d %d %d -> %d %d %d\n", sourcex_c, sourcey_c, sourcetheta_c, targetx_c, targety_c,
-                        targettheta_c);
-            throw SBPL_Exception();
+            SBPL_PRINTF("%d %d %d -> %d %d %d\n", sourcex_c, sourcey_c, sourcetheta_c, targetx_c, targety_c, targettheta_c);
+            throw SBPL_Exception("ERROR: successor not found for transition");
         }
 
 #if DEBUG
@@ -2308,12 +2436,13 @@ void EnvironmentNAVXYTHETALAT::GetActionsFromStateIDPath(vector<int>* stateIDPat
     }
 }
 
-void EnvironmentNAVXYTHETALAT::ConvertStateIDPathintoXYThetaPath(vector<int>* stateIDPath,
-                                                                 vector<sbpl_xy_theta_pt_t>* xythetaPath)
+void EnvironmentNAVXYTHETALAT::ConvertStateIDPathintoXYThetaPath(
+    std::vector<int>* stateIDPath,
+    std::vector<sbpl_xy_theta_pt_t>* xythetaPath)
 {
-    vector<EnvNAVXYTHETALATAction_t*> actionV;
-    vector<int> CostV;
-    vector<int> SuccIDV;
+    std::vector<EnvNAVXYTHETALATAction_t*> actionV;
+    std::vector<int> CostV;
+    std::vector<int> SuccIDV;
     int targetx_c, targety_c, targettheta_c;
     int sourcex_c, sourcey_c, sourcetheta_c;
 
@@ -2333,7 +2462,7 @@ void EnvironmentNAVXYTHETALAT::ConvertStateIDPathintoXYThetaPath(vector<int>* st
         GetCoordFromState(sourceID, sourcex_c, sourcey_c, sourcetheta_c);
 #endif
 
-        //get successors and pick the target via the cheapest action
+        // get successors and pick the target via the cheapest action
         SuccIDV.clear();
         CostV.clear();
         actionV.clear();
@@ -2345,8 +2474,7 @@ void EnvironmentNAVXYTHETALAT::ConvertStateIDPathintoXYThetaPath(vector<int>* st
 #if DEBUG
         GetCoordFromState(sourceID, sourcex_c, sourcey_c, sourcetheta_c);
         GetCoordFromState(targetID, targetx_c, targety_c, targettheta_c);
-        SBPL_FPRINTF(fDeb, "looking for %d %d %d -> %d %d %d (numofsuccs=%d)\n", sourcex_c, sourcey_c, sourcetheta_c,
-                     targetx_c, targety_c, targettheta_c, (int)SuccIDV.size());
+        SBPL_FPRINTF(fDeb, "looking for %d %d %d -> %d %d %d (numofsuccs=%d)\n", sourcex_c, sourcey_c, sourcetheta_c, targetx_c, targety_c, targettheta_c, (int)SuccIDV.size());
 #endif
 
         for (int sind = 0; sind < (int)SuccIDV.size(); sind++) {
@@ -2355,30 +2483,28 @@ void EnvironmentNAVXYTHETALAT::ConvertStateIDPathintoXYThetaPath(vector<int>* st
             GetCoordFromState(SuccIDV[sind], x_c, y_c, theta_c);
             SBPL_FPRINTF(fDeb, "succ: %d %d %d\n", x_c, y_c, theta_c);
 #endif
-
             if (SuccIDV[sind] == targetID && CostV[sind] <= bestcost) {
                 bestcost = CostV[sind];
                 bestsind = sind;
             }
         }
         if (bestsind == -1) {
-            SBPL_ERROR("ERROR: successor not found for transition:\n");
+            SBPL_ERROR("ERROR: successor not found for transition");
             GetCoordFromState(sourceID, sourcex_c, sourcey_c, sourcetheta_c);
             GetCoordFromState(targetID, targetx_c, targety_c, targettheta_c);
-            SBPL_PRINTF("%d %d %d -> %d %d %d\n", sourcex_c, sourcey_c, sourcetheta_c, targetx_c, targety_c,
-                        targettheta_c);
-            throw SBPL_Exception();
+            SBPL_PRINTF("%d %d %d -> %d %d %d\n", sourcex_c, sourcey_c, sourcetheta_c, targetx_c, targety_c, targettheta_c);
+            throw SBPL_Exception("ERROR: successor not found for transition");
         }
 
-        //now push in the actual path
+        // now push in the actual path
         int sourcex_c, sourcey_c, sourcetheta_c;
         GetCoordFromState(sourceID, sourcex_c, sourcey_c, sourcetheta_c);
         double sourcex, sourcey;
         sourcex = DISCXY2CONT(sourcex_c, EnvNAVXYTHETALATCfg.cellsize_m);
         sourcey = DISCXY2CONT(sourcey_c, EnvNAVXYTHETALATCfg.cellsize_m);
-        //TODO - when there are no motion primitives we should still print source state
+        // TODO - when there are no motion primitives we should still print source state
         for (int ipind = 0; ipind < ((int)actionV[bestsind]->intermptV.size()) - 1; ipind++) {
-            //translate appropriately
+            // translate appropriately
             sbpl_xy_theta_pt_t intermpt = actionV[bestsind]->intermptV[ipind];
             intermpt.x += sourcex;
             intermpt.y += sourcey;
@@ -2386,33 +2512,30 @@ void EnvironmentNAVXYTHETALAT::ConvertStateIDPathintoXYThetaPath(vector<int>* st
 #if DEBUG
             int nx = CONTXY2DISC(intermpt.x, EnvNAVXYTHETALATCfg.cellsize_m);
             int ny = CONTXY2DISC(intermpt.y, EnvNAVXYTHETALATCfg.cellsize_m);
-	    int ntheta;
+            int ntheta;
             ntheta = ContTheta2DiscNew(intermpt.theta);
-	    //ntheta = ContTheta2Disc(intermpt.theta, EnvNAVXYTHETALATCfg.NumThetaDirs);
 
-            SBPL_FPRINTF(fDeb, "%.3f %.3f %.3f (%d %d %d cost=%d) ",
-                intermpt.x, intermpt.y, intermpt.theta,
-                nx, ny, ntheta,  EnvNAVXYTHETALATCfg.Grid2D[nx][ny]);
-                //ContTheta2Disc(intermpt.theta, EnvNAVXYTHETALATCfg.NumThetaDirs), EnvNAVXYTHETALATCfg.Grid2D[nx][ny]);
-		
-            if(ipind == 0) SBPL_FPRINTF(fDeb, "first (heur=%d)\n", GetStartHeuristic(sourceID));
-            else SBPL_FPRINTF(fDeb, "\n");
+            SBPL_FPRINTF(fDeb, "%.3f %.3f %.3f (%d %d %d cost=%d) ", intermpt.x, intermpt.y, intermpt.theta, nx, ny, ntheta,  EnvNAVXYTHETALATCfg.Grid2D[nx][ny]);
+
+            if (ipind == 0) {
+                SBPL_FPRINTF(fDeb, "first (heur=%d)\n", GetStartHeuristic(sourceID));
+            }
+            else {
+                SBPL_FPRINTF(fDeb, "\n");
+            }
 #endif
-
-            //store
+            // store
             xythetaPath->push_back(intermpt);
         }
     }
 }
 
-//returns the stateid if success, and -1 otherwise
+// returns the stateid if success, and -1 otherwise
 int EnvironmentNAVXYTHETALAT::SetGoal(double x_m, double y_m, double theta_rad)
 {
     int x = CONTXY2DISC(x_m, EnvNAVXYTHETALATCfg.cellsize_m);
     int y = CONTXY2DISC(y_m, EnvNAVXYTHETALATCfg.cellsize_m);
-    int theta;
-    theta = ContTheta2DiscNew(theta_rad);
-    //theta = ContTheta2Disc(theta_rad, EnvNAVXYTHETALATCfg.NumThetaDirs);
+    int theta = ContTheta2DiscNew(theta_rad);
 
     SBPL_PRINTF("env: setting goal to %.3f %.3f %.3f (%d %d %d)\n", x_m, y_m, theta_rad, x, y, theta);
 
@@ -2427,14 +2550,17 @@ int EnvironmentNAVXYTHETALAT::SetGoal(double x_m, double y_m, double theta_rad)
 
     EnvNAVXYTHETALATHashEntry_t* OutHashEntry;
     if ((OutHashEntry = (this->*GetHashEntry)(x, y, theta)) == NULL) {
-        //have to create a new entry
+        // have to create a new entry
         OutHashEntry = (this->*CreateNewHashEntry)(x, y, theta);
     }
 
-    //need to recompute start heuristics?
+    // need to recompute start heuristics?
     if (EnvNAVXYTHETALAT.goalstateid != OutHashEntry->stateID) {
-        bNeedtoRecomputeStartHeuristics = true; //because termination condition may not plan all the way to the new goal
-        bNeedtoRecomputeGoalHeuristics = true; //because goal heuristics change
+        // because termination condition may not plan all the way to the new goal
+        bNeedtoRecomputeStartHeuristics = true;
+
+        // because goal heuristics change
+        bNeedtoRecomputeGoalHeuristics = true;
     }
 
     EnvNAVXYTHETALAT.goalstateid = OutHashEntry->stateID;
@@ -2446,14 +2572,12 @@ int EnvironmentNAVXYTHETALAT::SetGoal(double x_m, double y_m, double theta_rad)
     return EnvNAVXYTHETALAT.goalstateid;
 }
 
-//returns the stateid if success, and -1 otherwise
+// returns the stateid if success, and -1 otherwise
 int EnvironmentNAVXYTHETALAT::SetStart(double x_m, double y_m, double theta_rad)
 {
     int x = CONTXY2DISC(x_m, EnvNAVXYTHETALATCfg.cellsize_m);
     int y = CONTXY2DISC(y_m, EnvNAVXYTHETALATCfg.cellsize_m);
-    int theta;
-    theta = ContTheta2DiscNew(theta_rad);
-    //theta = ContTheta2Disc(theta_rad, EnvNAVXYTHETALATCfg.NumThetaDirs);
+    int theta = ContTheta2DiscNew(theta_rad);
 
     if (!IsWithinMapCell(x, y)) {
         SBPL_ERROR("ERROR: trying to set a start cell %d %d that is outside of map\n", x, y);
@@ -2468,18 +2592,18 @@ int EnvironmentNAVXYTHETALAT::SetStart(double x_m, double y_m, double theta_rad)
 
     EnvNAVXYTHETALATHashEntry_t* OutHashEntry;
     if ((OutHashEntry = (this->*GetHashEntry)(x, y, theta)) == NULL) {
-        //have to create a new entry
+        // have to create a new entry
         OutHashEntry = (this->*CreateNewHashEntry)(x, y, theta);
     }
 
-    //need to recompute start heuristics?
+    // need to recompute start heuristics?
     if (EnvNAVXYTHETALAT.startstateid != OutHashEntry->stateID) {
         bNeedtoRecomputeStartHeuristics = true;
-        //because termination condition can be not all states TODO - make it dependent on term. condition
+        // because termination condition can be not all states TODO - make it dependent on term. condition
         bNeedtoRecomputeGoalHeuristics = true;
     }
 
-    //set start
+    // set start
     EnvNAVXYTHETALAT.startstateid = OutHashEntry->stateID;
     EnvNAVXYTHETALATCfg.StartX_c = x;
     EnvNAVXYTHETALATCfg.StartY_c = y;
@@ -2488,17 +2612,21 @@ int EnvironmentNAVXYTHETALAT::SetStart(double x_m, double y_m, double theta_rad)
     return EnvNAVXYTHETALAT.startstateid;
 }
 
-void EnvironmentNAVXYTHETALAT::PrintState(int stateID, bool bVerbose, FILE* fOut /*=NULL*/)
+void EnvironmentNAVXYTHETALAT::PrintState(
+    int stateID,
+    bool bVerbose,
+    FILE* fOut)
 {
 #if DEBUG
-    if(stateID >= (int)StateID2CoordTable.size())
-    {
+    if (stateID >= (int)StateID2CoordTable.size()) {
         SBPL_ERROR("ERROR in EnvNAVXYTHETALAT... function: stateID illegal (2)\n");
         throw SBPL_Exception();
     }
 #endif
 
-    if (fOut == NULL) fOut = stdout;
+    if (fOut == NULL) {
+        fOut = stdout;
+    }
 
     EnvNAVXYTHETALATHashEntry_t* HashEntry = StateID2CoordTable[stateID];
 
@@ -2506,27 +2634,30 @@ void EnvironmentNAVXYTHETALAT::PrintState(int stateID, bool bVerbose, FILE* fOut
         SBPL_FPRINTF(fOut, "the state is a goal state\n");
     }
 
-    if (bVerbose)
+    if (bVerbose) {
         SBPL_FPRINTF(fOut, "X=%d Y=%d Theta=%d\n", HashEntry->X, HashEntry->Y, HashEntry->Theta);
+    }
     else
     {
-        SBPL_FPRINTF(fOut, "%.3f %.3f %.3f\n", DISCXY2CONT(HashEntry->X, EnvNAVXYTHETALATCfg.cellsize_m),
-                     DISCXY2CONT(HashEntry->Y, EnvNAVXYTHETALATCfg.cellsize_m), DiscTheta2ContNew(HashEntry->Theta));
-	//SBPL_FPRINTF(fOut, "%.3f %.3f %.3f\n", DISCXY2CONT(HashEntry->X, EnvNAVXYTHETALATCfg.cellsize_m),
-        //             DISCXY2CONT(HashEntry->Y, EnvNAVXYTHETALATCfg.cellsize_m),
-        //             DiscTheta2Cont(HashEntry->Theta, EnvNAVXYTHETALATCfg.NumThetaDirs));
-   }
+        SBPL_FPRINTF(fOut, "%.3f %.3f %.3f\n", DISCXY2CONT(HashEntry->X, EnvNAVXYTHETALATCfg.cellsize_m), DISCXY2CONT(HashEntry->Y, EnvNAVXYTHETALATCfg.cellsize_m), DiscTheta2ContNew(HashEntry->Theta));
+    }
 }
 
-EnvNAVXYTHETALATHashEntry_t* EnvironmentNAVXYTHETALAT::GetHashEntry_lookup(int X, int Y, int Theta)
+EnvNAVXYTHETALATHashEntry_t* EnvironmentNAVXYTHETALAT::GetHashEntry_lookup(
+    int X, int Y, int Theta)
 {
-    if (X < 0 || X >= EnvNAVXYTHETALATCfg.EnvWidth_c || Y < 0 || Y >= EnvNAVXYTHETALATCfg.EnvHeight_c || Theta < 0 ||
-        Theta >= EnvNAVXYTHETALATCfg.NumThetaDirs) return NULL;
+    if (X < 0 || X >= EnvNAVXYTHETALATCfg.EnvWidth_c ||
+        Y < 0 || Y >= EnvNAVXYTHETALATCfg.EnvHeight_c ||
+        Theta < 0 || Theta >= EnvNAVXYTHETALATCfg.NumThetaDirs)
+    {
+        return NULL;
+    }
     int index = XYTHETA2INDEX(X,Y,Theta);
     return Coord2StateIDHashTable_lookup[index];
 }
 
-EnvNAVXYTHETALATHashEntry_t* EnvironmentNAVXYTHETALAT::GetHashEntry_hash(int X, int Y, int Theta)
+EnvNAVXYTHETALATHashEntry_t*
+EnvironmentNAVXYTHETALAT::GetHashEntry_hash(int X, int Y, int Theta)
 {
 #if TIME_DEBUG
     clock_t currenttime = clock();
@@ -2535,17 +2666,15 @@ EnvNAVXYTHETALATHashEntry_t* EnvironmentNAVXYTHETALAT::GetHashEntry_hash(int X, 
     int binid = GETHASHBIN(X, Y, Theta);
 
 #if DEBUG
-    if ((int)Coord2StateIDHashTable[binid].size() > 5)
-    {
-        SBPL_FPRINTF(fDeb, "WARNING: Hash table has a bin %d (X=%d Y=%d) of size %d\n",
-            binid, X, Y, (int)Coord2StateIDHashTable[binid].size());
+    if ((int)Coord2StateIDHashTable[binid].size() > 5) {
+        SBPL_FPRINTF(fDeb, "WARNING: Hash table has a bin %d (X=%d Y=%d) of size %d\n", binid, X, Y, (int)Coord2StateIDHashTable[binid].size());
 
         PrintHashTableHist(fDeb);
     }
 #endif
 
-    //iterate over the states in the bin and select the perfect match
-    vector<EnvNAVXYTHETALATHashEntry_t*>* binV = &Coord2StateIDHashTable[binid];
+    // iterate over the states in the bin and select the perfect match
+    std::vector<EnvNAVXYTHETALATHashEntry_t*>* binV = &Coord2StateIDHashTable[binid];
     for (int ind = 0; ind < (int)binV->size(); ind++) {
         EnvNAVXYTHETALATHashEntry_t* hashentry = binV->at(ind);
         if (hashentry->X == X && hashentry->Y == Y && hashentry->Theta == Theta) {
@@ -2563,7 +2692,8 @@ EnvNAVXYTHETALATHashEntry_t* EnvironmentNAVXYTHETALAT::GetHashEntry_hash(int X, 
     return NULL;
 }
 
-EnvNAVXYTHETALATHashEntry_t* EnvironmentNAVXYTHETALAT::CreateNewHashEntry_lookup(int X, int Y, int Theta)
+EnvNAVXYTHETALATHashEntry_t*
+EnvironmentNAVXYTHETALAT::CreateNewHashEntry_lookup(int X, int Y, int Theta)
 {
     int i;
 
@@ -2580,22 +2710,20 @@ EnvNAVXYTHETALATHashEntry_t* EnvironmentNAVXYTHETALAT::CreateNewHashEntry_lookup
 
     HashEntry->stateID = StateID2CoordTable.size();
 
-    //insert into the tables
+    // insert into the tables
     StateID2CoordTable.push_back(HashEntry);
 
     int index = XYTHETA2INDEX(X,Y,Theta);
 
 #if DEBUG
-    if(Coord2StateIDHashTable_lookup[index] != NULL)
-    {
-        SBPL_ERROR("ERROR: creating hash entry for non-NULL hashentry\n");
-        throw SBPL_Exception();
+    if (Coord2StateIDHashTable_lookup[index] != NULL) {
+        throw SBPL_Exception("ERROR: creating hash entry for non-NULL hashentry");
     }
 #endif
 
     Coord2StateIDHashTable_lookup[index] = HashEntry;
 
-    //insert into and initialize the mappings
+    // insert into and initialize the mappings
     int* entry = new int[NUMOFINDICES_STATEID2IND];
     StateID2IndexMapping.push_back(entry);
     for (i = 0; i < NUMOFINDICES_STATEID2IND; i++) {
@@ -2603,8 +2731,7 @@ EnvNAVXYTHETALATHashEntry_t* EnvironmentNAVXYTHETALAT::CreateNewHashEntry_lookup
     }
 
     if (HashEntry->stateID != (int)StateID2IndexMapping.size() - 1) {
-        SBPL_ERROR("ERROR in Env... function: last state has incorrect stateID\n");
-        throw SBPL_Exception();
+        throw SBPL_Exception("ERROR in Env... function: last state has incorrect stateID");
     }
 
 #if TIME_DEBUG
@@ -2614,7 +2741,8 @@ EnvNAVXYTHETALATHashEntry_t* EnvironmentNAVXYTHETALAT::CreateNewHashEntry_lookup
     return HashEntry;
 }
 
-EnvNAVXYTHETALATHashEntry_t* EnvironmentNAVXYTHETALAT::CreateNewHashEntry_hash(int X, int Y, int Theta)
+EnvNAVXYTHETALATHashEntry_t*
+EnvironmentNAVXYTHETALAT::CreateNewHashEntry_hash(int X, int Y, int Theta)
 {
     int i;
 
@@ -2631,16 +2759,16 @@ EnvNAVXYTHETALATHashEntry_t* EnvironmentNAVXYTHETALAT::CreateNewHashEntry_hash(i
 
     HashEntry->stateID = StateID2CoordTable.size();
 
-    //insert into the tables
+    // insert into the tables
     StateID2CoordTable.push_back(HashEntry);
 
-    //get the hash table bin
+    // get the hash table bin
     i = GETHASHBIN(HashEntry->X, HashEntry->Y, HashEntry->Theta);
 
-    //insert the entry into the bin
+    // insert the entry into the bin
     Coord2StateIDHashTable[i].push_back(HashEntry);
 
-    //insert into and initialize the mappings
+    // insert into and initialize the mappings
     int* entry = new int[NUMOFINDICES_STATEID2IND];
     StateID2IndexMapping.push_back(entry);
     for (i = 0; i < NUMOFINDICES_STATEID2IND; i++) {
@@ -2648,19 +2776,21 @@ EnvNAVXYTHETALATHashEntry_t* EnvironmentNAVXYTHETALAT::CreateNewHashEntry_hash(i
     }
 
     if (HashEntry->stateID != (int)StateID2IndexMapping.size() - 1) {
-        SBPL_ERROR("ERROR in Env... function: last state has incorrect stateID\n");
-        throw SBPL_Exception();
+        throw SBPL_Exception("ERROR in Env... function: last state has incorrect stateID");
     }
 
 #if TIME_DEBUG
-    time_createhash += clock()-currenttime;
+    time_createhash += clock() - currenttime;
 #endif
 
     return HashEntry;
 }
 
-void EnvironmentNAVXYTHETALAT::GetSuccs(int SourceStateID, vector<int>* SuccIDV, vector<int>* CostV, vector<
-    EnvNAVXYTHETALATAction_t*>* actionV /*=NULL*/)
+void EnvironmentNAVXYTHETALAT::GetSuccs(
+    int SourceStateID,
+    std::vector<int>* SuccIDV,
+    std::vector<int>* CostV,
+    std::vector<EnvNAVXYTHETALATAction_t*>* actionV)
 {
     int aind;
 
@@ -2668,7 +2798,7 @@ void EnvironmentNAVXYTHETALAT::GetSuccs(int SourceStateID, vector<int>* SuccIDV,
     clock_t currenttime = clock();
 #endif
 
-    //clear the successor array
+    // clear the successor array
     SuccIDV->clear();
     CostV->clear();
     SuccIDV->reserve(EnvNAVXYTHETALATCfg.actionwidth);
@@ -2678,37 +2808,41 @@ void EnvironmentNAVXYTHETALAT::GetSuccs(int SourceStateID, vector<int>* SuccIDV,
         actionV->reserve(EnvNAVXYTHETALATCfg.actionwidth);
     }
 
-    //goal state should be absorbing
+    // goal state should be absorbing
     if (SourceStateID == EnvNAVXYTHETALAT.goalstateid) return;
 
-    //get X, Y for the state
+    // get X, Y for the state
     EnvNAVXYTHETALATHashEntry_t* HashEntry = StateID2CoordTable[SourceStateID];
 
-    //iterate through actions
+    // iterate through actions
     for (aind = 0; aind < EnvNAVXYTHETALATCfg.actionwidth; aind++) {
         EnvNAVXYTHETALATAction_t* nav3daction = &EnvNAVXYTHETALATCfg.ActionsV[(unsigned int)HashEntry->Theta][aind];
         int newX = HashEntry->X + nav3daction->dX;
         int newY = HashEntry->Y + nav3daction->dY;
-	int newTheta;
-	newTheta = normalizeDiscAngle(nav3daction->endtheta);
-	//newTheta = NORMALIZEDISCTHETA(nav3daction->endtheta, EnvNAVXYTHETALATCfg.NumThetaDirs);
+        int newTheta = normalizeDiscAngle(nav3daction->endtheta);
 
-        //skip the invalid cells
-        if (!IsValidCell(newX, newY)) continue;
+        // skip the invalid cells
+        if (!IsValidCell(newX, newY)) {
+            continue;
+        }
 
-        //get cost
+        // get cost
         int cost = GetActionCost(HashEntry->X, HashEntry->Y, HashEntry->Theta, nav3daction);
-        if (cost >= INFINITECOST) continue;
+        if (cost >= INFINITECOST) {
+            continue;
+        }
 
         EnvNAVXYTHETALATHashEntry_t* OutHashEntry;
         if ((OutHashEntry = (this->*GetHashEntry)(newX, newY, newTheta)) == NULL) {
-            //have to create a new entry
+            // have to create a new entry
             OutHashEntry = (this->*CreateNewHashEntry)(newX, newY, newTheta);
         }
 
         SuccIDV->push_back(OutHashEntry->stateID);
         CostV->push_back(cost);
-        if (actionV != NULL) actionV->push_back(nav3daction);
+        if (actionV != NULL) {
+            actionV->push_back(nav3daction);
+        }
     }
 
 #if TIME_DEBUG
@@ -2716,7 +2850,10 @@ void EnvironmentNAVXYTHETALAT::GetSuccs(int SourceStateID, vector<int>* SuccIDV,
 #endif
 }
 
-void EnvironmentNAVXYTHETALAT::GetPreds(int TargetStateID, vector<int>* PredIDV, vector<int>* CostV)
+void EnvironmentNAVXYTHETALAT::GetPreds(
+    int TargetStateID,
+    std::vector<int>* PredIDV,
+    std::vector<int>* CostV)
 {
     //TODO- to support tolerance, need:
     // a) generate preds for goal state based on all possible goal state variable settings,
@@ -2729,17 +2866,17 @@ void EnvironmentNAVXYTHETALAT::GetPreds(int TargetStateID, vector<int>* PredIDV,
     clock_t currenttime = clock();
 #endif
 
-    //get X, Y for the state
+    // get X, Y for the state
     EnvNAVXYTHETALATHashEntry_t* HashEntry = StateID2CoordTable[TargetStateID];
 
-    //clear the successor array
+    // clear the successor array
     PredIDV->clear();
     CostV->clear();
     PredIDV->reserve(EnvNAVXYTHETALATCfg.PredActionsV[(unsigned int)HashEntry->Theta].size());
     CostV->reserve(EnvNAVXYTHETALATCfg.PredActionsV[(unsigned int)HashEntry->Theta].size());
 
-    //iterate through actions
-    vector<EnvNAVXYTHETALATAction_t*>* actionsV = &EnvNAVXYTHETALATCfg.PredActionsV[(unsigned int)HashEntry->Theta];
+    // iterate through actions
+    std::vector<EnvNAVXYTHETALATAction_t*>* actionsV = &EnvNAVXYTHETALATCfg.PredActionsV[(unsigned int)HashEntry->Theta];
     for (aind = 0; aind < (int)EnvNAVXYTHETALATCfg.PredActionsV[(unsigned int)HashEntry->Theta].size(); aind++) {
 
         EnvNAVXYTHETALATAction_t* nav3daction = actionsV->at(aind);
@@ -2748,16 +2885,20 @@ void EnvironmentNAVXYTHETALAT::GetPreds(int TargetStateID, vector<int>* PredIDV,
         int predY = HashEntry->Y - nav3daction->dY;
         int predTheta = nav3daction->starttheta;
 
-        //skip the invalid cells
-        if (!IsValidCell(predX, predY)) continue;
+        // skip the invalid cells
+        if (!IsValidCell(predX, predY)) {
+            continue;
+        }
 
-        //get cost
+        // get cost
         int cost = GetActionCost(predX, predY, predTheta, nav3daction);
-        if (cost >= INFINITECOST) continue;
+        if (cost >= INFINITECOST) {
+            continue;
+        }
 
         EnvNAVXYTHETALATHashEntry_t* OutHashEntry;
         if ((OutHashEntry = (this->*GetHashEntry)(predX, predY, predTheta)) == NULL) {
-            //have to create a new entry
+            // have to create a new entry
             OutHashEntry = (this->*CreateNewHashEntry)(predX, predY, predTheta);
         }
 
@@ -2775,42 +2916,42 @@ void EnvironmentNAVXYTHETALAT::SetAllActionsandAllOutcomes(CMDPSTATE* state)
     int cost;
 
 #if DEBUG
-    if(state->StateID >= (int)StateID2CoordTable.size())
-    {
-        SBPL_ERROR("ERROR in Env... function: stateID illegal\n");
-        throw SBPL_Exception();
+    if (state->StateID >= (int)StateID2CoordTable.size()) {
+        throw SBPL_Exception("ERROR in Env... function: stateID illegal");
     }
 
-    if((int)state->Actions.size() != 0)
-    {
-        SBPL_ERROR("ERROR in Env_setAllActionsandAllOutcomes: actions already exist for the state\n");
-        throw SBPL_Exception();
+    if ((int)state->Actions.size() != 0) {
+        throw SBPL_Exception("ERROR in Env_setAllActionsandAllOutcomes: actions already exist for the state");
     }
 #endif
 
-    //goal state should be absorbing
-    if (state->StateID == EnvNAVXYTHETALAT.goalstateid) return;
+    // goal state should be absorbing
+    if (state->StateID == EnvNAVXYTHETALAT.goalstateid) {
+        return;
+    }
 
-    //get X, Y for the state
+    // get X, Y for the state
     EnvNAVXYTHETALATHashEntry_t* HashEntry = StateID2CoordTable[state->StateID];
 
-    //iterate through actions
+    // iterate through actions
     for (int aind = 0; aind < EnvNAVXYTHETALATCfg.actionwidth; aind++) {
         EnvNAVXYTHETALATAction_t* nav3daction = &EnvNAVXYTHETALATCfg.ActionsV[(unsigned int)HashEntry->Theta][aind];
         int newX = HashEntry->X + nav3daction->dX;
         int newY = HashEntry->Y + nav3daction->dY;
-	int newTheta;
-	newTheta = normalizeDiscAngle(nav3daction->endtheta);
-	//newTheta = NORMALIZEDISCTHETA(nav3daction->endtheta, EnvNAVXYTHETALATCfg.NumThetaDirs);
+        int newTheta = normalizeDiscAngle(nav3daction->endtheta);
 
-        //skip the invalid cells
-        if (!IsValidCell(newX, newY)) continue;
+        // skip the invalid cells
+        if (!IsValidCell(newX, newY)) {
+            continue;
+        }
 
-        //get cost
+        // get cost
         cost = GetActionCost(HashEntry->X, HashEntry->Y, HashEntry->Theta, nav3daction);
-        if (cost >= INFINITECOST) continue;
+        if (cost >= INFINITECOST) {
+            continue;
+        }
 
-        //add the action
+        // add the action
         CMDPACTION* action = state->AddAction(aind);
 
 #if TIME_DEBUG
@@ -2819,7 +2960,7 @@ void EnvironmentNAVXYTHETALAT::SetAllActionsandAllOutcomes(CMDPSTATE* state)
 
         EnvNAVXYTHETALATHashEntry_t* OutHashEntry;
         if ((OutHashEntry = (this->*GetHashEntry)(newX, newY, newTheta)) == NULL) {
-            //have to create a new entry
+            // have to create a new entry
             OutHashEntry = (this->*CreateNewHashEntry)(newX, newY, newTheta);
         }
         action->AddOutcome(OutHashEntry->stateID, cost, 1.0);
@@ -2830,67 +2971,69 @@ void EnvironmentNAVXYTHETALAT::SetAllActionsandAllOutcomes(CMDPSTATE* state)
     }
 }
 
-void EnvironmentNAVXYTHETALAT::GetPredsofChangedEdges(vector<nav2dcell_t> const * changedcellsV,
-                                                      vector<int> *preds_of_changededgesIDV)
+void EnvironmentNAVXYTHETALAT::GetPredsofChangedEdges(
+    std::vector<nav2dcell_t> const* changedcellsV,
+    std::vector<int>* preds_of_changededgesIDV)
 {
     nav2dcell_t cell;
     sbpl_xy_theta_cell_t affectedcell;
     EnvNAVXYTHETALATHashEntry_t* affectedHashEntry;
 
-    //increment iteration for processing savings
+    // increment iteration for processing savings
     iteration++;
 
     for (int i = 0; i < (int)changedcellsV->size(); i++) {
         cell = changedcellsV->at(i);
 
-        //now iterate over all states that could potentially be affected
+        // now iterate over all states that could potentially be affected
         for (int sind = 0; sind < (int)affectedpredstatesV.size(); sind++) {
             affectedcell = affectedpredstatesV.at(sind);
 
-            //translate to correct for the offset
+            // translate to correct for the offset
             affectedcell.x = affectedcell.x + cell.x;
             affectedcell.y = affectedcell.y + cell.y;
 
-            //insert only if it was actually generated
+            // insert only if it was actually generated
             affectedHashEntry = (this->*GetHashEntry)(affectedcell.x, affectedcell.y, affectedcell.theta);
             if (affectedHashEntry != NULL && affectedHashEntry->iteration < iteration) {
                 preds_of_changededgesIDV->push_back(affectedHashEntry->stateID);
-                affectedHashEntry->iteration = iteration; //mark as already inserted
+                affectedHashEntry->iteration = iteration; // mark as already inserted
             }
         }
     }
 }
 
-void EnvironmentNAVXYTHETALAT::GetSuccsofChangedEdges(vector<nav2dcell_t> const * changedcellsV,
-                                                      vector<int> *succs_of_changededgesIDV)
+void EnvironmentNAVXYTHETALAT::GetSuccsofChangedEdges(
+    std::vector<nav2dcell_t> const* changedcellsV,
+    std::vector<int>* succs_of_changededgesIDV)
 {
     nav2dcell_t cell;
     sbpl_xy_theta_cell_t affectedcell;
     EnvNAVXYTHETALATHashEntry_t* affectedHashEntry;
 
-    SBPL_ERROR("ERROR: getsuccs is not supported currently\n");
-    throw SBPL_Exception();
+    throw SBPL_Exception("ERROR: getsuccs is not supported currently");
 
-    //increment iteration for processing savings
+    // increment iteration for processing savings
     iteration++;
 
-    //TODO - check
+    // TODO - check
     for (int i = 0; i < (int)changedcellsV->size(); i++) {
         cell = changedcellsV->at(i);
 
-        //now iterate over all states that could potentially be affected
+        // now iterate over all states that could potentially be affected
         for (int sind = 0; sind < (int)affectedsuccstatesV.size(); sind++) {
             affectedcell = affectedsuccstatesV.at(sind);
 
-            //translate to correct for the offset
+            // translate to correct for the offset
             affectedcell.x = affectedcell.x + cell.x;
             affectedcell.y = affectedcell.y + cell.y;
 
-            //insert only if it was actually generated
+            // insert only if it was actually generated
             affectedHashEntry = (this->*GetHashEntry)(affectedcell.x, affectedcell.y, affectedcell.theta);
             if (affectedHashEntry != NULL && affectedHashEntry->iteration < iteration) {
                 succs_of_changededgesIDV->push_back(affectedHashEntry->stateID);
-                affectedHashEntry->iteration = iteration; //mark as already inserted
+                // mark as already inserted
+                affectedHashEntry->iteration = iteration;
             }
         }
     }
@@ -2906,57 +3049,71 @@ void EnvironmentNAVXYTHETALAT::InitializeEnvironment()
         SBPL_PRINTF("environment stores states in lookup table\n");
 
         Coord2StateIDHashTable_lookup = new EnvNAVXYTHETALATHashEntry_t*[maxsize];
-        for (int i = 0; i < maxsize; i++)
+        for (int i = 0; i < maxsize; i++) {
             Coord2StateIDHashTable_lookup[i] = NULL;
+        }
         GetHashEntry = &EnvironmentNAVXYTHETALAT::GetHashEntry_lookup;
         CreateNewHashEntry = &EnvironmentNAVXYTHETALAT::CreateNewHashEntry_lookup;
 
-        //not using hash table
+        // not using hash table
         HashTableSize = 0;
         Coord2StateIDHashTable = NULL;
     }
     else {
         SBPL_PRINTF("environment stores states in hashtable\n");
 
-        //initialize the map from Coord to StateID
-        HashTableSize = 4 * 1024 * 1024; //should be power of two
-        Coord2StateIDHashTable = new vector<EnvNAVXYTHETALATHashEntry_t*> [HashTableSize];
+        // initialize the map from Coord to StateID
+        HashTableSize = 4 * 1024 * 1024; // should be power of two
+        Coord2StateIDHashTable = new std::vector<EnvNAVXYTHETALATHashEntry_t*>[HashTableSize];
         GetHashEntry = &EnvironmentNAVXYTHETALAT::GetHashEntry_hash;
         CreateNewHashEntry = &EnvironmentNAVXYTHETALAT::CreateNewHashEntry_hash;
 
-        //not using hash
+        // not using hash
         Coord2StateIDHashTable_lookup = NULL;
     }
 
-    //initialize the map from StateID to Coord
+    // initialize the map from StateID to Coord
     StateID2CoordTable.clear();
 
-    //create start state
-    if ((HashEntry = (this->*GetHashEntry)(EnvNAVXYTHETALATCfg.StartX_c, EnvNAVXYTHETALATCfg.StartY_c,
-                                           EnvNAVXYTHETALATCfg.StartTheta)) == NULL) {
-        //have to create a new entry
-        HashEntry = (this->*CreateNewHashEntry)(EnvNAVXYTHETALATCfg.StartX_c, EnvNAVXYTHETALATCfg.StartY_c,
-                                                EnvNAVXYTHETALATCfg.StartTheta);
+    // create start state
+    if (NULL == (HashEntry = (this->*GetHashEntry)(
+            EnvNAVXYTHETALATCfg.StartX_c,
+            EnvNAVXYTHETALATCfg.StartY_c,
+            EnvNAVXYTHETALATCfg.StartTheta)))
+    {
+        // have to create a new entry
+        HashEntry = (this->*CreateNewHashEntry)(
+                EnvNAVXYTHETALATCfg.StartX_c,
+                EnvNAVXYTHETALATCfg.StartY_c,
+                EnvNAVXYTHETALATCfg.StartTheta);
     }
     EnvNAVXYTHETALAT.startstateid = HashEntry->stateID;
 
-    //create goal state
-    if ((HashEntry = (this->*GetHashEntry)(EnvNAVXYTHETALATCfg.EndX_c, EnvNAVXYTHETALATCfg.EndY_c,
-                                           EnvNAVXYTHETALATCfg.EndTheta)) == NULL) {
-        //have to create a new entry
-        HashEntry = (this->*CreateNewHashEntry)(EnvNAVXYTHETALATCfg.EndX_c, EnvNAVXYTHETALATCfg.EndY_c,
-                                                EnvNAVXYTHETALATCfg.EndTheta);
+    // create goal state
+    if ((HashEntry = (this->*GetHashEntry)(
+            EnvNAVXYTHETALATCfg.EndX_c,
+            EnvNAVXYTHETALATCfg.EndY_c,
+            EnvNAVXYTHETALATCfg.EndTheta)) == NULL)
+    {
+        // have to create a new entry
+        HashEntry = (this->*CreateNewHashEntry)(
+                EnvNAVXYTHETALATCfg.EndX_c,
+                EnvNAVXYTHETALATCfg.EndY_c,
+                EnvNAVXYTHETALATCfg.EndTheta);
     }
     EnvNAVXYTHETALAT.goalstateid = HashEntry->stateID;
 
-    //initialized
+    // initialized
     EnvNAVXYTHETALAT.bInitialized = true;
 }
 
-//examples of hash functions: map state coordinates onto a hash value
-//#define GETHASHBIN(X, Y) (Y*WIDTH_Y+X)
-//here we have state coord: <X1, X2, X3, X4>
-unsigned int EnvironmentNAVXYTHETALAT::GETHASHBIN(unsigned int X1, unsigned int X2, unsigned int Theta)
+// examples of hash functions: map state coordinates onto a hash value
+// #define GETHASHBIN(X, Y) (Y*WIDTH_Y+X)
+// here we have state coord: <X1, X2, X3, X4>
+unsigned int EnvironmentNAVXYTHETALAT::GETHASHBIN(
+    unsigned int X1,
+    unsigned int X2,
+    unsigned int Theta)
 {
     return inthash(inthash(X1) + (inthash(X2) << 1) + (inthash(Theta) << 2)) & (HashTableSize - 1);
 }
@@ -2992,23 +3149,23 @@ int EnvironmentNAVXYTHETALAT::GetFromToHeuristic(int FromStateID, int ToStateID)
 #endif
 
 #if DEBUG
-    if(FromStateID >= (int)StateID2CoordTable.size()
-        || ToStateID >= (int)StateID2CoordTable.size())
+    if (FromStateID >= (int)StateID2CoordTable.size() ||
+        ToStateID >= (int)StateID2CoordTable.size())
     {
         SBPL_ERROR("ERROR in EnvNAVXYTHETALAT... function: stateID illegal\n");
         throw SBPL_Exception();
     }
 #endif
 
-    //get X, Y for the state
+    // get X, Y for the state
     EnvNAVXYTHETALATHashEntry_t* FromHashEntry = StateID2CoordTable[FromStateID];
     EnvNAVXYTHETALATHashEntry_t* ToHashEntry = StateID2CoordTable[ToStateID];
 
-    //TODO - check if one of the gridsearches already computed and then use it.
+    // TODO - check if one of the gridsearches already computed and then use it.
 
-    return (int)(NAVXYTHETALAT_COSTMULT_MTOMM * EuclideanDistance_m(FromHashEntry->X, FromHashEntry->Y, ToHashEntry->X,
-                                                                    ToHashEntry->Y) /
-                 EnvNAVXYTHETALATCfg.nominalvel_mpersecs);
+    return (int)(NAVXYTHETALAT_COSTMULT_MTOMM *
+            EuclideanDistance_m(FromHashEntry->X, FromHashEntry->Y, ToHashEntry->X, ToHashEntry->Y) /
+            EnvNAVXYTHETALATCfg.nominalvel_mpersecs);
 
 }
 
@@ -3020,19 +3177,17 @@ int EnvironmentNAVXYTHETALAT::GetGoalHeuristic(int stateID)
 
 #if DEBUG
     if (stateID >= (int)StateID2CoordTable.size()) {
-        SBPL_ERROR("ERROR in EnvNAVXYTHETALAT... function: stateID illegal\n");
-        throw SBPL_Exception();
+        throw SBPL_Exception("ERROR in EnvNAVXYTHETALAT... function: stateID illegal");
     }
 #endif
 
     EnvNAVXYTHETALATHashEntry_t* HashEntry = StateID2CoordTable[stateID];
-    //computes distances from start state that is grid2D, so it is EndX_c EndY_c
+    // computes distances from start state that is grid2D, so it is EndX_c EndY_c
     int h2D = grid2Dsearchfromgoal->getlowerboundoncostfromstart_inmm(HashEntry->X, HashEntry->Y);
-    int hEuclid = (int)(NAVXYTHETALAT_COSTMULT_MTOMM * EuclideanDistance_m(HashEntry->X, HashEntry->Y,
-                                                                           EnvNAVXYTHETALATCfg.EndX_c,
-                                                                           EnvNAVXYTHETALATCfg.EndY_c));
+    int hEuclid = (int)(NAVXYTHETALAT_COSTMULT_MTOMM *
+            EuclideanDistance_m(HashEntry->X, HashEntry->Y, EnvNAVXYTHETALATCfg.EndX_c, EnvNAVXYTHETALATCfg.EndY_c));
 
-    //define this function if it is used in the planner (heuristic backward search would use it)
+    // define this function if it is used in the planner (heuristic backward search would use it)
     return (int)(((double)__max(h2D, hEuclid)) / EnvNAVXYTHETALATCfg.nominalvel_mpersecs);
 }
 
@@ -3044,18 +3199,16 @@ int EnvironmentNAVXYTHETALAT::GetStartHeuristic(int stateID)
 
 #if DEBUG
     if (stateID >= (int)StateID2CoordTable.size()) {
-        SBPL_ERROR("ERROR in EnvNAVXYTHETALAT... function: stateID illegal\n");
-        throw SBPL_Exception();
+        throw SBPL_Exception("ERROR in EnvNAVXYTHETALAT... function: stateID illegal");
     }
 #endif
 
     EnvNAVXYTHETALATHashEntry_t* HashEntry = StateID2CoordTable[stateID];
     int h2D = grid2Dsearchfromstart->getlowerboundoncostfromstart_inmm(HashEntry->X, HashEntry->Y);
-    int hEuclid = (int)(NAVXYTHETALAT_COSTMULT_MTOMM * EuclideanDistance_m(EnvNAVXYTHETALATCfg.StartX_c,
-                                                                           EnvNAVXYTHETALATCfg.StartY_c, HashEntry->X,
-                                                                           HashEntry->Y));
+    int hEuclid = (int)(NAVXYTHETALAT_COSTMULT_MTOMM *
+            EuclideanDistance_m(EnvNAVXYTHETALATCfg.StartX_c, EnvNAVXYTHETALATCfg.StartY_c, HashEntry->X, HashEntry->Y));
 
-    //define this function if it is used in the planner (heuristic backward search would use it)
+    // define this function if it is used in the planner (heuristic backward search would use it)
     return (int)(((double)__max(h2D, hEuclid)) / EnvNAVXYTHETALATCfg.nominalvel_mpersecs);
 }
 
@@ -3078,8 +3231,12 @@ EnvironmentNAVXYTHETALAT::GetStateEntry(int state_id) const
 //------------------------------------------------------------------------------
 
 
-void EnvironmentNAVXYTHETALAT::GetLazySuccs(int SourceStateID, std::vector<int>* SuccIDV, std::vector<int>* CostV, std::vector<bool>* isTrueCost,
-                                        std::vector<EnvNAVXYTHETALATAction_t*>* actionV /*=NULL*/)
+void EnvironmentNAVXYTHETALAT::GetLazySuccs(
+    int SourceStateID,
+    std::vector<int>* SuccIDV,
+    std::vector<int>* CostV,
+    std::vector<bool>* isTrueCost,
+    std::vector<EnvNAVXYTHETALATAction_t*>* actionV)
 {
     int aind;
 
@@ -3087,7 +3244,7 @@ void EnvironmentNAVXYTHETALAT::GetLazySuccs(int SourceStateID, std::vector<int>*
     clock_t currenttime = clock();
 #endif
 
-    //clear the successor array
+    // clear the successor array
     SuccIDV->clear();
     CostV->clear();
     SuccIDV->reserve(EnvNAVXYTHETALATCfg.actionwidth);
@@ -3098,48 +3255,56 @@ void EnvironmentNAVXYTHETALAT::GetLazySuccs(int SourceStateID, std::vector<int>*
         actionV->reserve(EnvNAVXYTHETALATCfg.actionwidth);
     }
 
-    //goal state should be absorbing
-    if (SourceStateID == EnvNAVXYTHETALAT.goalstateid) return;
+    // goal state should be absorbing
+    if (SourceStateID == EnvNAVXYTHETALAT.goalstateid) {
+        return;
+    }
 
-    //get X, Y for the state
+    // get X, Y for the state
     EnvNAVXYTHETALATHashEntry_t* HashEntry = StateID2CoordTable[SourceStateID];
 
-    //iterate through actions
+    // iterate through actions
     for (aind = 0; aind < EnvNAVXYTHETALATCfg.actionwidth; aind++) {
         EnvNAVXYTHETALATAction_t* nav3daction = &EnvNAVXYTHETALATCfg.ActionsV[(unsigned int)HashEntry->Theta][aind];
         int newX = HashEntry->X + nav3daction->dX;
         int newY = HashEntry->Y + nav3daction->dY;
-	int newTheta;
-	newTheta = normalizeDiscAngle(nav3daction->endtheta);
-	//newTheta = NORMALIZEDISCTHETA(nav3daction->endtheta, EnvNAVXYTHETALATCfg.NumThetaDirs);
+        int newTheta = normalizeDiscAngle(nav3daction->endtheta);
 
-        //skip the invalid cells
-        if (!IsValidCell(newX, newY)) continue;
-
-        if(!actionV){//if we are supposed to return the action, then don't do lazy
-          EnvNAVXYTHETALATHashEntry_t* OutHashEntry;
-          if((OutHashEntry = (this->*GetHashEntry)(newX, newY, newTheta)) == NULL)
-            OutHashEntry = (this->*CreateNewHashEntry)(newX, newY, newTheta);
-          SuccIDV->push_back(OutHashEntry->stateID);
-          CostV->push_back(nav3daction->cost);
-          isTrueCost->push_back(false);
-          continue;
+        // skip the invalid cells
+        if (!IsValidCell(newX, newY)) {
+            continue;
         }
 
-        //get cost
+        // if we are supposed to return the action, then don't do lazy
+        if (!actionV) {
+            EnvNAVXYTHETALATHashEntry_t* OutHashEntry;
+            if ((OutHashEntry = (this->*GetHashEntry)(newX, newY, newTheta)) == NULL) {
+                OutHashEntry = (this->*CreateNewHashEntry)(newX, newY, newTheta);
+            }
+            SuccIDV->push_back(OutHashEntry->stateID);
+            CostV->push_back(nav3daction->cost);
+            isTrueCost->push_back(false);
+            continue;
+        }
+
+        // get cost
         int cost = GetActionCost(HashEntry->X, HashEntry->Y, HashEntry->Theta, nav3daction);
-        if (cost >= INFINITECOST) continue;
+        if (cost >= INFINITECOST) {
+            continue;
+        }
 
         EnvNAVXYTHETALATHashEntry_t* OutHashEntry;
         if ((OutHashEntry = (this->*GetHashEntry)(newX, newY, newTheta)) == NULL) {
-            //have to create a new entry
+            // have to create a new entry
             OutHashEntry = (this->*CreateNewHashEntry)(newX, newY, newTheta);
         }
 
         SuccIDV->push_back(OutHashEntry->stateID);
         CostV->push_back(cost);
         isTrueCost->push_back(true);
-        if (actionV != NULL) actionV->push_back(nav3daction);
+        if (actionV != NULL) {
+            actionV->push_back(nav3daction);
+        }
     }
 
 #if TIME_DEBUG
@@ -3147,102 +3312,130 @@ void EnvironmentNAVXYTHETALAT::GetLazySuccs(int SourceStateID, std::vector<int>*
 #endif
 }
 
-int EnvironmentNAVXYTHETALAT::GetTrueCost(int parentID, int childID){
-  EnvNAVXYTHETALATHashEntry_t* fromHash = StateID2CoordTable[parentID];
-  EnvNAVXYTHETALATHashEntry_t* toHash = StateID2CoordTable[childID];
-
-  for(int i=0; i<EnvNAVXYTHETALATCfg.actionwidth; i++){
-    EnvNAVXYTHETALATAction_t* nav3daction = &EnvNAVXYTHETALATCfg.ActionsV[(unsigned int)fromHash->Theta][i];
-    int newX = fromHash->X + nav3daction->dX;
-    int newY = fromHash->Y + nav3daction->dY;
-    int newTheta;
-    newTheta = normalizeDiscAngle(nav3daction->endtheta);
-    //newTheta = NORMALIZEDISCTHETA(nav3daction->endtheta, EnvNAVXYTHETALATCfg.NumThetaDirs);
-
-    //skip the invalid cells
-    if(!IsValidCell(newX, newY))
-      continue;
-
-    EnvNAVXYTHETALATHashEntry_t* hash;
-    if((hash = (this->*GetHashEntry)(newX, newY, newTheta)) == NULL)
-      continue;
-    if(hash->stateID != toHash->stateID)
-      continue;
-
-    //get cost
-    int cost = GetActionCost(fromHash->X, fromHash->Y, fromHash->Theta, nav3daction);
-
-    if(cost >= INFINITECOST)
-      return -1;
-    return cost;
-  }
-  printf("this should never happen! we didn't find the state we need to get the true cost for!\n");
-  throw SBPL_Exception();
-  return -1;
-}
-
-void EnvironmentNAVXYTHETALAT::GetSuccsWithUniqueIds(int SourceStateID, std::vector<int>* SuccIDV, std::vector<int>* CostV,
-                                                     std::vector<EnvNAVXYTHETALATAction_t*>* actionV /*=NULL*/){
-  GetSuccs(SourceStateID, SuccIDV, CostV, actionV);
-}
-
-void EnvironmentNAVXYTHETALAT::GetLazySuccsWithUniqueIds(int SourceStateID, std::vector<int>* SuccIDV, std::vector<int>* CostV, std::vector<bool>* isTrueCost,
-                                                     std::vector<EnvNAVXYTHETALATAction_t*>* actionV /*=NULL*/){
-  GetLazySuccs(SourceStateID, SuccIDV, CostV, isTrueCost, actionV);
-}
-
-bool EnvironmentNAVXYTHETALAT::isGoal(int id){
-  return EnvNAVXYTHETALAT.goalstateid == id;
-}
-
-void EnvironmentNAVXYTHETALAT::GetLazyPreds(int TargetStateID, vector<int>* PredIDV, vector<int>* CostV, vector<bool>* isTrueCost)
+int EnvironmentNAVXYTHETALAT::GetTrueCost(int parentID, int childID)
 {
-  int aind;
+    EnvNAVXYTHETALATHashEntry_t* fromHash = StateID2CoordTable[parentID];
+    EnvNAVXYTHETALATHashEntry_t* toHash = StateID2CoordTable[childID];
+
+    for (int i = 0; i < EnvNAVXYTHETALATCfg.actionwidth; i++) {
+        EnvNAVXYTHETALATAction_t* nav3daction = &EnvNAVXYTHETALATCfg.ActionsV[(unsigned int)fromHash->Theta][i];
+        int newX = fromHash->X + nav3daction->dX;
+        int newY = fromHash->Y + nav3daction->dY;
+        int newTheta = normalizeDiscAngle(nav3daction->endtheta);
+
+        // skip the invalid cells
+        if (!IsValidCell(newX, newY)) {
+            continue;
+        }
+
+        EnvNAVXYTHETALATHashEntry_t* hash;
+        if ((hash = (this->*GetHashEntry)(newX, newY, newTheta)) == NULL) {
+            continue;
+        }
+        if (hash->stateID != toHash->stateID) {
+            continue;
+        }
+
+        // get cost
+        int cost = GetActionCost(fromHash->X, fromHash->Y, fromHash->Theta, nav3daction);
+
+        if (cost >= INFINITECOST) {
+            return -1;
+        }
+        return cost;
+    }
+    throw SBPL_Exception("This should never happen! we didn't find the state we need to get the true cost for!");
+    return -1;
+}
+
+void EnvironmentNAVXYTHETALAT::GetSuccsWithUniqueIds(
+    int SourceStateID,
+    std::vector<int>* SuccIDV,
+    std::vector<int>* CostV,
+    std::vector<EnvNAVXYTHETALATAction_t*>* actionV)
+{
+    GetSuccs(SourceStateID, SuccIDV, CostV, actionV);
+}
+
+void EnvironmentNAVXYTHETALAT::GetLazySuccsWithUniqueIds(
+    int SourceStateID,
+    std::vector<int>* SuccIDV,
+    std::vector<int>* CostV,
+    std::vector<bool>* isTrueCost,
+    std::vector<EnvNAVXYTHETALATAction_t*>* actionV)
+{
+    GetLazySuccs(SourceStateID, SuccIDV, CostV, isTrueCost, actionV);
+}
+
+bool EnvironmentNAVXYTHETALAT::isGoal(int id)
+{
+    return EnvNAVXYTHETALAT.goalstateid == id;
+}
+
+void EnvironmentNAVXYTHETALAT::GetLazyPreds(
+    int TargetStateID,
+    std::vector<int>* PredIDV,
+    std::vector<int>* CostV,
+    std::vector<bool>* isTrueCost)
+{
+    int aind;
 
 #if TIME_DEBUG
-  clock_t currenttime = clock();
+    clock_t currenttime = clock();
 #endif
 
-  //get X, Y for the state
-  EnvNAVXYTHETALATHashEntry_t* HashEntry = StateID2CoordTable[TargetStateID];
+    // get X, Y for the state
+    EnvNAVXYTHETALATHashEntry_t* HashEntry = StateID2CoordTable[TargetStateID];
 
-  //clear the successor array
-  PredIDV->clear();
-  CostV->clear();
-  PredIDV->reserve(EnvNAVXYTHETALATCfg.PredActionsV[(unsigned int)HashEntry->Theta].size());
-  CostV->reserve(EnvNAVXYTHETALATCfg.PredActionsV[(unsigned int)HashEntry->Theta].size());
+    // clear the successor array
+    PredIDV->clear();
+    CostV->clear();
+    PredIDV->reserve(EnvNAVXYTHETALATCfg.PredActionsV[(unsigned int)HashEntry->Theta].size());
+    CostV->reserve(EnvNAVXYTHETALATCfg.PredActionsV[(unsigned int)HashEntry->Theta].size());
 
-  //iterate through actions
-  vector<EnvNAVXYTHETALATAction_t*>* actionsV = &EnvNAVXYTHETALATCfg.PredActionsV[(unsigned int)HashEntry->Theta];
-  for (aind = 0; aind < (int)EnvNAVXYTHETALATCfg.PredActionsV[(unsigned int)HashEntry->Theta].size(); aind++) {
+    // iterate through actions
+    std::vector<EnvNAVXYTHETALATAction_t*>* actionsV = &EnvNAVXYTHETALATCfg.PredActionsV[(unsigned int)HashEntry->Theta];
+    for (aind = 0; aind < (int)EnvNAVXYTHETALATCfg.PredActionsV[(unsigned int)HashEntry->Theta].size(); aind++)
+    {
+        EnvNAVXYTHETALATAction_t* nav3daction = actionsV->at(aind);
 
-    EnvNAVXYTHETALATAction_t* nav3daction = actionsV->at(aind);
+        int predX = HashEntry->X - nav3daction->dX;
+        int predY = HashEntry->Y - nav3daction->dY;
+        int predTheta = nav3daction->starttheta;
 
-    int predX = HashEntry->X - nav3daction->dX;
-    int predY = HashEntry->Y - nav3daction->dY;
-    int predTheta = nav3daction->starttheta;
+        //skip the invalid cells
+        if (!IsValidCell(predX, predY)) {
+            continue;
+        }
 
-    //skip the invalid cells
-    if (!IsValidCell(predX, predY)) continue;
+        EnvNAVXYTHETALATHashEntry_t* OutHashEntry;
+        if ((OutHashEntry = (this->*GetHashEntry)(predX, predY, predTheta)) == NULL) {
+            OutHashEntry = (this->*CreateNewHashEntry)(predX, predY, predTheta);
+        }
 
-    EnvNAVXYTHETALATHashEntry_t* OutHashEntry;
-    if((OutHashEntry = (this->*GetHashEntry)(predX, predY, predTheta)) == NULL)
-      OutHashEntry = (this->*CreateNewHashEntry)(predX, predY, predTheta);
-    PredIDV->push_back(OutHashEntry->stateID);
-    CostV->push_back(nav3daction->cost);
-    isTrueCost->push_back(false);
-  }
+        PredIDV->push_back(OutHashEntry->stateID);
+        CostV->push_back(nav3daction->cost);
+        isTrueCost->push_back(false);
+    }
 
 #if TIME_DEBUG
-  time_getsuccs += clock()-currenttime;
+    time_getsuccs += clock()-currenttime;
 #endif
 }
 
-void EnvironmentNAVXYTHETALAT::GetPredsWithUniqueIds(int TargetStateID, vector<int>* PredIDV, vector<int>* CostV){
-  GetPreds(TargetStateID, PredIDV, CostV);
+void EnvironmentNAVXYTHETALAT::GetPredsWithUniqueIds(
+    int TargetStateID,
+    std::vector<int>* PredIDV,
+    std::vector<int>* CostV)
+{
+    GetPreds(TargetStateID, PredIDV, CostV);
 }
 
-void EnvironmentNAVXYTHETALAT::GetLazyPredsWithUniqueIds(int TargetStateID, vector<int>* PredIDV, vector<int>* CostV, vector<bool>* isTrueCost){
-  GetLazyPreds(TargetStateID, PredIDV, CostV, isTrueCost);
+void EnvironmentNAVXYTHETALAT::GetLazyPredsWithUniqueIds(
+    int TargetStateID,
+    std::vector<int>* PredIDV,
+    std::vector<int>* CostV,
+    std::vector<bool>* isTrueCost)
+{
+    GetLazyPreds(TargetStateID, PredIDV, CostV, isTrueCost);
 }
-

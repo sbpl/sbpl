@@ -1,10 +1,10 @@
 /*
  * Copyright (c) 2008, Maxim Likhachev
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  *     * Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimer.
  *     * Redistributions in binary form must reproduce the above copyright
@@ -13,7 +13,7 @@
  *     * Neither the name of the Carnegie Mellon University nor the names of its
  *       contributors may be used to endorse or promote products derived from
  *       this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -45,7 +45,7 @@
 #define NAVXYTHETALAT_DXYWIDTH 8
 #define ENVNAVXYTHETALAT_DEFAULTOBSTHRESH 254	//see explanation of the value below
 //maximum number of states for storing them into lookup (as opposed to hash)
-#define SBPL_XYTHETALAT_MAXSTATESFORLOOKUP 100000000 
+#define SBPL_XYTHETALAT_MAXSTATESFORLOOKUP 100000000
 //definition of theta orientations
 //0 - is aligned with X-axis in the positive direction (1,0 in polar coordinates)
 //theta increases as we go counterclockwise
@@ -53,14 +53,14 @@
 #define NAVXYTHETALAT_THETADIRS 16
 //number of actions per x,y,theta state
 //decrease, increase, same angle while moving plus decrease, increase angle while standing.
-#define NAVXYTHETALAT_DEFAULT_ACTIONWIDTH 5 
+#define NAVXYTHETALAT_DEFAULT_ACTIONWIDTH 5
 #define NAVXYTHETALAT_COSTMULT_MTOMM 1000
 
 class CMDPSTATE;
 class MDPConfig;
 class SBPL2DGridSearch;
 
-typedef struct
+struct EnvNAVXYTHETALATAction_t
 {
     unsigned char aind; //index of the action (unique for given starttheta)
     char starttheta;
@@ -77,18 +77,18 @@ typedef struct
  int motprimID;
  double turning_radius;
 
-} EnvNAVXYTHETALATAction_t;
+};
 
-typedef struct
+struct EnvNAVXYTHETALATHashEntry_t
 {
     int stateID;
     int X;
     int Y;
     char Theta;
     int iteration;
-} EnvNAVXYTHETALATHashEntry_t;
+};
 
-typedef struct
+struct SBPL_xytheta_mprimitive
 {
     int motprimID;
     unsigned char starttheta_c;
@@ -98,10 +98,10 @@ typedef struct
     //intermptV start at 0,0,starttheta and end at endcell in continuous
     //domain with half-bin less to account for 0,0 start
     std::vector<sbpl_xy_theta_pt_t> intermptV;
-} SBPL_xytheta_mprimitive;
+};
 
 //variables that dynamically change (e.g., array of states, ...)
-typedef struct
+struct EnvironmentNAVXYTHETALAT_t
 {
     int startstateid;
     int goalstateid;
@@ -109,10 +109,10 @@ typedef struct
     bool bInitialized;
 
     //any additional variables
-} EnvironmentNAVXYTHETALAT_t;
+};
 
 //configuration parameters
-typedef struct ENV_NAVXYTHETALAT_CONFIG
+struct EnvNAVXYTHETALATConfig_t
 {
     int EnvWidth_c;
     int EnvHeight_c;
@@ -125,10 +125,10 @@ typedef struct ENV_NAVXYTHETALAT_CONFIG
     int EndTheta;
     unsigned char** Grid2D;
 
- std::vector<double> ThetaDirs;
- int StartTheta_rad;
- int EndTheta_rad;
- double min_turning_radius_m;
+    std::vector<double> ThetaDirs;
+    int StartTheta_rad;
+    int EndTheta_rad;
+    double min_turning_radius_m;
 
     // the value at which and above which cells are obstacles in the maps sent from outside
     // the default is defined above
@@ -164,15 +164,15 @@ typedef struct ENV_NAVXYTHETALAT_CONFIG
     int dXY[NAVXYTHETALAT_DXYWIDTH][2];
 
     //array of actions, ActionsV[i][j] - jth action for sourcetheta = i
-    EnvNAVXYTHETALATAction_t** ActionsV; 
+    EnvNAVXYTHETALATAction_t** ActionsV;
     //PredActionsV[i] - vector of pointers to the actions that result in a state with theta = i
-    std::vector<EnvNAVXYTHETALATAction_t*>* PredActionsV; 
+    std::vector<EnvNAVXYTHETALATAction_t*>* PredActionsV;
 
     int actionwidth; //number of motion primitives
     std::vector<SBPL_xytheta_mprimitive> mprimV;
 
     std::vector<sbpl_2Dpt_t> FootprintPolygon;
-} EnvNAVXYTHETALATConfig_t;
+};
 
 class EnvNAVXYTHETALAT_InitParms
 {
@@ -566,11 +566,11 @@ public:
      * \brief returns stateID for a state with coords x,y,theta
      */
     virtual int GetStateFromCoord(int x, int y, int theta);
-    
+
     /**
      * \brief returns the actions / motion primitives of the passed path.
      */
-    virtual void GetActionsFromStateIDPath(std::vector<int>* stateIDPath, 
+    virtual void GetActionsFromStateIDPath(std::vector<int>* stateIDPath,
                                            std::vector<EnvNAVXYTHETALATAction_t>* action_list);
 
     /** \brief converts a path given by stateIDs into a sequence of
@@ -686,4 +686,3 @@ protected:
 };
 
 #endif
-
