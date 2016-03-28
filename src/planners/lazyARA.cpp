@@ -1,10 +1,10 @@
 /*
  * Copyright (c) 2013, Mike Phillips and Maxim Likhachev
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  *     * Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimer.
  *     * Redistributions in binary form must reproduce the above copyright
@@ -13,7 +13,7 @@
  *     * Neither the name of the Carnegie Mellon University nor the names of its
  *       contributors may be used to endorse or promote products derived from
  *       this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -27,6 +27,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include <sbpl/planners/lazyARA.h>
+
+#include <sstream>
+
 using namespace std;
 
 LazyARAPlanner::LazyARAPlanner(DiscreteSpaceInformation* environment, bool bSearchForward) :
@@ -53,7 +56,7 @@ void LazyARAPlanner::freeMemory(){
   states.clear();
 }
 
-LazyARAState* LazyARAPlanner::GetState(int id){	
+LazyARAState* LazyARAPlanner::GetState(int id){
   //if this stateID is out of bounds of our state vector then grow the list
   if(id >= int(states.size())){
     for(int i=states.size(); i<=id; i++)
@@ -109,7 +112,7 @@ void LazyARAPlanner::ExpandState(LazyARAState* parent){
     //printf("  succ %d\n",children[i]);
     LazyARAState* child = GetState(children[i]);
     insertLazyList(child, parent, costs[i], isTrueCost[i]);
-  } 
+  }
 }
 
 //assumptions:
@@ -240,20 +243,23 @@ int LazyARAPlanner::ImprovePath(){
   //expand states until done
   int expands = 0;
   CKey min_key = heap.getminkeyheap();
-  while(!heap.emptyheap() && 
-        min_key.key[0] < INFINITECOST && 
+  while(!heap.emptyheap() &&
+        min_key.key[0] < INFINITECOST &&
         (goal_state->g > min_key.key[0] || !goal_state->isTrueCost) &&
         (goal_state->v > min_key.key[0]) &&
         !outOfTime()){
 
-    //get the state		
+    //get the state
     LazyARAState* state = (LazyARAState*)heap.deleteminheap();
 
     if(state->v == state->g){
-      printf("ERROR: consistent state is being expanded\n");
-      printf("id=%d v=%d g=%d isTrueCost=%d lazyListSize=%lu\n",
-              state->id,state->v,state->g,state->isTrueCost,state->lazyList.size());
-      throw new SBPL_Exception();
+      std::stringstream ss("ERROR: consistent state is being expanded");
+      ss << "id=" << state->id;
+      ss << "v=" << state->v;
+      ss << "g=" << state->g;
+      ss << "isTrueCost=" << state->isTrueCost;
+      ss << "lazyListSize=" << state->lazyList.size();
+      throw SBPL_Exception(ss.str());
     }
 
     if(state->isTrueCost){
@@ -290,7 +296,7 @@ int LazyARAPlanner::ImprovePath(){
   if(min_key.key[0] >= INFINITECOST)
     printf("min key inf\n");
   */
-   
+
   if(goal_state->g == INFINITECOST && (heap.emptyheap() || min_key.key[0] >= INFINITECOST))
     return 0;//solution does not exists
   if(!heap.emptyheap() && goal_state->g > min_key.key[0])
@@ -353,14 +359,14 @@ vector<int> LazyARAPlanner::GetSearchPath(int& solcost){
     state = state->expanded_best_parent;
     wholePathIds.push_back(state->id);
   }
-  
+
   //if we pretended that the goal was expanded for path reconstruction then revert the state now
   if(!goal_expanded){
     goal_state->expanded_best_parent = NULL;
     goal_state->v = INFINITECOST;
   }
 
-  //if we searched forward then the path reconstruction 
+  //if we searched forward then the path reconstruction
   //worked backward from the goal, so we have to reverse the path
   if(bforwardsearch){
     //in place reverse
@@ -387,7 +393,7 @@ bool LazyARAPlanner::outOfTime(){
   //we are out of time if:
          //we used up the max time limit OR
          //we found some solution and used up the minimum time limit
-  return time_used >= params.max_time || 
+  return time_used >= params.max_time ||
          (use_repair_time && eps_satisfied != INFINITECOST && time_used >= params.repair_time);
 }
 
@@ -453,7 +459,7 @@ bool LazyARAPlanner::Search(vector<int>& pathIds, int& PathCost){
     double delta_time = double(clock()-before_time)/CLOCKS_PER_SEC;
 
     //print the bound, expands, and time for that iteration
-    printf("bound=%f expands=%d cost=%d time=%.3f\n", 
+    printf("bound=%f expands=%d cost=%d time=%.3f\n",
         eps_satisfied, delta_expands, goal_state->g, delta_time);
 
     //update stats
@@ -515,7 +521,7 @@ void LazyARAPlanner::prepareNextSearchIteration(){
   //recompute priorities for states in OPEN and reorder it
   for (int i=1; i<=heap.currentsize; ++i){
     LazyARAState* state = (LazyARAState*)heap.heap[i].heapstate;
-    heap.heap[i].key.key[0] = state->g + int(eps * state->h); 
+    heap.heap[i].key.key[0] = state->g + int(eps * state->h);
   }
   heap.makeheap();
 
@@ -560,10 +566,10 @@ int LazyARAPlanner::replan(vector<int>* solution_stateIDs_V, ReplanParams p, int
   }
 
   //plan
-  vector<int> pathIds; 
+  vector<int> pathIds;
   int PathCost = 0;
   bool solnFound = Search(pathIds, PathCost);
-  printf("total expands=%d planning time=%.3f reconstruct path time=%.3f total time=%.3f solution cost=%d\n", 
+  printf("total expands=%d planning time=%.3f reconstruct path time=%.3f total time=%.3f solution cost=%d\n",
       totalExpands, totalPlanTime, reconstructTime, totalTime, goal_state->g);
 
   //copy the solution

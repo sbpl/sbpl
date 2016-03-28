@@ -1,10 +1,10 @@
 /*
  * Copyright (c) 2008, Maxim Likhachev
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  *     * Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimer.
  *     * Redistributions in binary form must reproduce the above copyright
@@ -13,7 +13,7 @@
  *     * Neither the name of the Carnegie Mellon University nor the names of its
  *       contributors may be used to endorse or promote products derived from
  *       this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -31,6 +31,8 @@
 #define __LIST_H_
 
 #include <cstdlib>
+#include <sstream>
+
 #include <sbpl/config.h>
 #include <sbpl/sbpl_exception.h>
 
@@ -87,12 +89,10 @@ public:
     void insert(AbstractSearchState *AbstractSearchState1, int listindex)
     {
         if (currentsize >= LISTSIZE) {
-            SBPL_ERROR("ERROR: list is full\n");
-            throw new SBPL_Exception();
+            throw SBPL_Exception("ERROR: list is full");
         }
         if (AbstractSearchState1->listelem[listindex] != NULL) {
-            SBPL_ERROR("ERROR: insert: element is already in the list\n");
-            throw new SBPL_Exception();
+            throw SBPL_Exception("ERROR: insert: element is already in the list");
         }
         listelement *insertelem = (listelement*)malloc(sizeof(listelement));
         insertelem->liststate = AbstractSearchState1;
@@ -114,8 +114,7 @@ public:
     void remove(AbstractSearchState *AbstractSearchState1, int listindex)
     {
         if (currentsize == 0 || AbstractSearchState1->listelem[listindex] == NULL) {
-            SBPL_ERROR("ERROR: delete: list does not contain the element\n");
-            throw new SBPL_Exception();
+            throw SBPL_Exception("ERROR: delete: list does not contain the element");
         }
         if (AbstractSearchState1->listelem[listindex]->prev != NULL && AbstractSearchState1->listelem[listindex]->next
             != NULL) {
@@ -178,7 +177,7 @@ public:
     //contains infinite priority elements
     std::vector<AbstractSearchState *>* bucketV;
     //contains the priorities of elements in the numofbuckets-2 bucket (mixed priorities)
-    std::vector<int> assortedpriorityV; 
+    std::vector<int> assortedpriorityV;
     int firstpriority;
     int numofbuckets;
     int currentminelement_bucketind;
@@ -275,13 +274,11 @@ public:
 #if DEBUG
         else if(currentminelement_bucketind >= numofbuckets)
         {
-            SBPL_ERROR("ERROR: currentminelement_bucketind is invalid\n");
-            throw new SBPL_Exception();
+            throw SBPL_Exception("ERROR: currentminelement_bucketind is invalid");
         }
         else if((int)bucketV[currentminelement_bucketind].size() <= currentminelement_bucketVind)
         {
-            SBPL_ERROR("ERROR: failed to get minelement\n");
-            throw new SBPL_Exception();
+            throw SBPL_Exception("ERROR: failed to get minelement");
         }
 #endif
         else {
@@ -297,13 +294,11 @@ public:
 #if DEBUG
         else if(currentminelement_bucketind >= numofbuckets)
         {
-            SBPL_ERROR("ERROR: currentminelement_bucketind is invalid\n");
-            throw new SBPL_Exception();
+            throw SBPL_Exception("ERROR: currentminelement_bucketind is invalid");
         }
         else if((int)bucketV[currentminelement_bucketind].size() <= currentminelement_bucketVind)
         {
-            SBPL_ERROR("ERROR: failed to get minelement\n");
-            throw new SBPL_Exception();
+            throw SBPL_Exception("ERROR: failed to get minelement");
         }
 #endif
         else {
@@ -410,8 +405,7 @@ private:
                 }
             }
             if (currentminelement_priority == INFINITECOST) {
-                SBPL_ERROR("ERROR: in recomputemin in buckets\n");
-                throw new SBPL_Exception();
+                throw SBPL_Exception("ERROR: in recomputemin in buckets");
             }
         }
         else if (bind == (numofbuckets - 1)) {
@@ -582,17 +576,21 @@ public:
         int bucket_index = (currentfirstbucket_bindex + bucket_increment) % numofbuckets;
 
         if (bucket_increment >= numofbuckets || bucket_increment < 0) {
-            SBPL_ERROR("ERROR: invalid priority=%d (currentfirstbucket_priority=%d) used with sliding buckets\n",
-                       priority, currentfirstbucket_priority);
-            throw new SBPL_Exception();
+            std::stringstream ss;
+            ss << "ERROR: invalid priority=" << priority <<
+                    " (currentfirstbucket_priority=" <<
+                    currentfirstbucket_priority <<
+                    ") used with sliding buckets";
+            throw SBPL_Exception(ss.str());
         }
 
         //insert the element
         lastelementindexV[bucket_index]++;
 
         if (lastelementindexV[bucket_index] == bucketsize) {
-            SBPL_ERROR("ERROR: bucket %d is full (size=%d)\n", bucket_index, bucketsize);
-            throw new SBPL_Exception();
+            std::stringstream ss;
+            ss << "ERROR: bucket " << bucket_index << " is full (size=" << bucketsize << ")";
+            throw SBPL_Exception(ss.str());
         }
 
         if (bucketV[bucket_index] == NULL) createbucket(bucket_index);
@@ -665,8 +663,7 @@ private:
     void createbucket(int bucketindex)
     {
         if (bucketV[bucketindex] != NULL) {
-            SBPL_ERROR("ERROR: trying to create a non-null bucket\n");
-            throw new SBPL_Exception();
+            throw SBPL_Exception("ERROR: trying to create a non-null bucket");
         }
 
         if(initialdynamicsize)

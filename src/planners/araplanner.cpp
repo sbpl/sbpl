@@ -1,10 +1,10 @@
 /*
  * Copyright (c) 2008, Maxim Likhachev
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  *     * Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimer.
  *     * Redistributions in binary form must reproduce the above copyright
@@ -13,7 +13,7 @@
  *     * Neither the name of the Carnegie Mellon University nor the names of its
  *       contributors may be used to endorse or promote products derived from
  *       this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -33,6 +33,7 @@
 #include <cassert>
 #include <cmath>
 #include <limits>
+#include <sstream>
 
 #include <sbpl/discrete_space_information/environment.h>
 #include <sbpl/utils/heap.h>
@@ -61,8 +62,7 @@ ARAPlanner::ARAPlanner(DiscreteSpaceInformation* environment, bool bSearchForwar
 #endif
     fDeb = SBPL_FOPEN(debug, "w");
     if (fDeb == NULL) {
-        SBPL_ERROR("ERROR: could not open planner debug file\n");
-        throw new SBPL_Exception();
+        throw SBPL_Exception("ERROR: could not open planner debug file");
     }
 
     pSearchStateSpace_ = new ARASearchStateSpace_t;
@@ -108,8 +108,7 @@ CMDPSTATE* ARAPlanner::CreateState(int stateID, ARASearchStateSpace_t* pSearchSt
 
 #if DEBUG
     if (environment_->StateID2IndexMapping[stateID][ARAMDP_STATEID2IND] != -1) {
-        SBPL_ERROR("ERROR in CreateState: state already created\n");
-        throw new SBPL_Exception();
+        throw SBPL_Exception("ERROR in CreateState: state already created");
     }
 #endif
 
@@ -124,8 +123,7 @@ CMDPSTATE* ARAPlanner::CreateState(int stateID, ARASearchStateSpace_t* pSearchSt
     if(state !=
        pSearchStateSpace->searchMDP.StateArray[environment_->StateID2IndexMapping[stateID][ARAMDP_STATEID2IND]])
     {
-        SBPL_ERROR("ERROR in CreateState: invalid state index\n");
-        throw new SBPL_Exception();
+        throw SBPL_Exception("ERROR in CreateState: invalid state index");
     }
 #endif
 
@@ -140,8 +138,9 @@ CMDPSTATE* ARAPlanner::CreateState(int stateID, ARASearchStateSpace_t* pSearchSt
 CMDPSTATE* ARAPlanner::GetState(int stateID, ARASearchStateSpace_t* pSearchStateSpace)
 {
     if (stateID >= (int)environment_->StateID2IndexMapping.size()) {
-        SBPL_ERROR("ERROR int GetState: stateID %d is invalid\n", stateID);
-        throw new SBPL_Exception();
+        std::stringstream ss("ERROR int GetState: stateID ");
+        ss << stateID << " is invalid";
+        throw SBPL_Exception(ss.str());
     }
 
     if (environment_->StateID2IndexMapping[stateID][ARAMDP_STATEID2IND] == -1)
@@ -354,8 +353,7 @@ int ARAPlanner::ImprovePath(ARASearchStateSpace_t* pSearchStateSpace, double Max
     expands = 0;
 
     if (pSearchStateSpace->searchgoalstate == NULL) {
-        SBPL_ERROR("ERROR searching: no goal state is set\n");
-        throw new SBPL_Exception();
+        throw SBPL_Exception("ERROR searching: no goal state is set");
     }
 
     //goal state
@@ -388,16 +386,14 @@ int ARAPlanner::ImprovePath(ARASearchStateSpace_t* pSearchStateSpace, double Max
         PrintSearchState(state, fDeb);
         if (state->listelem[ARA_INCONS_LIST_ID] != NULL) {
             SBPL_FPRINTF(fDeb, "ERROR: expanding a state from inconslist\n");
-            SBPL_ERROR("ERROR: expanding a state from inconslist\n");
-            throw new SBPL_Exception();
+            throw SBPL_Exception("ERROR: expanding a state from inconslist");
         }
         //SBPL_FFLUSH(fDeb);
 #endif
 
 #if DEBUG
         if (minkey.key[0] < oldkey.key[0] && fabs(this->finitial_eps - 1.0) < ERR_EPS) {
-            //SBPL_PRINTF("WARN in search: the sequence of keys decreases\n");
-            //throw new SBPL_Exception();
+            //throw SBPL_Exception("WARN in search: the sequence of keys decreases");
         }
         oldkey = minkey;
 #endif
@@ -406,7 +402,7 @@ int ARAPlanner::ImprovePath(ARASearchStateSpace_t* pSearchStateSpace, double Max
             SBPL_ERROR("ERROR: consistent state is being expanded\n");
 #if DEBUG
             SBPL_FPRINTF(fDeb, "ERROR: consistent state is being expanded\n");
-            throw new SBPL_Exception();
+            throw SBPL_Exception("ERROR: consistent state is being expanded");
 #endif
         }
 
@@ -595,7 +591,7 @@ void ARAPlanner::ReInitializeSearchStateSpace(ARASearchStateSpace_t* pSearchStat
     pSearchStateSpace->heap->makeemptyheap();
     pSearchStateSpace->inconslist->makeemptylist(ARA_INCONS_LIST_ID);
 
-    //reset 
+    //reset
     pSearchStateSpace->eps = this->finitial_eps;
     pSearchStateSpace->eps_satisfied = INFINITECOST;
 
@@ -605,7 +601,7 @@ void ARAPlanner::ReInitializeSearchStateSpace(ARASearchStateSpace_t* pSearchStat
         ReInitializeSearchStateInfo(startstateinfo, pSearchStateSpace);
     }
     startstateinfo->g = 0;
-    
+
     //initialize goal state
     ARAState* searchgoalstate = (ARAState*)(pSearchStateSpace->searchgoalstate->PlannerSpecificData);
     if (searchgoalstate->callnumberaccessed != pSearchStateSpace->callnumber) {
@@ -625,8 +621,7 @@ void ARAPlanner::ReInitializeSearchStateSpace(ARASearchStateSpace_t* pSearchStat
 int ARAPlanner::InitializeSearchStateSpace(ARASearchStateSpace_t* pSearchStateSpace)
 {
     if (pSearchStateSpace->heap->currentsize != 0 || pSearchStateSpace->inconslist->currentsize != 0) {
-        SBPL_ERROR("ERROR in InitializeSearchStateSpace: heap or list is not empty\n");
-        throw new SBPL_Exception();
+        throw SBPL_Exception("ERROR in InitializeSearchStateSpace: heap or list is not empty");
     }
 
     pSearchStateSpace->eps = this->finitial_eps;
@@ -698,14 +693,13 @@ int ARAPlanner::ReconstructPath(ARASearchStateSpace_t* pSearchStateSpace)
             PrintSearchState(stateinfo, fDeb);
 #endif
             if (stateinfo->g == INFINITECOST) {
-                //SBPL_ERROR("ERROR in ReconstructPath: g of the state on the path is INFINITE\n");
-                //throw new SBPL_Exception();
+                //throw SBPL_Exception("ERROR in ReconstructPath: g of the state on the path is INFINITE");
                 return -1;
             }
 
             if (stateinfo->bestpredstate == NULL) {
                 SBPL_ERROR("ERROR in ReconstructPath: bestpred is NULL\n");
-                throw new SBPL_Exception();
+                throw SBPL_Exception("ERROR in ReconstructPath: bestpred is NULL");
             }
 
             //get the parent state
@@ -719,7 +713,7 @@ int ARAPlanner::ReconstructPath(ARASearchStateSpace_t* pSearchStateSpace)
             if (predstateinfo->v >= stateinfo->g) {
                 SBPL_ERROR("ERROR in ReconstructPath: g-values are non-decreasing\n");
                 PrintSearchState(predstateinfo, fDeb);
-                throw new SBPL_Exception();
+                throw SBPL_Exception("ERROR in ReconstructPath: g-values are non-decreasing");
             }
 
             //transition back
@@ -841,8 +835,7 @@ vector<int> ARAPlanner::GetSearchPath(ARASearchStateSpace_t* pSearchStateSpace, 
 
     FILE* fOut = stdout;
     if (fOut == NULL) {
-        SBPL_ERROR("ERROR: could not open file\n");
-        throw new SBPL_Exception();
+        throw SBPL_Exception("ERROR: could not open file");
     }
     while (state->StateID != goalstate->StateID) {
         if (state->PlannerSpecificData == NULL) {
@@ -879,7 +872,7 @@ vector<int> ARAPlanner::GetSearchPath(ARASearchStateSpace_t* pSearchStateSpace, 
 
 #if DEBUG
         ARAState* nextstateinfo = (ARAState*)(searchstateinfo->bestnextstate->PlannerSpecificData);
-        if (actioncost != abs((int)(searchstateinfo->g - nextstateinfo->g)) && 
+        if (actioncost != abs((int)(searchstateinfo->g - nextstateinfo->g)) &&
             pSearchStateSpace->eps_satisfied <= 1.001)
         {
             SBPL_FPRINTF(fDeb, "ERROR: actioncost=%d is not matching the difference in g-values of %d\n",
@@ -956,7 +949,7 @@ bool ARAPlanner::Search(ARASearchStateSpace_t* pSearchStateSpace, vector<int>& p
 
             //it will be a new search
             pSearchStateSpace->bNewSearchIteration = true;
-        }           
+        }
 
         if (pSearchStateSpace->bNewSearchIteration) {
             pSearchStateSpace->searchiteration++;

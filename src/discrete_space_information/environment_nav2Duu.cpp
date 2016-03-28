@@ -1,10 +1,10 @@
 /*
  * Copyright (c) 2009, Maxim Likhachev
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  *     * Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimer.
  *     * Redistributions in binary form must reproduce the above copyright
@@ -13,7 +13,7 @@
  *     * Neither the name of the Carnegie Mellon University nor the names of its
  *       contributors may be used to endorse or promote products derived from
  *       this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -29,6 +29,8 @@
 
 #include <cstdlib>
 #include <cstring>
+#include <sstream>
+
 #include <sbpl/discrete_space_information/environment_nav2Duu.h>
 #include <sbpl/utils/mdp.h>
 #include <sbpl/utils/mdpconfig.h>
@@ -63,91 +65,76 @@ void EnvironmentNAV2DUU::ReadConfiguration(FILE* fCfg)
 
     //discretization(cells)
     if (fscanf(fCfg, "%s", sTemp) != 1) {
-        SBPL_ERROR("ERROR: ran out of env file early\n");
-        throw new SBPL_Exception();
+        throw SBPL_Exception("ERROR: ran out of env file early");
     }
     strcpy(sTemp1, "discretization(cells):");
     if (strcmp(sTemp1, sTemp) != 0) {
-        SBPL_ERROR("ERROR: configuration file has incorrect format\n");
-        SBPL_PRINTF("Expected %s got %s\n", sTemp1, sTemp);
-        throw new SBPL_Exception();
+        std::stringstream ss("ERROR: configuration file has incorrect format. Expected ");
+        ss << sTemp1 << " got " << sTemp;
+        throw SBPL_Exception(ss.str());
     }
     if (fscanf(fCfg, "%s", sTemp) != 1) {
-        SBPL_ERROR("ERROR: ran out of env file early\n");
-        throw new SBPL_Exception();
+        throw SBPL_Exception("ERROR: ran out of env file early");
     }
     EnvNAV2DUUCfg.EnvWidth_c = atoi(sTemp);
     if (fscanf(fCfg, "%s", sTemp) != 1) {
-        SBPL_ERROR("ERROR: ran out of env file early\n");
-        throw new SBPL_Exception();
+        throw SBPL_Exception("ERROR: ran out of env file early");
     }
     EnvNAV2DUUCfg.EnvHeight_c = atoi(sTemp);
 
     //obsthresh:
     if (fscanf(fCfg, "%s", sTemp) != 1) {
-        SBPL_ERROR("ERROR: ran out of env file early\n");
-        throw new SBPL_Exception();
+        throw SBPL_Exception("ERROR: ran out of env file early");
     }
     strcpy(sTemp1, "obsthresh:");
     if (strcmp(sTemp1, sTemp) != 0) {
-        SBPL_ERROR("ERROR: configuration file has incorrect format\n");
-        SBPL_PRINTF("Expected %s got %s\n", sTemp1, sTemp);
-        throw new SBPL_Exception();
+        std::stringstream ss("ERROR: configuration file has incorrect format. Expected ");
+        ss << sTemp1 << " got " << sTemp;
+        throw SBPL_Exception(ss.str());
     }
     if (fscanf(fCfg, "%s", sTemp) != 1) {
-        SBPL_ERROR("ERROR: ran out of env file early\n");
-        throw new SBPL_Exception();
+        throw SBPL_Exception("ERROR: ran out of env file early");
     }
     EnvNAV2DUUCfg.obsthresh = (int)(atof(sTemp));
 
     //start(cells):
     if (fscanf(fCfg, "%s", sTemp) != 1) {
-        SBPL_ERROR("ERROR: ran out of env file early\n");
-        throw new SBPL_Exception();
+        throw SBPL_Exception("ERROR: ran out of env file early");
     }
     if (fscanf(fCfg, "%s", sTemp) != 1) {
-        SBPL_ERROR("ERROR: ran out of env file early\n");
-        throw new SBPL_Exception();
+        throw SBPL_Exception("ERROR: ran out of env file early");
     }
     EnvNAV2DUUCfg.StartX_c = atoi(sTemp);
     if (fscanf(fCfg, "%s", sTemp) != 1) {
-        SBPL_ERROR("ERROR: ran out of env file early\n");
-        throw new SBPL_Exception();
+        throw SBPL_Exception("ERROR: ran out of env file early");
     }
     EnvNAV2DUUCfg.StartY_c = atoi(sTemp);
 
     if (EnvNAV2DUUCfg.StartX_c < 0 || EnvNAV2DUUCfg.StartX_c >= EnvNAV2DUUCfg.EnvWidth_c) {
-        SBPL_ERROR("ERROR: illegal start coordinates\n");
-        throw new SBPL_Exception();
+        throw SBPL_Exception("ERROR: illegal start coordinates");
     }
     if (EnvNAV2DUUCfg.StartY_c < 0 || EnvNAV2DUUCfg.StartY_c >= EnvNAV2DUUCfg.EnvHeight_c) {
-        SBPL_ERROR("ERROR: illegal start coordinates\n");
-        throw new SBPL_Exception();
+        throw SBPL_Exception("ERROR: illegal start coordinates");
     }
 
     //end(cells):
     if (fscanf(fCfg, "%s", sTemp) != 1) {
-        SBPL_ERROR("ERROR: ran out of env file early\n");
-        throw new SBPL_Exception();
+        throw SBPL_Exception("ERROR: ran out of env file early");
     }
     if (fscanf(fCfg, "%s", sTemp) != 1) {
-        SBPL_ERROR("ERROR: ran out of env file early\n");
-        throw new SBPL_Exception();
+        throw SBPL_Exception("ERROR: ran out of env file early");
     }
     EnvNAV2DUUCfg.EndX_c = atoi(sTemp);
     if (fscanf(fCfg, "%s", sTemp) != 1) {
-        SBPL_ERROR("ERROR: ran out of env file early\n");
-        throw new SBPL_Exception();
+        throw SBPL_Exception("ERROR: ran out of env file early");
     }
     EnvNAV2DUUCfg.EndY_c = atoi(sTemp);
 
     if (EnvNAV2DUUCfg.EndX_c < 0 || EnvNAV2DUUCfg.EndX_c >= EnvNAV2DUUCfg.EnvWidth_c) {
-        SBPL_ERROR("ERROR: illegal end coordinates\n");
-        throw new SBPL_Exception();
+        throw SBPL_Exception("ERROR: illegal end coordinates");
     }
     if (EnvNAV2DUUCfg.EndY_c < 0 || EnvNAV2DUUCfg.EndY_c >= EnvNAV2DUUCfg.EnvHeight_c) {
-        SBPL_ERROR("ERROR: illegal end coordinates\n");
-        throw new SBPL_Exception();
+        throw SBPL_Exception("ERROR: illegal end coordinates");
     }
 
     //allocate the 2D environment and corresponding uncertainty matrix
@@ -161,14 +148,12 @@ void EnvironmentNAV2DUU::ReadConfiguration(FILE* fCfg)
     //environment:
     EnvNAV2DUUCfg.sizeofH = 0;
     if (fscanf(fCfg, "%s", sTemp) != 1) {
-        SBPL_ERROR("ERROR: ran out of env file early\n");
-        throw new SBPL_Exception();
+        throw SBPL_Exception("ERROR: ran out of env file early");
     }
     for (y = 0; y < EnvNAV2DUUCfg.EnvHeight_c; y++)
         for (x = 0; x < EnvNAV2DUUCfg.EnvWidth_c; x++) {
             if (fscanf(fCfg, "%f", &fTemp) != 1) {
-                SBPL_ERROR("ERROR: incorrect format of config file\n");
-                throw new SBPL_Exception();
+                throw SBPL_Exception("ERROR: incorrect format of config file");
             }
 
             if (fTemp > 1.0 - NAV2DUU_ERR_EPS || fTemp < NAV2DUU_ERR_EPS) {
@@ -274,8 +259,7 @@ void EnvironmentNAV2DUU::InitializeEnvConfig()
     }
 
     if (idcount != EnvNAV2DUUCfg.sizeofH) {
-        SBPL_ERROR("ERROR: idcount not equal to sizeofH\n");
-        throw new SBPL_Exception();
+        throw SBPL_Exception("ERROR: idcount not equal to sizeofH");
     }
 }
 
@@ -359,11 +343,11 @@ void EnvironmentNAV2DUU::Computedxy()
         if (EnvNAV2DUUCfg.dx_[dind] != 0 && EnvNAV2DUUCfg.dy_[dind] != 0) {
             if (dind <= 7) {
                 //the cost of a diagonal move in millimeters
-                EnvNAV2DUUCfg.dxy_distance_mm_[dind] = (int)(ENVNAV2DUU_COSTMULT * 1.414); 
+                EnvNAV2DUUCfg.dxy_distance_mm_[dind] = (int)(ENVNAV2DUU_COSTMULT * 1.414);
             }
             else {
                 //the cost of a move to 1,2 or 2,1 or so on in millimeters
-                EnvNAV2DUUCfg.dxy_distance_mm_[dind] = (int)(ENVNAV2DUU_COSTMULT * 2.236); 
+                EnvNAV2DUUCfg.dxy_distance_mm_[dind] = (int)(ENVNAV2DUU_COSTMULT * 2.236);
             }
         }
         else
@@ -422,8 +406,7 @@ void EnvironmentNAV2DUU::PrintState(int stateID, bool bVerbose, FILE* fOut /*=NU
 {
 #if DEBUG
     if (stateID >= this->EnvNAV2DUUCfg.EnvWidth_c*this->EnvNAV2DUUCfg.EnvHeight_c) {
-        SBPL_ERROR("ERROR in EnvNAV2DUU... function: stateID illegal (2)\n");
-        throw new SBPL_Exception();
+        throw SBPL_Exception("ERROR in EnvNAV2DUU... function: st ateID illegal (2)");
     }
 #endif
 
@@ -442,9 +425,7 @@ void EnvironmentNAV2DUU::PrintState(int stateID, bool bVerbose, FILE* fOut /*=NU
 void EnvironmentNAV2DUU::PrintEnv_Config(FILE* fOut)
 {
     //implement this if the planner needs to print out EnvNAV2DUU. configuration
-
-    SBPL_ERROR("ERROR in EnvNAV2DUU... function: PrintEnv_Config is undefined\n");
-    throw new SBPL_Exception();
+    throw SBPL_Exception("ERROR in EnvNAV2DUU... function: PrintEnv_Config is undefined");
 }
 
 //-------------------------------------------------------------------------------
@@ -456,8 +437,9 @@ bool EnvironmentNAV2DUU::InitializeEnv(const char* sEnvFile)
 {
     FILE* fCfg = fopen(sEnvFile, "r");
     if (fCfg == NULL) {
-        SBPL_ERROR("ERROR: unable to open %s\n", sEnvFile);
-        throw new SBPL_Exception();
+        std::stringstream ss("ERROR: unable to open ");
+        ss << sEnvFile;
+        throw SBPL_Exception(ss.str());
     }
     ReadConfiguration(fCfg);
     fclose(fCfg);
@@ -512,8 +494,7 @@ int EnvironmentNAV2DUU::GetFromToHeuristic(int FromStateID, int ToStateID)
 
     //define this function if it is used in the planner
 
-    SBPL_ERROR("ERROR in EnvNAV2DUU.. function: FromToHeuristic is undefined\n");
-    throw new SBPL_Exception();
+    throw SBPL_Exception("ERROR in EnvNAV2DUU.. function: FromToHeuristic is undefined");
 
     return 0;
 }
@@ -526,8 +507,7 @@ int EnvironmentNAV2DUU::GetGoalHeuristic(int stateID)
 
     //define this function if it used in the planner (heuristic forward search would use it)
 
-    SBPL_ERROR("ERROR in EnvNAV2DUU..function: GetGoalHeuristic is undefined\n");
-    throw new SBPL_Exception();
+    throw SBPL_Exception("ERROR in EnvNAV2DUU..function: GetGoalHeuristic is undefined");
 }
 
 int EnvironmentNAV2DUU::GetStartHeuristic(int stateID)
@@ -538,8 +518,7 @@ int EnvironmentNAV2DUU::GetStartHeuristic(int stateID)
 
     //define this function if it used in the planner (heuristic backward search would use it)
 
-    SBPL_ERROR("ERROR in EnvNAV2DUU.. function: GetStartHeuristic is undefined\n");
-    throw new SBPL_Exception();
+    throw SBPL_Exception("ERROR in EnvNAV2DUU.. function: GetStartHeuristic is undefined");
 
     return 0;
 }
@@ -565,7 +544,7 @@ void EnvironmentNAV2DUU::GetPreds(int stateID, const vector<sbpl_BinaryHiddenVar
     //see if the destination was originally uncertain
     bool bDet = false;
     //no need to worry about ==1.0 since obstacles are rejected above
-    if (EnvNAV2DUUCfg.UncertaintyGrid2D[destx][desty] < NAV2DUU_ERR_EPS) 
+    if (EnvNAV2DUUCfg.UncertaintyGrid2D[destx][desty] < NAV2DUU_ERR_EPS)
     bDet = true;
 
     //if yes, then figure out the probability of being an obstacle
@@ -592,8 +571,7 @@ void EnvironmentNAV2DUU::GetPreds(int stateID, const vector<sbpl_BinaryHiddenVar
 
 #if DEBUG
     if (EnvNAV2DUUCfg.numofdirs > 8) {
-        SBPL_ERROR("ERROR: number of directions can not exceed 8 for now\n");
-        throw new SBPL_Exception();
+        throw SBPL_Exception("ERROR: number of directions can not exceed 8 for now");
     }
 #endif
 

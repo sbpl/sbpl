@@ -1,10 +1,10 @@
 /*
  * Copyright (c) 2008, Maxim Likhachev
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  *     * Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimer.
  *     * Redistributions in binary form must reproduce the above copyright
@@ -13,7 +13,7 @@
  *     * Neither the name of the Carnegie Mellon University nor the names of its
  *       contributors may be used to endorse or promote products derived from
  *       this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -35,7 +35,7 @@
 #include <sbpl/sbpl_exception.h>
 #include <sbpl/utils/utils.h>
 
-// these structures contain footprints for the additional levels 
+// these structures contain footprints for the additional levels
 // each of these structures corresponds to one of the EnvNAVXYTHETALATAction_t structures
 typedef struct
 {
@@ -96,8 +96,7 @@ public:
     virtual void GetPredsofChangedEdges(std::vector<nav2dcell_t> const * changedcellsV,
                                         std::vector<int> *preds_of_changededgesIDV)
     {
-        SBPL_ERROR("ERROR: GetPredsofChangedEdges function not supported\n");
-        throw new SBPL_Exception();
+        throw SBPL_Exception("ERROR: GetPredsofChangedEdges function not supported");
     }
 
     /**
@@ -106,8 +105,7 @@ public:
     virtual void GetSuccsofChangedEdges(std::vector<nav2dcell_t> const * changedcellsV,
                                         std::vector<int> *succs_of_changededgesIDV)
     {
-        SBPL_ERROR("ERROR: GetSuccsofChangedEdges function not supported\n");
-        throw new SBPL_Exception();
+        throw SBPL_Exception("ERROR: GetSuccsofChangedEdges function not supported");
     }
 
     /**

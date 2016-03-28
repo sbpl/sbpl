@@ -1,10 +1,10 @@
 /*
  * Copyright (c) 2008, Maxim Likhachev
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  *     * Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimer.
  *     * Redistributions in binary form must reproduce the above copyright
@@ -13,7 +13,7 @@
  *     * Neither the name of the Carnegie Mellon University nor the names of its
  *       contributors may be used to endorse or promote products derived from
  *       this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -118,8 +118,7 @@ bool CMDPSTATE::Delete()
     CMDPACTION* action;
 
     if (this->PlannerSpecificData != NULL) {
-        SBPL_ERROR("ERROR deleting state: planner specific data is not deleted\n");
-        throw new SBPL_Exception();
+        throw SBPL_Exception("ERROR deleting state: planner specific data is not deleted");
     }
 
     //delete predecessors array
@@ -182,8 +181,7 @@ bool CMDPSTATE::RemovePred(int stateID)
     }
 
     //can happen when a state is twice a successor
-    //SBPL_ERROR("ERROR in RemovePred: no Pred is found\n");
-    //throw new SBPL_Exception();
+    //throw SBPL_Exception("ERROR in RemovePRed: no Pred is found");
 
     return false;
 }
@@ -247,8 +245,7 @@ bool CMDP::Create(int numofstates)
     CMDPSTATE* state;
 
     if (numofstates > MAXSTATESPACESIZE) {
-        SBPL_ERROR("ERROR in Create: maximum MDP size is reached\n");
-        throw new SBPL_Exception();
+        throw SBPL_Exception("ERROR in Create: maximum MDP size is reached");
     }
 
     for (int i = 0; i < numofstates; i++) {
@@ -273,8 +270,7 @@ CMDPSTATE* CMDP::AddState(int StateID)
     CMDPSTATE* state;
 
     if ((int)StateArray.size() + 1 > MAXSTATESPACESIZE) {
-        SBPL_ERROR("ERROR: maximum of states is reached in MDP\n");
-        throw new SBPL_Exception();
+        throw SBPL_Exception("ERROR: maximum of states is reached in MDP");
     }
 
     state = new CMDPSTATE(StateID);
