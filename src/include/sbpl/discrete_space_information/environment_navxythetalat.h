@@ -32,6 +32,8 @@
 
 #include <cstdio>
 #include <vector>
+#include <sstream>
+
 #include <sbpl/discrete_space_information/environment.h>
 #include <sbpl/utils/utils.h>
 
@@ -71,6 +73,10 @@ typedef struct
     std::vector<sbpl_xy_theta_pt_t> intermptV;
     //start at 0,0,starttheta and end at endcell in discrete domain
     std::vector<sbpl_xy_theta_cell_t> interm3DcellsV;
+
+ int motprimID;
+ double turning_radius;
+
 } EnvNAVXYTHETALATAction_t;
 
 typedef struct
@@ -88,6 +94,7 @@ typedef struct
     unsigned char starttheta_c;
     int additionalactioncostmult;
     sbpl_xy_theta_cell_t endcell;
+    double turning_radius;
     //intermptV start at 0,0,starttheta and end at endcell in continuous
     //domain with half-bin less to account for 0,0 start
     std::vector<sbpl_xy_theta_pt_t> intermptV;
@@ -118,6 +125,11 @@ typedef struct ENV_NAVXYTHETALAT_CONFIG
     int EndTheta;
     unsigned char** Grid2D;
 
+ std::vector<double> ThetaDirs;
+ int StartTheta_rad;
+ int EndTheta_rad;
+ double min_turning_radius_m;
+
     // the value at which and above which cells are obstacles in the maps sent from outside
     // the default is defined above
     unsigned char obsthresh;
@@ -142,7 +154,11 @@ typedef struct ENV_NAVXYTHETALAT_CONFIG
     int cost_possibly_circumscribed_thresh; // it has to be integer, because -1 means that it is not provided.
 
     double nominalvel_mpersecs;
+
+    //double nominalangvel_radpersecs;
+
     double timetoturn45degsinplace_secs;
+
     double cellsize_m;
 
     int dXY[NAVXYTHETALAT_DXYWIDTH][2];
@@ -197,6 +213,8 @@ public:
      */
     virtual bool InitializeEnv(const char* sEnvFile, const std::vector<sbpl_2Dpt_t>& perimeterptsV,
                                const char* sMotPrimFile);
+
+    //  ??  virtual bool InitializeEnv(const ENVNAVXYTHETAVELOLAT_InitParms & params);
 
     /**
      * \brief see comments on the same function in the parent class
@@ -280,6 +298,16 @@ public:
      * @param BucketSize
      */
     virtual void Set2DBucketSize(int BucketSize);
+
+    virtual double DiscTheta2ContNew(int theta) const;
+
+    virtual int ContTheta2DiscNew(double theta) const;
+
+    virtual double DiscTheta2ContFromSet(int theta) const;
+
+    virtual int ContTheta2DiscFromSet(double theta) const;
+
+    virtual int normalizeDiscAngle(int theta) const;
 
     /**
      * \brief initialize environment. Gridworld is defined as matrix A of size width by height.
@@ -440,6 +468,8 @@ protected:
     int iteration;
     int blocksize; // 2D block size
     int bucketsize; // 2D bucket size
+
+    bool bUseNonUniformAngles;
 
     //2D search for heuristic computations
     bool bNeedtoRecomputeStartHeuristics; //set whenever grid2Dsearchfromstart needs to be re-executed
