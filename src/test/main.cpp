@@ -561,15 +561,13 @@ int planxythetalat(PlannerType plannerType, char* envCfgFilename, char* motPrimF
     }
 
     // write the discrete solution to file
-    //	for (size_t i = 0; i < solution_stateIDs_V.size(); i++) {
-    //		int x;
-    //		int y;
-    //		int theta;
-    //		environment_navxythetalat.GetCoordFromState(solution_stateIDs_V[i], x, y, theta);
-    //
-    //		fprintf(fSol, "%d %d %d\t\t%.3f %.3f %.3f\n", x, y, theta,
-    //              DISCXY2CONT(x, 0.1), DISCXY2CONT(y, 0.1), DiscTheta2Cont(theta, 16));
-    //	}
+    for (size_t i = 0; i < solution_stateIDs_V.size(); i++) {
+        int x;
+        int y;
+        int theta;
+        environment_navxythetalat.GetCoordFromState(solution_stateIDs_V[i], x, y, theta);
+        fprintf(fSol, "%d %d %d\t\t%.3f %.3f %.3f\n", x, y, theta, DISCXY2CONT(x, 0.1), DISCXY2CONT(y, 0.1), DiscTheta2Cont(theta, 16));
+    }
 
     // write the continuous solution to file
     vector<sbpl_xy_theta_pt_t> xythetaPath;
@@ -678,11 +676,11 @@ int planxythetamlevlat(PlannerType plannerType, char* envCfgFilename, char* motP
     unsigned char cost_inscribed_thresh_addlevels[2]; //size should be at least numofaddlevels
     unsigned char cost_possibly_circumscribed_thresh_addlevels[2]; //size should be at least numofaddlevels
     //no costs are indicative of whether a cell is within inner circle
-    cost_inscribed_thresh_addlevels[0] = 255; 
+    cost_inscribed_thresh_addlevels[0] = 255;
     //no costs are indicative of whether a cell is within outer circle
-    cost_possibly_circumscribed_thresh_addlevels[0] = 0; 
+    cost_possibly_circumscribed_thresh_addlevels[0] = 0;
     //no costs are indicative of whether a cell is within inner circle
-    cost_inscribed_thresh_addlevels[1] = 255; 
+    cost_inscribed_thresh_addlevels[1] = 255;
     //no costs are indicative of whether a cell is within outer circle
     cost_possibly_circumscribed_thresh_addlevels[1] = 0;
     if (!environment_navxythetalat.InitializeAdditionalLevels(numofaddlevels, perimeterptsVV,
@@ -709,13 +707,13 @@ int planxythetamlevlat(PlannerType plannerType, char* envCfgFilename, char* motP
         throw new SBPL_Exception();
     }
 
-    //Initialize MDP Info
+    // Initialize MDP Info
     if (!environment_navxythetalat.InitializeMDPCfg(&MDPCfg)) {
         printf("ERROR: InitializeMDPCfg failed\n");
         throw new SBPL_Exception();
     }
 
-    //plan a path
+    // plan a path
     vector<int> solution_stateIDs_V;
 
     SBPLPlanner* planner = NULL;
@@ -1332,7 +1330,7 @@ int planandnavigatexythetalat(PlannerType plannerType, char* envCfgFilename, cha
                 environment_navxythetalat.GetPredsofChangedEdges(&changedcellsV, &preds_of_changededgesIDV);
                 // let know the incremental planner about them
                 //use by AD* planner (incremental)
-                ((ADPlanner*)planner)->update_preds_of_changededges(&preds_of_changededgesIDV); 
+                ((ADPlanner*)planner)->update_preds_of_changededges(&preds_of_changededgesIDV);
                 printf("%d states were affected\n", (int)preds_of_changededgesIDV.size());
             }
         }
