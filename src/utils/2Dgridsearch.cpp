@@ -1,10 +1,10 @@
 /*
  * Copyright (c) 2008, Maxim Likhachev
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  *     * Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimer.
  *     * Redistributions in binary form must reproduce the above copyright
@@ -13,7 +13,7 @@
  *     * Neither the name of the Carnegie Mellon University nor the names of its
  *       contributors may be used to endorse or promote products derived from
  *       this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -93,7 +93,7 @@ SBPL2DGridSearch::SBPL2DGridSearch(int width_x, int height_y, float cellsize_m, 
     default:
         getCost = &getCostN;
     }
-    
+
     startX_ = -1;
     startY_ = -1;
     goalX_ = -1;
@@ -249,7 +249,7 @@ void SBPL2DGridSearch::computedxy()
     dx0intersects_[7] = -1;
     dy0intersects_[7] = -1;
 
-    //Note: these actions have to be starting at 8 and through 15, since they 
+    //Note: these actions have to be starting at 8 and through 15, since they
     //get multiplied correspondingly in Dijkstra's search based on index
 #if SBPL_2DGRIDSEARCH_NUMOF2DDIRS == 16
     dx_[8] = 2; dy_[8] = 1;
@@ -268,7 +268,7 @@ void SBPL2DGridSearch::computedxy()
     dx0intersects_[14] = 0; dy0intersects_[14] = -1; dx1intersects_[14] = 1; dy1intersects_[14] = -1;
     dx_[15] = 2; dy_[15] = -1;
     dx0intersects_[15] = 1; dy0intersects_[15] = 0; dx1intersects_[15] = 1; dy1intersects_[15] = -1;
-#endif		
+#endif
 
     //compute distances
     for (int dind = 0; dind < SBPL_2DGRIDSEARCH_NUMOF2DDIRS; dind++) {
@@ -276,10 +276,10 @@ void SBPL2DGridSearch::computedxy()
         if (dx_[dind] != 0 && dy_[dind] != 0) {
             if (dind <= 7)
                 //the cost of a diagonal move in millimeters
-                dxy_distance_mm_[dind] = (int)(cellSize_m_ * 1414); 
+                dxy_distance_mm_[dind] = (int)(cellSize_m_ * 1414);
             else
                 //the cost of a move to 1,2 or 2,1 or so on in millimeters
-                dxy_distance_mm_[dind] = (int)(cellSize_m_ * 2236); 
+                dxy_distance_mm_[dind] = (int)(cellSize_m_ * 2236);
         }
         else
             dxy_distance_mm_[dind] = (int)(cellSize_m_ * 1000); //the cost of a horizontal move in millimeters
@@ -367,7 +367,7 @@ bool SBPL2DGridSearch::search_withheap(unsigned char** Grid2D, unsigned char obs
     key = searchExpState->g;
     if (termination_condition == SBPL_2DGRIDSEARCH_TERM_CONDITION_OPTPATHFOUND)
         //use h-values only if we are NOT computing all state values
-        key = key + SBPL_2DGRIDSEARCH_HEUR2D(startX_, startY_); 
+        key = key + SBPL_2DGRIDSEARCH_HEUR2D(startX_, startY_);
 
     OPEN2D_->insertheap(searchExpState, key);
 
@@ -446,7 +446,7 @@ bool SBPL2DGridSearch::search_withheap(unsigned char** Grid2D, unsigned char obs
                 key = searchPredState->g;
                 if (termination_condition == SBPL_2DGRIDSEARCH_TERM_CONDITION_OPTPATHFOUND)
                     //use h-values only if we are NOT computing all state values
-                    key = key + SBPL_2DGRIDSEARCH_HEUR2D(searchPredState->x, searchPredState->y); 
+                    key = key + SBPL_2DGRIDSEARCH_HEUR2D(searchPredState->x, searchPredState->y);
 
                 if (searchPredState->heapindex == 0)
                     OPEN2D_->insertheap(searchPredState, key);
@@ -462,7 +462,7 @@ bool SBPL2DGridSearch::search_withheap(unsigned char** Grid2D, unsigned char obs
     else
         largestcomputedoptf_ = INFINITECOST;
 
-    delete[] pbClosed;
+    free(pbClosed);
 
     SBPL_PRINTF( "# of expands during 2dgridsearch=%d time=%d msecs 2Dsolcost_inmm=%d "
                 "largestoptfval=%d (start=%d %d goal=%d %d)\n",
