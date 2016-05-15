@@ -32,6 +32,7 @@
 
 #include <cstdio>
 #include <vector>
+#include <unordered_set>
 #include <sbpl/discrete_space_information/environment.h>
 #include <sbpl/utils/utils.h>
 
@@ -435,8 +436,12 @@ protected:
     //member data
     EnvNAVXYTHETALATConfig_t EnvNAVXYTHETALATCfg;
     EnvironmentNAVXYTHETALAT_t EnvNAVXYTHETALAT;
-    std::vector<sbpl_xy_theta_cell_t> affectedsuccstatesV; //arrays of states whose outgoing actions cross cell 0,0
-    std::vector<sbpl_xy_theta_cell_t> affectedpredstatesV; //arrays of states whose incoming actions cross cell 0,0
+
+    //store states whose outgoing/incoming actions cross cell 0,0
+    //we use C++11 unordered sets to get ~O(N) on unique insertions instead of O(N*N)
+    std::unordered_set<sbpl_xy_theta_cell_t> affected_succ_states_;
+    std::unordered_set<sbpl_xy_theta_cell_t> affected_pred_states_;
+
     int iteration;
     int blocksize; // 2D block size
     int bucketsize; // 2D bucket size
