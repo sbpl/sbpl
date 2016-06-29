@@ -161,6 +161,20 @@ public:
     int theta;
 };
 
+// Provide a hash function to sbpl_xy_theta_cell_t so we can put them in std::set
+namespace std {
+  template <>
+  struct hash<sbpl_xy_theta_cell_t>
+  {
+    size_t operator()(const sbpl_xy_theta_cell_t& cell) const
+    {
+      return (hash<int>()(cell.x << 20)
+            ^ hash<int>()(cell.y << 10)
+            ^ hash<int>()(cell.theta));
+    }
+  };
+}
+
 class sbpl_xy_theta_pt_t
 {
 public:
