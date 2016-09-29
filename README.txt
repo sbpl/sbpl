@@ -115,7 +115,37 @@ II. Usage
     Command-line usage for the test_sbpl program can be viewed by passing '-h'
     as argument to the executable.
 
-    Motion primitives files can be found in sbpl/matlab/mprim directory.
+    Examples:
+
+        The following can be run from the directory containing test_sbpl,
+        which we assume is a build directory in the root of this project.
+
+        $ ./test_sbpl ../env_examples/nav3d/env1.cfg
+        Environment: xytheta; Planner: arastar; Search direction: backward
+        Initializing ARAPlanner...
+        start planning...
+        done planning
+        size of solution=16
+        solution size=0
+        Solution is found
+
+        $ ./test_sbpl --env=2d ../env_examples/nav2d/env1.cfg #2d is needed here in order to use 2d config
+        Environment: 2d; Planner: arastar; Search direction: backward
+        Initializing ARAPlanner...
+        start planning...
+        done planning
+        size of solution=22
+        Solution is found
+
+        $ ./test_sbpl --env=robarm --search-dir=forward --planner=rstar ../env_examples/robarm/env1_6d.cfg
+        Environment: robarm; Planner: rstar; Search direction: forward
+        Initializing RSTARPlanner...
+        start planning...
+        done planning
+        size of solution=44
+        Solution is found
+
+   Motion primitives files can be found in sbpl/matlab/mprim directory.
 
     Finally, few visualization scripts can be found in
     sbpl/matlab/visualization. In particular, plot_3Dpath.m function can be
