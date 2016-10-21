@@ -1,10 +1,10 @@
 /*
  * Copyright (c) 2008, Maxim Likhachev
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  *     * Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimer.
  *     * Redistributions in binary form must reproduce the above copyright
@@ -13,7 +13,7 @@
  *     * Neither the name of the Carnegie Mellon University nor the names of its
  *       contributors may be used to endorse or promote products derived from
  *       this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -29,6 +29,8 @@
 
 #include <cmath>
 #include <cstdlib>
+#include <sstream>
+
 #include <sbpl/planners/planner.h>
 #include <sbpl/utils/utils.h>
 #include <sbpl/utils/key.h>
@@ -74,22 +76,19 @@ void EnableMemCheck()
 void checkmdpstate(CMDPSTATE* state)
 {
 #if DEBUG == 0
-    SBPL_ERROR("ERROR: checkMDPstate is too expensive for not in DEBUG mode\n");
-    throw new SBPL_Exception();
+    throw SBPL_Exception("ERROR: checkMDPstate is too expensive for not in DEBUG mode");
 #endif
 
     for (int aind = 0; aind < (int)state->Actions.size(); aind++) {
         for (int aind1 = 0; aind1 < (int)state->Actions.size(); aind1++) {
             if (state->Actions[aind1]->ActionID == state->Actions[aind]->ActionID && aind1 != aind) {
-                SBPL_ERROR("ERROR in CheckMDP: multiple actions with the same ID exist\n");
-                throw new SBPL_Exception();
+                throw SBPL_Exception("ERROR in CheckMDP: multiple actions with the same ID exist");
             }
         }
         for (int sind = 0; sind < (int)state->Actions[aind]->SuccsID.size(); sind++) {
             for (int sind1 = 0; sind1 < (int)state->Actions[aind]->SuccsID.size(); sind1++) {
                 if (state->Actions[aind]->SuccsID[sind] == state->Actions[aind]->SuccsID[sind1] && sind != sind1) {
-                    SBPL_ERROR("ERROR in CheckMDP: multiple outcomes with the same ID exist\n");
-                    throw new SBPL_Exception();
+                    throw SBPL_Exception("ERROR in CheckMDP: multiple outcomes with the same ID exist");
                 }
             }
         }
@@ -121,8 +120,8 @@ bool PathExists(CMDP* pMarkovChain, CMDPSTATE* sourcestate, CMDPSTATE* targetsta
     int i;
     bool *bProcessed = new bool[pMarkovChain->StateArray.size()];
     bool bFound = false;
-    
-    for (i = 0; i < (int)pMarkovChain->StateArray.size(); i++) 
+
+    for (i = 0; i < (int)pMarkovChain->StateArray.size(); i++)
     {
         bProcessed[i] = false;
     }
@@ -137,8 +136,7 @@ bool PathExists(CMDP* pMarkovChain, CMDPSTATE* sourcestate, CMDPSTATE* targetsta
 
         //Markov Chain should just contain a single policy
         if ((int)state->Actions.size() > 1) {
-            SBPL_ERROR("ERROR in PathExists: Markov Chain is a general MDP\n");
-            throw new SBPL_Exception();
+            throw SBPL_Exception("ERROR in PathExists: Markov Chain is a general MDP");
         }
 
         if (state == targetstate) {
@@ -154,8 +152,7 @@ bool PathExists(CMDP* pMarkovChain, CMDPSTATE* sourcestate, CMDPSTATE* targetsta
                 if (pMarkovChain->StateArray[i]->StateID == state->Actions[0]->SuccsID[sind]) break;
             }
             if (i == (int)pMarkovChain->StateArray.size()) {
-                SBPL_ERROR("ERROR in PathExists: successor is not found\n");
-                throw new SBPL_Exception();
+                throw SBPL_Exception("ERROR in PathExists: successor is not found");
             }
             CMDPSTATE* SuccState = pMarkovChain->StateArray[i];
 
@@ -245,15 +242,15 @@ void EvaluatePolicy(CMDP* PolicyMDP, int StartStateID, int GoalStateID, double* 
                         if (PolicyMDP->StateArray[j]->StateID == action->SuccsID[oind]) break;
                     }
                     if (j == (int)PolicyMDP->StateArray.size()) {
-                        SBPL_ERROR("ERROR in EvaluatePolicy: incorrect successor %d\n", action->SuccsID[oind]);
-                        throw new SBPL_Exception();
+                        std::stringstream ss("ERROR in EvaluatePolicy: incorrect successor ");
+                        ss << action->SuccsID[oind];
+                        throw SBPL_Exception(ss.str());
                     }
                     Q += action->SuccsProb[oind] * (vals[j] + action->Costs[oind]);
                 }
 
                 if (vals[i] > Q) {
-                    SBPL_ERROR("ERROR in EvaluatePolicy: val is decreasing\n");
-                    throw new SBPL_Exception();
+                    throw SBPL_Exception("ERROR in EvaluatePolicy: val is decreasing");
                 }
 
                 //update delta
@@ -467,7 +464,7 @@ double computeMinUnsignedAngleDiff(double angle1, double angle2)
 }
 
 //computes 8-connected distances to obstacles and non-free areas in two linear
-//passes and returns them in disttoObs_incells 
+//passes and returns them in disttoObs_incells
 //and disttoNonfree_incells arrays. The distances are in terms of the number of cells but are floats. These distances
 //can then be converted into the actual distances using the actual discretization values
 //areas outside of the map are considered to be obstacles
@@ -519,7 +516,7 @@ void computeDistancestoNonfreeAreas(unsigned char** Grid2D, int width_x, int hei
     // decreasing y (inner)
     //  [2][3]
     //  [1][s]
-    //  [0] 
+    //  [0]
     dxdownrighttoleft_[0] = -1;
     dydownrighttoleft_[0] = -1;
     dxdownrighttoleft_[1] = -1;
@@ -533,7 +530,7 @@ void computeDistancestoNonfreeAreas(unsigned char** Grid2D, int width_x, int hei
     // decreasing y (inner)
     //  [3][2]
     //  [s][1]
-    //     [0] 
+    //     [0]
     dxuprighttoleft_[0] = 1;
     dyuprighttoleft_[0] = -1;
     dxuprighttoleft_[1] = 1;
@@ -547,7 +544,7 @@ void computeDistancestoNonfreeAreas(unsigned char** Grid2D, int width_x, int hei
     // increasing y (inner)
     //     [2]
     //  [s][1]
-    //  [3][0] 
+    //  [3][0]
     dxuplefttoright_[0] = 1;
     dyuplefttoright_[0] = -1;
     dxuplefttoright_[1] = 1;

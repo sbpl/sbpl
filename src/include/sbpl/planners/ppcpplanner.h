@@ -1,10 +1,10 @@
 /*
  * Copyright (c) 2009, Maxim Likhachev
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  *     * Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimer.
  *     * Redistributions in binary form must reproduce the above copyright
@@ -13,7 +13,7 @@
  *     * Neither the name of the Carnegie Mellon University nor the names of its
  *       contributors may be used to endorse or promote products derived from
  *       this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -146,8 +146,7 @@ public:
      */
     int replan(double allocated_time_sec, std::vector<int>* solution_stateIDs_V)
     {
-        SBPL_ERROR("ERROR: this version of replan not supported in PPCP planner\n");
-        throw new SBPL_Exception();
+        throw SBPL_Exception("ERROR: this version of replan not supported in PPCP planner");
     }
 
     /**
@@ -155,8 +154,7 @@ public:
      */
     int replan(double allocated_time_sec, std::vector<int>* solution_stateIDs_V, int* solcost)
     {
-        SBPL_ERROR("ERROR: this version of replan not supported in PPCP planner\n");
-        throw new SBPL_Exception();
+        throw SBPL_Exception("ERROR: this version of replan not supported in PPCP planner");
     }
 
     /**
@@ -169,8 +167,7 @@ public:
      */
     int set_search_mode(bool bSearchUntilFirstSolution)
     {
-        SBPL_ERROR("ERROR: set_search_mode not supported in PPCP planner\n");
-        throw new SBPL_Exception();
+        throw SBPL_Exception("ERROR: set_search_mode not supported in PPCP planner");
     }
 
     /**

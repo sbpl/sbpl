@@ -1,10 +1,10 @@
 /*
  * Copyright (c) 2009, Maxim Likhachev
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  *     * Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimer.
  *     * Redistributions in binary form must reproduce the above copyright
@@ -13,7 +13,7 @@
  *     * Neither the name of the Carnegie Mellon University nor the names of its
  *       contributors may be used to endorse or promote products derived from
  *       this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -39,7 +39,7 @@
 #include <sbpl/utils/utils.h>
 
 #define ENVNAV2DUU_COSTMULT 1000
-#define NAV2DUU_MAXACTIONSWIDTH 9		
+#define NAV2DUU_MAXACTIONSWIDTH 9
 #define ENVNAV2DUU_MAXDIRS 8
 
 class CMDPACTION;
@@ -72,7 +72,7 @@ typedef struct ENV_NAV2DUU_CONFIG
     int dy_[ENVNAV2DUU_MAXDIRS];
     //distances of transitions
     int dxy_distance_mm_[ENVNAV2DUU_MAXDIRS];
-    //the intermediate cells through which the actions go 
+    //the intermediate cells through which the actions go
     int dxintersects_[ENVNAV2D_MAXDIRS][2];
     int dyintersects_[ENVNAV2D_MAXDIRS][2];
     int numofdirs; //for now can only be 8
@@ -191,8 +191,7 @@ public:
      */
     virtual void SetAllActionsandAllOutcomes(CMDPSTATE* state)
     {
-        SBPL_ERROR("ERROR: SetAllActionsandAllOutcomes not supported in NAV2D UNDER UNCERTAINTY\n");
-        throw new SBPL_Exception();
+        throw SBPL_Exception("ERROR: SetAllActionsandAllOutcomes not supported in NAV2D_UNDER_UNCERTAINTY");
     }
 
     /**
@@ -200,8 +199,7 @@ public:
      */
     virtual void SetAllPreds(CMDPSTATE* state)
     {
-        SBPL_ERROR("ERROR: SetAllPreds not supported in NAV2D UNDER UNCERTAINTY\n");
-        throw new SBPL_Exception();
+        throw SBPL_Exception("ERROR: SetAllPreds not supported in NAV2D_UNDER_UNCERTAINTY");
     }
 
     /**
@@ -209,8 +207,7 @@ public:
      */
     virtual void GetSuccs(int SourceStateID, std::vector<int>* SuccIDV, std::vector<int>* CostV)
     {
-        SBPL_ERROR("ERROR: GetSuccs not supported in NAV2D UNDER UNCERTAINTY\n");
-        throw new SBPL_Exception();
+        throw SBPL_Exception("ERROR: GetSuccs not supported in NAV2D_UNDER_UNCERTAINTY");
     }
 
     /**
@@ -218,8 +215,7 @@ public:
      */
     virtual void GetPreds(int TargetStateID, std::vector<int>* PredIDV, std::vector<int>* CostV)
     {
-        SBPL_ERROR("ERROR: GetPreds not supported in NAV2D UNDER UNCERTAINTY\n");
-        throw new SBPL_Exception();
+        throw SBPL_Exception("ERROR: GetPreds not supported in NAV2D_UNDER_UNCERTAINTY");
     }
 
     /**

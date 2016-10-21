@@ -40,7 +40,7 @@ struct MDPConfig;
 
 /**
  * \brief base class for environments defining planning graphs
- * 
+ *
  * It is independent of the graph search used
  * The main means of communication between environment and graph search is
  * through stateID.  Each state is uniquely defined by stateID and graph
@@ -56,7 +56,7 @@ public:
      * \brief mapping from hashentry stateID (used in environment to contain
      *        the coordinates of a state, say x,y or x,y,theta)
      *        to an array of state indices used in searches.
-     * 
+     *
      * If a single search is done, then it is a single entry.  So
      * StateID2IndexMapping[100][0] = 5 means that hashentry with stateID 100
      * is mapped onto search index = 5 in search 0 The value of -1 means that
@@ -110,29 +110,26 @@ public:
      *        If a successor's cost is not true, then the cost must not overestimate the true cost.
      */
     virtual void GetLazySuccs(int SourceStateID, std::vector<int>* SuccIDV, std::vector<int>* CostV, std::vector<bool>* isTrueCost){
-      SBPL_ERROR("ERROR: GetLazySuccs is not implemented for this environment!\n");
-      throw new SBPL_Exception();
+        throw SBPL_Exception("ERROR: GetLazySuccs is not implemented for this environment");
     };
 
     /**
-     * \brief This version of GetSuccs is needed for E-Graphs. It always returns a unique ID for 
+     * \brief This version of GetSuccs is needed for E-Graphs. It always returns a unique ID for
      *        every successor. Generally, this function operates the same as the usual GetSuccs
      *        and only has different behavior when dealing with an underspecified goal condition
      *        so that several different states will have to map to the same id number (most planners
-     *        in sbpl use a single goal id number to identify the goal). This function is used 
+     *        in sbpl use a single goal id number to identify the goal). This function is used
      *        in conjunction with isGoal.
      */
     virtual void GetSuccsWithUniqueIds(int SourceStateID, std::vector<int>* SuccIDV, std::vector<int>* CostV){
-      SBPL_ERROR("ERROR: GetSuccsWithUniqueIds is not implemented for this environment!\n");
-      throw new SBPL_Exception();
+        throw SBPL_Exception("ERROR: GetSuccsWithUniqueIds is not implemented for this environment");
     };
 
     /**
      * \brief The lazy version of GetSuccsUniqueIds.
      */
     virtual void GetLazySuccsWithUniqueIds(int SourceStateID, std::vector<int>* SuccIDV, std::vector<int>* CostV, std::vector<bool>* isTrueCost){
-      SBPL_ERROR("ERROR: GetLazySuccsWithUniqueIds (lazy) is not implemented for this environment!\n");
-      throw new SBPL_Exception();
+        throw SBPL_Exception("ERROR: GetLazySuccsWithUniqueIds (lazy) is not implemented for this environment");
     };
 
     /**
@@ -140,17 +137,15 @@ public:
      *        without a "true cost". If the edge is found to be invalid, it should return -1
      */
     virtual int GetTrueCost(int parentID, int childID){
-      SBPL_ERROR("ERROR: GetTrueCost (used for lazy planning) is not implemented for this environment!\n");
-      throw new SBPL_Exception();
-      return -1;
+        throw SBPL_Exception("ERROR: GetTrueCost (used for lazy planning) is not implemented for this environment");
+        return -1;
     };
 
     /**
-     * \brief This function is generally used with E-Graphs (in conjunction with GetSuccsWithUniqueIds). 
+     * \brief This function is generally used with E-Graphs (in conjunction with GetSuccsWithUniqueIds).
      */
     virtual bool isGoal(int id){
-      SBPL_ERROR("ERROR: isGoal is not implemented for this environment!\n");
-      throw new SBPL_Exception();
+      throw SBPL_Exception("ERROR: isGoal is not implemented for this environment");
       return false;
     };
 
@@ -163,26 +158,25 @@ public:
      * \brief see comments for GetSuccs functon
      */
     virtual void GetLazyPreds(int TargetStateID, std::vector<int>* PredIDV, std::vector<int>* CostV, std::vector<bool>* isTrueCost){
-      SBPL_ERROR("ERROR: GetLazyPreds is not implemented for this environment!\n");
-      throw new SBPL_Exception();
+        throw SBPL_Exception("ERROR: GetLazyPreds is not implemented for this environment");
     };
 
     /**
      * \brief see comments for GetSuccs functon
      */
     virtual void GetPredsWithUniqueIds(int TargetStateID, std::vector<int>* PredIDV, std::vector<int>* CostV){
-      SBPL_ERROR("ERROR: GetPredsWithUniqueIds is not implemented for this environment!\n");
-      throw new SBPL_Exception();
+        SBPL_ERROR("ERROR: GetPredsWithUniqueIds is not implemented for this environment!\n");
+        throw SBPL_Exception("ERROR: GetPredsWithUniqueIds is not implemented for this environment");
     };
 
     /**
      * \brief see comments for GetSuccs functon
      */
     virtual void GetLazyPredsWithUniqueIds(int TargetStateID, std::vector<int>* PredIDV, std::vector<int>* CostV, std::vector<bool>* isTrueCost){
-      SBPL_ERROR("ERROR: GetLazyPredsWithUniqueIds is not implemented for this environment!\n");
-      throw new SBPL_Exception();
+        SBPL_ERROR("ERROR: GetLazyPredsWithUniqueIds is not implemented for this environment!\n");
+        throw SBPL_Exception("ERROR: GetLazyPredsWithUniqueIds is not implemented for this environment");
     };
-     
+
     /**
      * \brief see comments for GetSuccs functon
      */
@@ -234,8 +228,7 @@ public:
      */
     virtual bool AreEquivalent(int StateID1, int StateID2)
     {
-        SBPL_ERROR("ERROR: environment does not support calls to AreEquivalent function\n");
-        throw new SBPL_Exception();
+        throw SBPL_Exception("ERROR: environment does not support calls to AreEquivalent function");
     }
 
     /** \brief the following two functions generate succs/preds at some
@@ -248,8 +241,7 @@ public:
      */
     virtual void GetRandomSuccsatDistance(int SourceStateID, std::vector<int>* SuccIDV, std::vector<int>* CLowV)
     {
-        SBPL_ERROR("ERROR: environment does not support calls to GetRandomSuccsatDistance function\n");
-        throw new SBPL_Exception();
+        throw SBPL_Exception("ERROR: environment does not support calls to GetRandomSuccsatDistance function");
     }
 
     /**
@@ -257,8 +249,7 @@ public:
      */
     virtual void GetRandomPredsatDistance(int TargetStateID, std::vector<int>* PredIDV, std::vector<int>* CLowV)
     {
-        SBPL_ERROR("ERROR: environment does not support calls to GetRandomPredsatDistance function\n");
-        throw new SBPL_Exception();
+        throw SBPL_Exception("ERROR: environment does not support calls to GetRandomPredsatDistance function");
     }
 
     /**
@@ -297,8 +288,7 @@ public:
         const char* envdebug = "envdebug.txt";
 #endif
         if ((fDeb = SBPL_FOPEN(envdebug, "w")) == NULL) {
-            SBPL_ERROR("ERROR: failed to open debug file for environment\n");
-            throw new SBPL_Exception();
+            throw SBPL_Exception("ERROR: failed to open debug file for environment");
         }
     }
 };

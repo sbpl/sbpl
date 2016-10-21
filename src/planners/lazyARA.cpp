@@ -27,6 +27,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include <sbpl/planners/lazyARA.h>
+
+#include <sstream>
+
 using namespace std;
 
 LazyARAPlanner::LazyARAPlanner(
@@ -269,9 +272,13 @@ int LazyARAPlanner::ImprovePath()
         LazyARAState* state = (LazyARAState*)heap.deleteminheap();
 
         if (state->v == state->g) {
-            SBPL_DEBUG("ERROR: consistent state is being expanded");
-            SBPL_DEBUG("id=%d v=%d g=%d isTrueCost=%d lazyListSize=%lu", state->id, state->v, state->g, state->isTrueCost, state->lazyList.size());
-            throw new SBPL_Exception();
+            std::stringstream ss("ERROR: consistent state is being esxpanded ");
+            ss << "id=" << state->id;
+            ss << "v=" << state->v;
+            ss << "g=" << state->g;
+            ss << "isTrueCost=" << state->isTrueCost;
+            ss << "lazyListSize=" << state->lazyList.size();
+            throw SBPL_Exception(ss.str());
         }
 
         if (state->isTrueCost) {
@@ -661,3 +668,4 @@ void LazyARAPlanner::get_search_stats(vector<PlannerStats>* s)
         s->push_back(stats[i]);
     }
 }
+

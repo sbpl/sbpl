@@ -1,12 +1,14 @@
 /*
  * This code was used for generating experimental data for the purpose of understanding the performance of
- * the Anytime Nonparametric A* (ANA*) algorithm.  
+ * the Anytime Nonparametric A* (ANA*) algorithm.
  * The authors of this algorithm are Jur van den Berg, Rajat Shah, Arthur Huang and Ken Goldberg.
  * The code is available at http://goldberg.berkeley.edu/ana/
- * 
+ *
  */
 
 #include <cmath>
+#include <sstream>
+
 #include <sbpl/discrete_space_information/environment.h>
 #include <sbpl/planners/ANAplanner.h>
 #include <sbpl/utils/heap.h>
@@ -82,7 +84,7 @@ CMDPSTATE* anaPlanner::CreateState(int stateID, anaSearchStateSpace_t* pSearchSt
             pSearchStateSpace->searchMDP.StateArray.size() - 1;
 
 #if DEBUG
-    if (state != 
+    if (state !=
         pSearchStateSpace->searchMDP.StateArray[environment_->StateID2IndexMapping[stateID][anaMDP_STATEID2IND]])
     {
         printf("ERROR in CreateState: invalid state index\n");
@@ -101,8 +103,8 @@ CMDPSTATE* anaPlanner::CreateState(int stateID, anaSearchStateSpace_t* pSearchSt
 CMDPSTATE* anaPlanner::GetState(int stateID, anaSearchStateSpace_t* pSearchStateSpace)
 {
     if (stateID >= (int)environment_->StateID2IndexMapping.size()) {
-        SBPL_ERROR("ERROR in GetState: stateID %d is invalid\n", stateID);
-        throw new SBPL_Exception();
+        std::stringstream ss; ss << "ERROR in GetState: stateID " << stateID << " is invalid";
+        throw SBPL_Exception(ss.str());
     }
 
     if (environment_->StateID2IndexMapping[stateID][anaMDP_STATEID2IND] == -1)
@@ -320,8 +322,7 @@ int anaPlanner::ImprovePath(anaSearchStateSpace_t* pSearchStateSpace, double Max
     expands = 0;
 
     if (pSearchStateSpace->searchgoalstate == NULL) {
-        SBPL_ERROR("ERROR searching: no goal state is set\n");
-        throw new SBPL_Exception();
+        throw SBPL_Exception("ERROR searching: no goal state is set");
     }
 
     //goal state
@@ -338,7 +339,7 @@ int anaPlanner::ImprovePath(anaSearchStateSpace_t* pSearchStateSpace, double Max
     minkey.key[0] = -(pSearchStateSpace->heap->getminkeyheap().key[0]);
     CKey oldkey = minkey;
     while (!pSearchStateSpace->heap->emptyheap() &&
-           (clock() - TimeStarted) < MaxNumofSecs * (double)CLOCKS_PER_SEC) 
+           (clock() - TimeStarted) < MaxNumofSecs * (double)CLOCKS_PER_SEC)
            //&& goalkey > minkey && minkey.key[0] <= INFINITECOST
     {
         /*if(minkey.key[0] < 10) {
@@ -573,7 +574,7 @@ void anaPlanner::ReInitializeSearchStateSpace(anaSearchStateSpace_t* pSearchStat
     //insert start state into the heap
 
     // CHANGED - long int cast removed
-    key.key[0] = (long)-get_e_value(pSearchStateSpace, startstateinfo->MDPstate->StateID); 
+    key.key[0] = (long)-get_e_value(pSearchStateSpace, startstateinfo->MDPstate->StateID);
 
     //key.key[1] = startstateinfo->h;
     pSearchStateSpace->heap->insertheap(startstateinfo, key);
@@ -586,8 +587,7 @@ void anaPlanner::ReInitializeSearchStateSpace(anaSearchStateSpace_t* pSearchStat
 int anaPlanner::InitializeSearchStateSpace(anaSearchStateSpace_t* pSearchStateSpace)
 {
     if (pSearchStateSpace->heap->currentsize != 0) {
-        SBPL_ERROR("ERROR in InitializeSearchStateSpace: heap or list is not empty\n");
-        throw new SBPL_Exception();
+        throw SBPL_Exception("ERROR in InitializeSearchStateSpace: heap or list is not empty");
     }
 
     pSearchStateSpace->eps = this->finitial_eps;
@@ -674,8 +674,7 @@ int anaPlanner::ReconstructPath(anaSearchStateSpace_t* pSearchStateSpace)
             }
 
             if (stateinfo->bestpredstate == NULL) {
-                SBPL_ERROR("ERROR in ReconstructPath: bestpred is NULL\n");
-                throw new SBPL_Exception();
+                throw SBPL_Exception("ERROR in ReconstructPath: bestpred is NULL");
             }
 
             //get the parent state
@@ -687,9 +686,10 @@ int anaPlanner::ReconstructPath(anaSearchStateSpace_t* pSearchStateSpace)
 
             //check the decrease of g-values along the path
             if (predstateinfo->v >= stateinfo->g) {
-                SBPL_ERROR("ERROR in ReconstructPath: g-values are non-decreasing\n");
+                const char* msg = "ERROR in ReconstructPath: g-values are non-decreasing";
+                SBPL_ERROR("%s\n", msg);
                 PrintSearchState(predstateinfo, fDeb);
-                throw new SBPL_Exception();
+                throw SBPL_Exception(msg);
             }
 
             //transition back
@@ -869,7 +869,7 @@ bool anaPlanner::Search(anaSearchStateSpace_t* pSearchStateSpace, vector<int>& p
 #endif
 
     if (pSearchStateSpace->bReinitializeSearchStateSpace == true) {
-        //re-initialize state space 
+        //re-initialize state space
         ReInitializeSearchStateSpace(pSearchStateSpace);
     }
 

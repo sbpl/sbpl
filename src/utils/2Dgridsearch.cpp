@@ -29,6 +29,8 @@
 
 #include <cstdio>
 #include <ctime>
+#include <sstream>
+
 #include <sbpl/utils/2Dgridsearch.h>
 #include <sbpl/utils/heap.h>
 #include <sbpl/utils/list.h>
@@ -109,8 +111,7 @@ SBPL2DGridSearch::SBPL2DGridSearch(int width_x, int height_y, float cellsize_m, 
     //allocate memory
     OPEN2D_ = new CIntHeap(width_ * height_);
     if (!createSearchStates2D()) {
-        SBPL_ERROR("ERROR: failed to create searchstatespace2D\n");
-        throw new SBPL_Exception();
+        throw SBPL_Exception("ERROR: failed to create searchstatespace2D");
     }
 
     //by default, OPEN is implemented as heap
@@ -153,8 +154,9 @@ bool SBPL2DGridSearch::setOPENdatastructure(SBPL_2DGRIDSEARCH_OPENTYPE OPENtype)
 
         break;
     default:
-        SBPL_ERROR("ERROR: unknown data structure type = %d for OPEN2D\n", OPENtype_);
-        throw new SBPL_Exception();
+        std::stringstream ss("ERROR: unknown data structure type = ");
+        ss << OPENtype_ << " for OPEN2D";
+        throw SBPL_Exception(ss.str());
     };
 
     return true;
@@ -317,8 +319,9 @@ bool SBPL2DGridSearch::search(unsigned char** Grid2D, unsigned char obsthresh, i
                                                            termination_condition);
         break;
     default:
-        SBPL_ERROR("ERROR: unknown data structure type = %d for OPEN2D\n", OPENtype_);
-        throw new SBPL_Exception();
+        std::stringstream ss("ERROR: unknown data structure type = ");
+        ss << OPENtype_ << " for OPEN2D";
+        throw SBPL_Exception(ss.str());
     };
     return false;
 }
@@ -559,8 +562,7 @@ bool SBPL2DGridSearch::search_exp(unsigned char** Grid2D, unsigned char obsthres
                 searchPredState->g = __min(INFINITECOST, cost + searchExpState->g);
 
                 if (searchPredState->g >= INFINITECOST) {
-                    SBPL_ERROR("ERROR: infinite g\n");
-                    throw new SBPL_Exception();
+                    throw SBPL_Exception("ERROR: infinite g");
                 }
 
                 //put it into the list if not there already
@@ -673,8 +675,7 @@ bool SBPL2DGridSearch::search_withbuckets(unsigned char** Grid2D, unsigned char 
                 searchPredState->g = __min(INFINITECOST, cost + searchExpState->g);
 
                 if (searchPredState->g >= INFINITECOST) {
-                    SBPL_ERROR("ERROR: infinite g\n");
-                    throw new SBPL_Exception();
+                    throw SBPL_Exception("ERROR: infinite g");
                 }
 
                 //put it into the list if not there already
