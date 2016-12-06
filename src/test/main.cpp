@@ -1419,7 +1419,7 @@ int planandnavigatexythetalat(PlannerType plannerType, char* envCfgFilename, cha
     fflush(NULL);
     fclose(fSol);
 
-    delete map;
+    delete[] map;
     delete planner;
 
     return 1;
