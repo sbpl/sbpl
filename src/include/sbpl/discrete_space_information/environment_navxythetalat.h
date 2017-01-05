@@ -126,8 +126,8 @@ struct EnvNAVXYTHETALATConfig_t
     unsigned char** Grid2D;
 
     std::vector<double> ThetaDirs;
-    int StartTheta_rad;
-    int EndTheta_rad;
+    double StartTheta_rad;
+    double EndTheta_rad;
     double min_turning_radius_m;
 
     // the value at which and above which cells are obstacles in the maps sent from outside
