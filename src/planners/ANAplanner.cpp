@@ -860,7 +860,6 @@ vector<int> anaPlanner::GetSearchPath(anaSearchStateSpace_t* pSearchStateSpace, 
 bool anaPlanner::Search(anaSearchStateSpace_t* pSearchStateSpace, vector<int>& pathIds, int & PathCost,
                         bool bFirstSolution, bool bOptimalSolution, double MaxNumofSecs)
 {
-    CKey key;
     TimeStarted = clock();
     searchexpands = 0;
 
@@ -1029,8 +1028,8 @@ int anaPlanner::replan(double allocated_time_secs, vector<int>* solution_stateID
     printf("planner: replan called (bFirstSol=%d, bOptSol=%d)\n", bFirstSolution, bOptimalSolution);
 
     //plan
-    if (!(bFound = Search(pSearchStateSpace_, pathIds, PathCost, bFirstSolution, bOptimalSolution,
-                          allocated_time_secs)))
+    bFound = Search(pSearchStateSpace_, pathIds, PathCost, bFirstSolution, bOptimalSolution, allocated_time_secs);
+    if (!bFound)
     {
         printf("failed to find a solution\n");
     }

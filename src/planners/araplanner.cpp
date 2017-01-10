@@ -1075,8 +1075,8 @@ int ARAPlanner::replan(double allocated_time_secs, vector<int>* solution_stateID
     SBPL_PRINTF("planner: replan called (bFirstSol=%d, bOptSol=%d)\n", bFirstSolution, bOptimalSolution);
 
     //plan
-    if (!(bFound = Search(pSearchStateSpace_, pathIds, PathCost,
-                          bFirstSolution, bOptimalSolution, allocated_time_secs)))
+    bFound = Search(pSearchStateSpace_, pathIds, PathCost, bFirstSolution, bOptimalSolution, allocated_time_secs);
+    if (!bFound)
     {
         SBPL_PRINTF("failed to find a solution\n");
     }
@@ -1213,7 +1213,7 @@ double ARAPlanner::compute_suboptimality()
             ARAState* state = (ARAState*)currElem;
             assert(state);
 
-            int stateID = state->MDPstate->StateID;
+            // int stateID = state->MDPstate->StateID;
 
             // update the min to the f-value of this state if necessary
             int h = state->h;

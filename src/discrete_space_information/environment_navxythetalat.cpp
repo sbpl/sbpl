@@ -429,7 +429,7 @@ void EnvironmentNAVXYTHETALATTICE::ReadConfiguration(FILE* fCfg)
 
     // unallocate the 2d environment
     if (EnvNAVXYTHETALATCfg.Grid2D != NULL) {
-        for (int x = 0; x < EnvNAVXYTHETALATCfg.EnvWidth_c; x++) {
+        for (x = 0; x < EnvNAVXYTHETALATCfg.EnvWidth_c; x++) {
             delete[] EnvNAVXYTHETALATCfg.Grid2D[x];
         }
         delete[] EnvNAVXYTHETALATCfg.Grid2D;
@@ -1700,7 +1700,6 @@ void EnvironmentNAVXYTHETALATTICE::CalculateFootprintForPose(
                     cell.y = discrete_y;
 
                     // insert point if not there already
-                    int pind = 0;
                     for (pind = 0; pind < (int)footprint->size(); pind++) {
                         if (cell.x == footprint->at(pind).x && cell.y == footprint->at(pind).y) break;
                     }
@@ -2468,7 +2467,6 @@ void EnvironmentNAVXYTHETALAT::ConvertStateIDPathintoXYThetaPath(
         }
 
         // now push in the actual path
-        int sourcex_c, sourcey_c, sourcetheta_c;
         GetCoordFromState(sourceID, sourcex_c, sourcey_c, sourcetheta_c);
         double sourcex, sourcey;
         sourcex = DISCXY2CONT(sourcex_c, EnvNAVXYTHETALATCfg.cellsize_m);

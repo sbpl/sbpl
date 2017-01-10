@@ -1332,8 +1332,8 @@ int ADPlanner::replan(double allocated_time_secs, vector<int>* solution_stateIDs
     SBPL_PRINTF("planner: replan called (bFirstSol=%d, bOptSol=%d)\n", bsearchuntilfirstsolution, bOptimalSolution);
 
     //plan for the first solution only
-    if ((bFound = Search(pSearchStateSpace_, pathIds, PathCost, bsearchuntilfirstsolution, bOptimalSolution,
-                         allocated_time_secs)) == false) {
+    bFound = Search(pSearchStateSpace_, pathIds, PathCost, bsearchuntilfirstsolution, bOptimalSolution, allocated_time_secs);
+    if (!bFound) {
         SBPL_PRINTF("failed to find a solution\n");
     }
 
@@ -1468,4 +1468,3 @@ void ADPlanner::get_search_stats(vector<PlannerStats>* s)
         s->push_back(stats[i]);
     }
 }
-

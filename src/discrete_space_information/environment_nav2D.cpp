@@ -110,7 +110,6 @@ void EnvironmentNAV2D::SetConfiguration(int width, int height, const unsigned ch
     EnvNAV2DCfg.EnvHeight_c = height;
     EnvNAV2DCfg.StartX_c = startx;
     EnvNAV2DCfg.StartY_c = starty;
-    int x;
 
     if (EnvNAV2DCfg.StartX_c < 0 || EnvNAV2DCfg.StartX_c >= EnvNAV2DCfg.EnvWidth_c) {
         throw SBPL_Exception("illegal start coordinates");
@@ -124,7 +123,7 @@ void EnvironmentNAV2D::SetConfiguration(int width, int height, const unsigned ch
 
     //allocate the 2D environment
     EnvNAV2DCfg.Grid2D = new unsigned char*[EnvNAV2DCfg.EnvWidth_c];
-    for (x = 0; x < EnvNAV2DCfg.EnvWidth_c; x++) {
+    for (int x = 0; x < EnvNAV2DCfg.EnvWidth_c; x++) {
         EnvNAV2DCfg.Grid2D[x] = new unsigned char[EnvNAV2DCfg.EnvHeight_c];
     }
 
