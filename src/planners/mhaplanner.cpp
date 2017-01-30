@@ -1,10 +1,10 @@
 /*
  * Copyright (c) 2015, Maxim Likhachev
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  *     * Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimer.
  *     * Redistributions in binary form must reproduce the above copyright
@@ -13,7 +13,7 @@
  *     * Neither the name of the Carnegie Mellon University nor the names of its
  *       contributors may be used to endorse or promote products derived from
  *       this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -74,7 +74,7 @@ MHAPlanner::MHAPlanner(
     // search
     m_params.initial_eps = 1.0;
     m_params.final_eps = 1.0;
-    m_params.dec_eps = 0.0;
+    m_params.dec_eps = 0.2; // NOTE: same initial epsilon delta as ARA*
     m_params.return_first_solution = false;
     m_params.max_time = 0.0;
     m_params.repair_time = 0.0;
@@ -197,11 +197,11 @@ int MHAPlanner::replan(
     end_time = GetTime();
     m_elapsed += (end_time - start_time);
 
-    while (!m_open[0].emptyheap() && !time_limit_reached()) { 
+    while (!m_open[0].emptyheap() && !time_limit_reached()) {
         start_time = GetTime();
 
         // special case for mha* without additional heuristics
-        if (num_heuristics() == 1) { 
+        if (num_heuristics() == 1) {
             if (m_goal_state->g <= get_minf(m_open[0])) {
                 m_eps_satisfied = m_eps * m_eps_mha;
                 extract_path(solution_stateIDs_V, solcost);
