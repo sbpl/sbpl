@@ -1371,7 +1371,8 @@ int RSTARPlanner::replan(double allocated_time_secs, vector<int>* solution_state
     SBPL_PRINTF("planner: replan called (bFirstSol=%d, bOptSol=%d)\n", bFirstSolution, bOptimalSolution);
 
     //plan
-    if ((bFound = Search(pathIds, PathCost, bFirstSolution, bOptimalSolution, allocated_time_secs)) == false) {
+    bFound = Search(pathIds, PathCost, bFirstSolution, bOptimalSolution, allocated_time_secs);
+    if (!bFound) {
         SBPL_PRINTF("failed to find a solution\n");
     }
 
@@ -1460,4 +1461,3 @@ void RSTARPlanner::print_searchpath(FILE* fOut)
 }
 
 //---------------------------------------------------------------------------------------------------------
-

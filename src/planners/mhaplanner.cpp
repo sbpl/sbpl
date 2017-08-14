@@ -458,7 +458,6 @@ void MHAPlanner::clear()
     // free states
     for (size_t i = 0; i < m_search_states.size(); ++i) {
         // unmap graph to search state
-        MHASearchState* search_state = m_search_states[i];
         const int state_id = m_search_states[i]->state_id;
         int* idxs = environment_->StateID2IndexMapping[state_id];
         idxs[MHAMDP_STATEID2IND] = -1;
@@ -541,9 +540,9 @@ void MHAPlanner::expand(MHASearchState* state, int hidx)
     ++m_num_expansions;
 
     // remove s from all open lists
-    for (int hidx = 0; hidx < num_heuristics(); ++hidx) {
-        if (m_open[hidx].inheap(&state->od[hidx].open_state)) {
-            m_open[hidx].deleteheap(&state->od[hidx].open_state);
+    for (int temp_hidx = 0; temp_hidx < num_heuristics(); ++temp_hidx) {
+        if (m_open[temp_hidx].inheap(&state->od[temp_hidx].open_state)) {
+            m_open[temp_hidx].deleteheap(&state->od[temp_hidx].open_state);
         }
     }
 
@@ -569,14 +568,14 @@ void MHAPlanner::expand(MHASearchState* state, int hidx)
                 SBPL_DEBUG("  Update in search %d with f = %d", 0, fanchor);
 
                 if (!closed_in_add_search(succ_state)) {
-                    for (int hidx = 1; hidx < num_heuristics(); ++hidx) {
-                        int fn = compute_key(succ_state, hidx);
+                    for (int temp_hidx = 1; temp_hidx < num_heuristics(); ++temp_hidx) {
+                        int fn = compute_key(succ_state, temp_hidx);
                         if (fn <= m_eps_mha * fanchor) {
-                            insert_or_update(succ_state, hidx, fn);
-                            SBPL_DEBUG("  Update in search %d with f = %d", hidx, fn);
+                            insert_or_update(succ_state, temp_hidx, fn);
+                            SBPL_DEBUG("  Update in search %d with f = %d", temp_hidx, fn);
                         }
                         else {
-                            SBPL_DEBUG("  Skipping update of in search %d (%0.3f > %0.3f)", hidx, (double)fn, m_eps_mha * fanchor);
+                            SBPL_DEBUG("  Skipping update of in search %d (%0.3f > %0.3f)", temp_hidx, (double)fn, m_eps_mha * fanchor);
                         }
                     }
                 }
