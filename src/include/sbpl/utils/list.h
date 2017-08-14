@@ -461,13 +461,10 @@ public:
             dynamicsize[i] = 0;
           }
         }
-        else
-        {
-          for (int i = 0; i < numofbuckets; i++) {
-              lastelementindexV[i] = -1;
-              bucketV[i] = NULL;
-          }
-        }
+	for (int i = 0; i < numofbuckets; i++) {
+	  lastelementindexV[i] = -1;
+	  bucketV[i] = NULL;
+	}
 
         currentminelement_bindex = currentfirstbucket_bindex = 0;
         currentminelement_index = -1;
