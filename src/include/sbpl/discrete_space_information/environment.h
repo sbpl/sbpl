@@ -284,7 +284,7 @@ public:
      */
     DiscreteSpaceInformation()
     {
-#ifndef ROS
+#if !defined(ROS) && DEBUG
         const char* envdebug = "envdebug.txt";
 #endif
         if ((fDeb = SBPL_FOPEN(envdebug, "w")) == NULL) {
