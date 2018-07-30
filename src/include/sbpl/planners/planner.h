@@ -167,7 +167,6 @@ public:
      */
     AbstractSearchStateType_t StateType;
 
-public:
     AbstractSearchState()
     {
         StateType = ABSTRACT_GENERALSTATE;
@@ -341,10 +340,26 @@ public:
      */
     virtual void set_initialsolution_eps(double initialsolution_eps) { }
 
+    /**
+     * \brief sends a cancelling request.
+     * \returns true, if the canceling request was successfull.
+     */
+    virtual bool cancel()
+    {
+        canceled_ = true;
+        return true;
+    }
+
+    SBPLPlanner()
+    {
+        canceled_ = false;
+    }
+
     virtual ~SBPLPlanner() { }
 
 protected:
     DiscreteSpaceInformation *environment_;
+    bool canceled_;
 };
 
 #endif

@@ -472,6 +472,10 @@ bool LazyARAPlanner::Search(vector<int>& pathIds, int& PathCost)
     // the main loop of ARA*
     while (eps_satisfied > params.final_eps && !outOfTime()) {
 
+        if (canceled_) {
+            return false;
+        }
+
         // run weighted A*
         clock_t before_time = clock();
         int before_expands = search_expands;
@@ -607,6 +611,8 @@ int LazyARAPlanner::replan(
     SBPL_DEBUG("planner: replan called");
     params = p;
     use_repair_time = params.repair_time >= 0;
+
+    canceled_ = false;
 
     if (goal_state_id < 0) {
         SBPL_ERROR("ERROR searching: no goal state set");

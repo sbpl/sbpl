@@ -1251,6 +1251,11 @@ bool RSTARPlanner::Search(vector<int>& pathIds, int & PathCost, bool bFirstSolut
     {
         loop_time = clock();
 
+        if (canceled_)
+        {
+            return false;
+        }
+
         //decrease eps for all subsequent iterations
         if (fabs(pSearchStateSpace->eps_satisfied - pSearchStateSpace->eps) < ERR_EPS && !bFirstSolution) {
             pSearchStateSpace->eps = pSearchStateSpace->eps - dec_eps;
@@ -1367,6 +1372,7 @@ int RSTARPlanner::replan(double allocated_time_secs, vector<int>* solution_state
     bool bFirstSolution = this->bsearchuntilfirstsolution;
     bool bOptimalSolution = false;
     *psolcost = 0;
+    canceled_ = false;
 
     SBPL_PRINTF("planner: replan called (bFirstSol=%d, bOptSol=%d)\n", bFirstSolution, bOptimalSolution);
 

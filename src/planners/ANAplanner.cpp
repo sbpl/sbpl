@@ -892,6 +892,11 @@ bool anaPlanner::Search(anaSearchStateSpace_t* pSearchStateSpace, vector<int>& p
            (clock() - TimeStarted) < MaxNumofSecs * (double)CLOCKS_PER_SEC)
     {
         loop_time = clock();
+
+        if (canceled_) {
+            return false;
+        }
+
         //decrease eps for all subsequent iterations
         /*if(fabs(pSearchStateSpace->eps_satisfied - pSearchStateSpace->eps) < ERR_EPS && !bFirstSolution)
          {
@@ -1024,6 +1029,8 @@ int anaPlanner::replan(double allocated_time_secs, vector<int>* solution_stateID
     bool bFirstSolution = this->bsearchuntilfirstsolution;
     bool bOptimalSolution = false;
     *psolcost = 0;
+
+    canceled_ = false;
 
     printf("planner: replan called (bFirstSol=%d, bOptSol=%d)\n", bFirstSolution, bOptimalSolution);
 

@@ -1133,6 +1133,11 @@ bool ADPlanner::Search(ADSearchStateSpace_t* pSearchStateSpace, vector<int>& pat
                (clock() - TimeStarted) < repair_time * (double)CLOCKS_PER_SEC))
     {
         loop_time = clock();
+
+        if (canceled_){
+            return false;
+        }
+
         //it will be a new search iteration
         if (pSearchStateSpace->searchiteration == 0) pSearchStateSpace->searchiteration++;
 
@@ -1328,6 +1333,8 @@ int ADPlanner::replan(double allocated_time_secs, vector<int>* solution_stateIDs
     bool bFound = false;
     *psolcost = 0;
     bool bOptimalSolution = false;
+
+    canceled_ = false;
 
     SBPL_PRINTF("planner: replan called (bFirstSol=%d, bOptSol=%d)\n", bsearchuntilfirstsolution, bOptimalSolution);
 
