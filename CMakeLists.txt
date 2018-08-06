@@ -4,7 +4,7 @@ PROJECT( sbpl )
 # version (e.g. for packaging)
 set(SBPL_MAJOR_VERSION 1)
 set(SBPL_MINOR_VERSION 3)
-set(SBPL_PATCH_VERSION 0)
+set(SBPL_PATCH_VERSION 1)
 set(SBPL_VERSION ${SBPL_MAJOR_VERSION}.${SBPL_MINOR_VERSION}.${SBPL_PATCH_VERSION})
 
 set(CMAKE_BUILD_TYPE Release)
@@ -31,7 +31,7 @@ add_library(sbpl SHARED
   src/utils/mdp.cpp
   src/utils/utils.cpp
   src/utils/2Dgridsearch.cpp
-  src/utils/config.cpp	
+  src/utils/config.cpp
   )
 
 set(SBPL_INCLUDE_DIR "${CMAKE_INSTALL_PREFIX}/include")
@@ -62,8 +62,8 @@ if (${SBPL_BUILD_TREE_EXPORT})
     export(TARGETS sbpl FILE sbpl-targets.cmake)
     set(CONF_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/src/include")
     configure_file(
-        sbpl-config-tree-export.cmake.in 
-        "${PROJECT_BINARY_DIR}/sbpl-config.cmake" 
+        sbpl-config-tree-export.cmake.in
+        "${PROJECT_BINARY_DIR}/sbpl-config.cmake"
         @ONLY)
     export(PACKAGE sbpl)
 endif()
