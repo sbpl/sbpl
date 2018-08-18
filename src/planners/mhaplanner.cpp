@@ -151,6 +151,7 @@ int MHAPlanner::replan(
     }
 
     m_params = params;
+    canceled_ = false;
 
     SBPL_INFO("Generic Search parameters:");
     SBPL_INFO("  Initial Epsilon: %0.3f", m_params.initial_eps);
@@ -199,6 +200,10 @@ int MHAPlanner::replan(
 
     while (!m_open[0].emptyheap() && !time_limit_reached()) {
         start_time = GetTime();
+
+        if (canceled_) {
+            return 0;
+        }
 
         // special case for mha* without additional heuristics
         if (num_heuristics() == 1) {

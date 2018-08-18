@@ -374,6 +374,8 @@ int VIPlanner::replan(double allocatedtime, vector<int>* solution_stateIDs_V)
     FILE* fPolicy = SBPL_FOPEN(policy, "w");
     FILE* fStat = SBPL_FOPEN(stat, "w");
 
+    canceled_ = false;
+
     //initialization
     InitializePlanner();
 
@@ -382,6 +384,10 @@ int VIPlanner::replan(double allocatedtime, vector<int>* solution_stateIDs_V)
 
     //--------------iterate-------------------------------
     while (((clock() - starttime) / (double)CLOCKS_PER_SEC) < allocatedtime && g_belldelta > MDP_ERRDELTA) {
+
+        if (canceled_) {
+            return 0;
+        }
         viPlanner.iteration++;
 
         g_belldelta = 0;
