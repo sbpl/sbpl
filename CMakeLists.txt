@@ -9,6 +9,21 @@ set(SBPL_VERSION ${SBPL_MAJOR_VERSION}.${SBPL_MINOR_VERSION}.${SBPL_PATCH_VERSIO
 
 set(CMAKE_BUILD_TYPE Release)
 
+# support for ROS logging
+option(WITH_ROS_LOGGING "Enable ROS logging" ON)
+if (WITH_ROS_LOGGING)
+  find_package(roscpp QUIET)
+  if (roscpp_FOUND)
+    message(STATUS "Using ROS logging.")
+    include_directories(${roscpp_INCLUDE_DIRS})
+    add_definitions(-DROS)
+  else (roscpp_FOUND)
+    message(STATUS "Using default SBPL logging (roscpp not found).")
+  endif (roscpp_FOUND)
+else (WITH_ROS_LOGGING)
+  message(STATUS "Using default SBPL logging.")
+endif (WITH_ROS_LOGGING)
+
 include_directories(src/include)
 
 add_library(sbpl SHARED
@@ -33,6 +48,9 @@ add_library(sbpl SHARED
   src/utils/2Dgridsearch.cpp
   src/utils/config.cpp
   )
+if (WITH_ROS_LOGGING)
+  target_link_libraries (sbpl ${roscpp_LIBRARIES})
+endif (WITH_ROS_LOGGING)
 
 set(SBPL_INCLUDE_DIR "${CMAKE_INSTALL_PREFIX}/include")
 set(SBPL_LIB_DIR "${CMAKE_INSTALL_PREFIX}/lib")
