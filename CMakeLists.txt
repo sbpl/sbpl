@@ -9,6 +9,12 @@ set(SBPL_VERSION ${SBPL_MAJOR_VERSION}.${SBPL_MINOR_VERSION}.${SBPL_PATCH_VERSIO
 
 set(CMAKE_BUILD_TYPE Release)
 
+# The default signedness of `char` is not defined in the C++ standard.  The
+# SBPL code is assuming that `char` is signed but on ARM platforms it is
+# unsigned, and thus SBPL is not working there.  The following flag sets the
+# default signedness to "signed" independent of the platform.
+add_definitions(-fsigned-char)
+
 include_directories(src/include)
 
 add_library(sbpl SHARED
