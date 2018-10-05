@@ -838,7 +838,9 @@ int planandnavigate2d(PlannerType plannerType, char* envCfgFilename)
         }
         printf("\n");
     }
+#ifdef WIN32
     if (bPrint) printf("System Pause (return=%d)\n", system("pause"));
+#endif
 
     //Initialize Environment (should be called before initializing anything else)
     if (!environment_nav2D.InitializeEnv(size_x, size_y, map, startx, starty, goalx, goaly, obsthresh)) {
@@ -1001,7 +1003,9 @@ int planandnavigate2d(PlannerType plannerType, char* envCfgFilename)
             }
             printf("\n");
         }
+#ifdef WIN32
         if (bPrint) printf("System Pause (return=%d)\n", system("pause"));
+#endif
 
         //move along the path
         if (bPlanExists && (int)solution_stateIDs_V.size() > 1) {
