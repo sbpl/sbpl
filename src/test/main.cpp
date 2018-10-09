@@ -469,18 +469,6 @@ int planxythetalat(PlannerType plannerType, char* envCfgFilename, char* motPrimF
     sbpl_2Dpt_t pt_m;
     double halfwidth = 0.01; //0.3;
     double halflength = 0.01; //0.45;
-    pt_m.x = -halflength;
-    pt_m.y = -halfwidth;
-    perimeterptsV.push_back(pt_m);
-    pt_m.x = halflength;
-    pt_m.y = -halfwidth;
-    perimeterptsV.push_back(pt_m);
-    pt_m.x = halflength;
-    pt_m.y = halfwidth;
-    perimeterptsV.push_back(pt_m);
-    pt_m.x = -halflength;
-    pt_m.y = halfwidth;
-    perimeterptsV.push_back(pt_m);
 
     // clear the footprint
     perimeterptsV.clear();
@@ -544,6 +532,9 @@ int planxythetalat(PlannerType plannerType, char* envCfgFilename, char* motPrimF
 
     // write solution to sol.txt
     const char* sol = "sol.txt";
+#if DEBUG
+    printf("Writing solution to %s\n", sol);
+#endif
     FILE* fSol = fopen(sol, "w");
     if (fSol == NULL) {
         throw SBPL_Exception("ERROR: could not open solution file");
@@ -565,18 +556,57 @@ int planxythetalat(PlannerType plannerType, char* envCfgFilename, char* motPrimF
     for (unsigned int i = 0; i < xythetaPath.size(); i++) {
         fprintf(fSol, "%.3f %.3f %.3f\n", xythetaPath.at(i).x, xythetaPath.at(i).y, xythetaPath.at(i).theta);
     }
-    fclose(fSol);
 
     environment_navxythetalat.PrintTimeStat(stdout);
 
     // print a path
     if (bRet) {
         // print the solution
+        FILE* fCfg;
+        if ((fCfg = fopen(envCfgFilename, "r")) != NULL) {
+            // go to the line with environment
+            unsigned int BUFF_SIZE = 512;
+            char temp[BUFF_SIZE];
+            while (fgets(temp, BUFF_SIZE, fCfg) != NULL) {
+                if (strstr(temp, "environment:") != NULL) {
+                    break;
+                }
+            }
+
+            // read environment
+            char env[BUFF_SIZE][BUFF_SIZE];
+            int env_height = 0;
+            while (fgets(env[env_height], BUFF_SIZE, fCfg) != NULL) {
+                ++env_height;
+            }
+
+            // draw path
+            for (size_t i = 0; i < solution_stateIDs_V.size(); ++i) {
+                int x;
+                int y;
+                int theta;
+                environment_navxythetalat.GetCoordFromState(solution_stateIDs_V[i], x, y, theta);
+                env[y][x*2] = '*';
+            }
+
+            // write environment to file
+            fprintf(fSol, "\n%s\n", "environment:");
+            for (size_t i = 0; i < env_height; ++i) {
+                fprintf(fSol, "%s", env[i]);
+            }
+        }
+
+        if(fCfg) {
+            fclose(fCfg);
+        }
+
         printf("Solution is found\n");
     }
     else {
         printf("Solution does not exist\n");
     }
+
+    fclose(fSol);
 
     fflush(NULL);
 
