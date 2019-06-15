@@ -42,7 +42,7 @@ I. Building, Installing, and Using SBPL
         A pre-built Debian package exists on Linux for ROS distributions
         Fuerte and newer. To install the Debian, run:
 
-        sudo apt-get install ros-distro-sbpl
+        sudo apt-get install ros-<distro>-sbpl
 
         where distro is the name of your ROS distribution. This will install
         the SBPL library and associated development headers alongside other
