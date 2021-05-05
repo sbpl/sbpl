@@ -121,7 +121,7 @@ costmult = []
 if (has_turn_in_place_prims)
     costmult = [forwardcostmult, forwardcostmult, forwardandturncostmult, forwardandturncostmult, turninplacecostmult, backwardcostmult, backwardcostmult, backwardandturncostmult, backwardandturncostmult, turninplacecostmult];
 else
-    costmult = [forwardcostmult, forwardcostmult, forwardandturncostmult, forwardandturncostmult, tbackwardcostmult, backwardcostmult, backwardandturncostmult, backwardandturncostmult];
+    costmult = [forwardcostmult, forwardcostmult, forwardandturncostmult, forwardandturncostmult, backwardcostmult, backwardcostmult, backwardandturncostmult, backwardandturncostmult];
 end;    
 
 % list of angles increments in discrete units for the end pose of the primitive relative to the start pose
